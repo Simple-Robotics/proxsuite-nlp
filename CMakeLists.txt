@@ -4,14 +4,19 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
-SET(PROJECT_NAME lienlp)
-SET(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
-SET(PROJECT_USE_CMAKE_EXPORT TRUE)
-SET(PROJECT_USE_KEYWORD_LINK_LIBRARIES TRUE)
+set(PROJECT_NAME lienlp)
+set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
+set(PROJECT_URL "https://gitlab.inria.fr/wjallet/lie-nlp-solver")
+set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
+# set(PROJECT_USE_CMAKE_EXPORT True)
+set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 # Disable -Werror on Unix for now.
 SET(CXX_DISABLE_WERROR True)
 SET(CMAKE_VERBOSE_MAKEFILE True)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # ----------------------------------------------------
 # --- OPTIONS  ---------------------------------------
@@ -35,11 +40,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/python.cmake)
 IF(APPLE) # Use the handmade approach
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
+
+  # If needed, set CMake policy for APPLE systems
+  APPLY_DEFAULT_APPLE_CONFIGURATION()
 ENDIF(APPLE)
 include(CMakeDependentOption)
-
-# If needed, set CMake policy for APPLE systems
-APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 IF(WIN32)
   set(LINK copy_if_different)
@@ -49,21 +54,18 @@ ENDIF(WIN32)
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_UTILS "Build the utils" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the Python bindings" OFF)
 option(BUILD_WITH_COMMIT_VERSION "Build libraries by setting specific commit version" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
-option(BUILD_WITH_PINOCCHIO_SUPPORT, "Build the library with support for Pinocchio" OFF)
+option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
 option(BUILD_WITH_CASADI_SUPPORT "Build the library with the support of CASADI" OFF)
 option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
 cmake_dependent_option(LINK_PYTHON_INTERFACE_TO_OPENMP "Link OpenMP to the Python interface" ON BUILD_WITH_OPENMP_SUPPORT OFF)
-cmake_dependent_option(BUILD_PYTHON_BINDINGS_WITH_BOOST_MPFR_SUPPORT "Build the Python interface with Boost.Multiprecision MPFR support" ON BUILD_PYTHON_INTERFACE OFF)
 option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
-
-option(ENABLE_TEMPLATE_INSTANTIATION "Instantiate templates with default type for library build" ON)
 
 IF(INITIALIZE_WITH_NAN)
   message(STATUS "Initialize with NaN all the Eigen entries.")
@@ -92,6 +94,10 @@ IF(BUILD_WITH_CASADI_SUPPORT)
   ADD_PROJECT_DEPENDENCY(casadi 3.4.5 REQUIRED PKG_CONFIG_REQUIRES "casadi >= 3.4.5")
 ENDIF(BUILD_WITH_CASADI_SUPPORT)
 
+if(BUILD_WITH_PINOCCHIO_SUPPORT)
+  find_package(pinocchio REQUIRED)
+endif(BUILD_WITH_PINOCCHIO_SUPPORT)
+
 IF(BUILD_WITH_OPENMP_SUPPORT)
   find_package(OpenMP REQUIRED)
 ENDIF(BUILD_WITH_OPENMP_SUPPORT)
@@ -103,7 +109,6 @@ EXPORT_BOOST_DEFAULT_OPTIONS()
 ADD_PROJECT_DEPENDENCY(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 IF(BUILD_PYTHON_INTERFACE)
-  MESSAGE(STATUS "The Python bindings of Pinocchio will be compiled along the main library. If you want to disable this feature, please set the option BUILD_PYTHON_INTERFACE to OFF.")
   FINDPYTHON(REQUIRED)
   SEARCH_FOR_BOOST_PYTHON(REQUIRED)
   ADD_PROJECT_DEPENDENCY(eigenpy 2.6.7 REQUIRED)
@@ -145,7 +150,7 @@ FILE(GLOB_RECURSE HEADERS
      ${PROJECT_SOURCE_DIR}/src/*.hxx
      )
 
-LIST(APPEND HEADERS macros.hpp)
+# LIST(APPEND HEADERS macros.hpp)
 
 set(BINARY_DIR "${PROJECT_NAME}_BINARY_DIR")
 
