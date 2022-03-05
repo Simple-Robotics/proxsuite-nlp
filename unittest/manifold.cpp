@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_vector)
     using M = lienlp::PinocchioGroup<double>;
     M space(model);
     M::Vec_t x0(model.nq);
-    x0.setZero();
+    x0.noalias() = pinocchio::neutral(model);
     M::Vec_t v(model.nv);
     v.setRandom();
     std::cout << v << std::endl;
