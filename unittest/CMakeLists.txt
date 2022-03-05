@@ -3,7 +3,7 @@
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+ADD_PROJECT_DEPENDENCY(Boost COMPONENTS unit_test_framework REQUIRED)
 
 
 macro(ADD_TEST_CFLAGS test_name flag)

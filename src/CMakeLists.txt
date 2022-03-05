@@ -16,6 +16,7 @@ function(create_library)
   endif()
 
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
+    add_definitions(-DWITH_PINOCCHIO_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio)
   endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
@@ -28,5 +29,5 @@ endfunction()
 
 create_library()
 
-# ADD_HEADER_GROUP(HEADERS)
+ADD_HEADER_GROUP(HEADERS)
 

@@ -2,7 +2,7 @@
 # Copyright (c) 2022 CNRS INRIA
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 
 set(PROJECT_NAME lienlp)
 set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
@@ -25,9 +25,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Check if the submodule cmake have been initialized
-IF(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/cmake/base.cmake")
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/cmake/base.cmake")
   message(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-ENDIF()
+endif()
 
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
@@ -38,13 +38,15 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/python.cmake)
-IF(APPLE) # Use the handmade approach
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
+if(APPLE) # Use the handmade approach
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
-
-  # If needed, set CMake policy for APPLE systems
-  APPLY_DEFAULT_APPLE_CONFIGURATION()
-ENDIF(APPLE)
+endif(APPLE)
 include(CMakeDependentOption)
+
+# If needed, set CMake policy for APPLE systems
+APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 IF(WIN32)
   set(LINK copy_if_different)
@@ -60,7 +62,7 @@ option(BUILD_WITH_COMMIT_VERSION "Build libraries by setting specific commit ver
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
 option(BUILD_WITH_CASADI_SUPPORT "Build the library with the support of CASADI" OFF)
-option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
+option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" ON)
 cmake_dependent_option(LINK_PYTHON_INTERFACE_TO_OPENMP "Link OpenMP to the Python interface" ON BUILD_WITH_OPENMP_SUPPORT OFF)
 option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
@@ -95,11 +97,11 @@ IF(BUILD_WITH_CASADI_SUPPORT)
 ENDIF(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  find_package(pinocchio REQUIRED)
+  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 IF(BUILD_WITH_OPENMP_SUPPORT)
-  find_package(OpenMP REQUIRED)
+  ADD_PROJECT_DEPENDENCY(OpenMP REQUIRED)
 ENDIF(BUILD_WITH_OPENMP_SUPPORT)
 
 set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
@@ -145,7 +147,7 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 # ----------------------------------------------------
 # --- INCLUDE ----------------------------------------
 # ----------------------------------------------------
-FILE(GLOB_RECURSE HEADERS
+file(GLOB_RECURSE HEADERS
      ${PROJECT_SOURCE_DIR}/src/*.hpp
      ${PROJECT_SOURCE_DIR}/src/*.hxx
      )
