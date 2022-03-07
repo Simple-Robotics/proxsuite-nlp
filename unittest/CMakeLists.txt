@@ -43,4 +43,5 @@ endmacro(add_lienlp_test)
 
 
 add_lienlp_test(manifold)
+add_lienlp_test(merit)
 
