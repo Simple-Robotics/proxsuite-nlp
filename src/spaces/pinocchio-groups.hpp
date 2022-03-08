@@ -62,8 +62,8 @@ namespace lienlp {
       m_lg->dDifference(x0.derived(), x1.derived(), J1.derived(), pin::ARG1);
     }
 
-    inline int nq_impl() const { return m_lg->nq(); }
-    inline int nv_impl() const { return m_lg->nv(); }
+    inline int nx_impl() const { return m_lg->nq(); }
+    inline int ndx_impl() const { return m_lg->nv(); }
 
   };
 
@@ -130,8 +130,8 @@ namespace lienlp {
       pin::dDifference(m_model, x0.derived(), x1.derived(), J1, pin::ARG1);
     }
 
-    inline int nq_impl() const { return m_model.nq; }
-    inline int nv_impl() const { return m_model.nv; }
+    inline int nx_impl() const { return m_model.nq; }
+    inline int ndx_impl() const { return m_model.nv; }
 
     /// \}
 
@@ -151,7 +151,6 @@ namespace lienlp {
       Options = options
     };
   };
-
 
 
 }

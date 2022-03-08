@@ -29,8 +29,8 @@ namespace lienlp {
 
 
   template<class T>
-  int ManifoldTpl<T>::nx() const { return derived().nq_impl(); }  /// get repr dimension
+  int ManifoldTpl<T>::nx() const { return derived().nx_impl(); }  /// get repr dimension
   template<class T>
-  int ManifoldTpl<T>::ndx() const { return derived().nv_impl(); }  /// get tangent space dim
+  int ManifoldTpl<T>::ndx() const { return derived().ndx_impl(); }  /// get tangent space dim
 
 }

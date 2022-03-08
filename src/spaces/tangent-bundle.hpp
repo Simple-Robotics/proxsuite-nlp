@@ -38,8 +38,10 @@ namespace lienlp
       out.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
     }
 
-    inline int nq_impl() const { return base->nx() + base->ndx(); }
-    inline int nv_impl() const { return 2 * base->ndx(); }
+    inline int nx_impl() const { return base->nx() + base->ndx(); }
+    inline int ndx_impl() const { return 2 * base->ndx(); }
+
+    /// TODO implement Jintegrate, Jdiff
 
   };
 
@@ -53,6 +55,6 @@ namespace lienlp
       NV = Eigen::Dynamic,
       Options = base_traits::Options
     };
-  }
+  };
 
-}
+} // namespace lienlp
