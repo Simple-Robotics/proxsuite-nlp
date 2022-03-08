@@ -1,10 +1,8 @@
 #include "lienlp/manifold-base.hpp"
-#include "lienlp/pinocchio-groups.hpp"
+#include "lienlp/spaces/pinocchio-groups.hpp"
 
-// #ifdef WITH_PINOCCHIO_SUPPORT
-  #include <pinocchio/parsers/sample-models.hpp>
-  #include <pinocchio/multibody/liegroup/vector-space.hpp>
-// #endif
+#include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/multibody/liegroup/vector-space.hpp>
 
 #include <iostream>
 
@@ -22,9 +20,15 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
   const Vs lg;
   lienlp::PinocchioLieGroup<Vs> space(lg);
   Vs::ConfigVector_t x0(space.get_nq());
-  Vs::TangentVector_t v(space.get_nv());
+  x0.setRandom();
+  Vs::TangentVector_t v0(space.get_nv());
+  v0.setZero();
+  Vs::TangentVector_t v1(space.get_nv());
+  v1.setRandom();
 
-  auto x1 = space.integrate(x0, v);
+  std::cout << x0 << "<- x0\n";
+
+  auto x1 = space.integrate(x0, v0);
   std::cout << x1 << std::endl;
 
 }

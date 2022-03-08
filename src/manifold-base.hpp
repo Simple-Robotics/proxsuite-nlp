@@ -25,6 +25,7 @@ namespace lienlp {
 
     using Point_t = Eigen::Matrix<Scalar, NQ, 1, Options>;
     using TangentVec_t = Eigen::Matrix<Scalar, NV, 1, Options>;
+    using Jac_t = Eigen::Matrix<Scalar, NV, NV, Options>; 
 
     T& derived()
     {
@@ -36,8 +37,8 @@ namespace lienlp {
       return static_cast<const T&>(*this);
     }
 
-    int get_nq() const { return derived().nq_impl(); }  /// get repr dimension
-    int get_nv() const { return derived().nv_impl(); }  /// get tangent space dim
+    int get_nq() const;  /// get repr dimension
+    int get_nv() const;  /// get tangent space dim
 
     /**
      * Perform the manifold integration operation.
@@ -52,13 +53,11 @@ namespace lienlp {
       derived().integrate_impl(x.derived(), v.derived(), out.derived());
     }
 
-    /**
-     * Implementation of the integration operation.
-     */
-    template<class Vec_t, class Tangent_t>
-    void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                        const Eigen::MatrixBase<Tangent_t>& v,
-                        Eigen::MatrixBase<Vec_t>& out) const;
+    template<class Vec_t, class Tangent_t, class Jout_t>
+    void Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
+                    const Eigen::MatrixBase<Tangent_t>& v,
+                    Eigen::MatrixBase<Jout_t>& Jx,
+                    Eigen::MatrixBase<Jout_t>& Jv) const;
 
     /**
      * Perform the manifold retraction operation.
@@ -71,23 +70,29 @@ namespace lienlp {
       derived().diff_impl(x0.derived(), x1.derived(), out.derived());
     }
 
-    template<class Vec_t, class Tangent_t>
-    void diff_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                   const Eigen::MatrixBase<Vec_t>& x1,
-                   Eigen::MatrixBase<Tangent_t>& out) const;
+    template<class Vec_t, class Jout_t>
+    void Jdiff(const Eigen::MatrixBase<Vec_t>& x0,
+               const Eigen::MatrixBase<Vec_t>& x1,
+               Eigen::MatrixBase<Jout_t>& J0,
+               Eigen::MatrixBase<Jout_t>& J1) const;
+
+    /// \name Default impls
+    /// \{
 
     /// Out-of-place variant.
-    template<class Vec_t, class Tangent_t>
-    Point_t integrate(const Eigen::MatrixBase<Vec_t>& x,
-                          const Eigen::MatrixBase<Tangent_t>& v) const
-    {
-      Point_t out;
-      out.resize(get_nq());
-      integrate(x, v, out);
-      return out;
-    }
+    template<class P_t, class Tangent_t>
+    Point_t integrate(const Eigen::MatrixBase<P_t>& x,
+                      const Eigen::MatrixBase<Tangent_t>& v) const;
+
+    /// Out-of-place version of diff operator.
+    template<class P_t>
+    TangentVec_t diff(const Eigen::MatrixBase<P_t>& x0,
+                      const Eigen::MatrixBase<P_t>& x1) const;
+
+    /// \}
 
   };
 
-}
+}  // namespace lienlp
 
+#include "lienlp/manifold-base.hxx"

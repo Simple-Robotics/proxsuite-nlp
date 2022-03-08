@@ -20,7 +20,6 @@ endfunction(get_cpp_test_name)
 macro(add_lienlp_test name)
 
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
-  message(STATUS "  Got name ${name}, MACRO TEST NAME ${test_name}")
   ADD_UNIT_TEST(${test_name} ${name}.cpp)
   set_target_properties(${test_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${test_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -35,8 +34,6 @@ macro(add_lienlp_test name)
 
   target_link_libraries(${test_name} PUBLIC ${PROJECT_NAME})
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
-
-  message(STATUS "Test name: ${test_name}")
 
   unset(test_name)
 endmacro(add_lienlp_test)

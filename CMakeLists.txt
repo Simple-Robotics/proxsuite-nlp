@@ -152,11 +152,12 @@ file(GLOB_RECURSE HEADERS
      ${PROJECT_SOURCE_DIR}/src/*.hxx
      )
 
-# LIST(APPEND HEADERS macros.hpp)
-
-set(BINARY_DIR "${PROJECT_NAME}_BINARY_DIR")
-
-MAKE_DIRECTORY("${BINARY_DIR}/include/lienlp")
+file(MAKE_DIRECTORY
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/spaces"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/costs"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/meritfuncs"
+     )
 
 
 
@@ -176,7 +177,8 @@ ENDFOREACH(header)
 SET(HEADERS ${HEADERS_})
 
 add_subdirectory(src)
-add_subdirectory(bindings)
+add_subdirectory(python)
+add_subdirectory(examples)
 add_subdirectory(unittest)
 
 # --- PACKAGING ----------------------------------------------------------------
