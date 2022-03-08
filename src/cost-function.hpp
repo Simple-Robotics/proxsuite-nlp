@@ -1,21 +1,24 @@
 #pragma once
 
+#include "lienlp/fwd.hpp"
 #include "lienlp/manifold-base.hpp"
 
 
 namespace lienlp {
 
   template<class M>
-  struct CostFunction
+  class CostFunction
   {
-    using Scalar = typename M::Scalar;
-    using Point_t = typename M::Point_t;
-    using Vec_t = typename M::TangentVec_t;
-    using Hess_t = Eigen::Matrix<Scalar, M::NV, M::NV, M::Options>;
+  public:
+    LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)
 
-    Scalar operator()(const Eigen::MatrixBase<Point_t>& x) const;
-    Vec_t jacobian(const Eigen::MatrixBase<Point_t>& x) const;
-    Hess_t hessian(const Eigen::MatrixBase<Point_t>& x) const;
+    using Hess_t = MatrixXs;
+
+    virtual Scalar operator()(const VectorXs& x) const = 0;
+    virtual VectorXs gradient(const VectorXs& x) const = 0;
+    virtual Hess_t hessian(const VectorXs& x) const = 0;
+
+    virtual ~CostFunction<M>() = default;
 
   };
 

@@ -3,41 +3,47 @@
 
 #include "lienlp/manifold-base.hpp"
 #include "lienlp/cost-function.hpp"
-#include "lienlp/constraint.hpp"
+#include "lienlp/constraint-base.hpp"
+
+#include "lienlp/fwd.hpp"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 
 namespace lienlp {
 
-
-template<class M>
-struct MeritFunction
-{
-  using Scalar = typename M::Scalar;
-  using Point_t = typename M::Point_t;
-
-  template<typename... Args>
-  Scalar operator()(const Point_t& x, const Args&... args) const;
-};
-
-
-/// Simply evaluate the objective function.
-template<class M>
-struct SimpleEval : MeritFunction<M>
-{
-  using Cost_t = CostFunction<M>;
-  Cost_t* m_func;
-
-  using Scalar = typename M::Scalar;
-  using Point_t = typename M::Point_t;
-
-  SimpleEval(Cost_t* f) : m_func(f) {};
-
-  Scalar operator()(const Point_t& x) const
+  template<typename Scalar, typename... Args>
+  struct MeritFunctionTpl
   {
-    return (*m_func)(x);
-  }
+    using VectorXs = typename math_types<Scalar>::VectorXs;
+    virtual Scalar operator()(const VectorXs& x, const Args&... args) const = 0;
+    virtual VectorXs gradient(const VectorXs& x, const Args&... args) const = 0;
+  };
 
-};
+
+  /// Simply evaluate the objective function.
+  template<class M>
+  struct EvalObjective : MeritFunctionTpl<typename M::Scalar>
+  {
+    LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)
+
+    using Cost_t = CostFunction<M>;
+    Cost_t& m_func;
+
+    EvalObjective(Cost_t& f) : m_func(f) {};
+
+    Scalar operator()(const VectorXs& x) const
+    {
+      return m_func(x);
+    }
+
+    VectorXs gradient(const VectorXs& x) const
+    {
+      return m_func.gradient(x);
+    }
+
+  };
 
 
 

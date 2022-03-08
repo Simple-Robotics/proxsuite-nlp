@@ -7,6 +7,13 @@
 
 namespace lienlp {
 
+  /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
+  #define LIENLP_DEFINE_INTERFACE_TYPES(M)    \
+    using Scalar = typename M::Scalar;        \
+    using Point_t = typename M::Point_t;      \
+    using Vec_t = typename M::TangentVec_t;   \
+    using Hess_t = Eigen::Matrix<Scalar, M::NV, M::NV, M::Options>;
+
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
    */
@@ -37,8 +44,8 @@ namespace lienlp {
       return static_cast<const T&>(*this);
     }
 
-    int get_nq() const;  /// get repr dimension
-    int get_nv() const;  /// get tangent space dim
+    int nx() const;  /// get repr dimension
+    int ndx() const;  /// get tangent space dim
 
     /**
      * Perform the manifold integration operation.

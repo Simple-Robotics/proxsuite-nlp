@@ -19,11 +19,11 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
   using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
   const Vs lg;
   lienlp::PinocchioLieGroup<Vs> space(lg);
-  Vs::ConfigVector_t x0(space.get_nq());
+  Vs::ConfigVector_t x0(space.nx());
   x0.setRandom();
-  Vs::TangentVector_t v0(space.get_nv());
+  Vs::TangentVector_t v0(space.ndx());
   v0.setZero();
-  Vs::TangentVector_t v1(space.get_nv());
+  Vs::TangentVector_t v1(space.ndx());
   v1.setRandom();
 
   std::cout << x0 << "<- x0\n";

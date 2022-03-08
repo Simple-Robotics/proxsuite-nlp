@@ -10,7 +10,7 @@ namespace lienlp {
                             const Eigen::MatrixBase<Tangent_t>& v) const
   {
     Point_t out;
-    out.resize(get_nq());
+    out.resize(nx());
     integrate(x, v, out);
     return out;
   }
@@ -22,15 +22,15 @@ namespace lienlp {
                        const Eigen::MatrixBase<P_t>& x1) const
   {
     TangentVec_t out;
-    out.resize(get_nv());
+    out.resize(ndx());
     diff(x0, x1, out);
     return out;
   }
 
 
   template<class T>
-  int ManifoldTpl<T>::get_nq() const { return derived().nq_impl(); }  /// get repr dimension
+  int ManifoldTpl<T>::nx() const { return derived().nq_impl(); }  /// get repr dimension
   template<class T>
-  int ManifoldTpl<T>::get_nv() const { return derived().nv_impl(); }  /// get tangent space dim
+  int ManifoldTpl<T>::ndx() const { return derived().nv_impl(); }  /// get tangent space dim
 
 }

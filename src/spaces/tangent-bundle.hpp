@@ -20,8 +20,8 @@ namespace lienlp
                         const Eigen::MatrixBase<Tangent_t>& dx,
                         Eigen::MatrixBase<Vec_t>& out) const
     {
-      const int nq_ = base->get_nq();
-      const int nv_ = base->get_nv();
+      const int nq_ = base->nx();
+      const int nv_ = base->ndx();
       Base::Point_t base_pt = x.head(nq_);
       base->integrate(base_pt, dx.head(nv_), out.head(nq_));
       out.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
@@ -32,14 +32,14 @@ namespace lienlp
                    const Eigen::MatrixBase<Vec_t>& x1,
                    Eigen::MatrixBase<Tangent_t>& out) const
     {
-      const int nq_ = base->get_nq();
-      const int nv_ = base->get_nv();
+      const int nq_ = base->nx();
+      const int nv_ = base->ndx();
       base->diff(x0.head(nq_), x1.head(nq_), out.head(nv_));
       out.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
     }
 
-    inline int nq_impl() const { return base->get_nq() + base->get_nv(); }
-    inline int nv_impl() const { return 2 * base->get_nv(); }
+    inline int nq_impl() const { return base->nx() + base->ndx(); }
+    inline int nv_impl() const { return 2 * base->ndx(); }
 
   };
 
