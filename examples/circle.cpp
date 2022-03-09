@@ -1,7 +1,7 @@
 #include "lienlp/cost-function.hpp"
 #include "lienlp/merit-function-base.hpp"
 #include "lienlp/spaces/pinocchio-groups.hpp"
-#include "lienlp/costs/squared.hpp"
+#include "lienlp/costs/squared-distance.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 
@@ -33,25 +33,36 @@ int main()
 
   std::cout << "norm:" << p0.transpose() * p0 << '\n';
 
-
   auto d = space.diff(p0, p1);
   Man::Jac_t J0, J1;
-  space.Jdiff(p0, p1, J0, J1);
+  space.Jdiff(p0, p1, J0, 0);
+  space.Jdiff(p0, p1, J1, 1);
   std::cout << d << "  << p1 (-) p0\n";
   std::cout << J0 << " << J0\n";
   std::cout << J1 << " << J1\n";
+  std::cout << space.diff(p0, p1) << "  << diff (out of place)\n";
 
   Eigen::Matrix<double, Man::NV, Man::NV> weights;
   weights.setIdentity();
+  std::cout << "Weights:\n" << weights << '\n';
 
-  auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
+  using SR = StateResidual<Man>;
+  SR residual(space, p0);
+  std::cout << residual.m_manifold.diff(p0, p1) << "  << res eval\n";
+  std::cout << residual.m_target << "  << res target\n\n";
+
+  std::cout << "residual v: " << residual(p1) << '\n';
+  std::cout << "residual J: " << residual.jacobian(p1) << '\n';
+
+  auto cf = QuadResidualCost<SR>(space, residual, weights);
+  // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
   std::cout << "cost: " << cf(p1) << '\n';
   std::cout << "grad: " << cf.gradient(p1) << '\n';
   std::cout << "hess: " << cf.hessian(p1) << '\n';
 
-  auto merit_fun = EvalObjective<Man>(cf);
-  std::cout << "eval merit fun:   M=" << merit_fun(p1)          << '\n';
-  std::cout << "eval merit grad: ∇M=" << merit_fun.gradient(p1) << '\n';
+  // auto merit_fun = EvalObjective<Man>(cf);
+  // std::cout << "eval merit fun:   M=" << merit_fun(p1)          << '\n';
+  // std::cout << "eval merit grad: ∇M=" << merit_fun.gradient(p1) << '\n';
 
   return 0;
 }

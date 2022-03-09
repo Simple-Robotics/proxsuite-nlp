@@ -8,5 +8,7 @@
   using RefVector = Eigen::Ref<const VectorXs>;             \
   using RefMatrix = Eigen::Ref<const MatrixXs>;
 
-/// \brief Macro empty arg
+/// @brief Macro empty arg
 #define LIENLP_MACRO_EMPTY_ARG
+
+#define LIENLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj.derived())

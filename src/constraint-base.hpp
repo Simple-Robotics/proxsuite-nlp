@@ -6,35 +6,50 @@
 
 namespace lienlp {
 
+  #define LIENLP_CSTR_TYPES(Scalar, Options)                       \
+    using C_t = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>; \
+    using Jacobian_t = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>;
+
   /**
-   * \brief   Base template for constraint functions.
+   * @brief   Base template for constraint functions.
    */
-  template<class M, int NC=Eigen::Dynamic, typename... Args>
+  template<class _M>
   struct ConstraintFuncTpl
   {
+    using M = _M;
     LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)
+    LIENLP_CSTR_TYPES(Scalar, M::Options)
 
-    using C_t = Eigen::Matrix<Scalar, NC, 1, M::Options>;
-    using Jacobian_t = Eigen::Matrix<Scalar, NC, Eigen::Dynamic, M::Options>;
+    virtual C_t operator()(const VectorXs& x) const = 0;
+    /// @brief      Jacobian matrix of the constraint function.
+    virtual void jacobian(const VectorXs& x, Jacobian_t& Jout) const = 0;
 
-    virtual C_t operator()(const VectorXs& x, const Args&...) const = 0;
-    virtual Jacobian_t jacobian(const VectorXs& x, Jacobian_t& Jout, const Args&...) const = 0;
-
+    /** @copybrief jacobian()
+     * 
+     * Allocated version of the jacobian() method.
+     */
+    Jacobian_t jacobian(const VectorXs& x) const
+    {
+      Jacobian_t Jout;
+      jacobian(x, Jout);
+      return Jout;
+    }
+    
     /// TODO hvp (hessian vector product)
 
-    virtual ~ConstraintFuncTpl<M, NC, Args...>() = default;
+    virtual ~ConstraintFuncTpl<M>() = default;
 
   };
 
+
   /**
-   * \brief   Constraint format: negative/positive orthant, cones, etc...
+   * @brief   Constraint format: negative/positive orthant, cones, etc...
    */
   template<class M>
   struct ConstraintFormatBaseTpl
   {
     LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)
-    using C_t = Eigen::Matrix<Scalar, NC, 1, M::Options>;
-    using Jacobian_t = Eigen::Matrix<Scalar, NC, Eigen::Dynamic, M::Options>;
+    LIENLP_CSTR_TYPES(Scalar, M::Options)
 
     /// TODO hvp (hessian vector product)
 
@@ -43,3 +58,5 @@ namespace lienlp {
   };
 
 }
+
+#include "lienlp/constraint-base.hxx"
