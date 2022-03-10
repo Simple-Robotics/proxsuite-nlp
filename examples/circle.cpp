@@ -1,5 +1,10 @@
+/**
+ * Optimize a quadratic function on a circle, or on a disk.
+ * 
+ */
 #include "lienlp/cost-function.hpp"
 #include "lienlp/merit-function-base.hpp"
+#include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/spaces/pinocchio-groups.hpp"
 #include "lienlp/costs/squared-distance.hpp"
 
@@ -31,9 +36,8 @@ int main()
   std::cout << th0 << "  << th0\n\t";
   std::cout << th1 << "  << th1\n";
 
-  std::cout << "norm:" << p0.transpose() * p0 << '\n';
-
-  auto d = space.difference(p0, p1);
+  Man::TangentVec_t d;
+  space.difference(p0, p1, d);
   Man::Jac_t J0, J1;
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
@@ -44,25 +48,48 @@ int main()
 
   Eigen::Matrix<double, Man::NV, Man::NV> weights;
   weights.setIdentity();
-  std::cout << "Weights:\n" << weights << '\n';
 
-  using SR = StateResidual<Man>;
-  SR residual(space, p0);
-  std::cout << residual.m_manifold.difference(p0, p1) << "  << res eval\n";
+  StateResidual<Man> residual(&space, p0);
+  std::cout << residual.m_manifold->difference(p0, p1) << "  << res eval\n";
   std::cout << residual.m_target << "  << res target\n\n";
 
-  std::cout << "residual v: " << residual(p1) << '\n';
-  std::cout << "residual J: " << residual.jacobian(p1) << '\n';
+  std::cout << " residual val: " << residual(p1) << '\n';
+  std::cout << " residual Jac: " << residual.jacobian(p1) << '\n';
 
-  auto cf = QuadResidualCost<SR>(space, residual, weights);
+  auto cf = QuadResidualCost<double>(&space, &residual, weights);
   // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
-  std::cout << "cost: " << cf(p1) << '\n';
-  std::cout << "grad: " << cf.gradient(p1) << '\n';
-  std::cout << "hess: " << cf.hessian(p1) << '\n';
+  std::cout << " cost: " << cf(p1) << '\n';
+  std::cout << " grad: " << cf.gradient(p1) << '\n';
+  std::cout << " hess: " << cf.hessian(p1) << '\n';
 
-  // auto merit_fun = EvalObjective<Man>(cf);
-  // std::cout << "eval merit fun:   M=" << merit_fun(p1)          << '\n';
+  /// DEFINE A PROBLEM
+
+  using Prob_t = Problem<double>;
+  Prob_t::Equality_t cstr1(residual, 1);
+  std::vector<Prob_t::Equality_t*> eq_cstrs;
+  eq_cstrs.push_back(&cstr1);
+  Prob_t prob(cf, eq_cstrs);
+  std::cout << "   Constraint dimension:" << prob.getEqCs(0)->getDim() << '\n';
+
+  /// Test out merit functions
+
+  std::cout << "  MERIT FUNC TEST\n";
+  EvalObjective<double> merit_fun(&prob);
+  std::cout << "eval merit fun:   M=" << merit_fun(p1)          << '\n';
   // std::cout << "eval merit grad: ∇M=" << merit_fun.gradient(p1) << '\n';
+
+
+  // PDAL FUNCTION
+
+  PDALFunction<double> pdmerit(&prob);
+  Prob_t::VectorList lams;
+  prob.allocateMultipliers(lams);
+  double value = pdmerit(p0, lams, lams);
+  std::cout << " pdmerit(x0) " << value;
+
+  value = pdmerit(p1, lams, lams);
+  std::cout << " pdmerit(x1) " << value;
+  std::cout << std::endl;
 
   return 0;
 }
