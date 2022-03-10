@@ -29,26 +29,26 @@ namespace lienlp {
 
     /// \name Implementations
 
-    template<class Vec_t, class Tangent_t>
+    template<class Vec_t, class Tangent_t, class Out_t>
     void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
                         const Eigen::MatrixBase<Tangent_t>& v,
-                        Vec_t& out) const
+                        const Eigen::MatrixBase<Out_t>& out) const
     {
-      m_lg.integrate(x.derived(), v.derived(), out);
+      m_lg.integrate(x.derived(), v.derived(), out.derived());
     }
 
     template<class Vec_t, class Tangent_t>
     void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                   const Eigen::MatrixBase<Vec_t>& x1,
-                   Eigen::MatrixBase<Tangent_t>& vout) const
+                         const Eigen::MatrixBase<Vec_t>& x1,
+                         const Eigen::MatrixBase<Tangent_t>& vout) const
     {
-      m_lg.difference(x0.derived(), x1.derived(), vout);
+      m_lg.difference(x0.derived(), x1.derived(), vout.derived());
     }
 
     template<int arg, class Vec_t, class Tangent_t, class Jout_t>
     void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                    const Eigen::MatrixBase<Tangent_t>& v,
-                    Eigen::MatrixBase<Jout_t>& Jout) const
+                         const Eigen::MatrixBase<Tangent_t>& v,
+                         const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {
         case 0:
@@ -62,8 +62,8 @@ namespace lienlp {
 
     template<int arg, class Vec_t, class Jout_t>
     void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-               const Eigen::MatrixBase<Vec_t>& x1,
-               Eigen::MatrixBase<Jout_t>& Jout) const
+                          const Eigen::MatrixBase<Vec_t>& x1,
+                          const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {
         case 0:
@@ -128,18 +128,18 @@ namespace lienlp {
     /// \name implementations
     /// \{
 
-    template<class Vec_t, class Tangent_t>
+    template<class Vec_t, class Tangent_t, class Out_t>
     void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
                         const Eigen::MatrixBase<Tangent_t>& v,
-                        Eigen::MatrixBase<Vec_t>& xout) const
+                        const Eigen::MatrixBase<Out_t>& xout) const
     {
       pin::integrate(m_model, x.derived(), v.derived(), xout.derived());
     }
 
     template<int arg, class Vec_t, class Tangent_t, class Jout_t>
     void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                    const Eigen::MatrixBase<Tangent_t>& v,
-                    Eigen::MatrixBase<Jout_t>& Jout) const
+                         const Eigen::MatrixBase<Tangent_t>& v,
+                         const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {
         case 0:
@@ -153,16 +153,16 @@ namespace lienlp {
 
     template<class Vec_t, class Tangent_t>
     void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                   const Eigen::MatrixBase<Vec_t>& x1,
-                   Eigen::MatrixBase<Tangent_t>& vout) const
+                         const Eigen::MatrixBase<Vec_t>& x1,
+                         const Eigen::MatrixBase<Tangent_t>& vout) const
     {
       pin::difference(m_model, x0.derived(), x1.derived(), vout.derived());
     }
 
     template<int arg, class Vec_t, class Jout_t>
     void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-               const Eigen::MatrixBase<Vec_t>& x1,
-               Eigen::MatrixBase<Jout_t>& Jout) const
+                          const Eigen::MatrixBase<Vec_t>& x1,
+                          const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {
         case 0:

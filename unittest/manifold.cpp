@@ -43,11 +43,12 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 BOOST_AUTO_TEST_CASE(test_so2_tangent)
 {
   BOOST_TEST_MESSAGE("Starting");
-  using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
-  using SO2_wrap = PinocchioLieGroup<SO2>;
-  SO2 lg_;
+  using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
+  using SO2_wrap = PinocchioLieGroup<_SO2>;
+  _SO2 lg_;
   SO2_wrap base_space(lg_);
-  TangentBundle<SO2_wrap> tspace(base_space);
+  using TSO2 = TangentBundle<SO2_wrap>;
+  TSO2 tspace(base_space);
 
   BOOST_TEST_MESSAGE("Checking bundle dimension");
   // tangent bundle dim should be 3.
@@ -57,6 +58,13 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_CHECK(x0.isApprox(Eigen::Vector3d(1., 0., 0.)));
   auto x1 = tspace.rand();
   
+  TSO2::Jac_t J0, J1;
+
+  tspace.Jdifference(x0, x1, J0, 0);
+  std::cout << "J0:\n" << J0 << std::endl;
+
+  tspace.Jdifference(x0, x1, J1, 1);
+  std::cout << "J1:\n" << J1 << std::endl;
 
 }
 
@@ -109,9 +117,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   M_t space(model);
 
   auto x0 = space.zero();
-  std::cout << "x0(neutral):\n" << x0 << std::endl;
   auto x1 = space.rand();
-  std::cout << "x1:" << x1 << '\n';
 
 }
 

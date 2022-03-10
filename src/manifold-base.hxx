@@ -4,11 +4,11 @@
 namespace lienlp {
 
   template<class T>
-  template<class Vec_t, class Tangent_t>
+  template<class Vec_t, class Tangent_t, class Out_t>
   void ManifoldTpl<T>::integrate(
     const Eigen::MatrixBase<Vec_t>& x,
     const Eigen::MatrixBase<Tangent_t>& v,
-    Eigen::MatrixBase<Vec_t>& xout) const
+    const Eigen::MatrixBase<Out_t>& xout) const
   {
     derived().integrate_impl(x.derived(), v.derived(), xout.derived());
   }
@@ -26,10 +26,20 @@ namespace lienlp {
   }
 
   template<class T>
+  template<int arg, class Vec_t, class Tangent_t, class Jout_t>
+  void ManifoldTpl<T>::Jintegrate(
+    const Eigen::MatrixBase<Vec_t>& x,
+    const Eigen::MatrixBase<Tangent_t>& v,
+    const Eigen::MatrixBase<Jout_t>& Jout) const
+  {
+    derived().template Jintegrate_impl<arg>(x.derived(), v.derived(), Jout.derived());
+  }
+
+  template<class T>
   template<class Vec_t, class Tangent_t, class Jout_t>
   void ManifoldTpl<T>::Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
                                   const Eigen::MatrixBase<Tangent_t>& v,
-                                  Eigen::MatrixBase<Jout_t>& Jout,
+                                  const Eigen::MatrixBase<Jout_t>& Jout,
                                   int arg) const
   {
     switch (arg)
@@ -51,7 +61,7 @@ namespace lienlp {
   void ManifoldTpl<T>::difference(
     const Eigen::MatrixBase<Vec_t>& x0,
     const Eigen::MatrixBase<Vec_t>& x1,
-    Eigen::MatrixBase<Tangent_t>& out) const
+    const Eigen::MatrixBase<Tangent_t>& out) const
   {
     derived().difference_impl(x0.derived(), x1.derived(), out.derived());
   }
@@ -59,8 +69,9 @@ namespace lienlp {
   template<class T>
   template<class Vec_t>
   typename ManifoldTpl<T>::TangentVec_t
-  ManifoldTpl<T>::difference(const Eigen::MatrixBase<Vec_t>& x0,
-                       const Eigen::MatrixBase<Vec_t>& x1) const
+  ManifoldTpl<T>::difference(
+    const Eigen::MatrixBase<Vec_t>& x0,
+                             const Eigen::MatrixBase<Vec_t>& x1) const
   {
     TangentVec_t out;
     out.resize(ndx());
@@ -69,18 +80,29 @@ namespace lienlp {
   }
 
   template<class T>
+  template<int arg, class Vec_t, class Jout_t>
+  void ManifoldTpl<T>::Jdifference(
+    const Eigen::MatrixBase<Vec_t>& x0,
+    const Eigen::MatrixBase<Vec_t>& x1,
+    const Eigen::MatrixBase<Jout_t>& Jout) const
+  {
+    derived().template Jdifference_impl<arg>(x0.derived(), x1.derived(), Jout.derived());
+  }
+
+  template<class T>
   template<class Vec_t, class Jout_t>
-  void ManifoldTpl<T>::Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
-                             const Eigen::MatrixBase<Vec_t>& x1,
-                             Eigen::MatrixBase<Jout_t>& Jout,
-                             int arg) const
+  void ManifoldTpl<T>::Jdifference(
+    const Eigen::MatrixBase<Vec_t>& x0,
+    const Eigen::MatrixBase<Vec_t>& x1,
+    const Eigen::MatrixBase<Jout_t>& Jout,
+    int arg) const
   {
     switch (arg) {
       case 0:
-        Jdiff<0>(x0, x1, Jout);
+        Jdifference<0>(x0, x1, Jout);
         break;
       case 1:
-        Jdiff<1>(x0, x1, Jout);
+        Jdifference<1>(x0, x1, Jout);
         break;
     }
   }

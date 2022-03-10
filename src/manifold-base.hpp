@@ -17,8 +17,12 @@ namespace lienlp {
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
    */
+  template<typename Scalar>
+  struct ManifoldAbstract
+  {};
+
   template<class T>
-  struct ManifoldTpl {
+  struct ManifoldTpl : ManifoldAbstract<typename traits<T>::Scalar> {
   protected:
     using Self = ManifoldTpl<T>; /// Shorthand for the type of `this`
 
@@ -49,22 +53,22 @@ namespace lienlp {
     /// @brief    Get manifold tangent space dimension.
     int ndx() const;
 
-    /// @brief    Get the neutral element from the manifold (if this makes sense).
+    /// @brief    Get the neutral element \f$e \in M\f$ from the manifold (if this makes sense).
     Point_t zero() const { return derived().zero_impl(); }
-    /// @brief    Sample a random point on the manifold.
+    /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
     Point_t rand() const { return derived().rand_impl(); }
 
     /// @name     Operations
 
     /**
      * Perform the manifold integration operation.
-     * This is an interface. Specific implementations should be in the derived classes.
      * 
+     * @details This is an interface. Specific implementations should be in the derived classes.
      */
-    template<class Vec_t, class Tangent_t>
+    template<class Vec_t, class Tangent_t, class Out_t>
     void integrate(const Eigen::MatrixBase<Vec_t>& x,
                    const Eigen::MatrixBase<Tangent_t>& v,
-                   Eigen::MatrixBase<Vec_t>& out) const;
+                   const Eigen::MatrixBase<Out_t>& out) const;
 
     /**
      * @brief   Jacobian of the integation operation.
@@ -72,46 +76,41 @@ namespace lienlp {
     template<int arg, class Vec_t, class Tangent_t, class Jout_t>
     void Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
                     const Eigen::MatrixBase<Tangent_t>& v,
-                    Eigen::MatrixBase<Jout_t>& Jout) const
-    {
-      derived().template Jintegrate_impl<arg>(x.derived(), v.derived(), Jout.derived());
-    }
+                    const Eigen::MatrixBase<Jout_t>& Jout) const;
 
     /// @copybrief  Jintegrate()
+    /// Runtime argument variant.
     template<class Vec_t, class Tangent_t, class Jout_t>
     void Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
                     const Eigen::MatrixBase<Tangent_t>& v,
-                    Eigen::MatrixBase<Jout_t>& Jout,
+                    const Eigen::MatrixBase<Jout_t>& Jout,
                     int arg) const;
 
     /**
-     * Perform the manifold retraction operation.
+     * @brief Perform the manifold retraction operation.
      */
     template<class Vec_t, class Tangent_t>
     void difference(const Eigen::MatrixBase<Vec_t>& x0,
-              const Eigen::MatrixBase<Vec_t>& x1,
-              Eigen::MatrixBase<Tangent_t>& out) const;
+                    const Eigen::MatrixBase<Vec_t>& x1,
+                    const Eigen::MatrixBase<Tangent_t>& out) const;
 
     template<int arg, class Vec_t, class Jout_t>
     void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
-               const Eigen::MatrixBase<Vec_t>& x1,
-               Eigen::MatrixBase<Jout_t>& Jout) const
-    {
-      derived().template Jdifference_impl<arg>(x0.derived(), x1.derived(), Jout.derived());
-    }
+                     const Eigen::MatrixBase<Vec_t>& x1,
+                     const Eigen::MatrixBase<Jout_t>& Jout) const;
 
     template<class Vec_t, class Jout_t>
     void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
-               const Eigen::MatrixBase<Vec_t>& x1,
-               Eigen::MatrixBase<Jout_t>& Jout,
-               int arg) const;
+                     const Eigen::MatrixBase<Vec_t>& x1,
+                     const Eigen::MatrixBase<Jout_t>& Jout,
+                     int arg) const;
 
-    /// \name Default impls
+    /// \name Out-of-place (allocated) variants.
     /// \{
 
     /// @copybrief integrate()
     ///
-    /// Out-of-place variant.
+    /// Out-of-place variant of integration operator.
     template<class Vec_t, class Tangent_t>
     Point_t integrate(const Eigen::MatrixBase<Vec_t>& x,
                       const Eigen::MatrixBase<Tangent_t>& v) const;
@@ -121,7 +120,7 @@ namespace lienlp {
     /// Out-of-place version of diff operator.
     template<class Vec_t>
     TangentVec_t difference(const Eigen::MatrixBase<Vec_t>& x0,
-                      const Eigen::MatrixBase<Vec_t>& x1) const;
+                            const Eigen::MatrixBase<Vec_t>& x1) const;
 
     /// \}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lienlp/macros.hpp"
 #include "lienlp/manifold-base.hpp"
 
 namespace lienlp
@@ -38,32 +39,60 @@ namespace lienlp
     Point_t rand_impl() const;
 
 
-    /// @name   Implementations
+    /// @name   Implementations of operators
 
-    template<class Vec_t, class Tangent_t>
+    template<class Vec_t, class Tangent_t, class Out_t>
     void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
                         const Eigen::MatrixBase<Tangent_t>& dx,
-                        Eigen::MatrixBase<Vec_t>& out) const
-    {
-      const int nq_ = m_base.nx();
-      const int nv_ = m_base.ndx();
-      m_base.integrate(x.head(nq_), dx.head(nv_), out.head(nq_));
-      out.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
-    }
+                        const Eigen::MatrixBase<Out_t>& out) const;
 
     template<class Vec_t, class Tangent_t>
     void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
-                   Eigen::MatrixBase<Tangent_t>& out) const
+                   const Eigen::MatrixBase<Tangent_t>& out) const;
+
+    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
+    void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
+                         const Eigen::MatrixBase<Tangent_t>& v,
+                         const Eigen::MatrixBase<Jout_t>& Jout) const;
+
+    template<int arg, class Vec_t, class Jout_t>
+    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
+                          const Eigen::MatrixBase<Vec_t>& x1,
+                          const Eigen::MatrixBase<Jout_t>& Jout) const;
+
+    /// Get base point of an element of the tangent bundle.
+    /// This map is exactly the natural projection.
+    template<typename Point>
+    auto getBasePoint(const Eigen::MatrixBase<Point>& x) const
     {
-      const int nq_ = m_base.nx();
-      const int nv_ = m_base.ndx();
-      m_base.difference(x0.head(nq_), x1.head(nq_), out.head(nv_));
-      out.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
+      return x.derived().template head<Base::NQ>(m_base.nx());
     }
 
-    // template<class Vec_t, class Tangent_t>
-    /// TODO implement Jintegrate_impl, Jdifference_impl
+    template<typename Point>
+    auto getBasePointWrite(const Eigen::MatrixBase<Point>& x) const
+    {
+      return LIENLP_EIGEN_CONST_CAST(Point, x).template head<Base::NQ>(m_base.nx());
+    }
+
+    template<typename Tangent>
+    auto getBaseTangent(const Eigen::MatrixBase<Tangent>& v) const
+    {
+      return v.derived().template head<Base::NV>(m_base.ndx());
+    }
+
+    template<typename Tangent>
+    auto getTangentHeadWrite(const Eigen::MatrixBase<Tangent>& v) const
+    {
+      return LIENLP_EIGEN_CONST_CAST(Tangent, v).template head<Base::NV>(m_base.ndx());
+    }
+
+    template<typename Jac>
+    Eigen::Block<Jac, Base::NV, Base::NV>
+    getBaseJacobian(const Eigen::MatrixBase<Jac>& J) const
+    {
+      return LIENLP_EIGEN_CONST_CAST(Jac, J).template topLeftCorner<Base::NV,Base::NV>(m_base.ndx(), m_base.ndx());
+    }
 
   };
 
