@@ -11,7 +11,12 @@ namespace lienlp {
     using Jacobian_t = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
   /**
-   * @brief   Base template for constraint functions.
+   * @brief   Base template for constraint/residual functors.
+   * 
+   * Base template for constraint/residual functors. These should be
+   * passed around to constraint classes (e.g. equality constraints) or cost
+   * functions such as quadratic penalties.
+   * 
    */
   template<typename _Scalar>
   struct ConstraintFuncTpl
