@@ -5,7 +5,7 @@
 
 namespace lienlp{
   
-  template<class M>
-  using WeightedSquareDistanceCost = QuadResidualCost<StateResidual<M>>;
+  template<class Scalar>
+  using WeightedSquareDistanceCost = QuadResidualCost<StateResidual<Scalar>>;
 
 } // namespace lienlp

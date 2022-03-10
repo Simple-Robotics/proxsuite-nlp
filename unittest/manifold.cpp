@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 /// The tangent bundle of the SO2 Lie group.
 BOOST_AUTO_TEST_CASE(test_so2_tangent)
 {
-  BOOST_TEST_MESSAGE("Starting");
+  BOOST_TEST_MESSAGE("Starting T(SO2) test");
   using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
   using SO2_wrap = PinocchioLieGroup<_SO2>;
   _SO2 lg_;
@@ -58,6 +58,13 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_CHECK(x0.isApprox(Eigen::Vector3d(1., 0., 0.)));
   auto x1 = tspace.rand();
   
+  BOOST_TEST_MESSAGE(" testing diff");
+  TSO2::TangentVec_t dx0(2);
+  tspace.difference(x0, x1, dx0);
+  std::cout << dx0 << " << dx0" << std::endl;
+
+
+  BOOST_TEST_MESSAGE(" diff Jacobians");
   TSO2::Jac_t J0, J1;
 
   tspace.Jdifference(x0, x1, J0, 0);
@@ -65,6 +72,26 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
 
   tspace.Jdifference(x0, x1, J1, 1);
   std::cout << "J1:\n" << J1 << std::endl;
+
+  BOOST_CHECK(J0.isApprox(-TSO2::Jac_t::Identity(2, 2)));
+  BOOST_CHECK(J1.isApprox( TSO2::Jac_t::Identity(2, 2)));
+
+  J0.setZero();
+  J1.setZero();
+
+  // INTEGRATION OP
+  BOOST_TEST_MESSAGE(" testing integration");
+  TSO2::Point_t x1_new;
+  tspace.integrate(x0, dx0, x1_new);
+  BOOST_CHECK(x1_new.isApprox(x1));
+
+  BOOST_TEST_MESSAGE(" integrate jacobians");
+
+  tspace.Jintegrate(x0, dx0, J0, 0);
+  std::cout << J0 << " << J0\n";
+
+  tspace.Jintegrate(x0, dx0, J1, 1);
+  std::cout << J1 << " << J1"   << std::endl;
 
 }
 

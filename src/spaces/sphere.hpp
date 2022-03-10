@@ -25,10 +25,10 @@ namespace lienlp {
     /**
      * Geodesics on the 3D sphere are given by the great circles.
      */
-    template<class Vec_t, class Tangent_t>
+    template<class Vec_t, class Tangent_t, class Out_t>
     void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
                         const Eigen::MatrixBase<Tangent_t>& v,
-                        Eigen::MatrixBase<Vec_t>& out) const
+                        const Eigen::MatrixBase<Out_t>& out) const
     {
 
     }
@@ -40,7 +40,7 @@ namespace lienlp {
     template<class Vec_t, class Tangent_t>
     void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
-                   Eigen::MatrixBase<Tangent_t>& out) const
+                   const Eigen::MatrixBase<Tangent_t>& out) const
     {
 
     }
