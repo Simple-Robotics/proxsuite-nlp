@@ -86,11 +86,11 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   Vec_t x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
-  space.diff(x0, x0, d);
+  space.difference(x0, x0, d);
   BOOST_CHECK(d.isZero());
   std::cout << "  diff OK\n";
 
-  space.diff(x0, x1, d);
+  space.difference(x0, x1, d);
   BOOST_CHECK(d.isApprox(pinocchio::difference(model, x0, x1)));
   std::cout << "  diff OK\n";
 }

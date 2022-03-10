@@ -27,7 +27,7 @@ namespace lienlp {
 
     C_t operator()(const VectorXs& x) const
     {
-      return m_manifold.diff(m_target, x);
+      return m_manifold.difference(m_target, x);
     }
 
     void jacobian(const VectorXs& x, Jacobian_t& Jout) const
@@ -35,7 +35,7 @@ namespace lienlp {
       // set size
       Jout.resize(m_manifold.ndx(), m_manifold.ndx());
       Jout.setZero();
-      m_manifold.Jdiff(m_target, x, Jout, 1);
+      m_manifold.Jdifference(m_target, x, Jout, 1);
     }
 
   };

@@ -52,18 +52,18 @@ namespace lienlp
     }
 
     template<class Vec_t, class Tangent_t>
-    void diff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
                    Eigen::MatrixBase<Tangent_t>& out) const
     {
       const int nq_ = m_base.nx();
       const int nv_ = m_base.ndx();
-      m_base.diff(x0.head(nq_), x1.head(nq_), out.head(nv_));
+      m_base.difference(x0.head(nq_), x1.head(nq_), out.head(nv_));
       out.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
     }
 
     // template<class Vec_t, class Tangent_t>
-    /// TODO implement Jintegrate_impl, Jdiff_impl
+    /// TODO implement Jintegrate_impl, Jdifference_impl
 
   };
 

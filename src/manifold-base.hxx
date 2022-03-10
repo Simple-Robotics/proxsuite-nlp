@@ -48,29 +48,29 @@ namespace lienlp {
 
   template<class T>
   template<class Vec_t, class Tangent_t>
-  void ManifoldTpl<T>::diff(
+  void ManifoldTpl<T>::difference(
     const Eigen::MatrixBase<Vec_t>& x0,
     const Eigen::MatrixBase<Vec_t>& x1,
     Eigen::MatrixBase<Tangent_t>& out) const
   {
-    derived().diff_impl(x0.derived(), x1.derived(), out.derived());
+    derived().difference_impl(x0.derived(), x1.derived(), out.derived());
   }
 
   template<class T>
   template<class Vec_t>
   typename ManifoldTpl<T>::TangentVec_t
-  ManifoldTpl<T>::diff(const Eigen::MatrixBase<Vec_t>& x0,
+  ManifoldTpl<T>::difference(const Eigen::MatrixBase<Vec_t>& x0,
                        const Eigen::MatrixBase<Vec_t>& x1) const
   {
     TangentVec_t out;
     out.resize(ndx());
-    diff(x0, x1, out);
+    difference(x0, x1, out);
     return out;
   }
 
   template<class T>
   template<class Vec_t, class Jout_t>
-  void ManifoldTpl<T>::Jdiff(const Eigen::MatrixBase<Vec_t>& x0,
+  void ManifoldTpl<T>::Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
                              const Eigen::MatrixBase<Vec_t>& x1,
                              Eigen::MatrixBase<Jout_t>& Jout,
                              int arg) const

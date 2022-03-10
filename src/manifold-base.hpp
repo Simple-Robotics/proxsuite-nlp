@@ -88,20 +88,20 @@ namespace lienlp {
      * Perform the manifold retraction operation.
      */
     template<class Vec_t, class Tangent_t>
-    void diff(const Eigen::MatrixBase<Vec_t>& x0,
+    void difference(const Eigen::MatrixBase<Vec_t>& x0,
               const Eigen::MatrixBase<Vec_t>& x1,
               Eigen::MatrixBase<Tangent_t>& out) const;
 
     template<int arg, class Vec_t, class Jout_t>
-    void Jdiff(const Eigen::MatrixBase<Vec_t>& x0,
+    void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
                const Eigen::MatrixBase<Vec_t>& x1,
                Eigen::MatrixBase<Jout_t>& Jout) const
     {
-      derived().template Jdiff_impl<arg>(x0.derived(), x1.derived(), Jout.derived());
+      derived().template Jdifference_impl<arg>(x0.derived(), x1.derived(), Jout.derived());
     }
 
     template<class Vec_t, class Jout_t>
-    void Jdiff(const Eigen::MatrixBase<Vec_t>& x0,
+    void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
                const Eigen::MatrixBase<Vec_t>& x1,
                Eigen::MatrixBase<Jout_t>& Jout,
                int arg) const;
@@ -116,11 +116,11 @@ namespace lienlp {
     Point_t integrate(const Eigen::MatrixBase<Vec_t>& x,
                       const Eigen::MatrixBase<Tangent_t>& v) const;
 
-    /// @copybrief diff()
+    /// @copybrief difference()
     ///
     /// Out-of-place version of diff operator.
     template<class Vec_t>
-    TangentVec_t diff(const Eigen::MatrixBase<Vec_t>& x0,
+    TangentVec_t difference(const Eigen::MatrixBase<Vec_t>& x0,
                       const Eigen::MatrixBase<Vec_t>& x1) const;
 
     /// \}

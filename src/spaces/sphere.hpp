@@ -38,7 +38,7 @@ namespace lienlp {
      * We first need to derive a parametrization of the circle.
      */
     template<class Vec_t, class Tangent_t>
-    void diff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
                    Eigen::MatrixBase<Tangent_t>& out) const
     {

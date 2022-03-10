@@ -38,7 +38,7 @@ namespace lienlp {
     }
 
     template<class Vec_t, class Tangent_t>
-    void diff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
                    Eigen::MatrixBase<Tangent_t>& vout) const
     {
@@ -61,7 +61,7 @@ namespace lienlp {
     }
 
     template<int arg, class Vec_t, class Jout_t>
-    void Jdiff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                const Eigen::MatrixBase<Vec_t>& x1,
                Eigen::MatrixBase<Jout_t>& Jout) const
     {
@@ -152,7 +152,7 @@ namespace lienlp {
     }
 
     template<class Vec_t, class Tangent_t>
-    void diff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                    const Eigen::MatrixBase<Vec_t>& x1,
                    Eigen::MatrixBase<Tangent_t>& vout) const
     {
@@ -160,7 +160,7 @@ namespace lienlp {
     }
 
     template<int arg, class Vec_t, class Jout_t>
-    void Jdiff_impl(const Eigen::MatrixBase<Vec_t>& x0,
+    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
                const Eigen::MatrixBase<Vec_t>& x1,
                Eigen::MatrixBase<Jout_t>& Jout) const
     {

@@ -25,22 +25,22 @@ int main()
   Man::Point_t p1 = lg.random();
   std::cout << p0 << " << p0\n";
   std::cout << p1 << " << p1\n";
-  auto th0 = space.diff(neut, p0);
-  auto th1 = space.diff(neut, p1);
+  auto th0 = space.difference(neut, p0);
+  auto th1 = space.difference(neut, p1);
   std::cout << "Angles:\n\t";
   std::cout << th0 << "  << th0\n\t";
   std::cout << th1 << "  << th1\n";
 
   std::cout << "norm:" << p0.transpose() * p0 << '\n';
 
-  auto d = space.diff(p0, p1);
+  auto d = space.difference(p0, p1);
   Man::Jac_t J0, J1;
-  space.Jdiff(p0, p1, J0, 0);
-  space.Jdiff(p0, p1, J1, 1);
+  space.Jdifference(p0, p1, J0, 0);
+  space.Jdifference(p0, p1, J1, 1);
   std::cout << d << "  << p1 (-) p0\n";
   std::cout << J0 << " << J0\n";
   std::cout << J1 << " << J1\n";
-  std::cout << space.diff(p0, p1) << "  << diff (out of place)\n";
+  std::cout << space.difference(p0, p1) << "  << diff (out of place)\n";
 
   Eigen::Matrix<double, Man::NV, Man::NV> weights;
   weights.setIdentity();
@@ -48,7 +48,7 @@ int main()
 
   using SR = StateResidual<Man>;
   SR residual(space, p0);
-  std::cout << residual.m_manifold.diff(p0, p1) << "  << res eval\n";
+  std::cout << residual.m_manifold.difference(p0, p1) << "  << res eval\n";
   std::cout << residual.m_target << "  << res target\n\n";
 
   std::cout << "residual v: " << residual(p1) << '\n';
