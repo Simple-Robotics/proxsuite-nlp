@@ -78,6 +78,10 @@ namespace lienlp {
     }
 
     virtual C_t projection(const VectorXs& x) const = 0;
+    inline C_t dualProjection(const VectorXs& x) const
+    {
+      return x - projection(x);
+    }
     virtual Jacobian_t Jprojection(const VectorXs& x) const = 0;
     /// TODO hvp (hessian vector product)
 

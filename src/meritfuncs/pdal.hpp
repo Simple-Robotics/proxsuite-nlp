@@ -57,7 +57,7 @@ namespace lienlp {
         // displace the constraint
         cval.noalias() += m_muEq * lams_ext[i];
         // projection
-        cval.noalias() = eq_cstr->projection(cval);
+        cval.noalias() = eq_cstr->dualProjection(cval);
         displaced_residuals_.push_back(cval);
 
         result_ += (Scalar(0.5) / m_muEq) * cval.dot(cval);
