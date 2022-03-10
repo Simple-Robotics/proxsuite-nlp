@@ -1,9 +1,7 @@
 // Basis for merit functions.
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/cost-function.hpp"
-#include "lienlp/constraint-base.hpp"
+#include "lienlp/problem-base.hpp"
 
 #include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
@@ -14,34 +12,40 @@
 
 namespace lienlp {
 
-  template<typename Scalar, typename... Args>
+  template<typename _Scalar, typename... Args>
   struct MeritFunctionTpl
   {
-    using VectorXs = typename math_types<Scalar>::VectorXs;
+    using Scalar = _Scalar;
+    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    using Prob_t = Problem<Scalar>;
+
+    Prob_t* m_prob;
+
     virtual Scalar operator()(const VectorXs& x, const Args&... args) const = 0;
     virtual VectorXs gradient(const VectorXs& x, const Args&... args) const = 0;
   };
 
 
   /// Simply evaluate the objective function.
-  template<class M>
-  struct EvalObjective : MeritFunctionTpl<typename M::Scalar>
+  template<class _Scalar>
+  struct EvalObjective : MeritFunctionTpl<_Scalar>
   {
-    LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)
+    using Scalar = _Scalar;
+    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    using Prob_t = Problem<Scalar>;
 
-    using Cost_t = CostFunction<M>;
-    Cost_t& m_func;
+    Prob_t* m_prob;
 
-    EvalObjective(Cost_t& f) : m_func(f) {};
+    EvalObjective(Prob_t* prob) : m_prob(prob) {}
 
     Scalar operator()(const VectorXs& x) const
     {
-      return m_func(x);
+      return m_prob->m_cost(x);
     }
 
     VectorXs gradient(const VectorXs& x) const
     {
-      return m_func.gradient(x);
+      return m_prob->m_cost.gradient(x);
     }
 
   };
