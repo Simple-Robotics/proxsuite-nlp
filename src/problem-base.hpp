@@ -6,10 +6,14 @@
 #include "lienlp/constraints/equality-constraint.hpp"
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 
 namespace lienlp {
   
+  using boost::shared_ptr;
+
   template<typename _Scalar>
   struct Problem
   {
@@ -18,6 +22,7 @@ namespace lienlp {
 
     /// Generic constraint type
     using Cstr_t = ConstraintFormatBaseTpl<Scalar>;
+    using CstrPtr = shared_ptr<Cstr_t>;
     /// Equality constraint type
     using Equality_t = EqualityConstraint<Scalar>;
     /// Cost function type
@@ -26,16 +31,16 @@ namespace lienlp {
     /// The cost functional.
     const Cost_t& m_cost;
     /// List of equality constraints.
-    std::vector<Equality_t*> m_eq_cstrs;
+    const std::vector<CstrPtr> m_cstrs;
 
-    inline const Equality_t* getEqCs(const std::size_t& i) const
+    const CstrPtr getCstr(const std::size_t& i) const
     {
-      return m_eq_cstrs[i];
+      return m_cstrs[i];
     }
 
     std::size_t getNumConstraints() const
     {
-      return m_eq_cstrs.size();
+      return m_cstrs.size();
     }
 
     void allocateMultipliers(VectorList& out) const
@@ -43,7 +48,7 @@ namespace lienlp {
       out.resize(getNumConstraints());
       for (std::size_t i = 0; i < getNumConstraints(); i++)
       {
-        auto cur_cstr = getEqCs(i);
+        CstrPtr cur_cstr = m_cstrs[i];
         out[i] = VectorXs::Zero(cur_cstr->getDim());
       }
     }
@@ -59,8 +64,8 @@ namespace lienlp {
             : m_cost(cost) {}
 
     Problem(const Cost_t& cost,
-            std::vector<Equality_t*> eq_cstrs)
-            : m_cost(cost), m_eq_cstrs(eq_cstrs)
+            std::vector<CstrPtr> eq_cstrs)
+            : m_cost(cost), m_cstrs(eq_cstrs)
             {}
 
   };

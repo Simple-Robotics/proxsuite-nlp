@@ -13,26 +13,34 @@
 namespace lienlp {
 
   template<typename _Scalar, typename... Args>
-  struct MeritFunctionTpl
+  struct MeritFunctorBase
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
 
-    Prob_t* m_prob;
-
+    /// Evaluate the merit function.
     virtual Scalar operator()(const VectorXs& x, const Args&... args) const = 0;
-    virtual VectorXs gradient(const VectorXs& x, const Args&... args) const = 0;
+    /// Evaluate the merit function gradient.
+    virtual void gradient(const VectorXs& x, const Args&... args, VectorXs& out) const = 0;
+    /// @copybrief gradient()
+    VectorXs gradient(const VectorXs& x, const Args&... args) const
+    {
+      VectorXs out;
+      gradient(x, args..., out);
+      return out;
+    }
   };
 
 
   /// Simply evaluate the objective function.
   template<class _Scalar>
-  struct EvalObjective : MeritFunctionTpl<_Scalar>
+  struct EvalObjective : MeritFunctorBase<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
+    using MeritFunctorBase<_Scalar>::gradient;
 
     Prob_t* m_prob;
 
@@ -43,9 +51,10 @@ namespace lienlp {
       return m_prob->m_cost(x);
     }
 
-    VectorXs gradient(const VectorXs& x) const
+    void gradient(const VectorXs& x, VectorXs& out) const
     {
-      return m_prob->m_cost.gradient(x);
+      VectorXs g = m_prob->m_cost.gradient(x);
+      out.noalias() = g;
     }
 
   };

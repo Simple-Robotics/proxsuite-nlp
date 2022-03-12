@@ -66,23 +66,28 @@ namespace lienlp {
     ConstraintFormatBaseTpl<Scalar>(const functor_t& func, const int& nc)
       : m_func(func), m_nc(nc) {}
 
-    typename functor_t::C_t operator()(const VectorXs& x) const
+    inline typename functor_t::C_t operator()(const VectorXs& x) const
     {
       return m_func(x);
     }
 
+    inline typename functor_t::Jacobian_t jacobian(const VectorXs& x) const
+    {
+      return m_func.jacobian(x);
+    }
+
     /// Get dimension of constraint representation.
-    const int getDim() const
+    int getDim() const
     {
       return m_nc;
     }
 
-    virtual C_t projection(const VectorXs& x) const = 0;
-    inline C_t dualProjection(const VectorXs& x) const
+    virtual C_t projection(const VectorXs& z) const = 0;
+    inline C_t dualProjection(const VectorXs& z) const
     {
-      return x - projection(x);
+      return z - projection(z);
     }
-    virtual Jacobian_t Jprojection(const VectorXs& x) const = 0;
+    virtual Jacobian_t Jprojection(const VectorXs& z) const = 0;
     /// TODO hvp (hessian vector product)
 
     virtual ~ConstraintFormatBaseTpl<Scalar>() = default;

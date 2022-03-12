@@ -2,7 +2,6 @@
 
 #include "lienlp/cost-function.hpp"
 #include "lienlp/constraint-base.hpp"
-#include <iostream>
 
 namespace lienlp {
   

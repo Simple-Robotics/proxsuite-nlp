@@ -88,6 +88,7 @@ ENDMACRO(TAG_LIBRARY_VERSION)
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
 ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
+ADD_PROJECT_DEPENDENCY(fmt)
 
 # Variable containing all the cflags definition relative to optional dependencies
 SET(CFLAGS_DEPENDENCIES)
