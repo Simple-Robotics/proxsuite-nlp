@@ -5,9 +5,11 @@
 #include "lienlp/meritfuncs/lagrangian.hpp"
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace lienlp {
-  
+  using boost::shared_ptr;
+
   /**
    * Primal-dual Augmented Lagrangian function, extending
    * the function from Gill & Robinson (2012) to inequality constraints.
@@ -15,18 +17,19 @@ namespace lienlp {
    */
   template<typename _Scalar>
   struct PDALFunction :
-    MeritFunctorBase<_Scalar,
+    public MeritFunctorBase<
+      _Scalar,
       typename math_types<_Scalar>::VectorList,
       typename math_types<_Scalar>::VectorList>
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Parent = MeritFunctorBase<Scalar, VectorList, VectorList>;
+    using Parent::m_prob;
     using Parent::gradient;
     using Prob_t = Problem<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
-    Prob_t* m_prob;
     Lagrangian_t m_lagr;
 
     /// AL penalty parameter
@@ -36,18 +39,13 @@ namespace lienlp {
     const Scalar m_gamma = Scalar(1.);
 
     /// Set the merit function penalty parameter.
-    void setPenalty(const Scalar& new_mu)
-    {
-      m_muEq = new_mu;
-    };
+    void setPenalty(const Scalar& new_mu) { m_muEq = new_mu; };
 
     /// Get the merit function penalty parameter;
-    const Scalar& getPenalty()
-    {
-      return m_muEq;
-    }
+    const Scalar& getPenalty() { return m_muEq; }
 
-    PDALFunction(Prob_t* prob) : m_prob(prob), m_lagr(Lagrangian_t(prob)) {}
+    PDALFunction(shared_ptr<Prob_t> prob)
+      : Parent(prob), m_lagr(Lagrangian_t(prob)) {}
 
     /**
      *  @brief Compute the first-order multiplier estimates.
@@ -115,14 +113,14 @@ namespace lienlp {
     void gradient(const VectorXs& x,
                   const VectorList& lams,
                   const VectorList& lams_ext,
-                  VectorXs& out) const
-    {
-      VectorList lams_plus;
-      lams_plus.reserve(m_prob->getNumConstraints());
-      computePDALMultipliers(x, lams, lams_ext, lams_plus);
-      m_lagr.gradient(x, lams_plus, out);
-    }
+                  VectorXs& out) const;
 
+    void hessian(const VectorXs& x,
+                 const VectorList& lams,
+                 const VectorList& lams_ext,
+                 MatrixXs& out) const;
   };
 
 }
+
+#include "lienlp/meritfuncs/pdal.hxx"

@@ -7,10 +7,10 @@
 #include "lienlp/macros.hpp"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 
 
 namespace lienlp {
+  using boost::shared_ptr;
 
   template<typename _Scalar, typename... Args>
   struct MeritFunctorBase
@@ -18,6 +18,10 @@ namespace lienlp {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
+
+    shared_ptr<Prob_t> m_prob;
+
+    MeritFunctorBase(shared_ptr<Prob_t> prob) : m_prob(prob) {}
 
     /// Evaluate the merit function.
     virtual Scalar operator()(const VectorXs& x, const Args&... args) const = 0;
@@ -30,21 +34,25 @@ namespace lienlp {
       gradient(x, args..., out);
       return out;
     }
+
+    /// Compute the merit function Hessian matrix.
+    virtual void hessian(const VectorXs& x, const Args&... args, MatrixXs& out) const = 0;
   };
 
 
   /// Simply evaluate the objective function.
   template<class _Scalar>
-  struct EvalObjective : MeritFunctorBase<_Scalar>
+  struct EvalObjective : public MeritFunctorBase<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
-    using MeritFunctorBase<_Scalar>::gradient;
+    using Parent = MeritFunctorBase<Scalar>;
+    using Parent::m_prob;
+    using Parent::gradient;
 
-    Prob_t* m_prob;
-
-    EvalObjective(Prob_t* prob) : m_prob(prob) {}
+    EvalObjective(shared_ptr<Prob_t> prob)
+      : Parent(prob) {}
 
     Scalar operator()(const VectorXs& x) const
     {
@@ -53,10 +61,13 @@ namespace lienlp {
 
     void gradient(const VectorXs& x, VectorXs& out) const
     {
-      VectorXs g = m_prob->m_cost.gradient(x);
-      out.noalias() = g;
+      out.noalias() = m_prob->m_cost.gradient(x);
     }
 
+    void hessian(const VectorXs& x , MatrixXs& out) const
+    {
+      m_prob->m_cost.hessian(x, out);
+    }
   };
 
 

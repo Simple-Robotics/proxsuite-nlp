@@ -16,24 +16,21 @@ public:
 
   using Scalar = _Scalar;
   using CstrType = ConstraintFuncTpl<Scalar>;  // base constraint func to use
-  using M = ManifoldAbstract<Scalar>;
   LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+  using CostFunction<Scalar>::hessian;
 
-  M* m_manifold;
   CstrType* m_residual;
   MatrixXs m_weights;
 
-  QuadResidualCost(M* manifold,
-                   CstrType* residual,
+  QuadResidualCost(CstrType* residual,
                    const VectorXs& weightMatrix)
-  : m_manifold(manifold), m_residual(residual), m_weights(weightMatrix)
+  : m_residual(residual), m_weights(weightMatrix)
   {}
 
   template<typename... ResidualArgs>
-  QuadResidualCost(const M& manifold,
-                   const VectorXs& weightMatrix,
+  QuadResidualCost(const VectorXs& weightMatrix,
                    ResidualArgs&... args)
-                   : QuadResidualCost(manifold, new CstrType(args...),  weightMatrix)
+                   : QuadResidualCost(new CstrType(args...),  weightMatrix)
   {}
 
   Scalar operator()(const VectorXs& x) const
@@ -50,11 +47,13 @@ public:
     return Jres * (m_weights * err);
   }
 
-  MatrixXs hessian(const VectorXs& x) const
+  void hessian(const VectorXs& x, MatrixXs& out) const
   {
     MatrixXs Jres;
     m_residual->jacobian(x, Jres);
-    return Jres.transpose() * (m_weights * Jres);
+    const int ndx = Jres.cols();
+    out.resize(ndx, ndx);
+    out.noalias() = Jres.transpose() * (m_weights * Jres);
   }
 
 };

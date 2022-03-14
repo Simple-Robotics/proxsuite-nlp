@@ -16,7 +16,6 @@ namespace lienlp {
    * Base template for constraint/residual functors. These should be
    * passed around to constraint classes (e.g. equality constraints) or cost
    * functions such as quadratic penalties.
-   * 
    */
   template<typename _Scalar>
   struct ConstraintFuncTpl
@@ -39,8 +38,15 @@ namespace lienlp {
       jacobian(x, Jout);
       return Jout;
     }
-    
-    /// TODO hvp (hessian vector product)
+
+    /// Vector-hessian product.
+    virtual Jacobian_t vhp(const VectorXs& x, const VectorXs& v) const
+    {
+      Jacobian_t J;
+      J.resize(1, 1);
+      J.setZero();
+      return J;
+    }
 
     virtual ~ConstraintFuncTpl<Scalar>() = default;
 
@@ -88,7 +94,6 @@ namespace lienlp {
       return z - projection(z);
     }
     virtual Jacobian_t Jprojection(const VectorXs& z) const = 0;
-    /// TODO hvp (hessian vector product)
 
     virtual ~ConstraintFormatBaseTpl<Scalar>() = default;
   };

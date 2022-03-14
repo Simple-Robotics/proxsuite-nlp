@@ -64,8 +64,8 @@ namespace lienlp {
             : m_cost(cost) {}
 
     Problem(const Cost_t& cost,
-            std::vector<CstrPtr> eq_cstrs)
-            : m_cost(cost), m_cstrs(eq_cstrs)
+            std::vector<CstrPtr>& constraints)
+            : m_cost(cost), m_cstrs(constraints)
             {}
 
   };
