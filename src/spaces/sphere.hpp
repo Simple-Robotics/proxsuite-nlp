@@ -37,10 +37,11 @@ namespace lienlp {
      * Geodesics on the 3D sphere are given by the great circles.
      * We first need to derive a parametrization of the circle.
      */
-    template<class Vec_t, class Tangent_t>
-    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                   const Eigen::MatrixBase<Vec_t>& x1,
-                   const Eigen::MatrixBase<Tangent_t>& out) const
+    template<class Vec1_t, class Vec2_t, class Tangent_t>
+    void difference_impl(
+      const Eigen::MatrixBase<Vec1_t>& x0,
+      const Eigen::MatrixBase<Vec2_t>& x1,
+      const Eigen::MatrixBase<Tangent_t>& out) const
     {
 
     }

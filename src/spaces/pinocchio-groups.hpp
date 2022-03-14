@@ -37,9 +37,9 @@ namespace lienlp {
       m_lg.integrate(x.derived(), v.derived(), out.derived());
     }
 
-    template<class Vec_t, class Tangent_t>
-    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                         const Eigen::MatrixBase<Vec_t>& x1,
+    template<class Vec1_t, class Vec2_t, class Tangent_t>
+    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                         const Eigen::MatrixBase<Vec2_t>& x1,
                          const Eigen::MatrixBase<Tangent_t>& vout) const
     {
       m_lg.difference(x0.derived(), x1.derived(), vout.derived());
@@ -60,9 +60,9 @@ namespace lienlp {
       }
     }
 
-    template<int arg, class Vec_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                          const Eigen::MatrixBase<Vec_t>& x1,
+    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
+    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                          const Eigen::MatrixBase<Vec2_t>& x1,
                           const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {
@@ -151,17 +151,17 @@ namespace lienlp {
       }
     }
 
-    template<class Vec_t, class Tangent_t>
-    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                         const Eigen::MatrixBase<Vec_t>& x1,
-                         const Eigen::MatrixBase<Tangent_t>& vout) const
+    template<class Vec1_t, class Vec2_t, class Out_t>
+    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                         const Eigen::MatrixBase<Vec2_t>& x1,
+                         const Eigen::MatrixBase<Out_t>& vout) const
     {
       pin::difference(m_model, x0.derived(), x1.derived(), vout.derived());
     }
 
-    template<int arg, class Vec_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                          const Eigen::MatrixBase<Vec_t>& x1,
+    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
+    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                          const Eigen::MatrixBase<Vec2_t>& x1,
                           const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       switch (arg) {

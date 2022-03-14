@@ -46,19 +46,19 @@ namespace lienlp
                         const Eigen::MatrixBase<Tangent_t>& dx,
                         const Eigen::MatrixBase<Out_t>& out) const;
 
-    template<class Vec_t, class Tangent_t>
-    void difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                   const Eigen::MatrixBase<Vec_t>& x1,
-                   const Eigen::MatrixBase<Tangent_t>& out) const;
+    template<class Vec1_t, class Vec2_t, class Out_t>
+    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                         const Eigen::MatrixBase<Vec2_t>& x1,
+                         const Eigen::MatrixBase<Out_t>& out) const;
 
     template<int arg, class Vec_t, class Tangent_t, class Jout_t>
     void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
                          const Eigen::MatrixBase<Tangent_t>& v,
                          const Eigen::MatrixBase<Jout_t>& Jout) const;
 
-    template<int arg, class Vec_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                          const Eigen::MatrixBase<Vec_t>& x1,
+    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
+    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                          const Eigen::MatrixBase<Vec2_t>& x1,
                           const Eigen::MatrixBase<Jout_t>& Jout) const;
 
     /// Get base point of an element of the tangent bundle.

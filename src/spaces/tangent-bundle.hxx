@@ -44,10 +44,10 @@ namespace lienlp {
     }
 
     template<class Base>
-    template<class Vec_t, class Out_t>
+    template<class Vec1_t, class Vec2_t, class Out_t>
     void TangentBundle<Base>::
-    difference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                    const Eigen::MatrixBase<Vec_t>& x1,
+    difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                    const Eigen::MatrixBase<Vec2_t>& x1,
                     const Eigen::MatrixBase<Out_t>& out) const
     {
       const int nq_ = m_base.nx();
@@ -79,10 +79,10 @@ namespace lienlp {
     }
 
     template<class Base>
-    template<int arg, class Vec_t, class Jout_t>
+    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
     void TangentBundle<Base>::
-    Jdifference_impl(const Eigen::MatrixBase<Vec_t>& x0,
-                     const Eigen::MatrixBase<Vec_t>& x1,
+    Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
+                     const Eigen::MatrixBase<Vec2_t>& x1,
                      const Eigen::MatrixBase<Jout_t>& Jout) const
     {
       const int ndxbase = m_base.ndx();

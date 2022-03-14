@@ -89,19 +89,19 @@ namespace lienlp {
     /**
      * @brief Perform the manifold retraction operation.
      */
-    template<class Vec_t, class Tangent_t>
-    void difference(const Eigen::MatrixBase<Vec_t>& x0,
-                    const Eigen::MatrixBase<Vec_t>& x1,
+    template<class Vec1_t, class Vec2_t, class Tangent_t>
+    void difference(const Eigen::MatrixBase<Vec1_t>& x0,
+                    const Eigen::MatrixBase<Vec2_t>& x1,
                     const Eigen::MatrixBase<Tangent_t>& out) const;
 
-    template<int arg, class Vec_t, class Jout_t>
-    void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
-                     const Eigen::MatrixBase<Vec_t>& x1,
+    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
+    void Jdifference(const Eigen::MatrixBase<Vec1_t>& x0,
+                     const Eigen::MatrixBase<Vec2_t>& x1,
                      const Eigen::MatrixBase<Jout_t>& Jout) const;
 
-    template<class Vec_t, class Jout_t>
-    void Jdifference(const Eigen::MatrixBase<Vec_t>& x0,
-                     const Eigen::MatrixBase<Vec_t>& x1,
+    template<class Vec1_t, class Vec2_t, class Jout_t>
+    void Jdifference(const Eigen::MatrixBase<Vec1_t>& x0,
+                     const Eigen::MatrixBase<Vec2_t>& x1,
                      const Eigen::MatrixBase<Jout_t>& Jout,
                      int arg) const;
 
@@ -112,15 +112,15 @@ namespace lienlp {
     ///
     /// Out-of-place variant of integration operator.
     template<class Vec_t, class Tangent_t>
-    Point_t integrate(const Eigen::MatrixBase<Vec_t>& x,
-                      const Eigen::MatrixBase<Tangent_t>& v) const;
+    decltype(auto) integrate(const Eigen::MatrixBase<Vec_t>& x,
+                             const Eigen::MatrixBase<Tangent_t>& v) const;
 
     /// @copybrief difference()
     ///
     /// Out-of-place version of diff operator.
-    template<class Vec_t>
-    TangentVec_t difference(const Eigen::MatrixBase<Vec_t>& x0,
-                            const Eigen::MatrixBase<Vec_t>& x1) const;
+    template<class Vec1_t, class Vec2_t>
+    decltype(auto) difference(const Eigen::MatrixBase<Vec1_t>& x0,
+                              const Eigen::MatrixBase<Vec2_t>& x1) const;
 
     /// \}
 

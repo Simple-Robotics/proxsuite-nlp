@@ -54,7 +54,7 @@ int main()
   fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.jacobian(p1));
 
-  auto cf = QuadResidualCost<double>(&space, &residual, weights);
+  auto cf = QuadResidualCost<double>(&residual, weights);
   // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.gradient(p1));
@@ -63,32 +63,33 @@ int main()
   /// DEFINE A PROBLEM
 
   using Prob_t = Problem<double>;
-  Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual, 1));
+  Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
   std::vector<Prob_t::CstrPtr> cstrs;
   cstrs.push_back(cstr1);
-  Prob_t prob(cf, cstrs);
-  fmt::print("\tConstraint dimension: {:d}\n", prob.getCstr(0)->getDim());
+  shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
+  fmt::print("\tConstraint dimension: {:d}\n", prob->getCstr(0)->getDim());
 
   /// Test out merit functions
 
-  fmt::print("  MERIT FUNC TEST\n");
-  EvalObjective<double> merit_fun(&prob);
+  Prob_t::VectorXs grad(space.ndx());
+  EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
-  fmt::print("eval merit grad: ∇M={}\n", merit_fun.gradient(p1));
+  merit_fun.gradient(p0, grad);
+  fmt::print("eval merit grad: ∇M={}\n", grad);
 
 
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  PDALFunction<double> pdmerit(&prob);
+  PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
   Prob_t::VectorList lams;
   prob.allocateMultipliers(lams);
+  prob->allocateMultipliers(lams);
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n", lams.size(), lams[0]);
 
   // lagrangian
-  Prob_t::VectorXs grad(space.ndx());
   fmt::print("\tL(p0) = {}\n", lagr(p0, lams));
   fmt::print("\tL(p1) = {}\n", lagr(p1, lams));
   lagr.gradient(p0, lams, grad);
@@ -96,9 +97,20 @@ int main()
   lagr.gradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
+  Prob_t::MatrixXs hess(space.ndx(), space.ndx());
+  lagr.hessian(p0, lams, hess);
+  fmt::print("\tHLag(p0) = {}\n", hess);
+  lagr.hessian(p1, lams, hess);
+  fmt::print("\tHLag(p1) = {}\n", hess);
+
+  // merit function
   fmt::print("  PDAL FUNC TEST\n");
   fmt::print("\tpdmerit(p0) = {}\n", pdmerit(p0, lams, lams));
   fmt::print("\tpdmerit(p1) = {}\n", pdmerit(p1, lams, lams));
+  pdmerit.hessian(p0, lams, lams, hess);
+  fmt::print("\tHmerit(p0) = {}\n", hess);
+  pdmerit.hessian(p1, lams, lams, hess);
+  fmt::print("\tHmerit (p1) = {}\n", hess);
 
   // gradient of merit fun
   pdmerit.gradient(p0, lams, lams, grad);
