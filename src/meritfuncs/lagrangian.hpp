@@ -3,11 +3,8 @@
 #include "lienlp/fwd.hpp"
 #include "lienlp/merit-function-base.hpp"
 
-#include <boost/shared_ptr.hpp>
-
 namespace lienlp {
 
-  using boost::shared_ptr;
 
   /**
    * The Lagrangian function of a problem instance.
@@ -17,20 +14,20 @@ namespace lienlp {
   template<typename _Scalar>
   struct LagrangianFunction :
   public MeritFunctorBase<
-    _Scalar, typename math_types<_Scalar>::VectorList
+    _Scalar, typename math_types<_Scalar>::VectorOfVectors
     >
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
-    using Parent = MeritFunctorBase<Scalar, VectorList>;
+    using Parent = MeritFunctorBase<Scalar, VectorOfVectors>;
     using Parent::m_prob;
     using Parent::gradient;
 
     LagrangianFunction(shared_ptr<Prob_t> prob)
       : Parent(prob) {}
 
-    Scalar operator()(const VectorXs& x, const VectorList& lams) const
+    Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams) const
     {
       Scalar result_ = 0.;
       result_ = result_ + m_prob->m_cost(x);
@@ -43,9 +40,9 @@ namespace lienlp {
       return result_;
     }
 
-    void gradient(const VectorXs& x,
-                  const VectorList& lams,
-                  VectorXs& out) const
+    void gradient(const ConstVectorRef& x,
+                  const VectorOfVectors& lams,
+                  RefVector out) const
     {
       out.noalias() = m_prob->m_cost.gradient(x);
       const int num_c = m_prob->getNumConstraints();
@@ -56,9 +53,9 @@ namespace lienlp {
       }
     }
 
-    void hessian(const VectorXs& x,
-                 const VectorList& lams,
-                 MatrixXs& out) const
+    void hessian(const ConstVectorRef& x,
+                 const VectorOfVectors& lams,
+                 RefMatrix out) const
     {
       m_prob->m_cost.hessian(x, out);
       const int num_c = m_prob->getNumConstraints();

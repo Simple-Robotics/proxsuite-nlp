@@ -6,28 +6,42 @@
 
 namespace lienlp {
   
-  template<class _Scalar>
+  template<typename _Scalar>
   struct EqualityConstraint : ConstraintFormatBaseTpl<_Scalar>
   {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     using Scalar = _Scalar;
     LIENLP_CSTR_TYPES(Scalar)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
-    using ConstraintFormatBaseTpl<Scalar>::operator();
-    using functor_t = ConstraintFuncTpl<Scalar>;
+    using Parent = ConstraintFormatBaseTpl<Scalar>;
+    using Parent::operator();
+    using Parent::jacobian;
+    using functor_t = typename Parent::functor_t;
 
-    EqualityConstraint<Scalar>(const functor_t& func, const int& nc)
-      : ConstraintFormatBaseTpl<Scalar>(func, nc) {}
+    VectorXs proj_;
+    VectorXs Jproj_;
 
-    C_t projection(const VectorXs& x) const
+    EqualityConstraint(const functor_t& func)
+      : ConstraintFormatBaseTpl<Scalar>(func) {
+        proj_ = VectorXs::Zero(func.getDim());
+        Jproj_ = VectorXs::Zero(func.getDim(), func.ndx());
+      }
+
+    C_t projection(const ConstVectorRef& z) const
     {
-      return VectorXs::Zero(x.size());
+      return proj_;
     }
 
-    Jacobian_t Jprojection(const VectorXs& x) const
+    Jacobian_t Jprojection(const ConstVectorRef& z) const
     {
-      return MatrixXs::Zero(x.size(), x.size());
+      return Jproj_;
     }
 
+    void computeActiveSet(const ConstVectorRef& z, Active_t& out) const
+    {
+      out.array() = false;
+    }
   };
 
 } // namespace lienlp

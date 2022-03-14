@@ -6,9 +6,10 @@
 
 namespace lienlp {
 
-  #define LIENLP_CSTR_TYPES(Scalar)                       \
-    using C_t = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; \
-    using Jacobian_t = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+  #define LIENLP_CSTR_TYPES(Scalar)                                           \
+    using C_t = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;                     \
+    using Jacobian_t = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; \
+    using Active_t = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
   /**
    * @brief   Base template for constraint/residual functors.
@@ -20,35 +21,44 @@ namespace lienlp {
   template<typename _Scalar>
   struct ConstraintFuncTpl
   {
+  protected:
+    const int m_nc;
+    const int m_ndx;
+  public:
     using Scalar = _Scalar;
     LIENLP_CSTR_TYPES(Scalar)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
-    virtual C_t operator()(const VectorXs& x) const = 0;
+    virtual C_t operator()(const ConstVectorRef& x) const = 0;
     /// @brief      Jacobian matrix of the constraint function.
-    virtual void jacobian(const VectorXs& x, Jacobian_t& Jout) const = 0;
+    virtual void jacobian(const ConstVectorRef& x, Jacobian_t& Jout) const = 0;
+
+    ConstraintFuncTpl(const int& nc, const int& ndx)
+    : m_nc(nc), m_ndx(ndx) {}
+
+    virtual ~ConstraintFuncTpl<Scalar>() = default;
+
+    int getDim() const { return m_nc; }
+    int ndx() const { return m_ndx; }
 
     /** @copybrief jacobian()
      * 
      * Allocated version of the jacobian() method.
      */
-    Jacobian_t jacobian(const VectorXs& x) const
+    Jacobian_t jacobian(const ConstVectorRef& x) const
     {
-      Jacobian_t Jout;
+      Jacobian_t Jout(m_nc, m_ndx);
       jacobian(x, Jout);
       return Jout;
     }
 
     /// Vector-hessian product.
-    virtual Jacobian_t vhp(const VectorXs& x, const VectorXs& v) const
+    virtual Jacobian_t vhp(const ConstVectorRef& x, const ConstVectorRef& v) const
     {
-      Jacobian_t J;
-      J.resize(1, 1);
+      Jacobian_t J(m_ndx, m_ndx);
       J.setZero();
       return J;
     }
-
-    virtual ~ConstraintFuncTpl<Scalar>() = default;
 
   };
 
@@ -59,8 +69,6 @@ namespace lienlp {
   template<typename _Scalar>
   struct ConstraintFormatBaseTpl
   {
-  protected:
-    const int m_nc;
   public:
     using Scalar = _Scalar;
     LIENLP_CSTR_TYPES(Scalar)
@@ -69,32 +77,33 @@ namespace lienlp {
     using functor_t = ConstraintFuncTpl<Scalar>;
     const functor_t& m_func;
 
-    ConstraintFormatBaseTpl<Scalar>(const functor_t& func, const int& nc)
-      : m_func(func), m_nc(nc) {}
+    ConstraintFormatBaseTpl<Scalar>(const functor_t& func)
+      : m_func(func) {}
 
-    inline typename functor_t::C_t operator()(const VectorXs& x) const
+    inline C_t operator()(const ConstVectorRef& x) const
     {
       return m_func(x);
     }
 
-    inline typename functor_t::Jacobian_t jacobian(const VectorXs& x) const
+    inline Jacobian_t jacobian(const ConstVectorRef& x) const
     {
       return m_func.jacobian(x);
     }
 
     /// Get dimension of constraint representation.
-    int getDim() const
-    {
-      return m_nc;
-    }
+    int getDim() const { return m_func.getDim(); }
+    /// Get tangent space dimension (no. of columns of Jacobian)
+    int ndx() const { return m_func.ndx(); }
 
-    virtual C_t projection(const VectorXs& z) const = 0;
-    inline C_t dualProjection(const VectorXs& z) const
+    virtual C_t projection(const ConstVectorRef& z) const = 0;
+    inline C_t dualProjection(const ConstVectorRef& z) const
     {
       return z - projection(z);
     }
-    virtual Jacobian_t Jprojection(const VectorXs& z) const = 0;
-
+    /// Compute the jacobian of the active-set projection operator.
+    virtual Jacobian_t Jprojection(const ConstVectorRef& z) const = 0;
+    /// Compute the active set of the constraint.
+    virtual void computeActiveSet(const ConstVectorRef& z, Active_t& out) const = 0;
     virtual ~ConstraintFormatBaseTpl<Scalar>() = default;
   };
 

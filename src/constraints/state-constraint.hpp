@@ -17,26 +17,26 @@ namespace lienlp {
     LIENLP_CSTR_TYPES(Scalar)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
-    using ConstraintFuncTpl<Scalar>::operator();
-    using ConstraintFuncTpl<Scalar>::jacobian;
+    using Parent = ConstraintFuncTpl<Scalar>;
+    using Parent::operator();
+    using Parent::jacobian;
+    using Parent::m_ndx;
+    using Parent::m_nc;
 
     M* m_manifold;
 
     VectorXs m_target;
 
-    StateResidual(M* manifold, const VectorXs& target)
-      : m_manifold(manifold), m_target(target) {}
+    StateResidual(M* manifold, const ConstVectorRef& target)
+      : m_manifold(manifold), m_target(target), Parent(manifold->ndx(), manifold->ndx()) {}
 
-    C_t operator()(const VectorXs& x) const
+    C_t operator()(const ConstVectorRef& x) const
     {
       return m_manifold->difference(m_target, x);
     }
 
-    void jacobian(const VectorXs& x, Jacobian_t& Jout) const
+    void jacobian(const ConstVectorRef& x, Jacobian_t& Jout) const
     {
-      // set size
-      Jout.resize(m_manifold->ndx(), m_manifold->ndx());
-      Jout.setZero();
       m_manifold->Jdifference(m_target, x, Jout, 1);
     }
 

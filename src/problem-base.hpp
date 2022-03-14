@@ -6,13 +6,13 @@
 #include "lienlp/constraints/equality-constraint.hpp"
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 
 namespace lienlp {
   
-  using boost::shared_ptr;
+  /// Use the STL shared_ptr.
+  using std::shared_ptr;
 
   template<typename _Scalar>
   struct Problem
@@ -43,7 +43,7 @@ namespace lienlp {
       return m_cstrs.size();
     }
 
-    void allocateMultipliers(VectorList& out) const
+    void allocateMultipliers(VectorOfVectors& out) const
     {
       out.resize(getNumConstraints());
       for (std::size_t i = 0; i < getNumConstraints(); i++)
@@ -53,9 +53,9 @@ namespace lienlp {
       }
     }
 
-    VectorList allocateMultipliers() const
+    VectorOfVectors allocateMultipliers() const
     {
-      VectorList out_;
+      VectorOfVectors out_;
       allocateMultipliers(out_);
       return out_;
     }

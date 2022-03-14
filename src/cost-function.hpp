@@ -6,20 +6,31 @@
 
 namespace lienlp {
 
-  template<class _Scalar>
+  template<typename _Scalar>
   class CostFunction
   {
   public:
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
-    virtual Scalar operator()(const VectorXs& x) const = 0;
-    virtual VectorXs gradient(const VectorXs& x) const = 0;
-    virtual void hessian(const VectorXs& x, MatrixXs& out) const = 0;
+    const int m_ndx;
 
-    MatrixXs hessian(const VectorXs& x) const
+    CostFunction(const int& ndx) : m_ndx(ndx) {}
+
+    virtual Scalar operator()(const ConstVectorRef& x) const = 0;
+    virtual void gradient(const ConstVectorRef& x, RefVector out) const = 0;
+    virtual void hessian(const ConstVectorRef& x, RefMatrix out) const = 0;
+
+    VectorXs gradient(const ConstVectorRef& x) const
     {
-      MatrixXs out;
+      VectorXs out(m_ndx);
+      gradient(x, out);
+      return out;
+    }
+
+    MatrixXs hessian(const ConstVectorRef& x) const
+    {
+      MatrixXs out(m_ndx, m_ndx);
       hessian(x, out);
       return out;
     }

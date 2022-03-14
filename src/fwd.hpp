@@ -15,7 +15,7 @@ struct math_types
   using Scalar = _Scalar;
   using VectorXs = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
   using MatrixXs = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-  using VectorList = std::vector<VectorXs>;
+  using VectorOfVectors = std::vector<VectorXs>;
 };
 
 }  // namespace lienlp

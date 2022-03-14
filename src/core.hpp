@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2022 LAAS-CNRS, INRIA
+/** Copyright (c) 2022 LAAS-CNRS, INRIA
+ * 
  */
 #pragma once
 
 #include <Eigen/Core>
+#include <Eigen/Cholesky>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 #include "lienlp/macros.hpp"
 #include "lienlp/problem-base.hpp"
@@ -16,8 +16,6 @@
 
 
 namespace lienlp {
-
-  using boost::shared_ptr;
 
   template<typename M>  
   class Solver
@@ -30,9 +28,10 @@ namespace lienlp {
 
     shared_ptr<Prob_t> m_problem;
     Merit_t m_merit;
+    M& m_manifold;
 
-    Solver(shared_ptr<Prob_t>& prob)
-      : m_problem(prob)
+    Solver(M& man, shared_ptr<Prob_t>& prob)
+      : m_manifold(man), m_problem(prob)
     {}
 
   };

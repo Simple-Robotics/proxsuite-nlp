@@ -4,9 +4,11 @@
 #define LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)                   \
   using VectorXs = typename math_types<Scalar>::VectorXs;     \
   using MatrixXs = typename math_types<Scalar>::MatrixXs;     \
-  using VectorList = typename math_types<Scalar>::VectorList; \
-  using RefVector = Eigen::Ref<const VectorXs>;               \
-  using RefMatrix = Eigen::Ref<const MatrixXs>;
+  using VectorOfVectors = typename math_types<Scalar>::VectorOfVectors; \
+  using RefVector = Eigen::Ref<VectorXs>;                     \
+  using RefMatrix = Eigen::Ref<MatrixXs>;                     \
+  using ConstVectorRef = Eigen::Ref<const VectorXs>;          \
+  using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
 
 /// @brief Macro empty arg
 #define LIENLP_MACRO_EMPTY_ARG

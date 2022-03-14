@@ -6,11 +6,8 @@
 #include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
 
-#include <boost/shared_ptr.hpp>
-
 
 namespace lienlp {
-  using boost::shared_ptr;
 
   template<typename _Scalar, typename... Args>
   struct MeritFunctorBase
@@ -24,24 +21,25 @@ namespace lienlp {
     MeritFunctorBase(shared_ptr<Prob_t> prob) : m_prob(prob) {}
 
     /// Evaluate the merit function.
-    virtual Scalar operator()(const VectorXs& x, const Args&... args) const = 0;
+    virtual Scalar operator()(const ConstVectorRef& x, const Args&... args) const = 0;
     /// Evaluate the merit function gradient.
-    virtual void gradient(const VectorXs& x, const Args&... args, VectorXs& out) const = 0;
+    virtual void gradient(const ConstVectorRef& x, const Args&... args, RefVector out) const = 0;
+    /// Compute the merit function Hessian matrix.
+    virtual void hessian(const ConstVectorRef& x, const Args&... args, RefMatrix out) const = 0;
+
     /// @copybrief gradient()
-    VectorXs gradient(const VectorXs& x, const Args&... args) const
+    VectorXs gradient(const ConstVectorRef& x, const Args&... args) const
     {
       VectorXs out;
       gradient(x, args..., out);
       return out;
     }
 
-    /// Compute the merit function Hessian matrix.
-    virtual void hessian(const VectorXs& x, const Args&... args, MatrixXs& out) const = 0;
   };
 
 
   /// Simply evaluate the objective function.
-  template<class _Scalar>
+  template<typename _Scalar>
   struct EvalObjective : public MeritFunctorBase<_Scalar>
   {
     using Scalar = _Scalar;
@@ -54,17 +52,17 @@ namespace lienlp {
     EvalObjective(shared_ptr<Prob_t> prob)
       : Parent(prob) {}
 
-    Scalar operator()(const VectorXs& x) const
+    Scalar operator()(const ConstVectorRef& x) const
     {
       return m_prob->m_cost(x);
     }
 
-    void gradient(const VectorXs& x, VectorXs& out) const
+    void gradient(const ConstVectorRef& x, RefVector out) const
     {
-      out.noalias() = m_prob->m_cost.gradient(x);
+      out = m_prob->m_cost.gradient(x);
     }
 
-    void hessian(const VectorXs& x , MatrixXs& out) const
+    void hessian(const ConstVectorRef& x , RefMatrix out) const
     {
       m_prob->m_cost.hessian(x, out);
     }
