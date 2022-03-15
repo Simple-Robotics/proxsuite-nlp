@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lienlp/spaces/pinocchio-groups.hpp"
-#include "lienlp/spaces/tangent-bundle.hpp"
+#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "lienlp/modelling/spaces/tangent-bundle.hpp"
 
 
 namespace lienlp {

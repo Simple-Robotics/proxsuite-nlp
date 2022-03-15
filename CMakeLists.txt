@@ -155,10 +155,10 @@ file(GLOB_RECURSE HEADERS
 
 file(MAKE_DIRECTORY
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/spaces"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/costs"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/constraints"
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/meritfuncs"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/spaces"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/costs"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/constraints"
      )
 
 set(HEADERS_)

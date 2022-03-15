@@ -1,6 +1,6 @@
 #include "lienlp/manifold-base.hpp"
-#include "lienlp/spaces/pinocchio-groups.hpp"
-#include "lienlp/spaces/multibody.hpp"
+#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "lienlp/modelling/spaces/multibody.hpp"
 
 #include <pinocchio/parsers/sample-models.hpp>
 #include <pinocchio/multibody/liegroup/vector-space.hpp>

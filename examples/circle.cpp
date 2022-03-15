@@ -5,8 +5,8 @@
 #include "lienlp/cost-function.hpp"
 #include "lienlp/merit-function-base.hpp"
 #include "lienlp/meritfuncs/pdal.hpp"
-#include "lienlp/spaces/pinocchio-groups.hpp"
-#include "lienlp/costs/squared-distance.hpp"
+#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "lienlp/modelling/costs/squared-distance.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 

@@ -3,7 +3,7 @@
 #include "lienlp/manifold-base.hpp"
 #include "lienlp/cost-function.hpp"
 #include "lienlp/constraint-base.hpp"
-#include "lienlp/constraints/equality-constraint.hpp"
+#include "lienlp/modelling/constraints/equality-constraint.hpp"
 
 #include <vector>
 #include <memory>
