@@ -7,33 +7,34 @@
 namespace lienlp {
   
   template<typename _Scalar>
-  struct EqualityConstraint : ConstraintFormatBaseTpl<_Scalar>
+  struct EqualityConstraint : ConstraintSetBase<_Scalar>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = _Scalar;
-    LIENLP_CSTR_TYPES(Scalar)
+    LIENLP_RESIDUAL_TYPES(Scalar)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
-    using Parent = ConstraintFormatBaseTpl<Scalar>;
-    using Parent::operator();
-    using Parent::jacobian;
-    using functor_t = typename Parent::functor_t;
+    using Base = ConstraintSetBase<Scalar>;
+    using Base::operator();
+    using Base::computeJacobian;
+    using Active_t = typename Base::Active_t;
+    using functor_t = typename Base::functor_t;
 
     VectorXs proj_;
     VectorXs Jproj_;
 
     EqualityConstraint(const functor_t& func)
-      : ConstraintFormatBaseTpl<Scalar>(func) {
-        proj_ = VectorXs::Zero(func.getDim());
-        Jproj_ = VectorXs::Zero(func.getDim(), func.ndx());
+      : ConstraintSetBase<Scalar>(func) {
+        proj_ = VectorXs::Zero(func.nr());
+        Jproj_ = VectorXs::Zero(func.nr(), func.ndx());
       }
 
-    C_t projection(const ConstVectorRef& z) const
+    ReturnType projection(const ConstVectorRef& z) const
     {
       return proj_;
     }
 
-    Jacobian_t Jprojection(const ConstVectorRef& z) const
+    JacobianType Jprojection(const ConstVectorRef& z) const
     {
       return Jproj_;
     }

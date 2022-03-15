@@ -32,7 +32,6 @@ namespace lienlp {
                    const Eigen::MatrixBase<Tangent_t>& dx,
                    const Eigen::MatrixBase<Out_t>& out) const
     {
-      const int nq_ = m_base.nx();
       const int nv_ = m_base.ndx();
       Out_t& out_ = LIENLP_EIGEN_CONST_CAST(Out_t, out);
       out_.resize(nx_impl());
@@ -50,7 +49,6 @@ namespace lienlp {
                     const Eigen::MatrixBase<Vec2_t>& x1,
                     const Eigen::MatrixBase<Out_t>& out) const
     {
-      const int nq_ = m_base.nx();
       const int nv_ = m_base.ndx();
       Out_t& out_ = LIENLP_EIGEN_CONST_CAST(Out_t, out);
       out_.resize(ndx_impl());

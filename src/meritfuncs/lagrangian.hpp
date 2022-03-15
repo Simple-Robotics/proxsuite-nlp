@@ -20,44 +20,44 @@ namespace lienlp {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
-    using Parent = MeritFunctorBase<Scalar, VectorOfVectors>;
-    using Parent::m_prob;
-    using Parent::gradient;
+    using Base = MeritFunctorBase<Scalar, VectorOfVectors>;
+    using Base::m_prob;
+    using Base::computeGradient;
 
     LagrangianFunction(shared_ptr<Prob_t> prob)
-      : Parent(prob) {}
+      : Base(prob) {}
 
     Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams) const
     {
       Scalar result_ = 0.;
       result_ = result_ + m_prob->m_cost(x);
-      const auto num_c = m_prob->getNumConstraints();
+      const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
-        auto cstr = m_prob->getCstr(i);
+        const auto cstr = m_prob->getCstr(i);
         result_ = result_ + lams[i].dot((*cstr)(x));
       }
       return result_;
     }
 
-    void gradient(const ConstVectorRef& x,
-                  const VectorOfVectors& lams,
-                  RefVector out) const
+    void computeGradient(const ConstVectorRef& x,
+                         const VectorOfVectors& lams,
+                         RefVector out) const
     {
-      out.noalias() = m_prob->m_cost.gradient(x);
+      out.noalias() = m_prob->m_cost.computeGradient(x);
       const int num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
-        out.noalias() += (cstr->jacobian(x)).transpose() * lams[i];
+        out.noalias() += (cstr->computeJacobian(x)).transpose() * lams[i];
       }
     }
 
-    void hessian(const ConstVectorRef& x,
-                 const VectorOfVectors& lams,
-                 RefMatrix out) const
+    void computeHessian(const ConstVectorRef& x,
+                        const VectorOfVectors& lams,
+                        RefMatrix out) const
     {
-      m_prob->m_cost.hessian(x, out);
+      m_prob->m_cost.computeHessian(x, out);
       const int num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {

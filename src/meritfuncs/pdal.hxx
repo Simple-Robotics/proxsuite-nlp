@@ -1,7 +1,8 @@
 
 namespace lienlp {
+
   template<typename Scalar>
-  void PDALFunction<Scalar>::gradient(
+  void PDALFunction<Scalar>::computeGradient(
     const ConstVectorRef& x,
     const VectorOfVectors& lams,
     const VectorOfVectors& lams_ext,
@@ -10,11 +11,11 @@ namespace lienlp {
     VectorOfVectors lams_plus;
     lams_plus.reserve(m_prob->getNumConstraints());
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
-    m_lagr.gradient(x, lams_plus, out);
+    m_lagr.computeGradient(x, lams_plus, out);
   }
 
   template<typename Scalar>
-  void PDALFunction<Scalar>::hessian(
+  void PDALFunction<Scalar>::computeHessian(
     const ConstVectorRef& x,
     const VectorOfVectors& lams,
     const VectorOfVectors& lams_ext,
@@ -23,7 +24,7 @@ namespace lienlp {
     VectorOfVectors lams_plus;
     lams_plus.reserve(m_prob->getNumConstraints());
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
-    m_lagr.hessian(x, lams_plus, out);
+    m_lagr.computeHessian(x, lams_plus, out);
   }
 
 } // namespacelienlp

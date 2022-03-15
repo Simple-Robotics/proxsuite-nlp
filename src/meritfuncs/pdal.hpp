@@ -22,9 +22,9 @@ namespace lienlp {
   {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
-    using Parent = MeritFunctorBase<Scalar, VectorOfVectors, VectorOfVectors>;
-    using Parent::m_prob;
-    using Parent::gradient;
+    using Base = MeritFunctorBase<Scalar, VectorOfVectors, VectorOfVectors>;
+    using Base::m_prob;
+    using Base::computeGradient;
     using Prob_t = Problem<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
@@ -43,7 +43,7 @@ namespace lienlp {
     const Scalar& getPenalty() { return m_muEq; }
 
     PDALFunction(shared_ptr<Prob_t> prob)
-      : Parent(prob), m_lagr(Lagrangian_t(prob)) {}
+      : Base(prob), m_lagr(Lagrangian_t(prob)) {}
 
     /**
      *  @brief Compute the first-order multiplier estimates.
@@ -108,15 +108,15 @@ namespace lienlp {
       return result_;
     }
 
-    void gradient(const ConstVectorRef& x,
-                  const VectorOfVectors& lams,
-                  const VectorOfVectors& lams_ext,
-                  RefVector out) const;
+    void computeGradient(const ConstVectorRef& x,
+                         const VectorOfVectors& lams,
+                         const VectorOfVectors& lams_ext,
+                         RefVector out) const;
 
-    void hessian(const ConstVectorRef& x,
-                 const VectorOfVectors& lams,
-                 const VectorOfVectors& lams_ext,
-                 RefMatrix out) const;
+    void computeHessian(const ConstVectorRef& x,
+                        const VectorOfVectors& lams,
+                        const VectorOfVectors& lams_ext,
+                        RefMatrix out) const;
   };
 
 }

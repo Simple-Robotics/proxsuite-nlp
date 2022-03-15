@@ -21,12 +21,12 @@ namespace lienlp {
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
     /// Generic constraint type
-    using Cstr_t = ConstraintFormatBaseTpl<Scalar>;
+    using Cstr_t = ConstraintSetBase<Scalar>;
     using CstrPtr = shared_ptr<Cstr_t>;
     /// Equality constraint type
     using Equality_t = EqualityConstraint<Scalar>;
     /// Cost function type
-    using Cost_t = CostFunction<Scalar>;
+    using Cost_t = CostFunctionBase<Scalar>;
 
     /// The cost functional.
     const Cost_t& m_cost;
@@ -49,7 +49,7 @@ namespace lienlp {
       for (std::size_t i = 0; i < getNumConstraints(); i++)
       {
         CstrPtr cur_cstr = m_cstrs[i];
-        out[i] = VectorXs::Zero(cur_cstr->getDim());
+        out[i] = VectorXs::Zero(cur_cstr->nr());
       }
     }
 
