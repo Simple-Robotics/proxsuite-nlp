@@ -7,7 +7,7 @@
 
 namespace lienlp {
   template<typename M>
-  struct QuadraticResidual : ResidualBase<typename M::Scalar>
+  struct QuadraticResidualFunctor : ResidualBase<typename M::Scalar>
   {
     using Scalar = typename M::Scalar;
     LIENLP_RESIDUAL_TYPES(Scalar)
@@ -23,7 +23,7 @@ namespace lienlp {
     const Scalar m_level;
     const VectorXs m_target;
 
-    QuadraticResidual(const M& manifold,
+    QuadraticResidualFunctor(const M& manifold,
                       const MatrixXs& Q,
                       const Scalar level,
                       const VectorXs& target)
@@ -33,10 +33,10 @@ namespace lienlp {
                         m_level(level),
                         m_target(target) {}
 
-    QuadraticResidual(const M& manifold,
+    QuadraticResidualFunctor(const M& manifold,
                       const Scalar level,
                       const VectorXs& target)
-      : QuadraticResidual(manifold,
+      : QuadraticResidualFunctor(manifold,
                           MatrixXs::Identity(manifold.ndx(), manifold.ndx()),
                           level,
                           target) {}

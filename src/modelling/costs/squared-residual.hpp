@@ -10,7 +10,7 @@ namespace lienlp {
    * residual function.
    */
   template<typename _Scalar>
-  class QuadResidualCost : public CostFunctionBase<_Scalar>
+  class QuadraticResidualCost : public CostFunctionBase<_Scalar>
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -26,16 +26,16 @@ namespace lienlp {
     shared_ptr<ResidualType> m_residual;
     MatrixXs m_weights;
 
-    QuadResidualCost(const shared_ptr<ResidualType>& residual,
+    QuadraticResidualCost(const shared_ptr<ResidualType>& residual,
                      const ConstMatrixRef& weightMatrix)
       : Base(residual->nx(), residual->ndx()),
         m_residual(residual), m_weights(weightMatrix)
     {}
 
     template<typename... ResidualArgs>
-    QuadResidualCost(const ConstVectorRef& weightMatrix,
+    QuadraticResidualCost(const ConstVectorRef& weightMatrix,
                      ResidualArgs&... args)
-    : QuadResidualCost(new ResidualType(args...),  weightMatrix)
+    : QuadraticResidualCost(new ResidualType(args...),  weightMatrix)
     {}
 
     Scalar operator()(const ConstVectorRef& x) const

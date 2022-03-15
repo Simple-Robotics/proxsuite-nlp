@@ -7,6 +7,8 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
+#include "lienlp/modelling/constraints/quadratic-residual.hpp"
+#include "lienlp/solver-base.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 
@@ -29,6 +31,7 @@ int main()
   Man space;
   auto lg = space.m_lg;
   Man::Point_t p0 = lg.random();  // target
+  p0.normalize();
   Man::Point_t p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
@@ -51,7 +54,7 @@ int main()
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<decltype(residual)>(residual);
 
-  auto cf = QuadResidualCost<double>(resptr, weights);
+  QuadraticResidualCost<double> cf(resptr, weights);
   // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
@@ -59,11 +62,16 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
+  // Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
+  QuadraticResidualFunctor<Man> residualCircle(space, 1., Eigen::Vector2d::Zero());
+  Prob_t::Equality_t cstr1(residualCircle);
+  fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
+  fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
+  fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
+
   std::vector<Prob_t::CstrPtr> cstrs;
-  cstrs.push_back(cstr1);
+  cstrs.push_back(std::make_shared<Prob_t::Equality_t>(residualCircle));
   shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
-  fmt::print("\tConstraint dimension: {:d}\n", prob->getCstr(0)->nr());
 
   /// Test out merit functions
 
@@ -113,6 +121,9 @@ int main()
   fmt::print("\tgradM(p0) {}\n", grad);
   pdmerit.computeGradient(p1, lams, lams, grad);
   fmt::print("\tgradM(p1) {}\n", grad);
+
+  SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
+  SResults<double> results(space.nx(), *prob);
 
   return 0;
 }
