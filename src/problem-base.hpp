@@ -17,6 +17,7 @@ namespace lienlp {
   template<typename _Scalar>
   struct Problem
   {
+  public:
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
@@ -28,46 +29,57 @@ namespace lienlp {
     /// Cost function type
     using Cost_t = CostFunctionBase<Scalar>;
 
-    /// The cost functional.
+    /// The cost functional
     const Cost_t& m_cost;
-    /// List of equality constraints.
-    const std::vector<CstrPtr> m_cstrs;
 
+    /// Get a pointer to the \f$i\f$-th constraint pointer
     const CstrPtr getCstr(const std::size_t& i) const
     {
       return m_cstrs[i];
     }
 
+    /// @brief Get the number of constraint blocks.
     std::size_t getNumConstraints() const
     {
       return m_cstrs.size();
     }
 
-    void allocateMultipliers(VectorOfVectors& out) const
+    int getNcTotal() const
     {
-      out.resize(getNumConstraints());
-      for (std::size_t i = 0; i < getNumConstraints(); i++)
-      {
-        CstrPtr cur_cstr = m_cstrs[i];
-        out[i] = VectorXs::Zero(cur_cstr->nr());
-      }
+      return m_ncTotal;
     }
 
-    VectorOfVectors allocateMultipliers() const
-    {
-      VectorOfVectors out_;
-      allocateMultipliers(out_);
-      return out_;
-    }
-
-    Problem(const Cost_t& cost)
-            : m_cost(cost) {}
+    Problem(const Cost_t& cost) : m_cost(cost) {}
 
     Problem(const Cost_t& cost,
             std::vector<CstrPtr>& constraints)
             : m_cost(cost), m_cstrs(constraints)
-            {}
+    {
+      m_ncTotal = 0;
+      for (CstrPtr cstr : m_cstrs)
+      {
+        m_ncTotal += cstr->nr();
+      }
+    }
 
+
+    static void allocateMultipliers(
+      const Problem<Scalar>& prob,
+      VectorOfVectors& out)
+    {
+      out.reserve(prob.getNumConstraints());
+      for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
+      {
+        CstrPtr cur_cstr = prob.getCstr(i);
+        out.push_back(VectorXs::Zero(cur_cstr->nr()));
+      }
+    }
+
+  protected:
+    /// Vector of equality constraints.
+    const std::vector<CstrPtr> m_cstrs;
+    /// Total number of constraints
+    int m_ncTotal;
   };
 
 } // namespace lienlp

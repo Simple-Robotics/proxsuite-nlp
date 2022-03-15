@@ -17,11 +17,12 @@
 
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
-using Man = lienlp::PinocchioLieGroup<SO2>;
 
 using fmt::format;
 
 using namespace lienlp;
+using Man = PinocchioLieGroup<SO2>;
+using Prob_t = Problem<double>;
 
 int main()
 {
@@ -62,7 +63,6 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  using Prob_t = Problem<double>;
   Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
   std::vector<Prob_t::CstrPtr> cstrs;
   cstrs.push_back(cstr1);
@@ -84,7 +84,8 @@ int main()
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
   Prob_t::VectorOfVectors lams;
-  prob->allocateMultipliers(lams);
+  Prob_t::allocateMultipliers(*prob, lams);
+
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n", lams.size(), lams[0]);
 

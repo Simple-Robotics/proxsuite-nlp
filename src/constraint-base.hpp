@@ -35,6 +35,7 @@ namespace lienlp {
       return m_func.computeJacobian(x);
     }
 
+    int nx() const { return m_func.nx(); }
     /// Get dimension of constraint representation.
     int nr() const { return m_func.nr(); }
     /// Get tangent space dimension (no. of columns of Jacobian)
