@@ -21,8 +21,7 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
   std::cout << "test RN" << '\n';
   const int N = 4;
   using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
-  const Vs lg;
-  PinocchioLieGroup<Vs> space(lg);
+  PinocchioLieGroup<Vs> space;
   Vs::ConfigVector_t x0(space.nx());
   x0.setRandom();
   Vs::TangentVector_t v0(space.ndx());
@@ -44,10 +43,9 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
 {
   BOOST_TEST_MESSAGE("Starting T(SO2) test");
   using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
-  using SO2_wrap = PinocchioLieGroup<_SO2>;
-  _SO2 lg_;
-  SO2_wrap base_space(lg_);
-  using TSO2 = TangentBundle<SO2_wrap>;
+  using SO2 = PinocchioLieGroup<_SO2>;
+  using TSO2 = TangentBundle<SO2>;
+  SO2 base_space;
   TSO2 tspace(base_space);
 
   BOOST_TEST_MESSAGE("Checking bundle dimension");

@@ -25,7 +25,7 @@ namespace lienlp {
     LIENLP_DEFINE_INTERFACE_TYPES(Self)
 
     LieGroup m_lg;
-    PinocchioLieGroup(LieGroup lg) : m_lg(lg) {}
+    PinocchioLieGroup() {}
 
     /// \name Implementations
 

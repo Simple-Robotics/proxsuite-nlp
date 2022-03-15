@@ -26,9 +26,8 @@ using Prob_t = Problem<double>;
 
 int main()
 {
-  SO2 lg;
-  Man space(lg);
-  Man::Point_t neut = lg.neutral();
+  Man space;
+  auto lg = space.m_lg;
   Man::Point_t p0 = lg.random();  // target
   Man::Point_t p1 = lg.random();
   fmt::print("{} << p0\n", p0);
