@@ -33,7 +33,7 @@ namespace lienlp {
     /// @brief      Evaluate the residual at a given point x.
     virtual ReturnType operator()(const ConstVectorRef& x) const = 0;
     /// @brief      Jacobian matrix of the constraint function.
-    virtual void computeJacobian(const ConstVectorRef& x, JacobianType& Jout) const = 0;
+    virtual void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const = 0;
 
     ResidualBase(const int nx, const int ndx, const int nr)
     : m_nx(nx), m_ndx(ndx), m_nr(nr) {}
