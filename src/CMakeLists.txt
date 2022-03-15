@@ -1,6 +1,5 @@
 
 message(STATUS "src: Headers are: ${HEADERS}")
-message(STATUS "src: sources are: ${lib_sources}")
 
 function(create_library)
   # get the compile defs
