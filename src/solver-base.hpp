@@ -14,6 +14,7 @@
 #include "lienlp/problem-base.hpp"
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/workspace.hpp"
+#include "lienlp/results.hpp"
 
 
 namespace lienlp {
@@ -27,6 +28,9 @@ namespace lienlp {
     using Prob_t = Problem<Scalar>;
     using Merit_t = PDALFunction<Scalar>;
 
+    using Workspace = SWorkspace<Scalar>;
+    using Results = SResults<Scalar>;
+
     shared_ptr<Prob_t> m_problem;
     Merit_t m_merit;
     M& m_manifold;
@@ -35,11 +39,20 @@ namespace lienlp {
       : m_manifold(man), m_problem(prob)
     {}
 
-    void solve(SWorkspace& workspace, const VectorXs& x0, const VectorOfVectors& lams0)
+    void solve(Workspace& workspace,
+               Results& results,
+               const VectorXs& x0, const VectorOfVectors& lams0)
     {
-      workspace.x_prev = x0;
-      workspace.lams_prev = lams0;
+      results.xOpt = x0;
+      results.lamsOpt = lams0;
     }
+
+  protected:
+    void solveInner(Workspace& workspace)
+    {
+
+    }
+
 
   };
 
