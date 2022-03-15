@@ -57,6 +57,13 @@ namespace lienlp {
       Jout = (err.transpose() * m_weights) * Jerr;
     }
 
+    void vhp(const ConstVectorRef& x, const ConstVectorRef& v, RefMatrix Hout) const
+    {
+      MatrixXs Jerr(m_manifold.ndx(), m_manifold.ndx());
+      m_manifold.Jdifference(m_target, x, Jerr, 1);
+      Hout = v(0) * (Jerr.transpose() * m_weights * Jerr); // Gauss-Newton approx
+    }
+
   };
 } // namespace lienlp
 

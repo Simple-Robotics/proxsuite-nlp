@@ -56,10 +56,15 @@ namespace lienlp {
     }
 
     /// Vector-hessian product.
-    virtual JacobianType vhp(const ConstVectorRef& x, const ConstVectorRef& v) const
+    virtual void vhp(const ConstVectorRef& x, const ConstVectorRef& v, RefMatrix Hout) const
+    {
+      Hout.setZero();
+    }
+
+    JacobianType vhp(const ConstVectorRef& x, const ConstVectorRef& v) const
     {
       JacobianType J(m_ndx, m_ndx);
-      J.setZero();
+      vhp(x, v, J);
       return J;
     }
 
