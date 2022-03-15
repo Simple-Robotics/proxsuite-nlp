@@ -16,12 +16,12 @@
 #include <Eigen/Core>
 
 
-using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
+using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
 
 using fmt::format;
 
 using namespace lienlp;
-using Man = PinocchioLieGroup<SO2>;
+using Man = PinocchioLieGroup<Vs>;
 using Prob_t = Problem<double>;
 
 int main()
@@ -32,29 +32,26 @@ int main()
   Man::Point_t p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
-  Man::TangentVec_t th0(1), th1(1);
-  space.difference(neut, p0, th0);
-  space.difference(neut, p1, th1);
-
-  fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
   Man::TangentVec_t d;
   space.difference(p0, p1, d);
   Man::Jac_t J0, J1;
-  space.Jdifference(p0, p1, J0, 0);
-  space.Jdifference(p0, p1, J1, 1);
+  space.Jdifference<0>(p0, p1, J0);
+  space.Jdifference<1>(p0, p1, J1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Eigen::Matrix<double, Man::NV, Man::NV> weights;
+  Man::Jac_t weights;
   weights.setIdentity();
+  weights(1, 1) = 0.5;
 
   StateResidual<Man> residual(&space, p0);
   fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
+  auto resptr = std::make_shared<decltype(residual)>(residual);
 
-  auto cf = QuadResidualCost<double>(&residual, weights);
+  auto cf = QuadResidualCost<double>(resptr, weights);
   // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));

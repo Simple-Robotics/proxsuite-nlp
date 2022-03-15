@@ -35,6 +35,12 @@ namespace lienlp {
       : m_manifold(man), m_problem(prob)
     {}
 
+    void solve(SWorkspace& workspace, const VectorXs& x0, const VectorOfVectors& lams0)
+    {
+      workspace.x_prev = x0;
+      workspace.lams_prev = lams0;
+    }
+
   };
 
 } // namespace lienlp
