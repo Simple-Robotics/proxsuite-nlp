@@ -1,9 +1,14 @@
 #pragma once
 
 #include <Eigen/Core>
+
 #include <vector>
+#include <memory>
 
 namespace lienlp {
+
+/// Use the STL shared_ptr.
+using std::shared_ptr;
 
 /// Base trait struct for CRTP.
 template<class C>

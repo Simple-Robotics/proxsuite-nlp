@@ -6,13 +6,9 @@
 #include "lienlp/modelling/constraints/equality-constraint.hpp"
 
 #include <vector>
-#include <memory>
 
 
 namespace lienlp {
-  
-  /// Use the STL shared_ptr.
-  using std::shared_ptr;
 
   template<typename _Scalar>
   struct Problem
