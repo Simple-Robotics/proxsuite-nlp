@@ -56,7 +56,8 @@ namespace lienlp {
     {
       MatrixXs Jres(m_residual->nr(), m_ndx);
       m_residual->computeJacobian(x, Jres);
-      out = Jres.transpose() * (m_weights * Jres);
+      VectorXs err = (*m_residual)(x);
+      out = Jres.transpose() * (m_weights * Jres) + m_residual->vhp(x, err);
     }
 
   };
