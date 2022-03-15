@@ -20,13 +20,13 @@ namespace lienlp {
     using Active_t = typename Base::Active_t;
     using functor_t = typename Base::functor_t;
 
-    VectorXs proj_;
-    VectorXs Jproj_;
+    ReturnType proj_;
+    JacobianType Jproj_;
 
     EqualityConstraint(const functor_t& func)
-      : ConstraintSetBase<Scalar>(func) {
-        proj_ = VectorXs::Zero(func.nr());
-        Jproj_ = VectorXs::Zero(func.nr(), func.ndx());
+      : ConstraintSetBase<Scalar>(func), proj_(func.nr()), Jproj_(func.nr(), func.ndx()) {
+        proj_.setZero();
+        Jproj_.setZero();
       }
 
     ReturnType projection(const ConstVectorRef& z) const
