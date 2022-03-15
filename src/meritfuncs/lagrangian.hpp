@@ -45,7 +45,7 @@ namespace lienlp {
                          RefVector out) const
     {
       out.noalias() = m_prob->m_cost.computeGradient(x);
-      const int num_c = m_prob->getNumConstraints();
+      const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
@@ -58,7 +58,7 @@ namespace lienlp {
                         RefMatrix out) const
     {
       m_prob->m_cost.computeHessian(x, out);
-      const int num_c = m_prob->getNumConstraints();
+      const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
