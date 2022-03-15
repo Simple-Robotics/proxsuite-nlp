@@ -9,13 +9,14 @@ namespace lienlp {
   template<typename _Scalar>
   class CostFunctionBase
   {
+  protected:
+    const int m_nx;
+    const int m_ndx;
   public:
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
-    const int m_ndx;
-
-    CostFunctionBase(const int ndx) : m_ndx(ndx) {}
+    CostFunctionBase(const int nx, const int ndx) : m_nx(nx), m_ndx(ndx) {}
 
     virtual Scalar operator()(const ConstVectorRef& x) const = 0;
     virtual void computeGradient(const ConstVectorRef& x, RefVector out) const = 0;

@@ -29,7 +29,9 @@ namespace lienlp {
     VectorXs m_target;
 
     StateResidual(M* manifold, const ConstVectorRef& target)
-      : m_manifold(manifold), m_target(target), Base(manifold->nx(), manifold->ndx(), manifold->ndx()) {}
+      : Base(manifold->nx(), manifold->ndx(), manifold->ndx()),
+        m_manifold(manifold), m_target(target)
+      {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {

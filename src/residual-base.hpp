@@ -30,6 +30,7 @@ namespace lienlp {
     LIENLP_RESIDUAL_TYPES(Scalar)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
+    /// @brief      Evaluate the residual at a given point x.
     virtual ReturnType operator()(const ConstVectorRef& x) const = 0;
     /// @brief      Jacobian matrix of the constraint function.
     virtual void computeJacobian(const ConstVectorRef& x, JacobianType& Jout) const = 0;
