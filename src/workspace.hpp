@@ -24,6 +24,8 @@ namespace lienlp {
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
 
+    /// Newton iteration variables
+
     /// KKT iteration matrix.
     MatrixXs kktMatrix;
     /// KKT iteration right-hand side.
@@ -32,27 +34,71 @@ namespace lienlp {
     VectorXs pdStep;
 
     /// LDLT storage
-    Eigen::LDLT<MatrixXs, Eigen::Upper> ldlt_;
+    Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
 
-    VectorXs x_prev;
-    VectorOfVectors lams_prev;
+    //// Proximal parameters
+
+    VectorXs xPrev;
+    VectorOfVectors lamsPrev;
+
+    //// Meta
+
+    std::size_t numIters;
+    Scalar objective;
+
+    /// Residuals
+
+    VectorXs dualResidual;
+    Scalar dualInfeas;
+
+    VectorOfVectors primalResiduals;
+    std::vector<Scalar> primalInfeas;
+
+    /// tmp
+
+    VectorXs tmpObjGrad;
+    MatrixXs tmpObjHess;
+
+    std::vector<MatrixXs> tmpCstrJacobians;
+    std::vector<MatrixXs> tmpCstrVectorHessProd;
+    VectorOfVectors tmpLamsPlus;
+    VectorOfVectors auxProxDualErr;
+
 
     SWorkspace(const int nx,
                const int ndx,
-               const shared_ptr<Prob_t>& prob)
+               const Prob_t& prob)
       :
-      kktMatrix(ndx + prob->getNcTotal(), ndx + prob->getNcTotal()),
-      kktRhs(ndx + prob->getNcTotal()),
-      pdStep(ndx + prob->getNcTotal()),
-      ldlt_(ndx + prob->getNcTotal()),
-      x_prev(nx)
+      kktMatrix(ndx + prob.getNcTotal(), ndx + prob.getNcTotal()),
+      kktRhs(ndx + prob.getNcTotal()),
+      pdStep(ndx + prob.getNcTotal()),
+      numIters(0),
+      ldlt_(ndx + prob.getNcTotal()),
+      xPrev(nx),
+      tmpObjGrad(ndx),
+      tmpObjHess(ndx, ndx)
+    {
+      init(prob);
+    }
+
+    void init(const Prob_t& prob)
     {
       kktMatrix.setZero();
       kktRhs.setZero();
       pdStep.setZero();
-      x_prev.setZero();
+      xPrev.setZero();
 
-      Prob_t::allocateMultipliers(*prob, lams_prev);
+      dualResidual.setZero();
+      Prob_t::allocateMultipliers(prob, primalResiduals);  // not multipliers but same dims
+
+      tmpObjGrad.setZero();
+      tmpObjHess.setZero();
+
+      objective = 0.;
+
+      Prob_t::allocateMultipliers(prob, lamsPrev);
+      Prob_t::allocateMultipliers(prob, tmpLamsPlus);
+      Prob_t::allocateMultipliers(prob, auxProxDualErr);
     }
       
   };
