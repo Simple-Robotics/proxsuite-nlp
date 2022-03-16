@@ -18,9 +18,10 @@ endfunction(get_cpp_test_name)
 
 
 macro(add_lienlp_test name)
-
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
-  ADD_UNIT_TEST(${test_name} ${name}.cpp)
+  set(test_file ${name}.cpp)
+
+  ADD_UNIT_TEST(${test_name} ${test_file})
   set_target_properties(${test_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${test_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -40,5 +41,7 @@ endmacro(add_lienlp_test)
 
 
 add_lienlp_test(manifold)
+add_lienlp_test(residual)
+# add_lienlp_test(cost)
 add_lienlp_test(merit)
 

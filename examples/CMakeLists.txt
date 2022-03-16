@@ -1,3 +1,4 @@
+# Copyright (C) 2022 LAAS-CNRS / INRIA
 
 file(GLOB CPP_EXAMPLES
      "*.cpp")

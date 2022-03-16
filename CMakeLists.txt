@@ -158,6 +158,7 @@ file(MAKE_DIRECTORY
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/meritfuncs"
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/spaces"
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/costs"
+     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/residuals"
      "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/constraints"
      )
 

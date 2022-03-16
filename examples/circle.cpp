@@ -7,7 +7,7 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/constraints/quadratic-residual.hpp"
+#include "lienlp/modelling/residuals/quadratic-residual.hpp"
 #include "lienlp/solver-base.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>

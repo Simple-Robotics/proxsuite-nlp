@@ -24,22 +24,22 @@ namespace lienlp {
     const VectorXs m_target;
 
     QuadraticResidualFunctor(const M& manifold,
-                      const MatrixXs& Q,
-                      const Scalar level,
-                      const VectorXs& target)
-                      : Base(manifold.nx(), manifold.ndx(), 1),
-                        m_manifold(manifold), 
-                        m_weights(Q),
-                        m_level(level),
-                        m_target(target) {}
+                             const MatrixXs& Q,
+                             const Scalar level,
+                             const VectorXs& target)
+                             : Base(manifold.nx(), manifold.ndx(), 1),
+                               m_manifold(manifold), 
+                               m_weights(Q),
+                               m_level(level),
+                               m_target(target) {}
 
     QuadraticResidualFunctor(const M& manifold,
-                      const Scalar level,
-                      const VectorXs& target)
+                             const Scalar level,
+                             const VectorXs& target)
       : QuadraticResidualFunctor(manifold,
-                          MatrixXs::Identity(manifold.ndx(), manifold.ndx()),
-                          level,
-                          target) {}
+                                 MatrixXs::Identity(manifold.ndx(), manifold.ndx()),
+                                 level,
+                                 target) {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -57,7 +57,7 @@ namespace lienlp {
       Jout = (err.transpose() * m_weights) * Jerr;
     }
 
-    void vhp(const ConstVectorRef& x, const ConstVectorRef& v, RefMatrix Hout) const
+    void vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
     {
       MatrixXs Jerr(m_manifold.ndx(), m_manifold.ndx());
       m_manifold.Jdifference(m_target, x, Jerr, 1);
