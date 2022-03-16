@@ -20,11 +20,14 @@ namespace lienlp {
     using Active_t = typename Base::Active_t;
     using functor_t = typename Base::functor_t;
 
+    // TODO MAKE CONST
     ReturnType proj_;
     JacobianType Jproj_;
 
     EqualityConstraint(const functor_t& func)
-      : ConstraintSetBase<Scalar>(func), proj_(func.nr()), Jproj_(func.nr(), func.ndx()) {
+      : ConstraintSetBase<Scalar>(func),
+        proj_(func.nr()),
+        Jproj_(func.nr(), func.nr()) {
         proj_.setZero();
         Jproj_.setZero();
       }

@@ -23,6 +23,7 @@ namespace lienlp {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
+    using VecBool = Eigen::Matrix<bool, -1, 1>;
 
     /// Newton iteration variables
 
@@ -32,6 +33,8 @@ namespace lienlp {
     VectorXs kktRhs;
     /// Primal-dual step.
     VectorXs pdStep;
+    /// Signature of the matrix
+    VecBool signature;
 
     /// LDLT storage
     Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
@@ -41,27 +44,26 @@ namespace lienlp {
     VectorXs xPrev;
     VectorOfVectors lamsPrev;
 
-    //// Meta
-
-    std::size_t numIters;
-    Scalar objective;
-
     /// Residuals
 
     VectorXs dualResidual;
     Scalar dualInfeas;
 
     VectorOfVectors primalResiduals;
-    std::vector<Scalar> primalInfeas;
+    Scalar primalInfeas;
 
     /// tmp
 
-    VectorXs tmpObjGrad;
-    MatrixXs tmpObjHess;
+    VectorXs objectiveGradient;
+    MatrixXs objectiveHessian;
 
-    std::vector<MatrixXs> tmpCstrJacobians;
-    std::vector<MatrixXs> tmpCstrVectorHessProd;
-    VectorOfVectors tmpLamsPlus;
+    std::vector<MatrixXs> cstrJacobians;
+    std::vector<MatrixXs> cstrVectorHessProd;
+    /// cached 1st-order multipliers \f$\mathrm{proj}(\lambda_e + c / mu)\f$
+    VectorOfVectors lamsPlus;
+    /// cached PDAL estimates
+    VectorOfVectors lamsPDAL;
+    /// dual prox error \f$\mu (\lambda^+ - \lambda)\f$
     VectorOfVectors auxProxDualErr;
 
 
@@ -72,11 +74,11 @@ namespace lienlp {
       kktMatrix(ndx + prob.getNcTotal(), ndx + prob.getNcTotal()),
       kktRhs(ndx + prob.getNcTotal()),
       pdStep(ndx + prob.getNcTotal()),
-      numIters(0),
+      signature(ndx + prob.getNcTotal()),
       ldlt_(ndx + prob.getNcTotal()),
       xPrev(nx),
-      tmpObjGrad(ndx),
-      tmpObjHess(ndx, ndx)
+      objectiveGradient(ndx),
+      objectiveHessian(ndx, ndx)
     {
       init(prob);
     }
@@ -87,18 +89,34 @@ namespace lienlp {
       kktRhs.setZero();
       pdStep.setZero();
       xPrev.setZero();
+      signature.setConstant(false);
 
       dualResidual.setZero();
+
+      objectiveGradient.setZero();
+      objectiveHessian.setZero();
+
       Prob_t::allocateMultipliers(prob, primalResiduals);  // not multipliers but same dims
-
-      tmpObjGrad.setZero();
-      tmpObjHess.setZero();
-
-      objective = 0.;
-
       Prob_t::allocateMultipliers(prob, lamsPrev);
-      Prob_t::allocateMultipliers(prob, tmpLamsPlus);
+      Prob_t::allocateMultipliers(prob, lamsPlus);
+      Prob_t::allocateMultipliers(prob, lamsPDAL);
       Prob_t::allocateMultipliers(prob, auxProxDualErr);
+
+
+      const std::size_t nc = prob.getNumConstraints();
+      const int ndx = prob.m_cost.ndx();
+
+      cstrJacobians.reserve(nc);
+      cstrVectorHessProd.reserve(nc);
+
+      for (std::size_t i = 0; i < nc; i++)
+      {
+        auto cstr = prob.getCstr(i);
+        int nr = cstr->nr();
+        cstrJacobians.push_back(MatrixXs::Zero(nr, ndx));
+        cstrVectorHessProd.push_back(MatrixXs::Zero(ndx, ndx));
+      }
+
     }
       
   };

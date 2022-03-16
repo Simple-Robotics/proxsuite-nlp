@@ -17,6 +17,7 @@ function(add_lienlp_example exfile)
   target_include_directories(${example_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
   target_link_libraries(${example_name} PUBLIC ${PROJECT_NAME})
+  target_link_libraries(${example_name} PRIVATE fmt::fmt)
 endfunction()
 
 foreach(exfile ${CPP_EXAMPLES})

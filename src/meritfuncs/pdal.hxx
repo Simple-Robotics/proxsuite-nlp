@@ -21,10 +21,27 @@ namespace lienlp {
     const VectorOfVectors& lams_ext,
     RefMatrix out) const
   {
+    /// Compute cost hessian // TODO rip this out, use workspace
+    m_prob->m_cost.computeHessian(x, out);
+    const auto num_c = m_prob->getNumConstraints();
+    const auto ndx = m_prob->m_cost.ndx();
+
+    // Compute appropriate multiplier estimates, TODO rip this out
     VectorOfVectors lams_plus;
-    lams_plus.reserve(m_prob->getNumConstraints());
+    lams_plus.reserve(num_c);
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
-    m_lagr.computeHessian(x, lams_plus, out);
+
+    // m_lagr.computeHessian(x, lams_plus, out);  // useless because recompute
+
+    MatrixXs J, vhpBuf(ndx, ndx); // TODO refactor this allocation using workspace
+    for (std::size_t i = 0; i < num_c; i++)
+    {
+      typename Prob_t::CstrPtr cstr = m_prob->getCstr(i);
+      J.resize(cstr->nr(), ndx);
+      cstr->m_func.computeJacobian(x, J);
+      cstr->m_func.vhp(x, lams_plus[i], vhpBuf);
+      out.noalias() += vhpBuf + 2 * m_muEq * J.transpose() * J;
+    }
   }
 
 } // namespacelienlp

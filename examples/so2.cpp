@@ -7,8 +7,6 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/residuals/quadratic-residual.hpp"
-#include "lienlp/solver-base.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 
@@ -18,67 +16,64 @@
 #include <Eigen/Core>
 
 
-using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
+using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 
 using fmt::format;
 
 using namespace lienlp;
-using Man = PinocchioLieGroup<Vs>;
+using Man = PinocchioLieGroup<SO2>;
 using Prob_t = Problem<double>;
 
 int main()
 {
   Man space;
-  auto lg = space.m_lg;
+  SO2 lg = space.m_lg;
+  Man::Point_t neut = lg.neutral();
   Man::Point_t p0 = lg.random();  // target
-  p0.normalize();
   Man::Point_t p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
+  Man::TangentVec_t th0(1), th1(1);
+  space.difference(neut, p0, th0);
+  space.difference(neut, p1, th1);
+
+  fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
   Man::TangentVec_t d;
   space.difference(p0, p1, d);
   Man::Jac_t J0, J1;
-  space.Jdifference<0>(p0, p1, J0);
-  space.Jdifference<1>(p0, p1, J1);
+  space.Jdifference(p0, p1, J0, 0);
+  space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
   Man::Jac_t weights;
   weights.setIdentity();
-  weights(1, 1) = 0.5;
 
   StateResidual<Man> residual(&space, p0);
-  fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
-  fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
+  fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
-  auto resptr = std::make_shared<decltype(residual)>(residual);
+  auto resptr = std::make_shared<StateResidual<Man>>(residual);
 
   QuadraticResidualCost<double> cf(resptr, weights);
-  // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
 
   /// DEFINE A PROBLEM
 
-  // Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
-  QuadraticResidualFunctor<Man> residualCircle(space, 1., Eigen::Vector2d::Zero());
-  Prob_t::Equality_t cstr1(residualCircle);
-  fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
-  fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
-  fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
-
+  Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
   std::vector<Prob_t::CstrPtr> cstrs;
-  cstrs.push_back(std::make_shared<Prob_t::Equality_t>(residualCircle));
+  cstrs.push_back(cstr1);
   shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
+  fmt::print("\tConstraint dimension: {:d}\n", prob->getCstr(0)->nr());
 
   /// Test out merit functions
 
   Prob_t::VectorXs grad(space.ndx());
   EvalObjective<double> merit_fun(prob);
-  fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
+  fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
   fmt::print("eval merit grad: ∇M={}\n", grad);
 
@@ -122,16 +117,6 @@ int main()
   fmt::print("\tgradM(p0) {}\n", grad);
   pdmerit.computeGradient(p1, lams, lams, grad);
   fmt::print("\tgradM(p1) {}\n", grad);
-
-  SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
-  SResults<double> results(space.nx(), *prob);
-
-  Solver<Man> solver(space, prob);
-
-  auto lams0 = lams;
-  solver.solve(workspace, results, p1, lams0);
-  fmt::print("Results: {}", results);
-  fmt::print(" Target point was {}", p0);
 
   return 0;
 }

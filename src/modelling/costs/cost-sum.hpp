@@ -40,7 +40,7 @@ namespace lienlp {
 
     Scalar operator()(const ConstVectorRef& x) const
     {
-      Scalar result_(0.);
+      Scalar result_ = 0.;
       for (std::size_t i = 0; i < m_components.size(); i++)
       {
         result_ += m_weights[i] * m_components[i]->operator()(x);

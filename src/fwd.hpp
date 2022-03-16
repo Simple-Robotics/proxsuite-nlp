@@ -23,4 +23,18 @@ struct math_types
   using VectorOfVectors = std::vector<VectorXs>;
 };
 
+/// Shorthand for the infinity norm
+/// code from proxqp
+template<typename Mat_t>
+typename Mat_t::Scalar
+infNorm(const Eigen::MatrixBase<Mat_t>& z)
+{
+  if (z.rows() == 0 || z.cols() == 0)
+  {
+    return typename Mat_t::Scalar(0);
+  } else {
+    return z.template lpNorm<Eigen::Infinity>();
+  }
+}
+
 }  // namespace lienlp

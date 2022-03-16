@@ -35,7 +35,7 @@ namespace lienlp {
     /// @brief      Jacobian matrix of the constraint function.
     virtual void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const = 0;
     /// @brief      Vector-hessian product.
-    virtual void vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+    virtual void vhp(const ConstVectorRef&, const ConstVectorRef&, Eigen::Ref<JacobianType> Hout) const
     {
       Hout.setZero();
     }

@@ -34,6 +34,7 @@ macro(add_lienlp_test name)
   ADD_TEST_CFLAGS(${test_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
 
   target_link_libraries(${test_name} PUBLIC ${PROJECT_NAME})
+  target_link_libraries(${test_name} PRIVATE fmt::fmt)
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
 
   unset(test_name)

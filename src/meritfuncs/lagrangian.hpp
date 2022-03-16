@@ -44,12 +44,12 @@ namespace lienlp {
                          const VectorOfVectors& lams,
                          RefVector out) const
     {
-      out.noalias() = m_prob->m_cost.computeGradient(x);
+      out = m_prob->m_cost.computeGradient(x);
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
-        out.noalias() += (cstr->computeJacobian(x)).transpose() * lams[i];
+        out += (cstr->computeJacobian(x)).transpose() * lams[i];
       }
     }
 
@@ -58,11 +58,14 @@ namespace lienlp {
                         RefMatrix out) const
     {
       m_prob->m_cost.computeHessian(x, out);
-      const std::size_t num_c = m_prob->getNumConstraints();
+      const auto num_c = m_prob->getNumConstraints();
+      const int ndx = m_prob->m_cost.ndx();
+      MatrixXs vhp_buffer(ndx, ndx);
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
-        out.noalias() += cstr->m_func.vhp(x, lams[i]);
+        cstr->m_func.vhp(x, lams[i], vhp_buffer);
+        out += vhp_buffer;
       }
     }
   };

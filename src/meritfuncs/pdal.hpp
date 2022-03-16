@@ -31,10 +31,10 @@ namespace lienlp {
     Lagrangian_t m_lagr;
 
     /// AL penalty parameter
-    Scalar m_muEq = Scalar(0.01);
+    Scalar m_muEq = 0.01;
 
     /// Generalized pdAL dual penalty param
-    const Scalar m_gamma = Scalar(1.);
+    const Scalar m_gamma = 1.;
 
     /// Set the merit function penalty parameter.
     void setPenalty(const Scalar& new_mu) { m_muEq = new_mu; };
@@ -63,12 +63,14 @@ namespace lienlp {
     }
 
     /// @brief Compute the pdAL (Gill-Robinson) multipliers
+    /// @todo   fix recomputing 1st order multipliers (w/ workspace)
     void computePDALMultipliers(
       const ConstVectorRef& x,
       const VectorOfVectors& lams,
       const VectorOfVectors& lams_ext,
       VectorOfVectors& out) const
     {
+      // TODO fix calling this again; grab values from workspace
       computeFirstOrderMultipliers(x, lams_ext, out);
       for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
       {
@@ -91,7 +93,7 @@ namespace lienlp {
 
     Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams, const VectorOfVectors& lams_ext) const
     {
-      Scalar result_ = Scalar(0.);
+      Scalar result_ = 0.;
       result_ = result_ + m_prob->m_cost(x);
       VectorOfVectors displaced_residuals_ = computeFirstOrderMultipliers(x, lams_ext);
       const std::size_t num_c = m_prob->getNumConstraints();

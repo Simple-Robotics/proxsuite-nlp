@@ -36,6 +36,9 @@ namespace lienlp {
       return out;
     }
 
+    int ndx() const
+    { return m_ndx; }
+
     virtual ~CostFunctionBase<Scalar>() = default;
 
   };
