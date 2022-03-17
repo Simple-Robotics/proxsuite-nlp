@@ -13,7 +13,8 @@
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 
 
-#include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include <fmt/ostream.h>
 #include <Eigen/Core>
 
@@ -129,9 +130,10 @@ int main()
   Solver<Man> solver(space, prob);
 
   auto lams0 = lams;
+  fmt::print(fmt::fg(fmt::color::green), "[CALLING SOLVER]\n");
   solver.solve(workspace, results, p1, lams0);
-  fmt::print("Results: {}", results);
-  fmt::print(" Target point was {}", p0);
+  fmt::print("Results: {}\n", results);
+  fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;
 }
