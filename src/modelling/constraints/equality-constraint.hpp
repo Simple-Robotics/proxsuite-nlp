@@ -44,7 +44,7 @@ namespace lienlp {
 
     void computeActiveSet(const ConstVectorRef& z, Active_t& out) const
     {
-      out.array() = false;
+      out.array() = true;
     }
   };
 
