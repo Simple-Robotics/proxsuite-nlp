@@ -23,7 +23,6 @@ namespace lienlp {
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
-    using VecBool = Eigen::Matrix<bool, -1, 1>;
 
     /// Newton iteration variables
 
@@ -34,7 +33,7 @@ namespace lienlp {
     /// Primal-dual step.
     VectorXs pdStep;
     /// Signature of the matrix
-    VecBool signature;
+    Eigen::VectorXi signature;
 
     /// LDLT storage
     Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
@@ -42,7 +41,9 @@ namespace lienlp {
     //// Proximal parameters
 
     VectorXs xPrev;
+    VectorXs xTrial;
     VectorOfVectors lamsPrev;
+    VectorOfVectors lamsTrial;
 
     /// Residuals
 
@@ -55,6 +56,7 @@ namespace lienlp {
     /// tmp
 
     VectorXs objectiveGradient;
+    VectorXs meritGradient;
     MatrixXs objectiveHessian;
 
     std::vector<MatrixXs> cstrJacobians;
@@ -77,7 +79,10 @@ namespace lienlp {
       signature(ndx + prob.getNcTotal()),
       ldlt_(ndx + prob.getNcTotal()),
       xPrev(nx),
+      xTrial(nx),
+      dualResidual(ndx),
       objectiveGradient(ndx),
+      meritGradient(ndx),
       objectiveHessian(ndx, ndx)
     {
       init(prob);
@@ -88,16 +93,20 @@ namespace lienlp {
       kktMatrix.setZero();
       kktRhs.setZero();
       pdStep.setZero();
+      signature.setConstant(1);
+
       xPrev.setZero();
-      signature.setConstant(false);
+      xTrial.setZero();
+      Prob_t::allocateMultipliers(prob, lamsPrev);
+      Prob_t::allocateMultipliers(prob, lamsTrial);
 
       dualResidual.setZero();
+      Prob_t::allocateMultipliers(prob, primalResiduals);  // not multipliers but same dims
 
       objectiveGradient.setZero();
+      meritGradient.setZero();
       objectiveHessian.setZero();
 
-      Prob_t::allocateMultipliers(prob, primalResiduals);  // not multipliers but same dims
-      Prob_t::allocateMultipliers(prob, lamsPrev);
       Prob_t::allocateMultipliers(prob, lamsPlus);
       Prob_t::allocateMultipliers(prob, lamsPDAL);
       Prob_t::allocateMultipliers(prob, auxProxDualErr);

@@ -53,7 +53,9 @@ namespace lienlp {
         << "  value:       " << self.value << ",\n"
         << "  numIters:    " << self.numIters << ",\n"
         << "  mu:          " << self.mu << ",\n"
+        << "  rho:         " << self.rho << ",\n"
         << "}";
+      return s;
     }
 
 

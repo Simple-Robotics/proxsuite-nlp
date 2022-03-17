@@ -115,7 +115,7 @@ namespace lienlp {
         if (workspace.primalInfeas < primTol)
         {
           // accept dual iterate
-          fmt::print(fmt::fg(fmt::color::blue), "  Accept multipliers\n", i);
+          fmt::print("  Accept multipliers\n", i);
           acceptMultipliers(workspace, results.lamsOpt);
           if ((workspace.primalInfeas < targetTol) && (workspace.dualInfeas < targetTol))
           {
@@ -125,7 +125,7 @@ namespace lienlp {
           }
           updateToleranceSuccess();
         } else {
-          fmt::print(fmt::fg(fmt::color::orange_red), "  Reject multipliers\n", i);
+          fmt::print("  Reject multipliers\n", i);
           updatePenalty();
           updateToleranceFailure();
         }
@@ -186,15 +186,24 @@ namespace lienlp {
         workspace.kktRhs.setZero();
         workspace.kktMatrix.setZero();
 
+        workspace.meritGradient = workspace.objectiveGradient;
+
+        workspace.kktRhs(idx_prim) = workspace.objectiveGradient;
         workspace.kktMatrix(idx_prim, idx_prim) = workspace.objectiveHessian;
+
 
         for (std::size_t i = 0; i < num_c; i++)
         {
+          MatrixXs& J_ = workspace.cstrJacobians[i];
+
+          workspace.kktRhs(idx_prim) += J_.transpose() * results.lamsOpt[i];
+          workspace.kktMatrix(idx_prim, idx_prim).noalias() += workspace.cstrVectorHessProd[i];
+
+          workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
 
           // fill in the dual part of the KKT
           nc = problem->getCstr(i)->nr();
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-          fmt::print("[{}] cursor at {:d} (cstr size = {:d})\n", __func__, cursor, nc);
           workspace.kktRhs(block_slice) = workspace.auxProxDualErr[i];
           // jacobian block and transpose
           workspace.kktMatrix(block_slice, idx_prim) = workspace.cstrJacobians[i];
@@ -205,13 +214,12 @@ namespace lienlp {
 
           cursor += nc;
         }
-        // now fill in the 0-ndx prefixes
-        auto& lagrangian = meritFun.m_lagr;
-        lagrangian.computeGradient(x, results.lamsOpt, workspace.kktRhs(idx_prim));
-        // lagrangian.computeHessian(x, workspace.lamsPDAL, workspace.kktMatrix(idx_prim, idx_prim));
 
-        fmt::print("[{}] {} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
-        fmt::print("[{}]\n{} << kkt LHS\n", __func__, workspace.kktMatrix);
+        if (verbose)
+        {
+          fmt::print("[{}] {} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
+          fmt::print("[{}]\n{} << kkt LHS\n", __func__, workspace.kktMatrix);
+        }
 
         // now check if we can stop
         workspace.dualResidual = workspace.kktRhs(idx_prim);
@@ -226,28 +234,36 @@ namespace lienlp {
         workspace.ldlt_.compute(workspace.kktMatrix);
         workspace.pdStep = workspace.ldlt_.solve(-workspace.kktRhs);
 
-        fmt::print("  pdStep:  {}\n", workspace.pdStep.transpose());
+        workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
 
-        workspace.signature.array() = (workspace.ldlt_.vectorD().array() > 0);
-        fmt::print("[{}] KKT signature:  {}\n", __func__, workspace.signature.transpose());
+        if (verbose)
+        {
+          fmt::print("  pdStep:  {}\n", workspace.pdStep.transpose());
+          fmt::print("[{}] KKT signature:  {}\n", __func__, workspace.signature.transpose());
+        }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
 
         //// Take the step
-        // TODO implement linesearch
-        Scalar alpha_ls = 0.5;
-        x = manifold.integrate(x, alpha_ls * workspace.pdStep(idx_prim));
+
+        const Scalar merit0 = meritFun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        Scalar dir_deriv = 0;
+        dir_deriv += workspace.meritGradient.dot(workspace.pdStep(idx_prim));
         cursor = ndx;
         for (std::size_t i = 0; i < num_c; i++)
         {
           nc = problem->getCstr(i)->nr();
-
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-          results.lamsOpt[i].noalias() += alpha_ls * workspace.pdStep(block_slice);
 
+          dir_deriv += (-workspace.auxProxDualErr[i]).dot(workspace.pdStep(block_slice));
           cursor += nc;
         }
 
+        Scalar alpha_opt = doLinesearch(workspace, results, merit0, dir_deriv);
+        results.xOpt = workspace.xTrial;
+        results.lamsOpt = workspace.lamsTrial;
+
+        fmt::print("[{}] alpha_opt: {:.3g}\n", __func__, alpha_opt);
         fmt::print("[{}] current x: {}\n", __func__, x.transpose());
 
         results.numIters++;
@@ -258,8 +274,10 @@ namespace lienlp {
         }
       }
 
-      if (k == MAX_ITERS)
+      if (results.numIters >= MAX_ITERS)
         results.converged = ConvergedFlag::TOO_MANY_ITERS;
+
+      return;
     }
 
     void updateToleranceFailure()
@@ -328,6 +346,57 @@ namespace lienlp {
         cstr->m_func.vhp(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 
+
+
+    Scalar doLinesearch(Workspace& workspace, Results& results, Scalar merit0, Scalar d1) const
+    {
+      Scalar alpha_try = 1.;
+
+      const Scalar ls_beta = 0.5;
+      const Scalar alpha_min = 1e-7;
+      const Scalar ls_c1 = 1e-4;
+
+      while (alpha_try > alpha_min)
+      {
+        tryStep(workspace, results, alpha_try);
+        Scalar merit_trial = meritFun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+
+        bool armijo_cond = merit_trial < merit0 + ls_c1 * alpha_try * d1;
+        if (armijo_cond)
+        {
+          break;
+        }
+        alpha_try *= ls_beta;
+      }
+
+      return alpha_try;
+    }
+
+    /**
+     * Take a trial step.
+     * 
+     * @param workspace - Workspace
+     * @param results - contains the previous primal-dual point
+     * @param alpha - steps size
+     */
+    void tryStep(Workspace &workspace, Results& results, Scalar alpha) const
+    {
+      const int ndx = manifold.ndx();
+      auto idx_prim = Eigen::seq(0, ndx - 1);
+      manifold.integrate(results.xOpt, alpha * workspace.pdStep(idx_prim), workspace.xTrial);
+
+      int cursor = ndx;
+      int nc = 0;
+      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
+      {
+        nc = problem->getCstr(i)->nr();
+
+        auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
+        workspace.lamsTrial[i].noalias() = results.lamsOpt[i] + alpha * workspace.pdStep(block_slice);
+
+        cursor += nc;
+      }
+    }
 
   };
 
