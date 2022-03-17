@@ -18,8 +18,8 @@ namespace lienlp {
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
     /// Generic constraint type
-    using Cstr_t = ConstraintSetBase<Scalar>;
-    using CstrPtr = shared_ptr<Cstr_t>;
+    using CstrType = ConstraintSetBase<Scalar>;
+    using CstrPtr = shared_ptr<CstrType>;
     /// Equality constraint type
     using Equality_t = EqualityConstraint<Scalar>;
     /// Cost function type

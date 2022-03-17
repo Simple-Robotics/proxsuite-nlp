@@ -56,8 +56,7 @@ namespace lienlp {
       for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
       {
         auto cstr = m_prob->getCstr(i);
-        out.push_back((*cstr)(x));  // constraint val
-        out[i].noalias() = out[i] + lams_ext[i] / m_muEq;
+        out.push_back((*cstr)(x) + lams_ext[i] / m_muEq);
         out[i].noalias() = cstr->dualProjection(out[i]);
       }
     }
@@ -78,33 +77,22 @@ namespace lienlp {
       }
     }
 
-    /// @copybrief computeFirstOrderMultipliers()
-    /// Out-of-place variant.
-    VectorOfVectors computeFirstOrderMultipliers(
-      const ConstVectorRef& x,
-      const VectorOfVectors& lams_ext) const
+    Scalar operator()(const ConstVectorRef& x,
+                      const VectorOfVectors& lams,
+                      const VectorOfVectors& lams_ext) const
     {
-      VectorOfVectors out;
-      const std::size_t num_c = m_prob->getNumConstraints();
-      out.reserve(num_c);
-      computeFirstOrderMultipliers(x, lams_ext, out);
-      return out;
-    }
+      Scalar result_ = m_prob->m_cost(x);
 
-    Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams, const VectorOfVectors& lams_ext) const
-    {
-      Scalar result_ = 0.;
-      result_ = result_ + m_prob->m_cost(x);
-      VectorOfVectors displaced_residuals_ = computeFirstOrderMultipliers(x, lams_ext);
       const std::size_t num_c = m_prob->getNumConstraints();
-
       for (std::size_t i = 0; i < num_c; i++)
       {
-        VectorXs cval = displaced_residuals_[i];
-        result_ += (Scalar(0.5) / m_muEq) * cval.dot(cval);
+        auto cstr = m_prob->getCstr(i);
+        VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
+        cval.noalias() = cstr->dualProjection(cval);
+        result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
         // dual penalty
         VectorXs dual_res = cval - m_muEq * lams[i];
-        result_ += (Scalar(0.5) * m_gamma / m_muEq) * dual_res.dot(dual_res);
+        result_ += (Scalar(0.5) / m_muEq) * dual_res.squaredNorm();
       }
 
       return result_;
