@@ -51,7 +51,7 @@ int main()
   Man::Jac_t weights;
   weights.setIdentity();
 
-  StateResidual<Man> residual(&space, p0);
+  StateResidual<Man> residual(space, p0);
   fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<StateResidual<Man>>(residual);

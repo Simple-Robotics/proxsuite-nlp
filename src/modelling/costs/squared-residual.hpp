@@ -27,15 +27,15 @@ namespace lienlp {
     MatrixXs m_weights;
 
     QuadraticResidualCost(const shared_ptr<ResidualType>& residual,
-                     const ConstMatrixRef& weightMatrix)
+                          const ConstMatrixRef& weights)
       : Base(residual->nx(), residual->ndx()),
-        m_residual(residual), m_weights(weightMatrix)
+        m_residual(residual), m_weights(weights)
     {}
 
     template<typename... ResidualArgs>
-    QuadraticResidualCost(const ConstVectorRef& weightMatrix,
+    QuadraticResidualCost(const ConstVectorRef& weights,
                      ResidualArgs&... args)
-    : QuadraticResidualCost(new ResidualType(args...),  weightMatrix)
+    : QuadraticResidualCost(new ResidualType(args...),  weights)
     {}
 
     Scalar operator()(const ConstVectorRef& x) const

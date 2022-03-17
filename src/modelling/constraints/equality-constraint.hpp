@@ -27,7 +27,8 @@ namespace lienlp {
     EqualityConstraint(const functor_t& func)
       : ConstraintSetBase<Scalar>(func),
         proj_(func.nr()),
-        Jproj_(func.nr(), func.nr()) {
+        Jproj_(func.nr(), func.nr())
+      {
         proj_.setZero();
         Jproj_.setZero();
       }

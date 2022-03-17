@@ -33,7 +33,9 @@ int main()
   auto lg = space.m_lg;
   Man::Point_t p0 = lg.random();  // target
   p0.normalize();
-  Man::Point_t p1 = lg.random();
+  p0 << -.4, .7;
+  Man::Point_t p1;
+  p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
@@ -48,9 +50,8 @@ int main()
 
   Man::Jac_t weights;
   weights.setIdentity();
-  weights(1, 1) = 0.5;
 
-  StateResidual<Man> residual(&space, p0);
+  StateResidual<Man> residual(space, p0);
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
@@ -65,7 +66,7 @@ int main()
   /// DEFINE A PROBLEM
 
   // Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
-  QuadraticResidualFunctor<Man> residualCircle(space, 1., Eigen::Vector2d::Zero());
+  QuadraticResidualFunctor<Man> residualCircle(space, 1., space.zero());
   Prob_t::Equality_t cstr1(residualCircle);
   fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
@@ -92,8 +93,8 @@ int main()
   Prob_t::VectorOfVectors lams;
   Prob_t::allocateMultipliers(*prob, lams);
 
-  fmt::print("Allocated {:d} multipliers\n"
-             "1st mul = {}\n", lams.size(), lams[0]);
+  fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
+             lams.size(), lams[0]);
 
   // lagrangian
   fmt::print("\tL(p0) = {}\n", lagr(p0, lams));
@@ -113,10 +114,6 @@ int main()
   fmt::print("  PDAL FUNC TEST\n");
   fmt::print("\tpdmerit(p0) = {}\n", pdmerit(p0, lams, lams));
   fmt::print("\tpdmerit(p1) = {}\n", pdmerit(p1, lams, lams));
-  pdmerit.computeHessian(p0, lams, lams, hess);
-  fmt::print("\tHmerit(p0) = {}\n", hess);
-  pdmerit.computeHessian(p1, lams, lams, hess);
-  fmt::print("\tHmerit (p1) = {}\n", hess);
 
   // gradient of merit fun
   pdmerit.computeGradient(p0, lams, lams, grad);
