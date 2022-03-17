@@ -17,6 +17,8 @@
 #include "lienlp/workspace.hpp"
 #include "lienlp/results.hpp"
 
+#include "lienlp/modelling/costs/squared-distance.hpp"
+
 
 namespace lienlp {
 
@@ -35,22 +37,25 @@ namespace lienlp {
     shared_ptr<Prob_t> problem;
     Merit_t meritFun;
     M& manifold;
+    QuadDistanceCost<M> proxPenalty;
 
     //// Other settings
 
     bool verbose = true;
+    bool useGaussNewton = false;
 
     //// Algo params which evolve
 
-    Scalar dualTol;
+    Scalar innerTol;
     Scalar primTol;
     Scalar rho;
-    Scalar muEq;
-    Scalar muEqInv;
+    Scalar muEqInit;
+    Scalar muEq = muEqInit;
+    Scalar muEqInv = 1. / muEq;
     Scalar muFactor;
     Scalar rhoFactor = muFactor;
 
-    const Scalar MU_MIN = 1e-9;
+    const Scalar muMin = 1e-9;
 
     //// Algo hyperparams
 
@@ -63,9 +68,9 @@ namespace lienlp {
     Solver(M& man,
            shared_ptr<Prob_t>& prob,
            const Scalar tol=1e-6,
-           const Scalar muEq=1e-2,
+           const Scalar mu_eq_init=1e-2,
            const Scalar rho=0.,
-           const Scalar muFactor=0.1,
+           const Scalar mu_factor=0.1,
            const Scalar muMin=1e-9,
            const Scalar alphaPrim=0.1,
            const Scalar betaPrim=0.9,
@@ -73,12 +78,13 @@ namespace lienlp {
            const Scalar betaDual=1.)
       : manifold(man),
         problem(prob),
+        proxPenalty(man),
         meritFun(prob),
         targetTol(tol),
-        muEq(muEq),
+        muEq(mu_eq_init),
         rho(rho),
-        muFactor(muFactor),
-        MU_MIN(muMin),
+        muFactor(mu_factor),
+        muMin(muMin),
         alphaPrim(alphaPrim),
         betaPrim(betaPrim),
         alphaDual(alphaDual),
@@ -98,7 +104,7 @@ namespace lienlp {
       results.lamsOpt = lams0;
 
 
-      dualTol = 1.;
+      innerTol = 1.;
       primTol = 1.;
       updateToleranceFailure();
 
@@ -106,17 +112,19 @@ namespace lienlp {
       std::size_t i = 0;
       while (results.numIters < MAX_ITERS)
       {
-        fmt::print("[Iter {:d}] omega={}, eta={}\n", i, dualTol, primTol);
+        fmt::print(fmt::fg(fmt::color::yellow),
+                   "\n[Iter {:d}] omega={}, eta={}, mu={:g} (1/mu={:g})\n", i, innerTol, primTol, muEq, muEqInv);
         solveInner(workspace, results);
 
         // accept new primal iterate
         workspace.xPrev = results.xOpt;
+        proxPenalty.updateTarget(workspace.xPrev);
 
         if (workspace.primalInfeas < primTol)
         {
           // accept dual iterate
-          fmt::print("  Accept multipliers\n", i);
-          acceptMultipliers(workspace, results.lamsOpt);
+          fmt::print(fmt::fg(fmt::color::sea_green), "  Accept multipliers\n");
+          acceptMultipliers(workspace);
           if ((workspace.primalInfeas < targetTol) && (workspace.dualInfeas < targetTol))
           {
             // terminate algorithm
@@ -125,13 +133,13 @@ namespace lienlp {
           }
           updateToleranceSuccess();
         } else {
-          fmt::print("  Reject multipliers\n", i);
+          fmt::print(fmt::fg(fmt::color::orange_red), "  Reject multipliers\n");
           updatePenalty();
           updateToleranceFailure();
         }
         results.mu = muEq;
         // safeguard tolerances
-        dualTol = std::max(dualTol, targetTol);
+        innerTol = std::max(innerTol, targetTol);
 
         i++;
       }
@@ -147,13 +155,19 @@ namespace lienlp {
     /// Update penalty parameter and propagate side-effects.
     inline void updatePenalty()
     {
-      muEq = std::max(muEq * muFactor, MU_MIN);
+      setPenalty(std::max(muEq * muFactor, muMin));
+    }
+
+    /// Update penalty parameter and propagate side-effects.
+    void setPenalty(const Scalar new_mu)
+    {
+      muEq = new_mu;
       muEqInv = 1. / muEq;
       meritFun.setPenalty(muEq);
     }
 
   protected:
-    const std::size_t MAX_ITERS = 200;
+    std::size_t MAX_ITERS = 100;
 
     void solveInner(Workspace& workspace, Results& results)
     {
@@ -176,11 +190,10 @@ namespace lienlp {
         computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
         computeResidualDerivatives(x, workspace);
 
-        int nc = 0;   // constraint size
-        int cursor = ndx;  // starts after ndx (primal grad size)
-
         //// fill in LHS/RHS
         //// TODO create an Eigen::Map to map submatrices to the active sets of each constraint
+
+        fmt::print("    objective: {:g}\n", results.value);
 
         auto idx_prim = Eigen::seq(0, ndx - 1);
         workspace.kktRhs.setZero();
@@ -191,13 +204,17 @@ namespace lienlp {
         workspace.kktRhs(idx_prim) = workspace.objectiveGradient;
         workspace.kktMatrix(idx_prim, idx_prim) = workspace.objectiveHessian;
 
-
+        int nc = 0;   // constraint size
+        int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
         {
           MatrixXs& J_ = workspace.cstrJacobians[i];
 
           workspace.kktRhs(idx_prim) += J_.transpose() * results.lamsOpt[i];
-          workspace.kktMatrix(idx_prim, idx_prim).noalias() += workspace.cstrVectorHessProd[i];
+          if (not useGaussNewton)
+          {
+            workspace.kktMatrix(idx_prim, idx_prim).noalias() += workspace.cstrVectorHessProd[i];
+          }
 
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
 
@@ -224,11 +241,15 @@ namespace lienlp {
         // now check if we can stop
         workspace.dualResidual = workspace.kktRhs(idx_prim);
         workspace.dualInfeas = infNorm(workspace.dualResidual);
-        inner_conv = infNorm(workspace.kktRhs) < dualTol;
+        Scalar inner_crit = infNorm(workspace.kktRhs);
 
-        fmt::print("[{}] dualInfeas: {}\n", __func__, workspace.dualInfeas);
+        fmt::print("[{}] inner stop {:g} / dualInfeas: {:g} / primInfeas = {:g}\n",
+                   __func__, inner_crit, workspace.dualInfeas, workspace.primalInfeas);
 
-        if (inner_conv) return;
+        if (inner_crit <= innerTol)
+        {
+          return;
+        }
 
         // factorization
         workspace.ldlt_.compute(workspace.kktMatrix);
@@ -247,24 +268,30 @@ namespace lienlp {
         //// Take the step
 
         const Scalar merit0 = meritFun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
-        Scalar dir_deriv = 0;
-        dir_deriv += workspace.meritGradient.dot(workspace.pdStep(idx_prim));
+        Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep(idx_prim));
+        Scalar dir_dual = 0;
         cursor = ndx;
         for (std::size_t i = 0; i < num_c; i++)
         {
           nc = problem->getCstr(i)->nr();
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
 
-          dir_deriv += (-workspace.auxProxDualErr[i]).dot(workspace.pdStep(block_slice));
+          dir_dual += (-workspace.auxProxDualErr[i]).dot(workspace.pdStep(block_slice));
           cursor += nc;
         }
+
+        Scalar dir_deriv = dir_x + dir_dual;
 
         Scalar alpha_opt = doLinesearch(workspace, results, merit0, dir_deriv);
         results.xOpt = workspace.xTrial;
         results.lamsOpt = workspace.lamsTrial;
 
-        fmt::print("[{}] alpha_opt: {:.3g}\n", __func__, alpha_opt);
-        fmt::print("[{}] current x: {}\n", __func__, x.transpose());
+        if (verbose)
+        {
+          fmt::print("[{}] dir deriv: {:g}\n", __func__, dir_deriv);
+          fmt::print("[{}] alpha_opt: {:.3g}\n", __func__, alpha_opt);
+          fmt::print("[{}] current x: {}\n", __func__, x.transpose());
+        }
 
         results.numIters++;
         if (results.numIters >= MAX_ITERS)
@@ -283,16 +310,16 @@ namespace lienlp {
     void updateToleranceFailure()
     {
       primTol = primTol * std::pow(muEq, alphaPrim);
-      dualTol = dualTol * std::pow(muEq, alphaDual);
+      innerTol = innerTol * std::pow(muEq, alphaDual);
     }
 
     void updateToleranceSuccess()
     {
       primTol = primTol * std::pow(muEq, betaPrim);
-      dualTol = dualTol * std::pow(muEq, betaDual);
+      innerTol = innerTol * std::pow(muEq, betaDual);
     }
 
-    void acceptMultipliers(Workspace& workspace, VectorOfVectors& lams) const
+    void acceptMultipliers(Workspace& workspace) const
     {
       const auto nc = problem->getNumConstraints();
       for (std::size_t i = 0; i < nc; i++)
@@ -314,7 +341,7 @@ namespace lienlp {
         workspace.primalResiduals[i] = cstr->m_func(x);
 
         // multiplier
-        workspace.lamsPlus[i] = workspace.lamsPrev[i] + workspace.primalResiduals[i] * muEqInv;
+        workspace.lamsPlus[i] = workspace.lamsPrev[i] + muEqInv * workspace.primalResiduals[i];
         workspace.lamsPlus[i].noalias() = cstr->dualProjection(workspace.lamsPlus[i]);
         workspace.auxProxDualErr[i] = muEq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
@@ -324,9 +351,10 @@ namespace lienlp {
       workspace.primalInfeas = 0.;
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
+        auto cstr = problem->getCstr(i);
         workspace.primalInfeas = std::max(
           workspace.primalInfeas,
-          infNorm(workspace.primalResiduals[i]));
+          infNorm(cstr->dualProjection(workspace.primalResiduals[i])));
       }
     }
 
@@ -347,7 +375,14 @@ namespace lienlp {
       }
     } 
 
-
+    /**
+     * Perform the inexact backtracking line-search procedure.
+     * 
+     * @param workspace Workspace.
+     * @param results   Result struct.
+     * @param merit0    Value of the merit function at the previous point.
+     * @param d1        Directional derivative of the merit function in the search direction.
+     */
     Scalar doLinesearch(Workspace& workspace, Results& results, Scalar merit0, Scalar d1) const
     {
       Scalar alpha_try = 1.;
@@ -355,18 +390,27 @@ namespace lienlp {
       const Scalar ls_beta = 0.5;
       const Scalar alpha_min = 1e-7;
       const Scalar ls_c1 = 1e-4;
+      fmt::print(fmt::fg(fmt::color::yellow), "  [{}] current M = {:.5g}\n", __func__, merit0);
 
-      while (alpha_try > alpha_min)
+      while (alpha_try >= alpha_min)
       {
         tryStep(workspace, results, alpha_try);
-        Scalar merit_trial = meritFun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        Scalar merit_trial = meritFun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
+        Scalar dM = merit_trial - merit0;
+        fmt::print(fmt::fg(fmt::color::yellow), "  [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);
 
-        bool armijo_cond = merit_trial < merit0 + ls_c1 * alpha_try * d1;
+        bool armijo_cond = dM < ls_c1 * alpha_try * d1;
         if (armijo_cond)
         {
           break;
         }
         alpha_try *= ls_beta;
+      }
+
+      if (alpha_try < alpha_min)
+      {
+        alpha_try = alpha_min;
+        tryStep(workspace, results, alpha_try);
       }
 
       return alpha_try;
@@ -375,14 +419,14 @@ namespace lienlp {
     /**
      * Take a trial step.
      * 
-     * @param workspace - Workspace
-     * @param results - contains the previous primal-dual point
-     * @param alpha - steps size
+     * @param workspace Workspace
+     * @param results   Contains the previous primal-dual point
+     * @param alpha     Step size
      */
     void tryStep(Workspace &workspace, Results& results, Scalar alpha) const
     {
       const int ndx = manifold.ndx();
-      auto idx_prim = Eigen::seq(0, ndx - 1);
+      const auto idx_prim = Eigen::seq(0, ndx - 1);
       manifold.integrate(results.xOpt, alpha * workspace.pdStep(idx_prim), workspace.xTrial);
 
       int cursor = ndx;

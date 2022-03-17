@@ -125,6 +125,8 @@ int main()
   SResults<double> results(space.nx(), *prob);
 
   Solver<Man> solver(space, prob);
+  solver.setPenalty(1. / 50);
+  solver.useGaussNewton = true;
 
   auto lams0 = lams;
   fmt::print(fmt::fg(fmt::color::green), "[CALLING SOLVER]\n");
