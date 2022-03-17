@@ -48,10 +48,12 @@ namespace lienlp {
 
     friend std::ostream& operator<<(std::ostream& s, const SResults<Scalar>& self)
     {
-      s << "  convergence: " << self.converged << '\n'
-        << "  value:       " << self.value << '\n'
-        << "  numIters:    " << self.numIters << '\n'
-        << "  mu:          " << self.mu << '\n';
+      s << "{\n"
+        << "  convergence: " << self.converged << ",\n"
+        << "  value:       " << self.value << ",\n"
+        << "  numIters:    " << self.numIters << ",\n"
+        << "  mu:          " << self.mu << ",\n"
+        << "}";
     }
 
 
