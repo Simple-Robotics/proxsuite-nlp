@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include <fmt/core.h>
+#include <fmt/color.h>
 #include <fmt/ostream.h>
 
 #include "lienlp/macros.hpp"
@@ -113,17 +114,18 @@ namespace lienlp {
 
         if (workspace.primalInfeas < primTol)
         {
+          // accept dual iterate
+          fmt::print(fmt::fg(fmt::color::blue), "  Accept multipliers\n", i);
+          acceptMultipliers(workspace, results.lamsOpt);
           if ((workspace.primalInfeas < targetTol) && (workspace.dualInfeas < targetTol))
           {
             // terminate algorithm
             results.converged = ConvergedFlag::SUCCESS;
             break;
           }
-          // accept dual iterate
-          // TODO fix to avoid recomputing 1st order multipliers
-          acceptMultipliers(workspace, results.lamsOpt);
           updateToleranceSuccess();
         } else {
+          fmt::print(fmt::fg(fmt::color::orange_red), "  Reject multipliers\n", i);
           updatePenalty();
           updateToleranceFailure();
         }
@@ -181,6 +183,11 @@ namespace lienlp {
         //// TODO create an Eigen::Map to map submatrices to the active sets of each constraint
 
         auto idx_prim = Eigen::seq(0, ndx - 1);
+        workspace.kktRhs.setZero();
+        workspace.kktMatrix.setZero();
+
+        workspace.kktMatrix(idx_prim, idx_prim) = workspace.objectiveHessian;
+
         for (std::size_t i = 0; i < num_c; i++)
         {
 
@@ -200,10 +207,10 @@ namespace lienlp {
         }
         // now fill in the 0-ndx prefixes
         auto& lagrangian = meritFun.m_lagr;
-        lagrangian.computeGradient(x, workspace.lamsPDAL, workspace.kktRhs(idx_prim));
-        lagrangian.computeHessian(x, workspace.lamsPDAL, workspace.kktMatrix(idx_prim, idx_prim));
+        lagrangian.computeGradient(x, results.lamsOpt, workspace.kktRhs(idx_prim));
+        // lagrangian.computeHessian(x, workspace.lamsPDAL, workspace.kktMatrix(idx_prim, idx_prim));
 
-        fmt::print("[{}]\n{} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
+        fmt::print("[{}] {} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
         fmt::print("[{}]\n{} << kkt LHS\n", __func__, workspace.kktMatrix);
 
         // now check if we can stop
@@ -211,7 +218,7 @@ namespace lienlp {
         workspace.dualInfeas = infNorm(workspace.dualResidual);
         inner_conv = infNorm(workspace.kktRhs) < dualTol;
 
-        fmt::print("[{}] dual Infeas: {}\n", __func__, workspace.dualInfeas);
+        fmt::print("[{}] dualInfeas: {}\n", __func__, workspace.dualInfeas);
 
         if (inner_conv) return;
 
@@ -219,26 +226,29 @@ namespace lienlp {
         workspace.ldlt_.compute(workspace.kktMatrix);
         workspace.pdStep = workspace.ldlt_.solve(-workspace.kktRhs);
 
+        fmt::print("  pdStep:  {}\n", workspace.pdStep.transpose());
+
         workspace.signature.array() = (workspace.ldlt_.vectorD().array() > 0);
-        fmt::print("[{}] KKT signature:\n{}\n", __func__, workspace.signature.transpose());
+        fmt::print("[{}] KKT signature:  {}\n", __func__, workspace.signature.transpose());
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
 
         //// Take the step
         // TODO implement linesearch
-        manifold.integrate(x, workspace.pdStep(idx_prim), x);
+        Scalar alpha_ls = 0.5;
+        x = manifold.integrate(x, alpha_ls * workspace.pdStep(idx_prim));
         cursor = ndx;
         for (std::size_t i = 0; i < num_c; i++)
         {
           nc = problem->getCstr(i)->nr();
 
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-          results.lamsOpt[i].noalias() += workspace.pdStep(block_slice);
+          results.lamsOpt[i].noalias() += alpha_ls * workspace.pdStep(block_slice);
 
           cursor += nc;
         }
 
-        fmt::print("[{}] current x:\n{}\n", __func__, x);
+        fmt::print("[{}] current x: {}\n", __func__, x.transpose());
 
         results.numIters++;
         if (results.numIters >= MAX_ITERS)
