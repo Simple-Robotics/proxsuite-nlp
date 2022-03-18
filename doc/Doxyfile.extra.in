@@ -1,0 +1,8 @@
+
+INPUT                   = @CMAKE_SOURCE_DIR@/doc \
+                          @CMAKE_SOURCE_DIR@/src
+
+
+RECURSIVE               = YES
+
+FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.hh *.dox *.md *.py
