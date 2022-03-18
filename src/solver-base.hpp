@@ -112,6 +112,8 @@ namespace lienlp {
       std::size_t i = 0;
       while (results.numIters < MAX_ITERS)
       {
+        results.mu = muEq;
+        results.rho = rho;
         fmt::print(fmt::fg(fmt::color::yellow),
                    "\n[Iter {:d}] omega={}, eta={}, mu={:g} (1/mu={:g})\n", i, innerTol, primTol, muEq, muEqInv);
         solveInner(workspace, results);
@@ -137,7 +139,6 @@ namespace lienlp {
           updatePenalty();
           updateToleranceFailure();
         }
-        results.mu = muEq;
         // safeguard tolerances
         innerTol = std::max(innerTol, targetTol);
 
@@ -219,7 +220,9 @@ namespace lienlp {
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
 
           // fill in the dual part of the KKT
-          nc = problem->getCstr(i)->nr();
+          auto cstr = problem->getCstr(i);
+          nc = cstr->nr();
+          cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
           workspace.kktRhs(block_slice) = workspace.auxProxDualErr[i];
           // jacobian block and transpose
@@ -371,6 +374,7 @@ namespace lienlp {
         cstr->m_func.computeJacobian(x, J_);
         MatrixXs projJac = cstr->JdualProjection(workspace.lamsPlus[i]);
         J_.noalias() = projJac * J_;
+        fmt::print("   projJac: {}", projJac);
         cstr->m_func.vhp(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 

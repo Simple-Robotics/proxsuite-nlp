@@ -8,6 +8,7 @@
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
 #include "lienlp/modelling/residuals/quadratic-residual.hpp"
+#include "lienlp/modelling/constraints/negative-orthant.hpp"
 #include "lienlp/solver-base.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
@@ -34,6 +35,7 @@ int main()
   Man::Point_t p0 = lg.random();  // target
   p0.normalize();
   p0 << -.4, .7;
+  fmt::print("  |p0| = {}", p0.norm());
   Man::Point_t p1;
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
@@ -65,16 +67,17 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  // Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
   QuadraticResidualFunctor<Man> residualCircle(space, 1., space.zero());
-  Prob_t::Equality_t cstr1(residualCircle);
+  using Ineq_t = NegativeOrthant<double>;
+  // Prob_t::Equality_t cstr1(residualCircle);
+  Ineq_t cstr1(residualCircle);
   fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
   std::vector<Prob_t::CstrPtr> cstrs;
-  cstrs.push_back(std::make_shared<Prob_t::Equality_t>(residualCircle));
-  shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
+  cstrs.push_back(std::make_shared<Ineq_t>(cstr1));
+  auto prob = std::make_shared<Prob_t>(cf, cstrs);
 
   /// Test out merit functions
 

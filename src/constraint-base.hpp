@@ -52,6 +52,7 @@ namespace lienlp {
     }
     /// Compute the jacobian of the active-set projection operator.
     virtual JacobianType Jprojection(const ConstVectorRef& z) const = 0;
+    /// Compute the jacobian of the projection on the normal cone.
     inline JacobianType JdualProjection(const ConstVectorRef& z) const
     {
       
