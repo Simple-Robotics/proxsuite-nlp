@@ -6,3 +6,8 @@ INPUT                   = @CMAKE_SOURCE_DIR@/doc \
 RECURSIVE               = YES
 
 FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.hh *.dox *.md *.py
+
+SORT_MEMBER_DOCS        = YES
+
+FORMULA_MACROFILE       = @CMAKE_SOURCE_DIR@/doc/macros.inc
+

@@ -5,6 +5,9 @@
 #include <vector>
 #include <memory>
 
+/**
+ * Main namespace of the package.
+ */
 namespace lienlp {
 
 /// Use the STL shared_ptr.

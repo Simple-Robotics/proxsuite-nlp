@@ -44,4 +44,4 @@ namespace lienlp {
     }
   }
 
-} // namespacelienlp
+} // namespace lienlp

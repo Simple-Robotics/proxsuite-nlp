@@ -9,8 +9,13 @@
 namespace lienlp {
 
   /**
+   * @brief   Primal-dual augmented Lagrangian-type merit function.
+   * 
    * Primal-dual Augmented Lagrangian function, extending
    * the function from Gill & Robinson (2012) to inequality constraints.
+   * \f[
+   *    \calM_{\mu}(x, \Lambda; \Lambda_e) = 
+   * \f]
    * 
    */
   template<typename _Scalar>

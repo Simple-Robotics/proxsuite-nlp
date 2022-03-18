@@ -67,7 +67,9 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  QuadraticResidualFunctor<Man> residualCircle(space, 1., space.zero());
+  double radius_ = 0.6;
+
+  QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.zero());
   using Ineq_t = NegativeOrthant<double>;
   // Prob_t::Equality_t cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);

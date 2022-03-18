@@ -1,4 +1,3 @@
-/// Linear residuals, for vector spaces
 #pragma once
 
 

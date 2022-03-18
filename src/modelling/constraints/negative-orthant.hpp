@@ -6,6 +6,15 @@
 
 namespace lienlp {
 
+  /**
+   * @brief   Negative orthant, for constraints \f$h(x)\leq 0\f$.
+   * 
+   * Negative orthant, corresponding to constraints of the form
+   * \f[
+   *    h(x) \leq 0
+   * \f]
+   * where \f$h : \mathcal{X} \to \RR^p\f$ is a given residual.
+   */
   template<typename _Scalar>
   struct NegativeOrthant : ConstraintSetBase<_Scalar>
   {
@@ -30,12 +39,11 @@ namespace lienlp {
       const int nr = this->nr();
       Active_t active_set(nr);
       computeActiveSet(z, active_set);
-      JacobianType Jout(nr, this->ndx());
+      JacobianType Jout(nr, nr);
       Jout.setIdentity();
       for (int i = 0; i < nr; i++)
       {
-        // inactive components = projection is 0
-        if (not active_set(i))
+        if (active_set(i))
         {
           Jout.row(i).setZero();
         }
