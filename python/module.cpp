@@ -12,6 +12,7 @@ BOOST_PYTHON_MODULE(pylienlp)
   bp::import("warnings");
 
   exposeManifold();
+  exposeProblem();
   exposeResidual();
   exposeResults();
 }
