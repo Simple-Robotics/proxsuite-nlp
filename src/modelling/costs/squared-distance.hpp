@@ -12,18 +12,18 @@ namespace lienlp{
   {
     using Scalar = typename M::Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
-    using ResType = StateResidual<M>;
+    using ResidualType = StateResidual<M>;
     using Base = QuadraticResidualCost<Scalar>;
     using Base::m_residual;
 
     QuadDistanceCost(M& manifold)
-      : Base(std::make_shared<ResType>(manifold, manifold.zero()),
+      : Base(std::make_shared<ResidualType>(manifold, manifold.zero()),
              MatrixXs::Identity(manifold.ndx(), manifold.ndx()))
       {}
 
     void updateTarget(const ConstVectorRef& x)
     {
-      std::static_pointer_cast<ResType>(m_residual)->m_target = x;
+      std::static_pointer_cast<ResidualType>(m_residual)->m_target = x;
     }
   };
 

@@ -6,9 +6,16 @@
 
 namespace lienlp {
   
+  /**
+   * @brief   Equality constraints.
+   * 
+   * @details Equality constraints of the form \f$ c(x) = 0 \f$, where
+   *          \f$c : \calX \to \RR^p\f$ is a residual function
+   */
   template<typename _Scalar>
   struct EqualityConstraint : ConstraintSetBase<_Scalar>
   {
+  public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = _Scalar;
@@ -16,13 +23,8 @@ namespace lienlp {
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Base = ConstraintSetBase<Scalar>;
     using Base::operator();
-    using Base::computeJacobian;
     using Active_t = typename Base::Active_t;
     using functor_t = typename Base::functor_t;
-
-    // TODO MAKE CONST
-    ReturnType proj_;
-    JacobianType Jproj_;
 
     EqualityConstraint(const functor_t& func)
       : ConstraintSetBase<Scalar>(func),
@@ -47,6 +49,9 @@ namespace lienlp {
     {
       out.array() = true;
     }
+  private:
+    ReturnType proj_;
+    JacobianType Jproj_;
   };
 
 } // namespace lienlp

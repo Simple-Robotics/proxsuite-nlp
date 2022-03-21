@@ -11,3 +11,6 @@ SORT_MEMBER_DOCS        = YES
 
 FORMULA_MACROFILE       = @CMAKE_SOURCE_DIR@/doc/macros.inc
 
+GENERATE_TREEVIEW       = YES
+HTML_EXTRA_STYLESHEET   = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome.css
+

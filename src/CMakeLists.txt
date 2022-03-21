@@ -1,6 +1,4 @@
 
-message(STATUS "src: Headers are: ${HEADERS}")
-
 function(create_library)
   # get the compile defs
   get_directory_property(CURRENT_COMPILE_DEFINITIONS COMPILE_DEFINITIONS)
@@ -10,8 +8,8 @@ function(create_library)
   target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
   
   set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
-  if(BUILD_LIBRARY_WITH_COMMIT_VERSION)
-    TAG_LIBRARY_VERSION(${PROJECT_VERSION})
+  if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
+    TAG_LIBRARY_VERSION(${PROJECT_NAME})
   endif()
 
   if(BUILD_WITH_PINOCCHIO_SUPPORT)

@@ -23,7 +23,6 @@ namespace lienlp {
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Base = ConstraintSetBase<Scalar>;
     using Base::operator();
-    using Base::computeJacobian;
     using Active_t = typename Base::Active_t;
     using functor_t = typename Base::functor_t;
 

@@ -8,7 +8,6 @@ set(PROJECT_NAME lienlp)
 set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
 set(PROJECT_URL "https://gitlab.inria.fr/wjallet/lie-nlp-solver")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
-# set(PROJECT_USE_CMAKE_EXPORT True)
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 # Disable -Werror on Unix for now.
@@ -18,16 +17,7 @@ set(CMAKE_VERBOSE_MAKEFILE True)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# ----------------------------------------------------
-# --- OPTIONS  ---------------------------------------
-# Need to be set before including base.cmake
-# ----------------------------------------------------
-option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
-
-# Check if the submodule cmake have been initialized
-if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/cmake/base.cmake")
-  message(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-endif()
+option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
@@ -56,8 +46,8 @@ endif(WIN32)
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_UTILS "Build the utils" OFF)
-option(BUILD_PYTHON_INTERFACE "Build the Python bindings" OFF)
-option(BUILD_WITH_COMMIT_VERSION "Build libraries by setting specific commit version" OFF)
+option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
+option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
@@ -66,13 +56,7 @@ option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" ON)
 cmake_dependent_option(LINK_PYTHON_INTERFACE_TO_OPENMP "Link OpenMP to the Python interface" ON BUILD_WITH_OPENMP_SUPPORT OFF)
 option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
-option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
-
-if(INITIALIZE_WITH_NAN)
-  message(STATUS "Initialize with NaN all the Eigen entries.")
-  add_definitions(-DEIGEN_INITIALIZE_MATRICES_BY_NAN)
-endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")

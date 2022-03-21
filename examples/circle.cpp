@@ -67,7 +67,7 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  double radius_ = 0.6;
+  double radius_ = 1.;
 
   QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.zero());
   using Ineq_t = NegativeOrthant<double>;
@@ -131,7 +131,7 @@ int main()
 
   Solver<Man> solver(space, prob);
   solver.setPenalty(1. / 50);
-  solver.useGaussNewton = true;
+  solver.use_gauss_newton = true;
 
   auto lams0 = lams;
   fmt::print(fmt::fg(fmt::color::green), "[CALLING SOLVER]\n");

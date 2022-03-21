@@ -35,35 +35,40 @@ namespace lienlp {
     using Results = SResults<Scalar>;
 
     shared_ptr<Prob_t> problem;
-    Merit_t meritFun;
+    Merit_t merit_fun;
+    /// Manifold on which to optimize.
     M& manifold;
-    QuadDistanceCost<M> proxPenalty;
+    /// Proximal regularization penalty.
+    QuadDistanceCost<M> prox_penalty;
 
     //// Other settings
 
     bool verbose = true;
-    bool useGaussNewton = false;
+    bool use_gauss_newton = false;    /// Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
 
-    Scalar innerTol;
-    Scalar primTol;
-    Scalar rho;
-    Scalar muEqInit;
-    Scalar muEq = muEqInit;
-    Scalar muEqInv = 1. / muEq;
-    Scalar muFactor;
-    Scalar rhoFactor = muFactor;
+    const Scalar inner_tol0 = 1.;
+    const Scalar prim_tol0 = 1.;
+    Scalar inner_tol = inner_tol0;
+    Scalar prim_tol = prim_tol0;
+    Scalar rho;                 /// Primal proximal penalty parameter.
+    Scalar mu_eq_init;          /// Initial penalty parameter.
+    Scalar mu_eq = mu_eq_init;  /// Penalty parameter.
+    Scalar mu_eq_inv = 1. / mu_eq;
+    Scalar mu_factor;           /// Penalty update multiplicative factor.
+    Scalar rho_factor = mu_factor;
 
-    const Scalar muMin = 1e-9;
+    const Scalar inner_tol_min = 1e-9;  /// Lower safeguard for the subproblem tolerance.
+    const Scalar mu_lower_ = 1e-9;      /// Lower safeguard for the penalty parameter.
 
     //// Algo hyperparams
 
-    Scalar targetTol;
-    const Scalar alphaDual;
-    const Scalar betaDual;
-    const Scalar alphaPrim;
-    const Scalar betaPrim;
+    Scalar target_tol;        /// Target tolerance for the problem.
+    const Scalar prim_alpha;  /// BCL failure scaling (primal)
+    const Scalar prim_beta;   /// BCL success scaling (primal)
+    const Scalar dual_alpha;  /// BCL failure scaling (dual)
+    const Scalar dual_beta;   /// BCL success scaling (dual)
 
     Solver(M& man,
            shared_ptr<Prob_t>& prob,
@@ -71,26 +76,26 @@ namespace lienlp {
            const Scalar mu_eq_init=1e-2,
            const Scalar rho=0.,
            const Scalar mu_factor=0.1,
-           const Scalar muMin=1e-9,
-           const Scalar alphaPrim=0.1,
-           const Scalar betaPrim=0.9,
-           const Scalar alphaDual=1.,
-           const Scalar betaDual=1.)
+           const Scalar mu_lower_=1e-9,
+           const Scalar prim_alpha=0.1,
+           const Scalar prim_beta=0.9,
+           const Scalar dual_alpha=1.,
+           const Scalar dual_beta=1.)
       : manifold(man),
         problem(prob),
-        proxPenalty(man),
-        meritFun(prob),
-        targetTol(tol),
-        muEq(mu_eq_init),
+        prox_penalty(man),
+        merit_fun(prob),
+        target_tol(tol),
+        mu_eq(mu_eq_init),
         rho(rho),
-        muFactor(mu_factor),
-        muMin(muMin),
-        alphaPrim(alphaPrim),
-        betaPrim(betaPrim),
-        alphaDual(alphaDual),
-        betaDual(betaDual)
+        mu_factor(mu_factor),
+        mu_lower_(mu_lower_),
+        prim_alpha(prim_alpha),
+        prim_beta(prim_beta),
+        dual_alpha(dual_alpha),
+        dual_beta(dual_beta)
     {
-      meritFun.setPenalty(muEq);
+      merit_fun.setPenalty(mu_eq);
     }
 
     ConvergedFlag
@@ -103,31 +108,28 @@ namespace lienlp {
       results.xOpt = x0;
       results.lamsOpt = lams0;
 
-
-      innerTol = 1.;
-      primTol = 1.;
       updateToleranceFailure();
 
 
       std::size_t i = 0;
       while (results.numIters < MAX_ITERS)
       {
-        results.mu = muEq;
+        results.mu = mu_eq;
         results.rho = rho;
         fmt::print(fmt::fg(fmt::color::yellow),
-                   "\n[Iter {:d}] omega={}, eta={}, mu={:g} (1/mu={:g})\n", i, innerTol, primTol, muEq, muEqInv);
+                   "[Iter {:d}] omega={}, eta={}, mu={:g} (1/mu={:g})\n", i, inner_tol, prim_tol, mu_eq, mu_eq_inv);
         solveInner(workspace, results);
 
         // accept new primal iterate
         workspace.xPrev = results.xOpt;
-        proxPenalty.updateTarget(workspace.xPrev);
+        prox_penalty.updateTarget(workspace.xPrev);
 
-        if (workspace.primalInfeas < primTol)
+        if (workspace.primalInfeas < prim_tol)
         {
           // accept dual iterate
           fmt::print(fmt::fg(fmt::color::sea_green), "  Accept multipliers\n");
           acceptMultipliers(workspace);
-          if ((workspace.primalInfeas < targetTol) && (workspace.dualInfeas < targetTol))
+          if ((workspace.primalInfeas < target_tol) && (workspace.dualInfeas < target_tol))
           {
             // terminate algorithm
             results.converged = ConvergedFlag::SUCCESS;
@@ -140,7 +142,7 @@ namespace lienlp {
           updateToleranceFailure();
         }
         // safeguard tolerances
-        innerTol = std::max(innerTol, targetTol);
+        inner_tol = std::max(inner_tol, target_tol);
 
         i++;
       }
@@ -148,23 +150,23 @@ namespace lienlp {
       return results.converged;
     }
 
-    // Set solver convergence threshold
-    void setTolerance(const Scalar tol) { targetTol = tol; }
-    // Set solver maximum iteration number
+    /// Set solver convergence threshold.
+    void setTolerance(const Scalar tol) { target_tol = tol; }
+    /// Set solver maximum allowed number of iterations.
     void setMaxIters(const std::size_t val) { MAX_ITERS = val; }
 
-    /// Update penalty parameter and propagate side-effects.
+    /// Update penalty parameter using the provided factor (with a safeguard Solver::mu_lower_).
     inline void updatePenalty()
     {
-      setPenalty(std::max(muEq * muFactor, muMin));
+      setPenalty(std::max(mu_eq * mu_factor, mu_lower_));
     }
 
-    /// Update penalty parameter and propagate side-effects.
+    /// Set penalty parameter, its inverse and propagate to merit function.
     void setPenalty(const Scalar new_mu)
     {
-      muEq = new_mu;
-      muEqInv = 1. / muEq;
-      meritFun.setPenalty(muEq);
+      mu_eq = new_mu;
+      mu_eq_inv = 1. / mu_eq;
+      merit_fun.setPenalty(mu_eq);
     }
 
   protected:
@@ -176,8 +178,6 @@ namespace lienlp {
       VectorXs& x = results.xOpt; // shorthand
       const std::size_t num_c = problem->getNumConstraints();
 
-      bool inner_conv;
-
       std::size_t k;
       for (k = 0; k < MAX_ITERS; k++)
       {
@@ -188,13 +188,14 @@ namespace lienlp {
         problem->m_cost.computeGradient(x, workspace.objectiveGradient);
         problem->m_cost.computeHessian(x, workspace.objectiveHessian);
 
+        fmt::print("[{}] current x: {}\n", __func__, x.transpose());
+        fmt::print("     objective: {:g}\n", results.value);
+
         computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
         computeResidualDerivatives(x, workspace);
 
         //// fill in LHS/RHS
         //// TODO create an Eigen::Map to map submatrices to the active sets of each constraint
-
-        fmt::print("    objective: {:g}\n", results.value);
 
         auto idx_prim = Eigen::seq(0, ndx - 1);
         workspace.kktRhs.setZero();
@@ -212,7 +213,7 @@ namespace lienlp {
           MatrixXs& J_ = workspace.cstrJacobians[i];
 
           workspace.kktRhs(idx_prim) += J_.transpose() * results.lamsOpt[i];
-          if (not useGaussNewton)
+          if (not use_gauss_newton)
           {
             workspace.kktMatrix(idx_prim, idx_prim).noalias() += workspace.cstrVectorHessProd[i];
           }
@@ -230,7 +231,7 @@ namespace lienlp {
           workspace.kktMatrix(idx_prim, block_slice) = workspace.cstrJacobians[i].transpose();
           // reg block
           workspace.kktMatrix(block_slice, block_slice).setIdentity();
-          workspace.kktMatrix(block_slice, block_slice).array() *= -muEq;
+          workspace.kktMatrix(block_slice, block_slice).array() *= -mu_eq;
 
           cursor += nc;
         }
@@ -238,7 +239,6 @@ namespace lienlp {
         if (verbose)
         {
           fmt::print("[{}] {} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
-          fmt::print("[{}]\n{} << kkt LHS\n", __func__, workspace.kktMatrix);
         }
 
         // now check if we can stop
@@ -249,7 +249,7 @@ namespace lienlp {
         fmt::print("[{}] inner stop {:g} / dualInfeas: {:g} / primInfeas = {:g}\n",
                    __func__, inner_crit, workspace.dualInfeas, workspace.primalInfeas);
 
-        if (inner_crit <= innerTol)
+        if (inner_crit <= inner_tol)
         {
           return;
         }
@@ -262,7 +262,6 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print("  pdStep:  {}\n", workspace.pdStep.transpose());
           fmt::print("[{}] KKT signature:  {}\n", __func__, workspace.signature.transpose());
         }
 
@@ -270,7 +269,7 @@ namespace lienlp {
 
         //// Take the step
 
-        const Scalar merit0 = meritFun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        const Scalar merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
         Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep(idx_prim));
         Scalar dir_dual = 0;
         cursor = ndx;
@@ -291,9 +290,7 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print("[{}] dir deriv: {:g}\n", __func__, dir_deriv);
-          fmt::print("[{}] alpha_opt: {:.3g}\n", __func__, alpha_opt);
-          fmt::print("[{}] current x: {}\n", __func__, x.transpose());
+          fmt::print("[{}] dir deriv: {:.3g} | alpha: {:.3g}\n", __func__, dir_deriv, alpha_opt);
         }
 
         results.numIters++;
@@ -310,18 +307,29 @@ namespace lienlp {
       return;
     }
 
+    /**
+     * Update primal-dual subproblem tolerances upon
+     * failure (insufficient primal feasibility)
+     * 
+     * Also call this upon initialization of the solver.
+     */
     void updateToleranceFailure()
     {
-      primTol = primTol * std::pow(muEq, alphaPrim);
-      innerTol = innerTol * std::pow(muEq, alphaDual);
+      prim_tol = prim_tol0 * std::pow(mu_eq, prim_alpha);
+      inner_tol = inner_tol0 * std::pow(mu_eq, dual_alpha);
     }
 
+    /**
+     * Update primal-dual subproblem tolerances upon
+     * successful outer-loop iterate (good primal feasibility)
+     */
     void updateToleranceSuccess()
     {
-      primTol = primTol * std::pow(muEq, betaPrim);
-      innerTol = innerTol * std::pow(muEq, betaDual);
+      prim_tol = prim_tol * std::pow(mu_eq, prim_beta);
+      inner_tol = inner_tol * std::pow(mu_eq, dual_beta);
     }
 
+    /// @brief  Accept Lagrange multiplier estimates.
     void acceptMultipliers(Workspace& workspace) const
     {
       const auto nc = problem->getNumConstraints();
@@ -332,7 +340,10 @@ namespace lienlp {
       }
     }
 
-    /// Evaluate the primal residuals, etc
+    /** 
+     * Evaluate the primal residual vectors, and compute
+     * the first-order and primal-dual Lagrange multiplier estimates.
+     */
     void computeResidualsAndMultipliers(
       const ConstVectorRef& x,
       Workspace& workspace,
@@ -344,9 +355,9 @@ namespace lienlp {
         workspace.primalResiduals[i] = cstr->m_func(x);
 
         // multiplier
-        workspace.lamsPlus[i] = workspace.lamsPrev[i] + muEqInv * workspace.primalResiduals[i];
+        workspace.lamsPlus[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
         workspace.lamsPlus[i].noalias() = cstr->dualProjection(workspace.lamsPlus[i]);
-        workspace.auxProxDualErr[i] = muEq * (workspace.lamsPlus[i] - lams[i]);
+        workspace.auxProxDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
       } 
 
@@ -361,7 +372,10 @@ namespace lienlp {
       }
     }
 
-    /// Evaluate the constraint jacobians, vhp
+    /**
+     * Evaluate the derivatives (Jacobian, and vector-Hessian products) of the
+     * constraint residuals.
+     */
     void computeResidualDerivatives(
       const ConstVectorRef& x,
       Workspace& workspace) const
@@ -374,7 +388,6 @@ namespace lienlp {
         cstr->m_func.computeJacobian(x, J_);
         MatrixXs projJac = cstr->JdualProjection(workspace.lamsPlus[i]);
         J_.noalias() = projJac * J_;
-        fmt::print("   projJac: {}", projJac);
         cstr->m_func.vhp(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 
@@ -399,7 +412,7 @@ namespace lienlp {
       while (alpha_try >= alpha_min)
       {
         tryStep(workspace, results, alpha_try);
-        Scalar merit_trial = meritFun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
+        Scalar merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
         Scalar dM = merit_trial - merit0;
         fmt::print(fmt::fg(fmt::color::yellow), "  [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);
 

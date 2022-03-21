@@ -16,6 +16,12 @@ namespace lienlp {
     TOO_MANY_ITERS=1
   };
 
+  /**
+   * @brief   Results struct, holding the returned data from the solver.
+   * 
+   * @details This struct holds the current (and output) primal-dual point,
+   *          the optimal proximal parameters \f$(\rho, \mu)\f$.
+   */
   template<typename _Scalar>
   struct SResults
   {

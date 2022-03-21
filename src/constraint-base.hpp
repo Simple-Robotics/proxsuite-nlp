@@ -22,7 +22,6 @@ namespace lienlp {
     using functor_t = ResidualBase<Scalar>;
     const functor_t& m_func;
 
-    const MatrixXs eye;
 
     ConstraintSetBase<Scalar>(const functor_t& func)
       : m_func(func), eye(MatrixXs::Identity(func.nr(), func.nr()))
@@ -33,11 +32,6 @@ namespace lienlp {
       return m_func(x);
     }
 
-    inline JacobianType computeJacobian(const ConstVectorRef& x) const
-    {
-      return m_func.computeJacobian(x);
-    }
-
     /// Get dimension of manifold element representation.
     int nx() const { return m_func.nx(); }
     /// Get dimension of constraint representation.
@@ -45,12 +39,14 @@ namespace lienlp {
     /// Get tangent space dimension (no. of columns of Jacobian)
     int ndx() const { return m_func.ndx(); }
 
+    /// Compute projection of variable @p z onto the constraint set.
     virtual ReturnType projection(const ConstVectorRef& z) const = 0;
+    /// Compute projection of @p z onto the normal cone to the set.
     inline ReturnType dualProjection(const ConstVectorRef& z) const
     {
       return z - projection(z);
     }
-    /// Compute the jacobian of the active-set projection operator.
+    /// Compute the jacobian of the constraint set projection operator.
     virtual JacobianType Jprojection(const ConstVectorRef& z) const = 0;
     /// Compute the jacobian of the projection on the normal cone.
     inline JacobianType JdualProjection(const ConstVectorRef& z) const
@@ -61,6 +57,8 @@ namespace lienlp {
     /// Compute the active set of the constraint.
     virtual void computeActiveSet(const ConstVectorRef& z, Active_t& out) const = 0;
     virtual ~ConstraintSetBase<Scalar>() = default;
+  private:
+    const MatrixXs eye;
   };
 
 }

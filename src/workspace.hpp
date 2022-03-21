@@ -53,19 +53,19 @@ namespace lienlp {
     VectorOfVectors primalResiduals;
     Scalar primalInfeas;
 
-    /// tmp
-
+    /// Objective function gradient.
     VectorXs objectiveGradient;
+    /// Merit function gradient.
     VectorXs meritGradient;
+    /// Objective function Hessian.
     MatrixXs objectiveHessian;
 
     std::vector<MatrixXs> cstrJacobians;
     std::vector<MatrixXs> cstrVectorHessProd;
-    /// cached 1st-order multipliers \f$\mathrm{proj}(\lambda_e + c / mu)\f$
+    /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorOfVectors lamsPlus;
-    /// cached PDAL estimates
+    /// Primal-dual multiplier estimates (from the pdBCL algorithm)
     VectorOfVectors lamsPDAL;
-    /// dual prox error \f$\mu (\lambda^+ - \lambda)\f$
     VectorOfVectors auxProxDualErr;
 
 

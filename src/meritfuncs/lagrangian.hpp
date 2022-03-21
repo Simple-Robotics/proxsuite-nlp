@@ -49,7 +49,7 @@ namespace lienlp {
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
-        out += (cstr->computeJacobian(x)).transpose() * lams[i];
+        out += (cstr->m_func.computeJacobian(x)).transpose() * lams[i];
       }
     }
 
