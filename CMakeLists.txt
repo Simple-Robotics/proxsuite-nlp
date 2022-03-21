@@ -97,25 +97,16 @@ ADD_PROJECT_DEPENDENCY(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   FINDPYTHON(REQUIRED)
+  set(PY_NAME "py${PROJECT_NAME}")
+  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
   SEARCH_FOR_BOOST_PYTHON(REQUIRED)
   ADD_PROJECT_DEPENDENCY(eigenpy 2.6.7 REQUIRED)
 
-  if(BUILD_WITH_AUTODIFF_SUPPORT)
-    ADD_PROJECT_DEPENDENCY(pycppad 1.1.0 REQUIRED)
-    add_definitions(-DPYCPPAD_EXCLUDE_EIGEN_NUMTRAITS_SPECIALIZATION)
-  endif(BUILD_WITH_AUTODIFF_SUPPORT)
-
-
-  # Check wether this a PyPy Python
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET)
-
   message(STATUS "Python compiler: ${_python_implementation_value}")
-  if(_python_implementation_value MATCHES "PyPy")
-    set(BUILD_PYTHON_INTERFACE_WITH_PYPY TRUE)
-  endif()
 
 endif(BUILD_PYTHON_INTERFACE)
 
@@ -138,19 +129,20 @@ file(GLOB_RECURSE HEADERS
      )
 
 file(MAKE_DIRECTORY
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/helpers"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/meritfuncs"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/spaces"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/costs"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/residuals"
-     "${${PROJECT_NAME}_BINARY_DIR}/include/lienlp/modelling/constraints"
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/helpers
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/meritfuncs
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/spaces
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/costs
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/residuals
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/constraints
      )
 
-set(HEADERS_)
+# Process headers
+set(HEADERS_LIST)
 foreach(header ${HEADERS})
   string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/src/" "" header ${header})
-  list(APPEND HEADERS_ ${header})
+  list(APPEND HEADERS_LIST ${header})
   get_filename_component(headerName ${header} NAME)
   get_filename_component(headerPath ${header} PATH)
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
@@ -160,11 +152,18 @@ foreach(header ${HEADERS})
           DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${headerPath}
           PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 endforeach(header)
-set(HEADERS ${HEADERS_})
+set(HEADERS ${HEADERS_LIST})
 
+# Source files
 add_subdirectory(src)
-add_subdirectory(python)
+
+# Python interface
+if(BUILD_PYTHON_INTERFACE)
+  add_subdirectory(python)
+endif()
 add_subdirectory(examples)
+
+# Unit tests
 add_subdirectory(unittest)
 
 # --- PACKAGING ----------------------------------------------------------------
