@@ -26,6 +26,14 @@ struct math_types
   using VectorOfVectors = std::vector<VectorXs>;
 };
 
+// fwd Problem
+template<typename Scalar>
+struct Problem;
+
+// fwd SResults
+template<typename Scalar>
+struct SResults;
+
 /// Shorthand for the infinity norm
 /// code from proxqp
 template<typename Mat_t>

@@ -9,27 +9,28 @@
 #include "example-base.hpp"
 
 
-using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
 
 using namespace lienlp;
-using Man = PinocchioLieGroup<Vs>;
 using Prob_t = Problem<double>;
 using Equality_t = EqualityConstraint<double>;
 
-int main(int argc, const char* argv[])
+template<int N, int M = 1>
+int submain()
 {
+  using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
+  using Man = PinocchioLieGroup<Vs>;
   Man space;
-  Man::Point_t p0 = space.zero();
-  Man::Point_t p1 = space.rand();
+  typename Man::Point_t p0 = space.zero();
+  typename Man::Point_t p1 = space.rand();
 
-  Eigen::MatrixXd Qroot(2, 4);
+  Eigen::MatrixXd Qroot(N, 4);
   Qroot.setRandom();
-  Eigen::Matrix2d Q_ = Qroot * Qroot.transpose();
+  Eigen::MatrixXd Q_ = Qroot * Qroot.transpose();
 
-  Eigen::MatrixXd A(1, 2);
+  Eigen::MatrixXd A(M, N);
   A.setRandom();
-  Eigen::VectorXd b(1);
-  b << 0.5;
+  Eigen::VectorXd b(M);
+  b.setRandom();
 
   fmt::print("Linear residual:\n{} << Q\n", Q_);
   fmt::print("A {}\n", A);
@@ -50,15 +51,23 @@ int main(int argc, const char* argv[])
   auto prob = std::make_shared<Prob_t>(cost, cstrs_);
 
   using Solver_t = Solver<Man>;
-  Solver_t::Workspace workspace(space.nx(), space.nx(), *prob);
-  Solver_t::Results results(space.nx(), *prob);
+  typename Solver_t::Workspace workspace(space.nx(), space.nx(), *prob);
+  typename Solver_t::Results results(space.nx(), *prob);
 
   Solver_t solver(space, prob);
-  solver.setPenalty(0.01);
+  solver.setPenalty(1e-3);
   solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lamsPrev);
-  fmt::print("Results {}\n", results);
+  fmt::print("Results {}\n\n", results);
 
+  return 0;
+}
+
+int main(int argc, const char* argv[])
+{
+  int s0 = submain<2>();
+  int s1 = submain<4>();
+  int s2 = submain<4, 3>();
   return 0;
 }
