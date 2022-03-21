@@ -7,10 +7,10 @@
 namespace lienlp {
   
   /**
-   * @brief   Equality constraints.
+   * @brief   Equality constraints \f$c(x) = 0\f$.
    * 
-   * @details Equality constraints of the form \f$ c(x) = 0 \f$, where
-   *          \f$c : \calX \to \RR^p\f$ is a residual function
+   * @details This class implements the set associated with equality constraints\f$ c(x) = 0 \f$,
+   *          where \f$c : \calX \to \RR^p\f$ is a residual function.
    */
   template<typename _Scalar>
   struct EqualityConstraint : ConstraintSetBase<_Scalar>

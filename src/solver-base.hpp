@@ -1,5 +1,4 @@
 /** Copyright (c) 2022 LAAS-CNRS, INRIA
- * 
  */
 #pragma once
 
@@ -117,8 +116,11 @@ namespace lienlp {
       {
         results.mu = mu_eq;
         results.rho = rho;
-        fmt::print(fmt::fg(fmt::color::yellow),
-                   "[Iter {:d}] omega={}, eta={}, mu={:g} (1/mu={:g})\n", i, inner_tol, prim_tol, mu_eq, mu_eq_inv);
+        if (verbose)
+        {
+          fmt::print(fmt::fg(fmt::color::yellow), "[Iter {:d}] omega={:.3g}, eta={:.3g}, mu={:g} (1/mu={:g})\n",
+                     i, inner_tol, prim_tol, mu_eq, mu_eq_inv);
+        }
         solveInner(workspace, results);
 
         // accept new primal iterate
@@ -128,7 +130,7 @@ namespace lienlp {
         if (workspace.primalInfeas < prim_tol)
         {
           // accept dual iterate
-          fmt::print(fmt::fg(fmt::color::sea_green), "  Accept multipliers\n");
+          fmt::print(fmt::fg(fmt::color::lime_green), "  Accept multipliers\n");
           acceptMultipliers(workspace);
           if ((workspace.primalInfeas < target_tol) && (workspace.dualInfeas < target_tol))
           {
@@ -189,9 +191,12 @@ namespace lienlp {
         problem->m_cost.computeGradient(x, workspace.objectiveGradient);
         problem->m_cost.computeHessian(x, workspace.objectiveHessian);
 
-        fmt::print("== Iterate {:d} ==\n", results.numIters);
-        fmt::print("[{}] current x: {}", __func__, x.transpose());
-        fmt::print("     objective: {:g}\n", results.value);
+        if (verbose)
+        {
+          fmt::print("[{}] Iterate {:d}\n", __func__, results.numIters);
+          fmt::print(" | current x: {}", x.transpose());
+          fmt::print(" | objective: {:g}\n", results.value);
+        }
 
         computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
         computeResidualDerivatives(x, workspace);
@@ -238,19 +243,18 @@ namespace lienlp {
           cursor += nc;
         }
 
-        if (verbose)
-        {
-          fmt::print("[{}] KKT RHS: {}\n", __func__, workspace.kktRhs.transpose());
-          fmt::print("[{}] KKT LHS:\n{}\n", __func__, workspace.kktMatrix);
-        }
-
         // now check if we can stop
         workspace.dualResidual = workspace.kktRhs(idx_prim);
         workspace.dualInfeas = infNorm(workspace.dualResidual);
         Scalar inner_crit = infNorm(workspace.kktRhs);
 
-        fmt::print("[{}] inner stop {:g} / dualInfeas: {:g} / primInfeas = {:g}\n",
-                   __func__, inner_crit, workspace.dualInfeas, workspace.primalInfeas);
+        if (verbose)
+        {
+          fmt::print(" | KKT RHS: {}\n",  workspace.kktRhs.transpose());
+          fmt::print(" | KKT LHS:\n{}\n", workspace.kktMatrix);
+          fmt::print(" | inner stop {:g} / dualInfeas: {:g} / primInfeas = {:g}\n",
+                     inner_crit, workspace.dualInfeas, workspace.primalInfeas);
+        }
 
         if (inner_crit <= inner_tol)
         {
@@ -265,7 +269,7 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print("[{}] KKT signature:  {}\n", __func__, workspace.signature.transpose());
+          fmt::print(" | KKT signature:  {}\n", workspace.signature.transpose());
         }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
@@ -293,7 +297,7 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print("[{}] dir deriv: {:.3g} | alpha: {:.3g}\n", __func__, dir_deriv, alpha_opt);
+          fmt::print(" | dir deriv: {:.3g} | alpha: {:.3g}\n", dir_deriv, alpha_opt);
         }
 
         results.numIters++;

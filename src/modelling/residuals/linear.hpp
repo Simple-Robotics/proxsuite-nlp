@@ -7,7 +7,7 @@
 namespace lienlp {
   
   /**
-   * Linear residuals \f$r(x) = Ax + b\f$
+   * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
   struct LinearResidual : ResidualBase<_Scalar>

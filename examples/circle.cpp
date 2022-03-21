@@ -3,7 +3,6 @@
  * 
  */
 #include "lienlp/cost-function.hpp"
-#include "lienlp/merit-function-base.hpp"
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
@@ -11,18 +10,10 @@
 #include "lienlp/modelling/constraints/negative-orthant.hpp"
 #include "lienlp/solver-base.hpp"
 
-#include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
-
-
-#include <fmt/core.h>
-#include <fmt/color.h>
-#include <fmt/ostream.h>
-#include <Eigen/Core>
+#include "example-base.hpp"
 
 
 using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
-
-using fmt::format;
 
 using namespace lienlp;
 using Man = PinocchioLieGroup<Vs>;

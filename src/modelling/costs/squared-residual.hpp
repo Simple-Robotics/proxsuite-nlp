@@ -6,11 +6,13 @@
 namespace lienlp {
 
   /**
-   * Cost function which is the weighted squares of some
-   * residual function.
+   * @brief Weighted quadratic residual \f$\frac{1}{2}\| r(x) \|_W \f$ of a residual \f$r(x)\f$.
+   * 
+   * Cost function which is the weighted squares \f$\frac12 \|r(x)\|_W \f$ of some
+   * residual function \f$r :\calX\to \RR^p\f$.
    */
   template<typename _Scalar>
-  class QuadraticResidualCost : public CostFunctionBase<_Scalar>
+  struct QuadraticResidualCost : public CostFunctionBase<_Scalar>
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

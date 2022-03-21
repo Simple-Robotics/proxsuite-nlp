@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 CNRS INRIA
+# Copyright (C) 2022 CNRS INRIA
 #
 
 cmake_minimum_required(VERSION 3.0)

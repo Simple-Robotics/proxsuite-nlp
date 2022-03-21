@@ -1,9 +1,12 @@
 # Copyright (C) 2022 LAAS-CNRS / INRIA
 
-file(GLOB CPP_EXAMPLES
+set(EXAMPLES_HEADER
+    "example-base.hpp")
+
+file(GLOB EXAMPLES_CPP
      "*.cpp")
 
-message(STATUS "CPP EXAMPLES: ${CPP_EXAMPLES}")
+message(STATUS "CPP EXAMPLES: ${EXAMPLES_CPP}")
 
 
 function(add_lienlp_example exfile)
@@ -20,7 +23,7 @@ function(add_lienlp_example exfile)
   target_link_libraries(${example_name} PRIVATE fmt::fmt)
 endfunction()
 
-foreach(exfile ${CPP_EXAMPLES})
+foreach(exfile ${EXAMPLES_CPP})
   add_lienlp_example(${exfile})
 endforeach()
 
