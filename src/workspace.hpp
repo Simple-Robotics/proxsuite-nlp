@@ -64,6 +64,8 @@ namespace lienlp {
     std::vector<MatrixXs> cstrVectorHessProd;
     /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorOfVectors lamsPlus;
+    /// Pre-projected multipliers.
+    VectorOfVectors lamsPlusPre;
     /// Primal-dual multiplier estimates (from the pdBCL algorithm)
     VectorOfVectors lamsPDAL;
     VectorOfVectors auxProxDualErr;
@@ -107,6 +109,7 @@ namespace lienlp {
       meritGradient.setZero();
       objectiveHessian.setZero();
 
+      Prob_t::allocateMultipliers(prob, lamsPlusPre);
       Prob_t::allocateMultipliers(prob, lamsPlus);
       Prob_t::allocateMultipliers(prob, lamsPDAL);
       Prob_t::allocateMultipliers(prob, auxProxDualErr);

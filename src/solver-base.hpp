@@ -110,6 +110,7 @@ namespace lienlp {
 
       updateToleranceFailure();
 
+      results.numIters = 0;
 
       std::size_t i = 0;
       while (results.numIters < MAX_ITERS)
@@ -188,7 +189,8 @@ namespace lienlp {
         problem->m_cost.computeGradient(x, workspace.objectiveGradient);
         problem->m_cost.computeHessian(x, workspace.objectiveHessian);
 
-        fmt::print("[{}] current x: {}\n", __func__, x.transpose());
+        fmt::print("== Iterate {:d} ==\n", results.numIters);
+        fmt::print("[{}] current x: {}", __func__, x.transpose());
         fmt::print("     objective: {:g}\n", results.value);
 
         computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
@@ -238,7 +240,8 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print("[{}] {} << kkt RHS\n", __func__, workspace.kktRhs.transpose());
+          fmt::print("[{}] KKT RHS: {}\n", __func__, workspace.kktRhs.transpose());
+          fmt::print("[{}] KKT LHS:\n{}\n", __func__, workspace.kktMatrix);
         }
 
         // now check if we can stop
@@ -355,8 +358,8 @@ namespace lienlp {
         workspace.primalResiduals[i] = cstr->m_func(x);
 
         // multiplier
-        workspace.lamsPlus[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
-        workspace.lamsPlus[i].noalias() = cstr->dualProjection(workspace.lamsPlus[i]);
+        workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
+        workspace.lamsPlus[i] = cstr->dualProjection(workspace.lamsPlusPre[i]);
         workspace.auxProxDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
       } 
@@ -386,8 +389,7 @@ namespace lienlp {
 
         MatrixXs& J_ = workspace.cstrJacobians[i];
         cstr->m_func.computeJacobian(x, J_);
-        MatrixXs projJac = cstr->JdualProjection(workspace.lamsPlus[i]);
-        J_.noalias() = projJac * J_;
+        J_.noalias() = cstr->JdualProjection(workspace.lamsPlusPre[i]) * J_;
         cstr->m_func.vhp(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 

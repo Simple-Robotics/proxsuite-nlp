@@ -44,7 +44,7 @@ namespace lienlp {
       {
         if (active_set(i))
         {
-          Jout.row(i).setZero();
+          Jout.col(i).setZero();
         }
       }
       return Jout;
@@ -53,7 +53,7 @@ namespace lienlp {
     void computeActiveSet(const ConstVectorRef& z,
                           Active_t& out) const
     {
-      out.array() = (z.array() >= Scalar(0.));
+      out.array() = (z.array() > Scalar(0.));
     }
 
   };
