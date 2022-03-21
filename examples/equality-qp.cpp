@@ -55,7 +55,7 @@ int submain()
   typename Solver_t::Results results(space.nx(), *prob);
 
   Solver_t solver(space, prob);
-  solver.setPenalty(1e-3);
+  solver.setPenalty(1e-4);
   solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lamsPrev);
@@ -69,5 +69,6 @@ int main(int argc, const char* argv[])
   int s0 = submain<2>();
   int s1 = submain<4>();
   int s2 = submain<4, 3>();
+  int s3 = submain<10, 4>();
   return 0;
 }

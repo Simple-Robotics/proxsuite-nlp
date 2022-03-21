@@ -250,8 +250,8 @@ namespace lienlp {
 
         if (verbose)
         {
-          fmt::print(" | KKT RHS: {}\n",  workspace.kktRhs.transpose());
-          fmt::print(" | KKT LHS:\n{}\n", workspace.kktMatrix);
+          // fmt::print(" | KKT RHS: {}\n",  workspace.kktRhs.transpose());
+          // fmt::print(" | KKT LHS:\n{}\n", workspace.kktMatrix);
           fmt::print(" | inner stop {:g} / dualInfeas: {:g} / primInfeas = {:g}\n",
                      inner_crit, workspace.dualInfeas, workspace.primalInfeas);
         }
