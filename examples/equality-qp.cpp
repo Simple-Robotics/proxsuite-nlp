@@ -14,14 +14,14 @@
 /**
  * Sample a random orthonormal matrix.
  */
-template<typename Scalar, int M, int N>
-Eigen::Matrix<Scalar, M, N> randomOrthogonal()
+template<typename Scalar>
+Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
 {
-  using ReturnType = Eigen::Matrix<Scalar, N, N>;
-  ReturnType out = ReturnType::Random();
+  using ReturnType = Eigen::Matrix<Scalar, -1, -1>;
+  ReturnType out = ReturnType::Random(N, N);
   Eigen::FullPivHouseholderQR<Eigen::Ref<ReturnType>> qr(out);
-  Eigen::Matrix<Scalar, N, N> Q(qr.matrixQ());
-  return Q.template topLeftCorner<M, N>();
+  Eigen::Matrix<Scalar, -1, -1> Q(qr.matrixQ());
+  return Q.template topLeftCorner(M, N);
 }
 
 
@@ -46,7 +46,7 @@ int submain()
   A.setZero();
   if (M > 0)
   {
-    A = randomOrthogonal<double, M, N>();
+    A = randomOrthogonal<double>(M, N);
   }
   Eigen::VectorXd b(M);
   b.setRandom();
@@ -78,10 +78,6 @@ int submain()
 
 int main(int argc, const char* argv[])
 {
-
-  auto A = randomOrthogonal<double, 2, 4>();
-  fmt::print("Random A (from QR):\n{}\n-- check {}\n", A, A.transpose() * A);
-
   submain<2>();
   submain<4>();
   submain<4, 3>();
@@ -91,5 +87,6 @@ int main(int argc, const char* argv[])
   submain<20, 4>();
   submain<50, 0>();
   submain<50, 10>();
+  submain<200, 42>();
   return 0;
 }

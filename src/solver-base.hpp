@@ -395,7 +395,6 @@ namespace lienlp {
         workspace.primalInfeas = std::max(
           workspace.primalInfeas,
           infNorm(cstr->dualProjection(workspace.primalResiduals[i])));
-        fmt::print(" | {} << cstr {:d}", workspace.primalResiduals[i].transpose(), i);
       }
     }
 
