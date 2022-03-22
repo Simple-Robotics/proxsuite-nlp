@@ -8,6 +8,21 @@
 
 #include "example-base.hpp"
 
+#include <Eigen/QR>
+
+
+/**
+ * Sample a random orthonormal matrix.
+ */
+template<typename Scalar, int M, int N>
+Eigen::Matrix<Scalar, M, N> randomOrthogonal()
+{
+  using ReturnType = Eigen::Matrix<Scalar, N, N>;
+  ReturnType out = ReturnType::Random();
+  Eigen::FullPivHouseholderQR<Eigen::Ref<ReturnType>> qr(out);
+  Eigen::Matrix<Scalar, N, N> Q(qr.matrixQ());
+  return Q.template topLeftCorner<M, N>();
+}
 
 
 using namespace lienlp;
@@ -23,30 +38,26 @@ int submain()
   typename Man::Point_t p0 = space.zero();
   typename Man::Point_t p1 = space.rand();
 
-  Eigen::MatrixXd Qroot(N, 4);
+  Eigen::MatrixXd Qroot(N, N + 1);
   Qroot.setRandom();
-  Eigen::MatrixXd Q_ = Qroot * Qroot.transpose();
+  Eigen::MatrixXd Q_ = Qroot * Qroot.transpose() / N;
 
   Eigen::MatrixXd A(M, N);
-  A.setRandom();
+  A.setZero();
+  if (M > 0)
+  {
+    A = randomOrthogonal<double, M, N>();
+  }
   Eigen::VectorXd b(M);
   b.setRandom();
-
-  fmt::print("Linear residual:\n{} << Q\n", Q_);
-  fmt::print("A {}\n", A);
 
   LinearResidual<double> res1(A, b);
 
   QuadDistanceCost<Man> cost(space, Q_);
 
-  fmt::print("cost(p0)  {}\n", cost(p0));
-  fmt::print("cost(p1)  {}\n", cost(p1));
-
   auto cstr1 = std::make_shared<Equality_t>(res1);
-  std::vector<Prob_t::CstrPtr> cstrs_{
-    cstr1,
-    cstr1
-    };
+  std::vector<Prob_t::CstrPtr> cstrs_;
+  if (M > 0) cstrs_.push_back(cstr1);
 
   auto prob = std::make_shared<Prob_t>(cost, cstrs_);
 
@@ -56,6 +67,7 @@ int submain()
 
   Solver_t solver(space, prob);
   solver.setPenalty(1e-4);
+  solver.rho = 1e-8;
   solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lamsPrev);
@@ -66,9 +78,18 @@ int submain()
 
 int main(int argc, const char* argv[])
 {
-  int s0 = submain<2>();
-  int s1 = submain<4>();
-  int s2 = submain<4, 3>();
-  int s3 = submain<10, 4>();
+
+  auto A = randomOrthogonal<double, 2, 4>();
+  fmt::print("Random A (from QR):\n{}\n-- check {}\n", A, A.transpose() * A);
+
+  submain<2>();
+  submain<4>();
+  submain<4, 3>();
+  submain<10, 4>();
+  submain<10, 6>();
+  submain<20, 1>();
+  submain<20, 4>();
+  submain<50, 0>();
+  submain<50, 10>();
   return 0;
 }
