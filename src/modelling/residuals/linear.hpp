@@ -20,8 +20,8 @@ namespace lienlp {
     using Base = ResidualBase<Scalar>;
     using Base::computeJacobian;
 
-    MatrixXs mat;
-    VectorXs b;
+    const MatrixXs mat;
+    const VectorXs b;
 
     LinearResidual(const ConstMatrixRef& A, const ConstVectorRef& b)
       : Base(A.cols(), A.cols(), A.rows()), mat(A), b(b) {}
