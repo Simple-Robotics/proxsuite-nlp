@@ -33,10 +33,11 @@ namespace lienlp {
     using Workspace = SWorkspace<Scalar>;
     using Results = SResults<Scalar>;
 
-    shared_ptr<Prob_t> problem;
-    Merit_t merit_fun;
     /// Manifold on which to optimize.
     M& manifold;
+    shared_ptr<Prob_t> problem;
+    /// Merit function.
+    Merit_t merit_fun;
     /// Proximal regularization penalty.
     QuadDistanceCost<M> prox_penalty;
 
@@ -85,13 +86,13 @@ namespace lienlp {
            const Scalar dual_beta=1.)
       : manifold(man),
         problem(prob),
-        prox_penalty(man),
-        merit_fun(prob),
-        target_tol(tol),
-        mu_eq_init(mu_eq_init),
+        merit_fun(problem),
+        prox_penalty(manifold),
         rho(rho),
+        mu_eq_init(mu_eq_init),
         mu_factor(mu_factor),
         mu_lower_(mu_lower_),
+        target_tol(tol),
         prim_alpha(prim_alpha),
         prim_beta(prim_beta),
         dual_alpha(dual_alpha),
