@@ -30,13 +30,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/python.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
-if(APPLE) # Use the handmade approach
-  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
-endif(APPLE)
 include(CMakeDependentOption)
-
-# If needed, set CMake policy for APPLE systems
-APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 if(WIN32)
   set(LINK copy_if_different)
@@ -56,7 +50,13 @@ option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" ON)
 cmake_dependent_option(LINK_PYTHON_INTERFACE_TO_OPENMP "Link OpenMP to the Python interface" ON BUILD_WITH_OPENMP_SUPPORT OFF)
 option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
+option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
+
+if(INITIALIZE_WITH_NAN)
+  message(STATUS "Initialize with NaN all the Eigen entries.")
+  add_definitions(-DEIGEN_INITIALIZE_MATRICES_BY_NAN)
+endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
@@ -110,12 +110,6 @@ if(BUILD_PYTHON_INTERFACE)
 
 endif(BUILD_PYTHON_INTERFACE)
 
-# Enforce the preprocessed version of boost::list and boost::vector
-# but it avoids any compilation issue.
-add_definitions(-DBOOST_MPL_LIMIT_LIST_SIZE=30)
-add_definitions(-DBOOST_MPL_LIMIT_VECTOR_SIZE=30)
-
-list(APPEND CFLAGS_DEPENDENCIES "-DBOOST_MPL_LIMIT_LIST_SIZE=30")
 
 # Path to boost headers
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
