@@ -171,6 +171,11 @@ namespace lienlp {
       } else {
         setPenalty(std::max(mu_eq * mu_factor, mu_lower_));
       }
+      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
+      {
+        auto cstr = problem->getCstr(i);
+        cstr->updateProxParameters(mu_eq);
+      }
     }
 
     /// Set penalty parameter, its inverse and propagate to merit function.

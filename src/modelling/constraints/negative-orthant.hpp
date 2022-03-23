@@ -51,7 +51,7 @@ namespace lienlp {
     }
 
     void computeActiveSet(const ConstVectorRef& z,
-                          Active_t& out) const
+                          Eigen::Ref<Active_t> out) const
     {
       out.array() = (z.array() > Scalar(0.));
     }

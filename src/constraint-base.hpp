@@ -54,8 +54,12 @@ namespace lienlp {
       
       return eye - Jprojection(z);
     }
+
+    /// Update proximal parameter; this applies to when a proximal operator is derived.
+    virtual void updateProxParameters(const Scalar mu) {};
+
     /// Compute the active set of the constraint.
-    virtual void computeActiveSet(const ConstVectorRef& z, Active_t& out) const = 0;
+    virtual void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const = 0;
     virtual ~ConstraintSetBase<Scalar>() = default;
   private:
     const MatrixXs eye;

@@ -27,7 +27,7 @@ namespace lienlp {
     using functor_t = typename Base::functor_t;
 
     EqualityConstraint(const functor_t& func)
-      : ConstraintSetBase<Scalar>(func),
+      : Base(func),
         proj_(func.nr()),
         Jproj_(func.nr(), func.nr())
       {
@@ -45,7 +45,7 @@ namespace lienlp {
       return Jproj_;
     }
 
-    void computeActiveSet(const ConstVectorRef& z, Active_t& out) const
+    void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const
     {
       out.array() = true;
     }
