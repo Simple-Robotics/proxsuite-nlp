@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_linear)
 
   Eigen::Matrix4d J0;
   res.computeJacobian(x0, J0);
-  fmt::print("{}  <<  Jres(x0)", J0);
+  fmt::print("{}  <<  Jres(x0)\n", J0);
 
   BOOST_CHECK(res(x0).isApprox(b));
   BOOST_CHECK(J0.isApprox(A));
