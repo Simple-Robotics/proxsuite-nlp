@@ -26,6 +26,10 @@ struct math_types
   using VectorOfVectors = std::vector<VectorXs>;
 };
 
+// fwd Cost
+template<typename Scalar>
+struct CostFunctionBase;
+
 // fwd Problem
 template<typename Scalar>
 struct Problem;
