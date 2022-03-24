@@ -90,11 +90,16 @@ namespace lienlp {
     }
 
     /// Update proximal parameter; this applies to when a proximal operator is derived.
-    virtual void updateProxParameters(const Scalar mu) {};
+    virtual void updateProxParameters(const Scalar) {};
 
     /// Compute the active set of the constraint.
     virtual void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const = 0;
     virtual ~ConstraintSetBase<Scalar>() = default;
+
+    bool operator==(const ConstraintSetBase<Scalar>& rhs)
+    {
+      return this == &rhs;
+    }
   };
 
 }
