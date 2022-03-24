@@ -8,10 +8,14 @@ namespace lienlp {
     void exposeProblem()
     {
       using context::Problem_t;
-      bp::class_<Problem_t, std::shared_ptr<Problem_t>>(
+      using ConstraintStack = std::vector<Problem_t::CstrPtr>;
+      bp::class_<Problem_t>(
         "Problem", "Problem definition class.",
-        bp::init<const context::Cost_t&>(bp::args("cost"))
+        bp::init<const context::Cost_t&,
+                 ConstraintStack&
+                 >(bp::args("cost", "constraints"))
       )
+        .def(bp::init<const context::Cost_t&>(bp::args("cost")))
         ;
     }
 
