@@ -1,5 +1,6 @@
 include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
 
+# identify bindings C++ source files
 file(GLOB_RECURSE ${PY_NAME}_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
      )
@@ -25,11 +26,11 @@ set_target_properties(${PY_NAME}
 
 # link solver, eigenpy, Boost.Python
 target_link_libraries(${PY_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
-TARGET_LINK_BOOST_PYTHON(${PY_NAME} PUBLIC)
+target_link_boost_python(${PY_NAME} PUBLIC)
 install(TARGETS ${PY_NAME} DESTINATION ${${PY_NAME}_INSTALL_DIR})
 
-message(WARNING "Python headers: ${PY_HEADERS}")
-message(WARNING "Python sources: ${PY_SOURCES}")
+message(STATUS "Python headers: ${PY_HEADERS}")
+message(STATUS "Python sources: ${PY_SOURCES}")
 
 foreach(pyheader ${PY_HEADERS})
   message(STATUS "Processing Python header ${pyheader}")
@@ -43,10 +44,24 @@ file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
      )
 
+# COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PY_NAME}_PYFILES
     __init__.py)
 
+file(GLOB_RECURSE PY_EXAMPLES
+     ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.py)
+
+message(STATUS "Python examples: ${PY_EXAMPLES}")
 
 foreach(pyfile ${${PY_NAME}_PYFILES})
-  python_install_on_site(${PROJECT_NAME} ${pyfile})
+	python_install_on_site(${PROJECT_NAME} ${pyfile})
+endforeach()
+
+foreach(pyfile ${PY_EXAMPLES})
+	get_filename_component(pyfile_name ${pyfile} NAME)
+	configure_file(
+		${pyfile}
+		${CMAKE_CURRENT_BINARY_DIR}/examples/${pyfile_name}
+		COPYONLY
+		)
 endforeach()
