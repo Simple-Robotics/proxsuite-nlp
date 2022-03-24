@@ -1,5 +1,5 @@
 #include "lienlp/python/fwd.hpp"
-#include "lienlp/results.hpp"
+#include "lienlp/problem-base.hpp"
 
 
 namespace lienlp {
@@ -7,9 +7,12 @@ namespace lienlp {
     
     void exposeProblem()
     {
-      bp::class_<context::Problem_t>("Problem",
-                                     "Problem definition class.",
-                                     bp::no_init);
+      using context::Problem_t;
+      bp::class_<Problem_t, std::shared_ptr<Problem_t>>(
+        "Problem", "Problem definition class.",
+        bp::init<const context::Cost_t&>(bp::args("cost"))
+      )
+        ;
     }
 
   } // namespace python
