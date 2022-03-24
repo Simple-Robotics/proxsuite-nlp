@@ -86,6 +86,7 @@ int main(int argc, const char* argv[])
   submain<20, 4>();
   submain<50, 0>();
   submain<50, 10>();
+  submain<100, 50>();
   submain<200, 42>();
   return 0;
 }
