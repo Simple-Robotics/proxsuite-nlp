@@ -24,7 +24,7 @@ namespace lienlp {
 
 
     ConstraintSetBase<Scalar>(const functor_t& func)
-      : m_func(func), eye(MatrixXs::Identity(func.nr(), func.nr()))
+      : m_func(func)
       {}
 
     inline ReturnType operator()(const ConstVectorRef& x) const
@@ -41,18 +41,52 @@ namespace lienlp {
 
     /// Compute projection of variable @p z onto the constraint set.
     virtual ReturnType projection(const ConstVectorRef& z) const = 0;
-    /// Compute projection of @p z onto the normal cone to the set.
-    inline ReturnType dualProjection(const ConstVectorRef& z) const
+
+    /** Compute projection of @p z onto the normal cone to the set.
+     * The default implementation is just $\f\mathrm{id} - P\f$.
+     */
+    inline ReturnType normalConeProjection(const ConstVectorRef& z) const
     {
       return z - projection(z);
     }
-    /// Compute the jacobian of the constraint set projection operator.
-    virtual JacobianType Jprojection(const ConstVectorRef& z) const = 0;
-    /// Compute the jacobian of the projection on the normal cone.
-    inline JacobianType JdualProjection(const ConstVectorRef& z) const
+
+    /** Apply the jacobian of the constraint set projection operator.
+     * @param[in]  z     Input vector (multiplier estimate)
+     * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place and returned.
+     */
+    virtual void applyProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
     {
-      
-      return eye - Jprojection(z);
+      const int nr = this->nr();
+      Active_t active_set(nr);
+      computeActiveSet(z, active_set);
+      for (int i = 0; i < nr; i++)
+      {
+        /// active constraints -> projector onto the constraint set is zero
+        if (active_set(i))
+        {
+          Jout.row(i).setZero();
+        }
+      }
+    }
+
+    /** Apply the jacobian of the projection on the normal cone.
+     * @param[in]  z     Input vector
+     * @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which will be modified in place.
+     *                   The modification should be a row-wise operation.
+     */
+    virtual void applyNormalConeProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout)
+    {
+      const int nr = this->nr();
+      Active_t active_set(nr);
+      computeActiveSet(z, active_set);
+      for (int i = 0; i < nr; i++)
+      {
+        /// inactive constraint -> normal cone projection is zero
+        if (not active_set(i))
+        {
+          Jout.row(i).setZero();
+        }
+      }
     }
 
     /// Update proximal parameter; this applies to when a proximal operator is derived.
@@ -61,8 +95,6 @@ namespace lienlp {
     /// Compute the active set of the constraint.
     virtual void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const = 0;
     virtual ~ConstraintSetBase<Scalar>() = default;
-  private:
-    const MatrixXs eye;
   };
 
 }

@@ -27,31 +27,27 @@ namespace lienlp {
     using functor_t = typename Base::functor_t;
 
     EqualityConstraint(const functor_t& func)
-      : Base(func),
-        proj_(func.nr()),
-        Jproj_(func.nr(), func.nr())
-      {
-        proj_.setZero();
-        Jproj_.setZero();
-      }
+      : Base(func) {}
 
-    ReturnType projection(const ConstVectorRef& z) const
+    inline ReturnType projection(const ConstVectorRef& z) const
     {
-      return proj_;
+      return z * Scalar(0.);
     }
 
-    JacobianType Jprojection(const ConstVectorRef& z) const
+    inline void applyProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
     {
-      return Jproj_;
+      Jout.setZero();
     }
 
-    void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const
+    inline void applyNormalConeProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
+    {
+      return;  // do nothing
+    }
+
+    inline void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const
     {
       out.array() = true;
     }
-  private:
-    ReturnType proj_;
-    JacobianType Jproj_;
   };
 
 } // namespace lienlp

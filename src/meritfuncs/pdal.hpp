@@ -65,7 +65,7 @@ namespace lienlp {
       {
         auto cstr = m_prob->getCstr(i);
         out.push_back((*cstr)(x) + lams_ext[i] / m_muEq);
-        out[i].noalias() = cstr->dualProjection(out[i]);
+        out[i].noalias() = cstr->normalConeProjection(out[i]);
       }
     }
 
@@ -96,7 +96,7 @@ namespace lienlp {
       {
         auto cstr = m_prob->getCstr(i);
         VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
-        cval.noalias() = cstr->dualProjection(cval);
+        cval.noalias() = cstr->normalConeProjection(cval);
         result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
         // dual penalty
         VectorXs dual_res = cval - m_muEq * lams[i];

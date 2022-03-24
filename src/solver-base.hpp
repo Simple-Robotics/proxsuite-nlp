@@ -388,7 +388,7 @@ namespace lienlp {
 
         // multiplier
         workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
-        workspace.lamsPlus[i] = cstr->dualProjection(workspace.lamsPlusPre[i]);
+        workspace.lamsPlus[i] = cstr->normalConeProjection(workspace.lamsPlusPre[i]);
         workspace.auxProxDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
       } 
@@ -400,7 +400,7 @@ namespace lienlp {
         auto cstr = problem->getCstr(i);
         workspace.primalInfeas = std::max(
           workspace.primalInfeas,
-          infNorm(cstr->dualProjection(workspace.primalResiduals[i])));
+          infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
       }
     }
 
@@ -416,8 +416,9 @@ namespace lienlp {
       {
         auto cstr = problem->getCstr(i);
 
-        Eigen::Ref<MatrixXs> J_ = workspace.cstrJacobians[i];
+        MatrixXs& J_ = workspace.cstrJacobians[i];
         cstr->m_func.computeJacobian(x, J_);
+        cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], J_);
         cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 

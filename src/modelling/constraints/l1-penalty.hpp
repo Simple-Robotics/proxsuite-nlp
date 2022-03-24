@@ -35,22 +35,6 @@ namespace lienlp {
       return z.array().sign() * (z.abs().array() - m_mu).max(Scalar(0.));
     }
 
-    JacobianType Jprojection(const ConstVectorRef& z) const
-    {
-      JacobianType Jout(this->nr(), this->nr());
-      Jout.setIdentity();
-      Active_t zero_loc(this->nr());
-      computeActiveSet(z, zero_loc);
-      for (int i = 0; i < this->nr(); i++)
-      {
-        if (zero_loc(i))
-        {
-          Jout(i, i) = 0.;
-        }
-      }
-      return Jout;
-    }
-
     void computeActiveSet(const ConstVectorRef& z,
                           Eigen::Ref<Active_t> out) const
     {
