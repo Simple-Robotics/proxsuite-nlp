@@ -63,11 +63,11 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  Prob_t::CstrPtr cstr1(new Prob_t::Equality_t(residual));
+  Prob_t::CstrPtr cstr1(new Prob_t::EqualityType(residual));
   std::vector<Prob_t::CstrPtr> cstrs;
   cstrs.push_back(cstr1);
   shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
-  fmt::print("\tConstraint dimension: {:d}\n", prob->getCstr(0)->nr());
+  fmt::print("\tConstraint dimension: {:d}\n", prob->getConstraint(0)->nr());
 
   /// Test out merit functions
 

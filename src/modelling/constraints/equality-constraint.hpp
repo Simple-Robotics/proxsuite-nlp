@@ -34,17 +34,17 @@ namespace lienlp {
       return z * Scalar(0.);
     }
 
-    inline void applyProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
+    inline void applyProjectionJacobian(const ConstVectorRef&, MatrixRef Jout) const
     {
       Jout.setZero();
     }
 
-    inline void applyNormalConeProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
+    inline void applyNormalConeProjectionJacobian(const ConstVectorRef&, MatrixRef) const
     {
       return;  // do nothing
     }
 
-    inline void computeActiveSet(const ConstVectorRef& z, Eigen::Ref<Active_t> out) const
+    inline void computeActiveSet(const ConstVectorRef&, Eigen::Ref<Active_t> out) const
     {
       out.array() = true;
     }

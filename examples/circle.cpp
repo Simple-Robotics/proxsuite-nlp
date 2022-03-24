@@ -58,11 +58,11 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  double radius_ = 1.;
+  double radius_ = .7;
 
   QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.zero());
   using Ineq_t = NegativeOrthant<double>;
-  // Prob_t::Equality_t cstr1(residualCircle);
+  // Prob_t::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
   fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
@@ -129,6 +129,7 @@ int main()
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.xOpt.transpose());
+  fmt::print("Constraint value {}\n", cstr1(results.xOpt).transpose());
   fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;

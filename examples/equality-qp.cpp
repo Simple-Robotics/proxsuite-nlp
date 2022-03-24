@@ -27,7 +27,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
 
 using namespace lienlp;
 using Prob_t = Problem<double>;
-using Equality_t = EqualityConstraint<double>;
+using EqualityType = EqualityConstraint<double>;
 
 template<int N, int M = 1>
 int submain()
@@ -54,7 +54,7 @@ int submain()
 
   QuadDistanceCost<Man> cost(space, Q_);
 
-  auto cstr1 = std::make_shared<Equality_t>(res1);
+  auto cstr1 = std::make_shared<EqualityType>(res1);
   std::vector<Prob_t::CstrPtr> cstrs_;
   if (M > 0) cstrs_.push_back(cstr1);
 
