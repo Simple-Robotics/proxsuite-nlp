@@ -5,10 +5,7 @@
 #include <pinocchio/parsers/sample-models.hpp>
 #include <pinocchio/multibody/liegroup/vector-space.hpp>
 
-#include <iostream>
-
 #include <boost/test/unit_test.hpp>
-#include <boost/utility/binary.hpp>
 
 
 using namespace lienlp;
@@ -18,7 +15,6 @@ BOOST_AUTO_TEST_SUITE(manifold)
 
 BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 {
-  std::cout << "test RN" << '\n';
   const int N = 4;
   using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
   PinocchioLieGroup<Vs> space;
@@ -29,12 +25,8 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
   Vs::TangentVector_t v1(space.ndx());
   v1.setRandom();
 
-  std::cout << x0 << "<- x0\n";
-
   auto x1 = space.integrate(x0, v0);
-  std::cout << x1 << std::endl;
   BOOST_CHECK(x1.isApprox(x0));
-
 }
 
 
@@ -59,17 +51,12 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_TEST_MESSAGE(" testing diff");
   TSO2::TangentVec_t dx0(2);
   tspace.difference(x0, x1, dx0);
-  std::cout << dx0 << " << dx0" << std::endl;
-
 
   BOOST_TEST_MESSAGE(" diff Jacobians");
   TSO2::Jac_t J0, J1;
 
   tspace.Jdifference(x0, x1, J0, 0);
-  std::cout << "J0:\n" << J0 << std::endl;
-
   tspace.Jdifference(x0, x1, J1, 1);
-  std::cout << "J1:\n" << J1 << std::endl;
 
   BOOST_CHECK(J0.isApprox(-TSO2::Jac_t::Identity(2, 2)));
   BOOST_CHECK(J1.isApprox( TSO2::Jac_t::Identity(2, 2)));
@@ -86,11 +73,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_TEST_MESSAGE(" integrate jacobians");
 
   tspace.Jintegrate(x0, dx0, J0, 0);
-  std::cout << J0 << " << J0\n";
-
   tspace.Jintegrate(x0, dx0, J1, 1);
-  std::cout << J1 << " << J1"   << std::endl;
-
 }
 
 
@@ -114,18 +97,15 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   space.integrate(x0, d, xout);
   auto xout2 = pinocchio::integrate(model, x0, d);
   BOOST_CHECK(xout.isApprox(xout2));
-  std::cout << "  integrate OK\n";
 
   Vec_t x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
   space.difference(x0, x0, d);
   BOOST_CHECK(d.isZero());
-  std::cout << "  diff OK\n";
 
   space.difference(x0, x1, d);
   BOOST_CHECK(d.isApprox(pinocchio::difference(model, x0, x1)));
-  std::cout << "  diff OK\n";
 }
 // #endif
 
@@ -143,6 +123,10 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
 
   auto x0 = space.zero();
   auto x1 = space.rand();
+  auto dx0 = space.difference(x0, x1);
+  auto x1_exp = space.integrate(x0, dx0);
+
+  BOOST_CHECK(x1_exp.isApprox(x1));
 
 }
 
