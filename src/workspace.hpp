@@ -123,7 +123,7 @@ namespace lienlp {
 
       for (std::size_t i = 0; i < nc; i++)
       {
-        auto cstr = prob.getCstr(i);
+        auto cstr = prob.getConstraint(i);
         int nr = cstr->nr();
         cstrJacobians.push_back(MatrixXs::Zero(nr, ndx));
         cstrVectorHessProd.push_back(MatrixXs::Zero(ndx, ndx));

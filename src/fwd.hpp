@@ -30,6 +30,10 @@ struct math_types
 template<typename Scalar>
 struct CostFunctionBase;
 
+// fwd ConstraintSetBase
+template<typename Scalar>
+struct ConstraintSetBase;
+
 // fwd Problem
 template<typename Scalar>
 struct Problem;

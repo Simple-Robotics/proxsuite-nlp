@@ -173,7 +173,7 @@ namespace lienlp {
       }
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getCstr(i);
+        auto cstr = problem->getConstraint(i);
         cstr->updateProxParameters(mu_eq);
       }
     }
@@ -247,7 +247,7 @@ namespace lienlp {
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
 
           // fill in the dual part of the KKT
-          auto cstr = problem->getCstr(i);
+          auto cstr = problem->getConstraint(i);
           nc = cstr->nr();
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
@@ -312,7 +312,7 @@ namespace lienlp {
         cursor = ndx;
         for (std::size_t i = 0; i < num_c; i++)
         {
-          nc = problem->getCstr(i)->nr();
+          nc = problem->getConstraint(i)->nr();
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
 
           dir_dual += (-workspace.auxProxDualErr[i]).dot(workspace.pdStep(block_slice));
@@ -383,7 +383,7 @@ namespace lienlp {
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getCstr(i);
+        auto cstr = problem->getConstraint(i);
         workspace.primalResiduals[i] = cstr->m_func(x);
 
         // multiplier
@@ -397,7 +397,7 @@ namespace lienlp {
       workspace.primalInfeas = 0.;
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getCstr(i);
+        auto cstr = problem->getConstraint(i);
         workspace.primalInfeas = std::max(
           workspace.primalInfeas,
           infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
@@ -414,7 +414,7 @@ namespace lienlp {
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getCstr(i);
+        auto cstr = problem->getConstraint(i);
 
         MatrixXs& J_ = workspace.cstrJacobians[i];
         cstr->m_func.computeJacobian(x, J_);
@@ -481,7 +481,7 @@ namespace lienlp {
       int nc = 0;
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        nc = problem->getCstr(i)->nr();
+        nc = problem->getConstraint(i)->nr();
 
         auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
         workspace.lamsTrial[i].noalias() = results.lamsOpt[i] + alpha * workspace.pdStep(block_slice);

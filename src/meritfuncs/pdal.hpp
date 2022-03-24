@@ -63,7 +63,7 @@ namespace lienlp {
     {
       for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
       {
-        auto cstr = m_prob->getCstr(i);
+        auto cstr = m_prob->getConstraint(i);
         out.push_back((*cstr)(x) + lams_ext[i] / m_muEq);
         out[i].noalias() = cstr->normalConeProjection(out[i]);
       }
@@ -94,7 +94,7 @@ namespace lienlp {
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
-        auto cstr = m_prob->getCstr(i);
+        auto cstr = m_prob->getConstraint(i);
         VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
         cval.noalias() = cstr->normalConeProjection(cval);
         result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();

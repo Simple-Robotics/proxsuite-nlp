@@ -55,7 +55,7 @@ namespace lienlp {
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        activeSet.push_back(VecBool::Zero(prob.getCstr(i)->nr()));
+        activeSet.push_back(VecBool::Zero(prob.getConstraint(i)->nr()));
       }
     }
 

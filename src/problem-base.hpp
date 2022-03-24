@@ -21,15 +21,15 @@ namespace lienlp {
     using CstrType = ConstraintSetBase<Scalar>;
     using CstrPtr = shared_ptr<CstrType>;
     /// Equality constraint type
-    using Equality_t = EqualityConstraint<Scalar>;
+    using EqualityType = EqualityConstraint<Scalar>;
     /// Cost function type
-    using Cost_t = CostFunctionBase<Scalar>;
+    using CostType = CostFunctionBase<Scalar>;
 
     /// The cost functional
-    const Cost_t& m_cost;
+    const CostType& m_cost;
 
     /// Get a pointer to the \f$i\f$-th constraint pointer
-    const CstrPtr getCstr(const std::size_t& i) const
+    const CstrPtr getConstraint(const std::size_t& i) const
     {
       return m_cstrs[i];
     }
@@ -45,9 +45,9 @@ namespace lienlp {
       return m_ncTotal;
     }
 
-    Problem(const Cost_t& cost) : m_cost(cost) {}
+    Problem(const CostType& cost) : m_cost(cost) {}
 
-    Problem(const Cost_t& cost,
+    Problem(const CostType& cost,
             std::vector<CstrPtr>& constraints)
             : m_cost(cost), m_cstrs(constraints)
     {
@@ -66,7 +66,7 @@ namespace lienlp {
       out.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        CstrPtr cur_cstr = prob.getCstr(i);
+        CstrPtr cur_cstr = prob.getConstraint(i);
         out.push_back(VectorXs::Zero(cur_cstr->nr()));
       }
     }

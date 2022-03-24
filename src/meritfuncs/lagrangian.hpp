@@ -34,7 +34,7 @@ namespace lienlp {
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
-        const auto cstr = m_prob->getCstr(i);
+        const auto cstr = m_prob->getConstraint(i);
         result_ = result_ + lams[i].dot((*cstr)(x));
       }
       return result_;
@@ -48,7 +48,7 @@ namespace lienlp {
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {
-        auto cstr = m_prob->getCstr(i);
+        auto cstr = m_prob->getConstraint(i);
         out += (cstr->m_func.computeJacobian(x)).transpose() * lams[i];
       }
     }
@@ -63,7 +63,7 @@ namespace lienlp {
       MatrixXs vhp_buffer(ndx, ndx);
       for (std::size_t i = 0; i < num_c; i++)
       {
-        auto cstr = m_prob->getCstr(i);
+        auto cstr = m_prob->getConstraint(i);
         cstr->m_func.vectorHessianProduct(x, lams[i], vhp_buffer);
         out += vhp_buffer;
       }
