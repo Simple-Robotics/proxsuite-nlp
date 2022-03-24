@@ -46,7 +46,7 @@ namespace lienlp {
       return Scalar(0.5) * err.dot(m_weights * err);
     }
 
-    void computeGradient(const ConstVectorRef& x, RefVector out) const
+    void computeGradient(const ConstVectorRef& x, VectorRef out) const
     {
       MatrixXs Jres(m_residual->nr(), m_ndx);
       m_residual->computeJacobian(x, Jres);
@@ -54,12 +54,12 @@ namespace lienlp {
       out = Jres.transpose() * (m_weights * err);
     }
 
-    void computeHessian(const ConstVectorRef& x, RefMatrix out) const
+    void computeHessian(const ConstVectorRef& x, MatrixRef out) const
     {
       MatrixXs Jres(m_residual->nr(), m_ndx);
       m_residual->computeJacobian(x, Jres);
       VectorXs err = (*m_residual)(x);
-      out = Jres.transpose() * (m_weights * Jres) + m_residual->vhp(x, err);
+      out = Jres.transpose() * (m_weights * Jres) + m_residual->vectorHessianProduct(x, err);
     }
 
   };

@@ -5,8 +5,8 @@
   using VectorXs = typename math_types<Scalar>::VectorXs;     \
   using MatrixXs = typename math_types<Scalar>::MatrixXs;     \
   using VectorOfVectors = typename math_types<Scalar>::VectorOfVectors; \
-  using RefVector = Eigen::Ref<VectorXs>;                     \
-  using RefMatrix = Eigen::Ref<MatrixXs>;                     \
+  using VectorRef = Eigen::Ref<VectorXs>;                     \
+  using MatrixRef = Eigen::Ref<MatrixXs>;                     \
   using ConstVectorRef = Eigen::Ref<const VectorXs>;          \
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
 

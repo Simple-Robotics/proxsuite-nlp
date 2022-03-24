@@ -418,9 +418,7 @@ namespace lienlp {
 
         Eigen::Ref<MatrixXs> J_ = workspace.cstrJacobians[i];
         cstr->m_func.computeJacobian(x, J_);
-        MatrixXs jacProj = cstr->JdualProjection(workspace.lamsPlusPre[i]);
-        workspace.cstrJacobians[i] = jacProj * J_;
-        cstr->m_func.vhp(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
+        cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 
 

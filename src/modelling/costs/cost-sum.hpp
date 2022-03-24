@@ -48,7 +48,7 @@ namespace lienlp {
       return result_;
     }
 
-    void computeGradient(const ConstVectorRef& x, RefVector out) const
+    void computeGradient(const ConstVectorRef& x, VectorRef out) const
     {
       out.setZero();
       for (std::size_t i = 0; i < m_components.size(); i++)
@@ -57,7 +57,7 @@ namespace lienlp {
       }
     }
 
-    void computeHessian(const ConstVectorRef& x, RefMatrix out) const
+    void computeHessian(const ConstVectorRef& x, MatrixRef out) const
     {
       out.setZero();
       for (std::size_t i = 0; i < m_components.size(); i++)

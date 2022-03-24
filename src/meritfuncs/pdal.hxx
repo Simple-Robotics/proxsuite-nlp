@@ -6,7 +6,7 @@ namespace lienlp {
     const ConstVectorRef& x,
     const VectorOfVectors& lams,
     const VectorOfVectors& lams_ext,
-    RefVector out) const
+    VectorRef out) const
   {
     VectorOfVectors lams_plus;
     lams_plus.reserve(m_prob->getNumConstraints());
@@ -19,7 +19,7 @@ namespace lienlp {
     const ConstVectorRef& x,
     const VectorOfVectors& lams,
     const VectorOfVectors& lams_ext,
-    RefMatrix out) const
+    MatrixRef out) const
   {
     /// Compute cost hessian // TODO rip this out, use workspace
     m_prob->m_cost.computeHessian(x, out);
@@ -33,14 +33,14 @@ namespace lienlp {
 
     // m_lagr.computeHessian(x, lams_plus, out);  // useless because recompute
 
-    MatrixXs J, vhpBuf(ndx, ndx); // TODO refactor this allocation using workspace
+    MatrixXs J, vhp_buffer(ndx, ndx); // TODO refactor this allocation using workspace
     for (std::size_t i = 0; i < num_c; i++)
     {
       typename Prob_t::CstrPtr cstr = m_prob->getCstr(i);
       J.resize(cstr->nr(), ndx);
       cstr->m_func.computeJacobian(x, J);
-      cstr->m_func.vhp(x, lams_plus[i], vhpBuf);
-      out.noalias() += vhpBuf + 2 * m_muEq * J.transpose() * J;
+      cstr->m_func.vectorHessianProduct(x, lams_plus[i], vectorHessianProductBuf);
+      out.noalias() += vhp_buffer + 2 * m_muEq * J.transpose() * J;
     }
   }
 

@@ -19,8 +19,8 @@ namespace lienlp {
     CostFunctionBase(const int nx, const int ndx) : m_nx(nx), m_ndx(ndx) {}
 
     virtual Scalar operator()(const ConstVectorRef& x) const = 0;
-    virtual void computeGradient(const ConstVectorRef& x, RefVector out) const = 0;
-    virtual void computeHessian(const ConstVectorRef& x, RefMatrix out) const = 0;
+    virtual void computeGradient(const ConstVectorRef& x, VectorRef out) const = 0;
+    virtual void computeHessian(const ConstVectorRef& x, MatrixRef out) const = 0;
 
     VectorXs computeGradient(const ConstVectorRef& x) const
     {

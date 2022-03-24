@@ -23,9 +23,9 @@ namespace lienlp {
     /// Evaluate the merit function.
     virtual Scalar operator()(const ConstVectorRef& x, const Args&... args) const = 0;
     /// Evaluate the merit function gradient.
-    virtual void computeGradient(const ConstVectorRef& x, const Args&... args, RefVector out) const = 0;
+    virtual void computeGradient(const ConstVectorRef& x, const Args&... args, VectorRef out) const = 0;
     /// Compute the merit function Hessian matrix.
-    virtual void computeHessian(const ConstVectorRef& x, const Args&... args, RefMatrix out) const = 0;
+    virtual void computeHessian(const ConstVectorRef& x, const Args&... args, MatrixRef out) const = 0;
 
     /// @copybrief computeGradient()
     VectorXs computeGradient(const ConstVectorRef& x, const Args&... args) const
@@ -57,12 +57,12 @@ namespace lienlp {
       return m_prob->m_cost(x);
     }
 
-    void computeGradient(const ConstVectorRef& x, RefVector out) const
+    void computeGradient(const ConstVectorRef& x, VectorRef out) const
     {
       m_prob->m_cost.computeGradient(x, out);
     }
 
-    void computeHessian(const ConstVectorRef& x , RefMatrix out) const
+    void computeHessian(const ConstVectorRef& x , MatrixRef out) const
     {
       m_prob->m_cost.computeHessian(x, out);
     }

@@ -58,7 +58,7 @@ namespace lienlp {
       Jout = 2. * (err.transpose() * m_weights) * Jerr;
     }
 
-    void vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
     {
       MatrixXs Jerr(m_manifold.ndx(), m_manifold.ndx());
       m_manifold.Jdifference(m_target, x, Jerr, 1);

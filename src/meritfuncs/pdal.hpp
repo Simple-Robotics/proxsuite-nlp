@@ -109,12 +109,12 @@ namespace lienlp {
     void computeGradient(const ConstVectorRef& x,
                          const VectorOfVectors& lams,
                          const VectorOfVectors& lams_ext,
-                         RefVector out) const;
+                         VectorRef out) const;
 
     void computeHessian(const ConstVectorRef& x,
                         const VectorOfVectors& lams,
                         const VectorOfVectors& lams_ext,
-                        RefMatrix out) const;
+                        MatrixRef out) const;
   };
 
 }

@@ -42,7 +42,7 @@ namespace lienlp {
 
     void computeGradient(const ConstVectorRef& x,
                          const VectorOfVectors& lams,
-                         RefVector out) const
+                         VectorRef out) const
     {
       out = m_prob->m_cost.computeGradient(x);
       const std::size_t num_c = m_prob->getNumConstraints();
@@ -55,7 +55,7 @@ namespace lienlp {
 
     void computeHessian(const ConstVectorRef& x,
                         const VectorOfVectors& lams,
-                        RefMatrix out) const
+                        MatrixRef out) const
     {
       m_prob->m_cost.computeHessian(x, out);
       const auto num_c = m_prob->getNumConstraints();
@@ -64,7 +64,7 @@ namespace lienlp {
       for (std::size_t i = 0; i < num_c; i++)
       {
         auto cstr = m_prob->getCstr(i);
-        cstr->m_func.vhp(x, lams[i], vhp_buffer);
+        cstr->m_func.vectorHessianProduct(x, lams[i], vhp_buffer);
         out += vhp_buffer;
       }
     }
