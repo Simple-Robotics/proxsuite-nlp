@@ -9,8 +9,7 @@
 namespace lienlp {
 namespace python {
   namespace bp = boost::python;
-
-  using Residual_t = ResidualBase<context::Scalar>;
+  using context::Residual_t;
 
   struct ResidualWrap : Residual_t, bp::wrapper<Residual_t>
   {

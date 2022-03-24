@@ -18,6 +18,7 @@ namespace python {
 
     using Problem_t = Problem<Scalar>;
     using Result_t = SResults<Scalar>;
+    using Residual_t = ResidualBase<Scalar>;
     using Cost_t = CostFunctionBase<Scalar>;
     using Constraint_t = ConstraintSetBase<Scalar>;
 
