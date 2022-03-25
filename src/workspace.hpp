@@ -9,7 +9,8 @@
 #include "lienlp/problem-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /** Workspace class, which holds the necessary intermediary data
    * for the solver to function.

@@ -5,7 +5,8 @@
 #include "lienlp/residual-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
   template<typename M>
   struct QuadraticResidualFunctor : ResidualBase<typename M::Scalar>
   {

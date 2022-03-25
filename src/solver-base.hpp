@@ -19,7 +19,8 @@
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename M>
   class Solver

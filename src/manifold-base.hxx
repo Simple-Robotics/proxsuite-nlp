@@ -1,7 +1,8 @@
 #pragma once
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<class T>
   template<class Vec_t, class Tangent_t, class Out_t>

@@ -5,8 +5,10 @@
 #include "lienlp/modelling/constraints/negative-orthant.hpp"
 
 
-namespace lienlp {
-namespace python {
+namespace lienlp
+{
+namespace python
+{
 
   namespace bp = boost::python;
 

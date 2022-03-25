@@ -10,7 +10,8 @@
 #include <memory>
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   namespace pin = pinocchio;
 

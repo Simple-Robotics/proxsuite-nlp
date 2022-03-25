@@ -8,7 +8,8 @@
 #include <vector>
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename _Scalar>
   struct Problem

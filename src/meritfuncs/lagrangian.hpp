@@ -3,7 +3,8 @@
 #include "lienlp/fwd.hpp"
 #include "lienlp/merit-function-base.hpp"
 
-namespace lienlp {
+namespace lienlp
+{
 
 
   /**

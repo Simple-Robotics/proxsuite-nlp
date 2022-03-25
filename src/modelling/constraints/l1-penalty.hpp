@@ -4,7 +4,8 @@
 #include "lienlp/constraint-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /**
    * @brief   Composite \f$\ell_1\f$-penalty function.

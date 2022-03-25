@@ -6,8 +6,10 @@
 #include <boost/python/overloads.hpp>
 
 
-namespace lienlp {
-namespace python {
+namespace lienlp
+{
+namespace python
+{
   namespace bp = boost::python;
   using context::Residual_t;
 
@@ -28,10 +30,8 @@ namespace python {
     using context::MatrixXs;
 
     // define function pointer types and cast member functions
-    using CompJac1_t = MatrixXs(const context::ConstVectorRef&) const;
-    using CompJac2_t = void(const context::ConstVectorRef&, context::MatrixRef) const;
-    CompJac1_t Residual_t::*compJac1 = &Residual_t::computeJacobian;
-    CompJac2_t Residual_t::*compJac2 = &Residual_t::computeJacobian;
+    context::MatFuncRet_t Residual_t::*compJac1 = &Residual_t::computeJacobian;
+    context::MatFunc_t Residual_t::*compJac2 = &Residual_t::computeJacobian;
 
     bp::class_<Residual_t, boost::noncopyable>("ResidualBase", bp::no_init)
       .def("__call__", &Residual_t::operator(), bp::args("self", "z"))

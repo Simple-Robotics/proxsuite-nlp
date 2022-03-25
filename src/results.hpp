@@ -7,7 +7,8 @@
 #include "lienlp/problem-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   enum ConvergedFlag
   {

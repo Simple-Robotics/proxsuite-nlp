@@ -5,9 +5,11 @@
 #include <eigenpy/eigenpy.hpp>
 
 
-namespace lienlp {
+namespace lienlp
+{
 
-namespace python {
+namespace python
+{
   namespace bp = boost::python;
 
   void exposeManifold();

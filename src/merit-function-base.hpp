@@ -7,7 +7,8 @@
 #include "lienlp/macros.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename _Scalar, typename... Args>
   struct MeritFunctorBase

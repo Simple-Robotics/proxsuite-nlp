@@ -2,8 +2,10 @@
 #include "lienlp/manifold-base.hpp"
 
 
-namespace lienlp {
-namespace python {
+namespace lienlp
+{
+namespace python
+{
 
   void exposeManifold()
   {

@@ -8,7 +8,8 @@
 /**
  * Main namespace of the package.
  */
-namespace lienlp {
+namespace lienlp
+{
 
 /// Use the STL shared_ptr.
 using std::shared_ptr;

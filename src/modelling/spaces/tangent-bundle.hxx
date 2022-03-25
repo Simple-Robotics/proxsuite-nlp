@@ -1,5 +1,6 @@
 
-namespace lienlp {
+namespace lienlp
+{
 
     template<class Base>
     typename TangentBundle<Base>::Point_t

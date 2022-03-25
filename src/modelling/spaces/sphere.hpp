@@ -2,7 +2,8 @@
 
 #include "lienlp/manifold-base.hpp"
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<int Dim, typename Scalar, int Options = 0>
   struct Sphere : ManifoldTpl<Sphere<Dim, Scalar, Options>>

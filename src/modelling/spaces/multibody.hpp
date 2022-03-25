@@ -4,7 +4,8 @@
 #include "lienlp/modelling/spaces/tangent-bundle.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /// @brief      A convenient alias for the tangent bundle of a multibody configuration group.
   /// @details    This cannot not a typedef, since we provide a constructor for the class.

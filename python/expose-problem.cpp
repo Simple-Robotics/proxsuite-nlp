@@ -2,8 +2,10 @@
 #include "lienlp/problem-base.hpp"
 
 
-namespace lienlp {
-  namespace python {
+namespace lienlp
+{
+  namespace python
+  {
     
     void exposeProblem()
     {

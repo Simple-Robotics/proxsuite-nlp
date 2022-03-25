@@ -5,7 +5,8 @@
 #include "lienlp/residual-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /**
    * @brief   Constraint format: negative/positive orthant, cones, etc...

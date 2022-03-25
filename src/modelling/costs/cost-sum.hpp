@@ -5,7 +5,8 @@
 #include "lienlp/cost-function.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename _Scalar>
   class CostSum : CostFunctionBase<_Scalar>

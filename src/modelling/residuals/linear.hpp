@@ -4,7 +4,8 @@
 #include "lienlp/residual-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
   
   /**
    * @brief Linear residuals \f$r(x) = Ax + b\f$.

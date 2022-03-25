@@ -6,10 +6,13 @@
 #include <eigenpy/eigen-typedef.hpp>
 
 
-namespace lienlp {
-namespace python {
+namespace lienlp
+{
+namespace python
+{
 
-  namespace context {
+  namespace context
+  {
     
     using Scalar = double;
 
@@ -21,6 +24,13 @@ namespace python {
     using Residual_t = ResidualBase<Scalar>;
     using Cost_t = CostFunctionBase<Scalar>;
     using Constraint_t = ConstraintSetBase<Scalar>;
+
+
+    using VecFunc_t = void(const ConstVectorRef&, VectorRef) const;
+    using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;
+    using MatFunc_t = void(const ConstVectorRef&, MatrixRef) const;
+    using MatFuncRet_t = MatrixXs(const ConstVectorRef&) const;
+
 
   } // namespace context
 

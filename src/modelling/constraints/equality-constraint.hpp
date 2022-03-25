@@ -4,7 +4,8 @@
 #include "lienlp/constraint-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
   
   /**
    * @brief   Equality constraints \f$c(x) = 0\f$.

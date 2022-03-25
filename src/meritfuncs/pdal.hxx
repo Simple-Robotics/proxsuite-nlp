@@ -1,5 +1,6 @@
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename Scalar>
   void PDALFunction<Scalar>::computeGradient(

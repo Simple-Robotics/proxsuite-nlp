@@ -3,7 +3,8 @@
 #include "lienlp/cost-function.hpp"
 #include "lienlp/residual-base.hpp"
 
-namespace lienlp {
+namespace lienlp
+{
 
   /**
    * @brief Weighted quadratic residual \f$\frac{1}{2}\| r(x) \|_W \f$ of a residual \f$r(x)\f$.

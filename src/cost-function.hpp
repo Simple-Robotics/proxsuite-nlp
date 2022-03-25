@@ -4,7 +4,8 @@
 #include "lienlp/manifold-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   template<typename _Scalar>
   class CostFunctionBase

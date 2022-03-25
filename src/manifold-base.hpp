@@ -5,7 +5,8 @@
 #include "lienlp/fwd.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
   #define LIENLP_DEFINE_INTERFACE_TYPES(M)    \

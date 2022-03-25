@@ -2,8 +2,10 @@
 #include "lienlp/results.hpp"
 
 
-namespace lienlp {
-namespace python {
+namespace lienlp
+{
+namespace python
+{
 
   void exposeResults()
   {

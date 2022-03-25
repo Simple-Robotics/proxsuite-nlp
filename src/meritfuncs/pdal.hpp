@@ -6,7 +6,8 @@
 
 #include <vector>
 
-namespace lienlp {
+namespace lienlp
+{
 
   /**
    * @brief   Primal-dual augmented Lagrangian-type merit function.

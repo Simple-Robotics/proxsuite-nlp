@@ -5,7 +5,8 @@
 #include "lienlp/manifold-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
   
   #define LIENLP_RESIDUAL_TYPES(Scalar)                                           \
     using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;                     \

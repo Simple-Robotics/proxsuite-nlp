@@ -4,7 +4,8 @@
 #include "lienlp/constraint-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
 
   /**
    * @brief   Negative orthant, for constraints \f$h(x)\leq 0\f$.

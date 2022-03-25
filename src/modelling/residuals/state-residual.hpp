@@ -4,7 +4,8 @@
 #include "lienlp/residual-base.hpp"
 
 
-namespace lienlp {
+namespace lienlp
+{
   
   /**
    * Constraint function to be equal to a given element of a manifold.
