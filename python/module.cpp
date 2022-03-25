@@ -13,6 +13,7 @@ BOOST_PYTHON_MODULE(pylienlp)
   bp::import("warnings");
 
   exposeManifold();
+  exposeFunctorTypes();
   exposeResidual();
   exposeCost();
   exposeConstraint();

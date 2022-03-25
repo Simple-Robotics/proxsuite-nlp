@@ -13,8 +13,6 @@ namespace lienlp
   template<typename _Scalar>
   struct LinearResidual : ResidualBase<_Scalar>
   {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
