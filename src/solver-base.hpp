@@ -280,7 +280,7 @@ namespace lienlp
                      inner_crit, workspace.dualInfeas, workspace.primalInfeas);
         }
 
-        if ((inner_crit <= inner_tol) && (k > 0))
+        if (inner_crit <= inner_tol)
         {
           return;
         }
