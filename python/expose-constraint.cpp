@@ -29,7 +29,7 @@ namespace python
     bp::class_<Equality_t, bp::bases<Constraint_t>>(
       "EqualityConstraint",
       "Cast a residual into an equality constraint",
-      bp::init<const context::Residual_t&>()
+      bp::init<const context::DFunctor_t&>()
     )
       ;
 
@@ -37,7 +37,7 @@ namespace python
     bp::class_<Inequality_t, bp::bases<Constraint_t>>(
       "NegativeOrthant",
       "Cast a residual into a negative inequality constraint h(x) \\leq 0",
-      bp::init<const context::Residual_t&>()
+      bp::init<const context::DFunctor_t&>()
     )
       ;
   }

@@ -1,5 +1,4 @@
 #include "lienlp/python/fwd.hpp"
-#include "lienlp/residual-base.hpp"
 
 #include "lienlp/modelling/residuals/linear.hpp"
 
@@ -11,8 +10,8 @@ namespace lienlp
 namespace python
 {
   namespace bp = boost::python;
-  using context::Residual_t;
-  struct ResidualWrap : Residual_t, bp::wrapper<Residual_t>
+  using context::DFunctor_t;
+  struct ResidualWrap : DFunctor_t, bp::wrapper<DFunctor_t>
   {
     void computeJacobian(
       const ConstVectorRef& x,
@@ -22,23 +21,12 @@ namespace python
     }
   };
 
-  void exposeResidual()
+  void exposeResiduals()
   {
-    using context::Scalar;
     using context::VectorXs;
     using context::MatrixXs;
 
-    // define function pointer types and cast member functions
-    context::MatFuncRet_t Residual_t::*compJac2 = &Residual_t::computeJacobian;
-
-    bp::class_<Residual_t,
-               bp::bases<context::DFunctor_t>,
-               boost::noncopyable
-              >("ResidualBase", bp::no_init)
-      .def("computeJacobian", compJac2, bp::args("self", "x"))
-      ;
-
-    bp::class_<LinearResidual<Scalar>, bp::bases<Residual_t>>(
+    bp::class_<LinearResidual<context::Scalar>, bp::bases<DFunctor_t>>(
       "LinearResidual",
       bp::init<MatrixXs, VectorXs>());
   }

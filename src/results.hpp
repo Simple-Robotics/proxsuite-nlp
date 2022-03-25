@@ -26,8 +26,6 @@ namespace lienlp
   template<typename _Scalar>
   struct SResults
   {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;

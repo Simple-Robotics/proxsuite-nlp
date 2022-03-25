@@ -2,18 +2,18 @@
 
 
 #include "lienlp/manifold-base.hpp"
-#include "lienlp/residual-base.hpp"
+#include "lienlp/functor-base.hpp"
 
 
 namespace lienlp
 {
   template<typename M>
-  struct QuadraticResidualFunctor : ResidualBase<typename M::Scalar>
+  struct QuadraticResidualFunctor : DifferentiableFunctor<typename M::Scalar>
   {
     using Scalar = typename M::Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = ResidualBase<Scalar>;
+    using Base = DifferentiableFunctor<Scalar>;
     using Base::computeJacobian;
     using Base::m_ndx;
     using Base::m_nr;

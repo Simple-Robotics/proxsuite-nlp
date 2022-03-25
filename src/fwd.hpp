@@ -42,10 +42,6 @@ struct BaseFunctor;
 template<typename Scalar>
 struct DifferentiableFunctor;
 
-//fwd ResidualBase
-template<typename Scalar>
-struct ResidualBase;
-
 // fwd Cost
 template<typename Scalar>
 struct CostFunctionBase;

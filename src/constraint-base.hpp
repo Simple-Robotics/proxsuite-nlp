@@ -1,8 +1,7 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/manifold-base.hpp"
-#include "lienlp/residual-base.hpp"
+#include "lienlp/functor-base.hpp"
 
 
 namespace lienlp
@@ -19,11 +18,11 @@ namespace lienlp
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
     using Active_t = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    using functor_t = ResidualBase<Scalar>;
-    const functor_t& m_func;
+    using FunctorType = DifferentiableFunctor<Scalar>;
+    const FunctorType& m_func;
 
 
-    ConstraintSetBase<Scalar>(const functor_t& func)
+    ConstraintSetBase<Scalar>(const FunctorType& func)
       : m_func(func)
       {}
 

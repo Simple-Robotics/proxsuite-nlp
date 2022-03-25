@@ -29,7 +29,7 @@ namespace python
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
-      bp::init<shared_ptr<context::Residual_t>, MatrixXs>()
+      bp::init<shared_ptr<context::DFunctor_t>, MatrixXs>()
     );
   }  
 

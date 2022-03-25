@@ -14,7 +14,8 @@ namespace python
 
   void exposeManifold();
   void exposeFunctorTypes();
-  void exposeResidual();
+  /// Expose defined residuals for modelling
+  void exposeResiduals();
   void exposeCost();
   void exposeConstraint();
   void exposeProblem();

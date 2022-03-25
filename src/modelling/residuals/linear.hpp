@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "lienlp/residual-base.hpp"
+#include "lienlp/functor-base.hpp"
 
 
 namespace lienlp
@@ -11,12 +11,12 @@ namespace lienlp
    * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
-  struct LinearResidual : ResidualBase<_Scalar>
+  struct LinearResidual : DifferentiableFunctor<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = ResidualBase<Scalar>;
+    using Base = DifferentiableFunctor<Scalar>;
     using Base::computeJacobian;
 
     const MatrixXs mat;

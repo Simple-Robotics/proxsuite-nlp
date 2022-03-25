@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lienlp/cost-function.hpp"
-#include "lienlp/residual-base.hpp"
+#include "lienlp/functor-base.hpp"
 
 namespace lienlp
 {
@@ -19,17 +19,17 @@ namespace lienlp
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = _Scalar;
-    using ResidualType = ResidualBase<Scalar>;  // base constraint func to use
+    using FunctorType = DifferentiableFunctor<Scalar>;  // base constraint func to use
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Base = CostFunctionBase<Scalar>;
     using Base::computeGradient;
     using Base::computeHessian;
     using Base::m_ndx;
 
-    shared_ptr<ResidualType> m_residual;
+    shared_ptr<FunctorType> m_residual;
     MatrixXs m_weights;
 
-    QuadraticResidualCost(const shared_ptr<ResidualType>& residual,
+    QuadraticResidualCost(const shared_ptr<FunctorType>& residual,
                           const ConstMatrixRef& weights)
       : Base(residual->nx(), residual->ndx()),
         m_residual(residual), m_weights(weights)
@@ -38,7 +38,7 @@ namespace lienlp
     template<typename... ResidualArgs>
     QuadraticResidualCost(const ConstVectorRef& weights,
                      ResidualArgs&... args)
-    : QuadraticResidualCost(new ResidualType(args...),  weights)
+    : QuadraticResidualCost(new FunctorType(args...),  weights)
     {}
 
     Scalar operator()(const ConstVectorRef& x) const

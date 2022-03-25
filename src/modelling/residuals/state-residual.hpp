@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "lienlp/residual-base.hpp"
+#include "lienlp/functor-base.hpp"
 
 
 namespace lienlp
@@ -12,14 +12,14 @@ namespace lienlp
    * This is templated on the manifold.
    */
   template<typename M>
-  struct StateResidual : ResidualBase<typename M::Scalar>
+  struct StateResidual : DifferentiableFunctor<typename M::Scalar>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = typename M::Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = ResidualBase<Scalar>;
+    using Base = DifferentiableFunctor<Scalar>;
     using Base::operator();
     using Base::computeJacobian;
     using Base::m_ndx;

@@ -21,7 +21,6 @@ namespace python
 
     using Problem_t = Problem<Scalar>;
     using Result_t = SResults<Scalar>;
-    using Residual_t = ResidualBase<Scalar>;
     using Cost_t = CostFunctionBase<Scalar>;
     using Constraint_t = ConstraintSetBase<Scalar>;
     using Functor_t = BaseFunctor<Scalar>;
@@ -32,7 +31,7 @@ namespace python
     using MatFunc_t = void(const ConstVectorRef&, MatrixRef) const;
     using MatFuncRet_t = MatrixXs(const ConstVectorRef&) const;
     /// Signature of no-allocation vector-hessian product.
-    using VHPFunc_t= void(const ConstVectorRef&, const ConstVectorRef&, MatrixRef) const;
+    using VHPFunc_t = void(const ConstVectorRef&, const ConstVectorRef&, MatrixRef) const;
 
 
   } // namespace context

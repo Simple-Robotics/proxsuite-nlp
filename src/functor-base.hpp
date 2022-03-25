@@ -1,14 +1,12 @@
 /** @file Base definitions for functor classes.
  */
+#pragma once
+
 #include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
 
 namespace lienlp
 {
-  #define LIENLP_FUNCTOR_TYPEDEFS(Scalar)                                       \
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)                                         \
-    using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;                \
-    using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; \
 
   /**
    * @brief Base functor type.
@@ -50,12 +48,31 @@ namespace lienlp
       : BaseFunctor<Scalar>(nx, ndx, nr) {}
 
     /// @brief      Jacobian matrix of the constraint function.
-    virtual void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const = 0;
+    virtual void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const = 0;
     /// @brief      Vector-hessian product.
-    virtual void vectorHessianProduct(const ConstVectorRef&, const ConstVectorRef&, MatrixRef Hout) const
+    virtual void vectorHessianProduct(const ConstVectorRef&, const ConstVectorRef&, Eigen::Ref<JacobianType> Hout) const
     {
       Hout.setZero();
     }
+
+    /** @copybrief computeJacobian()
+     * 
+     * Allocated version of the computeJacobian() method.
+     */
+    JacobianType computeJacobian(const ConstVectorRef& x) const
+    {
+      JacobianType Jout(this->nr(), this->ndx());
+      computeJacobian(x, Jout);
+      return Jout;
+    }
+
+    JacobianType vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v) const
+    {
+      JacobianType J(this->ndx(), this->ndx());
+      vectorHessianProduct(x, v, J);
+      return J;
+    }
+
   };
 
 } // namespace lienlp

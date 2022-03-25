@@ -14,7 +14,7 @@ BOOST_PYTHON_MODULE(pylienlp)
 
   exposeManifold();
   exposeFunctorTypes();
-  exposeResidual();
+  exposeResiduals();
   exposeCost();
   exposeConstraint();
   exposeProblem();
