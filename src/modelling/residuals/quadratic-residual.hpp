@@ -11,8 +11,8 @@ namespace lienlp
   struct QuadraticResidualFunctor : ResidualBase<typename M::Scalar>
   {
     using Scalar = typename M::Scalar;
-    LIENLP_RESIDUAL_TYPES(Scalar)
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+
     using Base = ResidualBase<Scalar>;
     using Base::computeJacobian;
     using Base::m_ndx;

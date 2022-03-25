@@ -17,8 +17,7 @@ namespace lienlp
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = typename M::Scalar;
-    LIENLP_RESIDUAL_TYPES(Scalar)
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ResidualBase<Scalar>;
     using Base::operator();

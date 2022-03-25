@@ -5,10 +5,10 @@
   using VectorXs = typename math_types<Scalar>::VectorXs;     \
   using MatrixXs = typename math_types<Scalar>::MatrixXs;     \
   using VectorOfVectors = typename math_types<Scalar>::VectorOfVectors; \
-  using VectorRef = Eigen::Ref<VectorXs>;                     \
-  using MatrixRef = Eigen::Ref<MatrixXs>;                     \
-  using ConstVectorRef = Eigen::Ref<const VectorXs>;          \
-  using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
+  using VectorRef = typename math_types<Scalar>::VectorRef;   \
+  using MatrixRef = typename math_types<Scalar>::MatrixRef;   \
+  using ConstVectorRef = typename math_types<Scalar>::ConstVectorRef;   \
+  using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
 
 /// @brief Macro empty arg
 #define LIENLP_MACRO_EMPTY_ARG

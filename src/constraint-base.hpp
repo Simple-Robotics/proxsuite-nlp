@@ -16,8 +16,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_RESIDUAL_TYPES(Scalar)
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
     using Active_t = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using functor_t = ResidualBase<Scalar>;
