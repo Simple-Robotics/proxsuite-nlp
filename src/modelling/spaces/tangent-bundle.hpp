@@ -38,6 +38,7 @@ namespace lienlp
     PointType neutral_impl() const;
     PointType rand_impl() const;
 
+    const Base& getBaseSpace() const { return m_base; }
 
     /// @name   Implementations of operators
 

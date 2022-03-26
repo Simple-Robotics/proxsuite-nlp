@@ -115,10 +115,12 @@ namespace lienlp
     using Self = MultibodyConfiguration<_Scalar, Options>;
     LIENLP_DEFINE_INTERFACE_TYPES(Self)
 
-    typedef pin::ModelTpl<Scalar, Options> PinModel;
+    using PinModel = pin::ModelTpl<Scalar, Options>;
 
     MultibodyConfiguration(const PinModel& model) : m_model(model)
     {};
+
+    const PinModel& getModel() { return m_model; }
 
     PointType neutral_impl() const
     {
@@ -185,7 +187,7 @@ namespace lienlp
     /// \}
 
   protected:
-    const PinModel m_model;
+    const PinModel& m_model;
 
   };
 
