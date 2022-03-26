@@ -28,7 +28,11 @@ namespace lienlp
     using TangentVectorType = Eigen::Matrix<Scalar, NV, 1, Options>;
     using JacobianType = Eigen::Matrix<Scalar, NV, NV, Options>; 
 
-    TangentBundle<Base>(Base base) : m_base(base) {}; 
+    /// Constructor using base space instance.
+    TangentBundle(Base base) : m_base(base) {}; 
+    /// Constructor using base space constructor.
+    template<typename... BaseCtorArgs>
+    TangentBundle(BaseCtorArgs... args) : m_base(Base(args...)) {}
 
     /// Declare implementations
 

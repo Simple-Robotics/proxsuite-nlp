@@ -3,6 +3,7 @@
 #include "lienlp/python/context.hpp"
 
 #include <eigenpy/eigenpy.hpp>
+#include <boost/python.hpp>
 
 
 namespace lienlp
