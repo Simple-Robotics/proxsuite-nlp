@@ -91,11 +91,12 @@ namespace lienlp
   /// Allocated versions
   template<class T>
   template<class Vec_t, class Tangent_t>
-  decltype(auto)
-  ManifoldTpl<T>::integrate(const Eigen::MatrixBase<Vec_t>& x,
-                            const Eigen::MatrixBase<Tangent_t>& v) const
+  typename ManifoldTpl<T>::PointType
+  ManifoldTpl<T>::integrate(
+    const Eigen::MatrixBase<Vec_t>& x,
+    const Eigen::MatrixBase<Tangent_t>& v) const
   {
-    Point_t out;
+    PointType out;
     out.resize(nx());
     integrate(x, v, out);
     return out;
@@ -103,12 +104,12 @@ namespace lienlp
 
   template<class T>
   template<class Vec1_t, class Vec2_t>
-  decltype(auto)
+  typename ManifoldTpl<T>::TangentVectorType
   ManifoldTpl<T>::difference(
     const Eigen::MatrixBase<Vec1_t>& x0,
     const Eigen::MatrixBase<Vec2_t>& x1) const
   {
-    TangentVec_t out;
+    TangentVectorType out;
     out.resize(ndx());
     difference(x0, x1, out);
     return out;

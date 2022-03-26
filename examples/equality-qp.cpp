@@ -35,7 +35,7 @@ int submain()
   using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
   using Man = PinocchioLieGroup<Vs>;
   Man space;
-  typename Man::Point_t p1 = space.rand();
+  typename Man::PointType p1 = space.rand();
 
   Eigen::MatrixXd Qroot(N, N + 1);
   Qroot.setRandom();

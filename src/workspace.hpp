@@ -69,7 +69,8 @@ namespace lienlp
     VectorOfVectors lamsPlusPre;
     /// Primal-dual multiplier estimates (from the pdBCL algorithm)
     VectorOfVectors lamsPDAL;
-    VectorOfVectors auxProxDualErr;
+    /// Subproblem proximal dual error.
+    VectorOfVectors subproblemDualErr;
 
 
     SWorkspace(const int nx,
@@ -100,20 +101,20 @@ namespace lienlp
 
       xPrev.setZero();
       xTrial.setZero();
-      Prob_t::allocateMultipliers(prob, lamsPrev);
-      Prob_t::allocateMultipliers(prob, lamsTrial);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsPrev);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsTrial);
 
       dualResidual.setZero();
-      Prob_t::allocateMultipliers(prob, primalResiduals);  // not multipliers but same dims
+      Prob_t::allocateMultipliersOrResiduals(prob, primalResiduals);  // not multipliers but same dims
 
       objectiveGradient.setZero();
       meritGradient.setZero();
       objectiveHessian.setZero();
 
-      Prob_t::allocateMultipliers(prob, lamsPlusPre);
-      Prob_t::allocateMultipliers(prob, lamsPlus);
-      Prob_t::allocateMultipliers(prob, lamsPDAL);
-      Prob_t::allocateMultipliers(prob, auxProxDualErr);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsPlusPre);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsPlus);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsPDAL);
+      Prob_t::allocateMultipliersOrResiduals(prob, subproblemDualErr);
 
 
       const std::size_t nc = prob.getNumConstraints();

@@ -88,7 +88,7 @@ namespace lienlp
       }
     }
 
-    /// Update proximal parameter; this applies to when a proximal operator is derived.
+    /// Update proximal parameter; this applies to when this class is a proximal operator.
     virtual void updateProxParameters(const Scalar) {};
 
     /// Compute the active set of the constraint.

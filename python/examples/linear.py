@@ -1,7 +1,9 @@
 import numpy as np
+import lienlp
 from lienlp import LinearResidual, EqualityConstraint, NegativeOrthant, Problem
 
-A = np.random.randn(2, 3)
+nx = 3
+A = np.random.randn(2, nx)
 b = np.random.randn(2)
 x0 = np.linalg.lstsq(A, -b)[0]
 x1 = np.linalg.lstsq(A, np.abs(b) * .1)[0]
@@ -29,3 +31,5 @@ print("proj  x0:", cstr2.projection(x0))
 print("proj  x1:", cstr2.projection(x1))
 print("dproj x1:", cstr2.normalConeProjection(x1))
 
+
+cost_ = QuadraticResidualCost(resdl, np.eye(nx))

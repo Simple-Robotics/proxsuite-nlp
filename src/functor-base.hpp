@@ -30,8 +30,11 @@ namespace lienlp
 
     virtual ~BaseFunctor() = default;
 
+    /// Get functor input vector size (representation of manifold).
     int nx() const { return m_nx; }
+    /// Get input manifold's tangent space dimension.
     int ndx() const { return m_ndx; }
+    /// Get functor codimension.
     int nr() const { return m_nr; }
   };
 

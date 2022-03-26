@@ -23,25 +23,25 @@ int main()
 {
   Man space;
   auto lg = space.m_lg;
-  Man::Point_t p0 = lg.random();  // target
+  Man::PointType p0 = lg.random();  // target
   p0.normalize();
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
-  Man::Point_t p1;
+  Man::PointType p1;
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
-  Man::TangentVec_t d;
+  Man::TangentVectorType d;
   space.difference(p0, p1, d);
-  Man::Jac_t J0, J1;
+  Man::JacobianType J0, J1;
   space.Jdifference<0>(p0, p1, J0);
   space.Jdifference<1>(p0, p1, J1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Man::Jac_t weights;
+  Man::JacobianType weights;
   weights.setIdentity();
 
   StateResidual<Man> residual(space, p0);
@@ -60,7 +60,7 @@ int main()
 
   double radius_ = .7;
 
-  QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.zero());
+  QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.neutral());
   using Ineq_t = NegativeOrthant<double>;
   // Prob_t::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
@@ -87,7 +87,7 @@ int main()
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
   Prob_t::VectorOfVectors lams;
-  Prob_t::allocateMultipliers(*prob, lams);
+  Prob_t::allocateMultipliersOrResiduals(*prob, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
              lams.size(), lams[0]);

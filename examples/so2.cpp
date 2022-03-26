@@ -28,27 +28,27 @@ int main()
 {
   Man space;
   SO2 lg = space.m_lg;
-  Man::Point_t neut = lg.neutral();
-  Man::Point_t p0 = lg.random();  // target
-  Man::Point_t p1 = lg.random();
+  Man::PointType neut = lg.neutral();
+  Man::PointType p0 = lg.random();  // target
+  Man::PointType p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
-  Man::TangentVec_t th0(1), th1(1);
+  Man::TangentVectorType th0(1), th1(1);
   space.difference(neut, p0, th0);
   space.difference(neut, p1, th1);
 
   fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
-  Man::TangentVec_t d;
+  Man::TangentVectorType d;
   space.difference(p0, p1, d);
-  Man::Jac_t J0, J1;
+  Man::JacobianType J0, J1;
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Man::Jac_t weights;
+  Man::JacobianType weights;
   weights.setIdentity();
 
   StateResidual<Man> residual(space, p0);
@@ -84,7 +84,7 @@ int main()
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
   Prob_t::VectorOfVectors lams;
-  Prob_t::allocateMultipliers(*prob, lams);
+  Prob_t::allocateMultipliersOrResiduals(*prob, lams);
 
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n", lams.size(), lams[0]);

@@ -16,8 +16,6 @@ namespace lienlp
   struct QuadraticResidualCost : public CostFunctionBase<_Scalar>
   {
   public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     using Scalar = _Scalar;
     using FunctorType = DifferentiableFunctor<Scalar>;  // base constraint func to use
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)

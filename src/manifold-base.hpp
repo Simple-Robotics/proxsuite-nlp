@@ -11,9 +11,8 @@ namespace lienlp
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
   #define LIENLP_DEFINE_INTERFACE_TYPES(M)    \
     using Scalar = typename M::Scalar;        \
-    using Point_t = typename M::Point_t;      \
-    using Vec_t = typename M::TangentVec_t;   \
-    using Hess_t = Eigen::Matrix<Scalar, M::NV, M::NV, M::Options>;
+    using PointType = typename M::PointType;      \
+    using TangentVectorType = typename M::TangentVectorType;
 
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
@@ -35,9 +34,9 @@ namespace lienlp
       Options = traits<T>::Options
     };
 
-    using Point_t = Eigen::Matrix<Scalar, NQ, 1, Options>;
-    using TangentVec_t = Eigen::Matrix<Scalar, NV, 1, Options>;
-    using Jac_t = Eigen::Matrix<Scalar, NV, NV, Options>; 
+    using PointType = Eigen::Matrix<Scalar, NQ, 1, Options>;
+    using TangentVectorType = Eigen::Matrix<Scalar, NV, 1, Options>;
+    using JacobianType = Eigen::Matrix<Scalar, NV, NV, Options>; 
 
     T& derived()
     {
@@ -55,9 +54,9 @@ namespace lienlp
     int ndx() const;
 
     /// @brief    Get the neutral element \f$e \in M\f$ from the manifold (if this makes sense).
-    Point_t zero() const { return derived().zero_impl(); }
+    PointType neutral() const { return derived().neutral_impl(); }
     /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
-    Point_t rand() const { return derived().rand_impl(); }
+    PointType rand() const { return derived().rand_impl(); }
 
     /// @name     Operations
 
@@ -113,15 +112,15 @@ namespace lienlp
     ///
     /// Out-of-place variant of integration operator.
     template<class Vec_t, class Tangent_t>
-    decltype(auto) integrate(const Eigen::MatrixBase<Vec_t>& x,
-                             const Eigen::MatrixBase<Tangent_t>& v) const;
+    PointType integrate(const Eigen::MatrixBase<Vec_t>& x,
+                        const Eigen::MatrixBase<Tangent_t>& v) const;
 
     /// @copybrief difference()
     ///
     /// Out-of-place version of diff operator.
     template<class Vec1_t, class Vec2_t>
-    decltype(auto) difference(const Eigen::MatrixBase<Vec1_t>& x0,
-                              const Eigen::MatrixBase<Vec2_t>& x1) const;
+    TangentVectorType difference(const Eigen::MatrixBase<Vec1_t>& x0,
+                                 const Eigen::MatrixBase<Vec2_t>& x1) const;
 
     /// \}
 

@@ -58,9 +58,9 @@ namespace lienlp
         m_ncTotal += cstr->nr();
       }
     }
-
-
-    static void allocateMultipliers(
+    
+    /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
+    static void allocateMultipliersOrResiduals(
       const Problem<Scalar>& prob,
       VectorOfVectors& out)
     {
@@ -71,7 +71,6 @@ namespace lienlp
         out.push_back(VectorXs::Zero(cur_cstr->nr()));
       }
     }
-
   protected:
     /// Vector of equality constraints.
     const std::vector<CstrPtr> m_cstrs;

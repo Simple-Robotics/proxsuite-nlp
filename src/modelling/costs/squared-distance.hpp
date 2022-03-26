@@ -17,7 +17,7 @@ namespace lienlp{
     using Base::m_residual;
 
     QuadDistanceCost(M& manifold, const ConstMatrixRef& weights)
-      : Base(std::make_shared<FunctorType>(manifold, manifold.zero()), weights)
+      : Base(std::make_shared<FunctorType>(manifold, manifold.neutral()), weights)
       {}
 
     QuadDistanceCost(M& manifold)

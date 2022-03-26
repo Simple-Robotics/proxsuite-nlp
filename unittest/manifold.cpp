@@ -44,29 +44,29 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   // tangent bundle dim should be 3.
   BOOST_CHECK_EQUAL(tspace.nx(), 3);
 
-  auto x0 = tspace.zero();
+  auto x0 = tspace.neutral();
   BOOST_CHECK(x0.isApprox(Eigen::Vector3d(1., 0., 0.)));
   auto x1 = tspace.rand();
   
   BOOST_TEST_MESSAGE(" testing diff");
-  TSO2::TangentVec_t dx0(2);
+  TSO2::TangentVectorType dx0(2);
   tspace.difference(x0, x1, dx0);
 
   BOOST_TEST_MESSAGE(" diff Jacobians");
-  TSO2::Jac_t J0, J1;
+  TSO2::JacobianType J0, J1;
 
   tspace.Jdifference(x0, x1, J0, 0);
   tspace.Jdifference(x0, x1, J1, 1);
 
-  BOOST_CHECK(J0.isApprox(-TSO2::Jac_t::Identity(2, 2)));
-  BOOST_CHECK(J1.isApprox( TSO2::Jac_t::Identity(2, 2)));
+  BOOST_CHECK(J0.isApprox(-TSO2::JacobianType::Identity(2, 2)));
+  BOOST_CHECK(J1.isApprox( TSO2::JacobianType::Identity(2, 2)));
 
   J0.setZero();
   J1.setZero();
 
   // INTEGRATION OP
   BOOST_TEST_MESSAGE(" testing integration");
-  TSO2::Point_t x1_new;
+  TSO2::PointType x1_new;
   tspace.integrate(x0, dx0, x1_new);
   BOOST_CHECK(x1_new.isApprox(x1));
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   pinocchio::buildModels::humanoidRandom(model, true);
 
   using Q_t = MultibodyConfiguration<double>;
-  using Vec_t = Q_t::Point_t;
+  using Vec_t = Q_t::PointType;
   Q_t space(model);
 
   Vec_t x0 = pinocchio::neutral(model);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   // M_t space(config_space);
   M_t space(model);
 
-  auto x0 = space.zero();
+  auto x0 = space.neutral();
   auto x1 = space.rand();
   auto dx0 = space.difference(x0, x1);
   auto x1_exp = space.integrate(x0, dx0);

@@ -3,24 +3,24 @@ namespace lienlp
 {
 
     template<class Base>
-    typename TangentBundle<Base>::Point_t
-    TangentBundle<Base>::zero_impl() const
+    typename TangentBundle<Base>::PointType
+    TangentBundle<Base>::neutral_impl() const
     {
-      Point_t out;
+      PointType out;
       out.resize(nx_impl());
       out.setZero();
-      out.head(m_base.nx()) = m_base.zero();
+      out.head(m_base.nx()) = m_base.neutral();
       return out;
     }
 
     template<class Base>
-    typename TangentBundle<Base>::Point_t
+    typename TangentBundle<Base>::PointType
     TangentBundle<Base>::rand_impl() const
     {
-      Point_t out;
+      PointType out;
       out.resize(nx_impl());
       out.head(m_base.nx()) = m_base.rand();
-      using BTanVec_t = typename Base::TangentVec_t;
+      using BTanVec_t = typename Base::TangentVectorType;
       out.tail(m_base.ndx()) = BTanVec_t::Random(m_base.ndx());
       return out;
     }

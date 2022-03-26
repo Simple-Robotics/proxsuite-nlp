@@ -27,6 +27,10 @@ namespace lienlp
 
     LieGroup m_lg;
     PinocchioLieGroup() {}
+    PinocchioLieGroup(const LieGroup& lg) : m_lg(lg) {}
+
+    template<typename... Args>
+    PinocchioLieGroup(Args... args) : m_lg(args...) {}
 
     /// \name Implementations
 
@@ -79,12 +83,12 @@ namespace lienlp
     inline int nx_impl() const { return m_lg.nq(); }
     inline int ndx_impl() const { return m_lg.nv(); }
 
-    Point_t zero_impl() const
+    PointType neutral_impl() const
     {
       return m_lg.neutral();
     }
 
-    Point_t rand_impl() const
+    PointType rand_impl() const
     {
       return m_lg.random();
     }
@@ -116,12 +120,12 @@ namespace lienlp
     MultibodyConfiguration(const PinModel& model) : m_model(model)
     {};
 
-    Point_t zero_impl() const
+    PointType neutral_impl() const
     {
       return pinocchio::neutral(m_model);
     }
 
-    Point_t rand_impl() const
+    PointType rand_impl() const
     {
       return pinocchio::randomConfiguration(m_model);
     }

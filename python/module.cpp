@@ -1,4 +1,6 @@
 #include "lienlp/python/fwd.hpp"
+#include "lienlp/python/util.hpp"
+
 #include <eigenpy/eigenpy.hpp>
 
 
@@ -12,7 +14,10 @@ BOOST_PYTHON_MODULE(pylienlp)
 
   bp::import("warnings");
 
-  exposeManifold();
+  {
+    bp::scope man_scope = get_namespace("manifolds");
+    exposeManifold();
+  }
   exposeFunctorTypes();
   exposeResiduals();
   exposeCost();

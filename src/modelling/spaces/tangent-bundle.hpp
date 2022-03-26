@@ -24,9 +24,9 @@ namespace lienlp
       Options = traits<Self>::Options
     };
 
-    using Point_t = Eigen::Matrix<Scalar, NQ, 1, Options>;
-    using TangentVec_t = Eigen::Matrix<Scalar, NV, 1, Options>;
-    using Jac_t = Eigen::Matrix<Scalar, NV, NV, Options>; 
+    using PointType = Eigen::Matrix<Scalar, NQ, 1, Options>;
+    using TangentVectorType = Eigen::Matrix<Scalar, NV, 1, Options>;
+    using JacobianType = Eigen::Matrix<Scalar, NV, NV, Options>; 
 
     TangentBundle<Base>(Base base) : m_base(base) {}; 
 
@@ -35,8 +35,8 @@ namespace lienlp
     inline int nx_impl() const { return m_base.nx() + m_base.ndx(); }
     inline int ndx_impl() const { return 2 * m_base.ndx(); }
 
-    Point_t zero_impl() const;
-    Point_t rand_impl() const;
+    PointType neutral_impl() const;
+    PointType rand_impl() const;
 
 
     /// @name   Implementations of operators

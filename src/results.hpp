@@ -50,7 +50,7 @@ namespace lienlp
                mu(0.),
                rho(0.)
     {
-      Prob_t::allocateMultipliers(prob, lamsOpt);
+      Prob_t::allocateMultipliersOrResiduals(prob, lamsOpt);
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {

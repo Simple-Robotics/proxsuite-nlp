@@ -252,7 +252,7 @@ namespace lienlp
           nc = cstr->nr();
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-          workspace.kktRhs(block_slice) = workspace.auxProxDualErr[i];
+          workspace.kktRhs(block_slice) = workspace.subproblemDualErr[i];
           // jacobian block and transpose
           workspace.kktMatrix(block_slice, idx_prim) = J_;
           workspace.kktMatrix(idx_prim, block_slice) = J_.transpose();
@@ -316,7 +316,7 @@ namespace lienlp
           nc = problem->getConstraint(i)->nr();
           auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
 
-          dir_dual += (-workspace.auxProxDualErr[i]).dot(workspace.pdStep(block_slice));
+          dir_dual += (-workspace.subproblemDualErr[i]).dot(workspace.pdStep(block_slice));
           cursor += nc;
         }
 
@@ -390,7 +390,7 @@ namespace lienlp
         // multiplier
         workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
         workspace.lamsPlus[i] = cstr->normalConeProjection(workspace.lamsPlusPre[i]);
-        workspace.auxProxDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
+        workspace.subproblemDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
       } 
 

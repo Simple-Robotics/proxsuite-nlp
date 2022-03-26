@@ -21,7 +21,7 @@ PinocchioLieGroup<Vs_> space;
 
 BOOST_AUTO_TEST_CASE(test_equality)
 {
-  auto x0 = space.zero();
+  auto x0 = space.neutral();
   auto x1 = space.rand();
 }
 
