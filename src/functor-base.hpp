@@ -7,6 +7,9 @@
 
 namespace lienlp
 {
+  // fwd declare composition
+  template<typename F1, typename F2>
+  struct ComposeFunctor;
 
   /**
    * @brief Base functor type.
