@@ -69,25 +69,29 @@ namespace lienlp
     /// Get base point of an element of the tangent bundle.
     /// This map is exactly the natural projection.
     template<typename Point>
-    auto getBasePoint(const Eigen::MatrixBase<Point>& x) const
+    typename Point::template ConstFixedSegmentReturnType<Base::NQ>::Type
+    getBasePoint(const Eigen::MatrixBase<Point>& x) const
     {
       return x.derived().template head<Base::NQ>(m_base.nx());
     }
 
     template<typename Point>
-    auto getBasePointWrite(const Eigen::MatrixBase<Point>& x) const
+    typename Point::template      FixedSegmentReturnType<Base::NQ>::Type
+    getBasePointWrite(const Eigen::MatrixBase<Point>& x) const
     {
       return LIENLP_EIGEN_CONST_CAST(Point, x).template head<Base::NQ>(m_base.nx());
     }
 
     template<typename Tangent>
-    auto getBaseTangent(const Eigen::MatrixBase<Tangent>& v) const
+    typename Tangent::template ConstFixedSegmentReturnType<Base::NV>::Type
+    getBaseTangent(const Eigen::MatrixBase<Tangent>& v) const
     {
       return v.derived().template head<Base::NV>(m_base.ndx());
     }
 
     template<typename Tangent>
-    auto getTangentHeadWrite(const Eigen::MatrixBase<Tangent>& v) const
+    typename Tangent::template      FixedSegmentReturnType<Base::NV>::Type
+    getTangentHeadWrite(const Eigen::MatrixBase<Tangent>& v) const
     {
       return LIENLP_EIGEN_CONST_CAST(Tangent, v).template head<Base::NV>(m_base.ndx());
     }
