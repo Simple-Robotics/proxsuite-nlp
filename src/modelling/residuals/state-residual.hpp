@@ -23,11 +23,11 @@ namespace lienlp
     using Base::m_ndx;
     using Base::m_nr;
 
-    M& m_manifold;
+    const M& m_manifold;
 
     VectorXs m_target;
 
-    StateResidual(M& manifold, const ConstVectorRef& target)
+    StateResidual(const M& manifold, const ConstVectorRef& target)
       : Base(manifold.nx(), manifold.ndx(), manifold.ndx()),
         m_manifold(manifold), m_target(target)
       {}

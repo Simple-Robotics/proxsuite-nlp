@@ -73,7 +73,7 @@ namespace lienlp
      * @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which will be modified in place.
      *                   The modification should be a row-wise operation.
      */
-    virtual void applyNormalConeProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout)
+    virtual void applyNormalConeProjectionJacobian(const ConstVectorRef& z, MatrixRef Jout) const
     {
       const int nr = this->nr();
       Active_t active_set(nr);

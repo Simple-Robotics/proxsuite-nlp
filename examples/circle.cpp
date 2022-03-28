@@ -68,7 +68,7 @@ int main()
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
-  std::vector<Prob_t::CstrPtr> cstrs;
+  std::vector<Prob_t::ConstraintPtr> cstrs;
   cstrs.push_back(std::make_shared<Ineq_t>(cstr1));
   auto prob = std::make_shared<Prob_t>(cf, cstrs);
 

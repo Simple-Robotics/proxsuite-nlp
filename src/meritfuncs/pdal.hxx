@@ -37,7 +37,7 @@ namespace lienlp
     MatrixXs J, vhp_buffer(ndx, ndx); // TODO refactor this allocation using workspace
     for (std::size_t i = 0; i < num_c; i++)
     {
-      typename Prob_t::CstrPtr cstr = m_prob->getConstraint(i);
+      typename Prob_t::ConstraintPtr cstr = m_prob->getConstraint(i);
       J.resize(cstr->nr(), ndx);
       cstr->m_func.computeJacobian(x, J);
       cstr->m_func.vectorHessianProduct(x, lams_plus[i], vhp_buffer);

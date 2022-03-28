@@ -55,7 +55,7 @@ int submain()
   QuadDistanceCost<Man> cost(space, Q_);
 
   auto cstr1 = std::make_shared<EqualityType>(res1);
-  std::vector<Prob_t::CstrPtr> cstrs_;
+  std::vector<Prob_t::ConstraintPtr> cstrs_;
   if (M > 0) cstrs_.push_back(cstr1);
 
   auto prob = std::make_shared<Prob_t>(cost, cstrs_);

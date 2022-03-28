@@ -19,8 +19,8 @@ namespace lienlp
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
     /// Generic constraint type
-    using CstrType = ConstraintSetBase<Scalar>;
-    using CstrPtr = shared_ptr<CstrType>;
+    using ConstraintType = ConstraintSetBase<Scalar>;
+    using ConstraintPtr = shared_ptr<ConstraintType>;
     /// Equality constraint type
     using EqualityType = EqualityConstraint<Scalar>;
     /// Cost function type
@@ -28,9 +28,8 @@ namespace lienlp
 
     /// The cost functional
     const CostType& m_cost;
-
     /// Get a pointer to the \f$i\f$-th constraint pointer
-    const CstrPtr getConstraint(const std::size_t& i) const
+    const ConstraintPtr getConstraint(const std::size_t& i) const
     {
       return m_cstrs[i];
     }
@@ -46,16 +45,16 @@ namespace lienlp
       return m_ncTotal;
     }
 
-    Problem(const CostType& cost) : m_cost(cost) {}
+    Problem(const CostType& cost) : m_cost(cost), m_ncTotal(0) {}
 
     Problem(const CostType& cost,
-            const std::vector<CstrPtr>& constraints)
-            : m_cost(cost), m_cstrs(constraints)
+            const std::vector<ConstraintPtr>& constraints)
+            : m_cost(cost), m_cstrs(constraints), m_ncTotal(0)
     {
-      m_ncTotal = 0;
-      for (CstrPtr cstr : m_cstrs)
+      int& nc = const_cast<int&>(m_ncTotal);
+      for (ConstraintPtr cstr : m_cstrs)
       {
-        m_ncTotal += cstr->nr();
+        nc += cstr->nr();
       }
     }
     
@@ -67,15 +66,15 @@ namespace lienlp
       out.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        CstrPtr cur_cstr = prob.getConstraint(i);
+        ConstraintPtr cur_cstr = prob.getConstraint(i);
         out.push_back(VectorXs::Zero(cur_cstr->nr()));
       }
     }
   protected:
     /// Vector of equality constraints.
-    const std::vector<CstrPtr> m_cstrs;
+    const std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
-    int m_ncTotal;
+    const int m_ncTotal;
   };
 
 } // namespace lienlp

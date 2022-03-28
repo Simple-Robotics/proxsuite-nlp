@@ -63,8 +63,8 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  Prob_t::CstrPtr cstr1(new Prob_t::EqualityType(residual));
-  std::vector<Prob_t::CstrPtr> cstrs;
+  Prob_t::ConstraintPtr cstr1(new Prob_t::EqualityType(residual));
+  std::vector<Prob_t::ConstraintPtr> cstrs;
   cstrs.push_back(cstr1);
   shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
   fmt::print("\tConstraint dimension: {:d}\n", prob->getConstraint(0)->nr());

@@ -25,8 +25,8 @@ namespace python
   {
     using context::Scalar;
     using context::Constraint_t;
-    using CstrPtr = shared_ptr<Constraint_t>;
-    bp::class_<Constraint_t, CstrPtr, boost::noncopyable>(
+    using ConstraintPtr = shared_ptr<Constraint_t>;
+    bp::class_<Constraint_t, ConstraintPtr, boost::noncopyable>(
       "ConstraintSetBase", "Base class for constraint sets.",
       bp::no_init
     )

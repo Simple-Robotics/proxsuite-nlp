@@ -35,7 +35,7 @@ namespace lienlp
     using Results = SResults<Scalar>;
 
     /// Manifold on which to optimize.
-    M& manifold;
+    const M& manifold;
     shared_ptr<Prob_t> problem;
     /// Merit function.
     Merit_t merit_fun;
@@ -74,7 +74,7 @@ namespace lienlp
     const Scalar alpha_min = 1e-7;
     const Scalar ls_c1 = 1e-4;
 
-    Solver(M& man,
+    Solver(const M& man,
            shared_ptr<Prob_t>& prob,
            const Scalar tol=1e-6,
            const Scalar mu_eq_init=1e-2,
@@ -102,11 +102,10 @@ namespace lienlp
       merit_fun.setPenalty(mu_eq);
     }
 
-    ConvergedFlag
-    solve(Workspace& workspace,
-          Results& results,
-          const VectorXs& x0,
-          const VectorOfVectors& lams0)
+    ConvergedFlag solve(Workspace& workspace,
+                        Results& results,
+                        const VectorXs& x0,
+                        const VectorOfVectors& lams0)
     {
       // init variables
       results.xOpt = x0;
