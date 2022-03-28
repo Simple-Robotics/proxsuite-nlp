@@ -77,11 +77,11 @@ namespace lienlp
                const int ndx,
                const Prob_t& prob)
       :
-      kktMatrix(ndx + prob.getNcTotal(), ndx + prob.getNcTotal()),
-      kktRhs(ndx + prob.getNcTotal()),
-      pdStep(ndx + prob.getNcTotal()),
-      signature(ndx + prob.getNcTotal()),
-      ldlt_(ndx + prob.getNcTotal()),
+      kktMatrix(ndx + prob.getTotalConstraintDim(), ndx + prob.getTotalConstraintDim()),
+      kktRhs(ndx + prob.getTotalConstraintDim()),
+      pdStep(ndx + prob.getTotalConstraintDim()),
+      signature(ndx + prob.getTotalConstraintDim()),
+      ldlt_(ndx + prob.getTotalConstraintDim()),
       xPrev(nx),
       xTrial(nx),
       dualResidual(ndx),

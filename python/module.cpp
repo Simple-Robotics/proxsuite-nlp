@@ -23,7 +23,10 @@ BOOST_PYTHON_MODULE(pylienlp)
     bp::scope res_cope = get_namespace("residuals");
     exposeResiduals();
   }
-  exposeCost();
+  {
+    bp::scope cost_scope = get_namespace("costs");
+    exposeCost();
+  }
   exposeConstraint();
   exposeProblem();
   exposeResults();

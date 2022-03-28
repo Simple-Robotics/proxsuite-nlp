@@ -40,21 +40,26 @@ namespace lienlp
       return m_cstrs.size();
     }
 
-    int getNcTotal() const
+    int getTotalConstraintDim() const
     {
       return m_ncTotal;
     }
 
+    std::vector<int> getConstraintDims() const
+    {
+      return m_ncs;
+    }
+
     Problem(const CostType& cost) : m_cost(cost), m_ncTotal(0) {}
 
-    Problem(const CostType& cost,
-            const std::vector<ConstraintPtr>& constraints)
+    Problem(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
             : m_cost(cost), m_cstrs(constraints), m_ncTotal(0)
     {
       int& nc = const_cast<int&>(m_ncTotal);
       for (ConstraintPtr cstr : m_cstrs)
       {
         nc += cstr->nr();
+        m_ncs.push_back(cstr->nr());
       }
     }
     
@@ -75,6 +80,7 @@ namespace lienlp
     const std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
     const int m_ncTotal;
+    std::vector<int> m_ncs;
   };
 
 } // namespace lienlp

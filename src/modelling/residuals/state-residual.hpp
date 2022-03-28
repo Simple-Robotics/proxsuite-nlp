@@ -1,7 +1,11 @@
+/**
+ * @file    Implements a functor which is the residual between two points on the manifold,
+ *          obtained by the manifold retraction op.
+ */
 #pragma once
 
-
 #include "lienlp/functor-base.hpp"
+#include "lienlp/manifold-base.hpp"
 
 
 namespace lienlp
@@ -14,6 +18,7 @@ namespace lienlp
   template<typename _Scalar>
   struct StateResidual : DifferentiableFunctor<_Scalar>
   {
+  public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
@@ -24,14 +29,14 @@ namespace lienlp
     using Base::m_nr;
     using M = ManifoldAbstract<Scalar>;
 
-    const M& m_manifold;
-
-    VectorXs m_target;
+    /// Target point on the manifold.
+    typename M::PointType m_target;
 
     StateResidual(const M& manifold, const ConstVectorRef& target)
       : Base(manifold.nx(), manifold.ndx(), manifold.ndx()),
-        m_manifold(manifold), m_target(target)
-      {}
+          m_target(target),
+          m_manifold(manifold)
+        {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -43,6 +48,8 @@ namespace lienlp
       m_manifold.Jdifference(m_target, x, Jout, 1);
     }
 
+  private:
+    const M& m_manifold;
   };
 
 } // namespace lienlp

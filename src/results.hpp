@@ -43,8 +43,7 @@ namespace lienlp
     Scalar mu;
     Scalar rho;
 
-    SResults(const int nx,
-             const Prob_t& prob)
+    SResults(const int nx, const Prob_t& prob)
              : xOpt(nx),
                numIters(0),
                mu(0.),

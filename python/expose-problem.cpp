@@ -18,6 +18,9 @@ namespace lienlp
                  >(bp::args("cost", "constraints"))
       )
         .def(bp::init<const context::Cost_t&>(bp::args("cost")))
+        .add_property("num_constraints", &Problem_t::getNumConstraints)
+        .add_property("total_constraint_dim", &Problem_t::getTotalConstraintDim)
+        .add_property("constraint_dims", &Problem_t::getConstraintDims)
         ;
     }
 

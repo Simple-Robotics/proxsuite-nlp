@@ -26,7 +26,6 @@ namespace python
   exposeTangentBundle(const char* name, const char* docstring, Init init)
   {
     return bp::class_<TangentBundle<M>, bp::bases<context::ManifoldAbstract_t>>(name, docstring, init)
-      // .def("getBaseSpace", &TangentBundle<M>::getBaseSpace)
       ;
   }
 
@@ -43,12 +42,7 @@ namespace python
     using context::Scalar;
     using context::ManifoldAbstract_t;
 
-    bp::class_<ManifoldAbstract_t, boost::noncopyable>(
-      "ManifoldAbstract", "Manifold abstract class.",
-      bp::no_init
-    )
-      .def(manifold_visitor<ManifoldAbstract_t>())
-      ;
+    internal::exposeBaseManifold();
 
     using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
     bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<ManifoldAbstract_t>>(
