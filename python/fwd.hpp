@@ -13,8 +13,8 @@ namespace python
 {
   namespace bp = boost::python;
 
-  void exposeManifold();
   void exposeFunctorTypes();
+  void exposeManifold();
   /// Expose defined residuals for modelling
   void exposeResiduals();
   void exposeCost();

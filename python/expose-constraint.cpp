@@ -12,11 +12,21 @@ namespace python
 
   namespace bp = boost::python;
 
+  template<typename T>
+  void exposeSpecificConstraint(const char* name, const char* docstring)
+  {
+    bp::class_<T, shared_ptr<T>, bp::bases<context::Constraint_t>>(
+      name, docstring,
+      bp::init<const context::DFunctor_t&>()
+    );
+  }
+
   void exposeConstraint()
   {
     using context::Scalar;
     using context::Constraint_t;
-    bp::class_<Constraint_t, boost::noncopyable>(
+    using CstrPtr = shared_ptr<Constraint_t>;
+    bp::class_<Constraint_t, CstrPtr, boost::noncopyable>(
       "ConstraintSetBase", "Base class for constraint sets.",
       bp::no_init
     )
@@ -25,21 +35,13 @@ namespace python
       .def("computeActiveSet", &Constraint_t::computeActiveSet, bp::args("self", "z", "out"))
       ;
 
-    using Equality_t = EqualityConstraint<Scalar>;
-    bp::class_<Equality_t, bp::bases<Constraint_t>>(
+    exposeSpecificConstraint<EqualityConstraint<Scalar>>(
       "EqualityConstraint",
-      "Cast a residual into an equality constraint",
-      bp::init<const context::DFunctor_t&>()
-    )
-      ;
+      "Cast  functor into an equality constraint");
 
-    using Inequality_t = NegativeOrthant<Scalar>;
-    bp::class_<Inequality_t, bp::bases<Constraint_t>>(
+    exposeSpecificConstraint<NegativeOrthant<Scalar>>(
       "NegativeOrthant",
-      "Cast a residual into a negative inequality constraint h(x) \\leq 0",
-      bp::init<const context::DFunctor_t&>()
-    )
-      ;
+      "Cast a functor into a negative inequality constraint h(x) \\leq 0");
   }
 
 }

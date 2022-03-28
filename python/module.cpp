@@ -14,12 +14,15 @@ BOOST_PYTHON_MODULE(pylienlp)
 
   bp::import("warnings");
 
+  exposeFunctorTypes();
   {
     bp::scope man_scope = get_namespace("manifolds");
     exposeManifold();
   }
-  exposeFunctorTypes();
-  exposeResiduals();
+  {
+    bp::scope res_cope = get_namespace("residuals");
+    exposeResiduals();
+  }
   exposeCost();
   exposeConstraint();
   exposeProblem();

@@ -11,7 +11,7 @@ namespace lienlp
     {
       using context::Problem_t;
       using ConstraintStack = std::vector<Problem_t::CstrPtr>;
-      bp::class_<Problem_t>(
+      bp::class_<Problem_t, shared_ptr<Problem_t>>(
         "Problem", "Problem definition class.",
         bp::init<const context::Cost_t&,
                  ConstraintStack&

@@ -10,25 +10,16 @@ namespace lienlp
 namespace python
 {
   namespace bp = boost::python;
-  using context::DFunctor_t;
-  struct ResidualWrap : DFunctor_t, bp::wrapper<DFunctor_t>
-  {
-    void computeJacobian(
-      const ConstVectorRef& x,
-      Eigen::Ref<JacobianType> Jout) const
-    {
-      this->get_override("computeJacobian")(x, Jout);
-    }
-  };
 
   void exposeResiduals()
   {
     using context::VectorXs;
     using context::MatrixXs;
+    using context::DFunctor_t;
 
     bp::class_<LinearResidual<context::Scalar>, bp::bases<DFunctor_t>>(
       "LinearResidual",
-      bp::init<MatrixXs, VectorXs>());
+      bp::init<MatrixXs, VectorXs>(bp::args("A", "b")));
   }
 
 } // namespace python

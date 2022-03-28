@@ -10,43 +10,18 @@ namespace lienlp
 {
 namespace python
 {
-  template<typename Man>
-  struct manifold_visitor : public bp::def_visitor<manifold_visitor<Man>>
-  {
-    template<class PyClass>
-    void visit(PyClass& cl) const
-    {
-      using context::VectorXs;
-      using PointType = typename Man::PointType;
-      using VecType = typename Man::TangentVectorType;
-      using IntegrateFun_t = PointType(const Eigen::MatrixBase<VectorXs>&, const Eigen::MatrixBase<VectorXs>&) const;
-      using DifferenceFun_t = VecType(const Eigen::MatrixBase<VectorXs>&, const Eigen::MatrixBase<VectorXs>&) const;
-
-      IntegrateFun_t Man::*int1 = &Man::template integrate<VectorXs, VectorXs>;
-      DifferenceFun_t Man::*diff1 = &Man::template difference<VectorXs, VectorXs>;
-
-      cl
-        .add_property("nx", &Man::nx, "Manifold representation dimension.")
-        .add_property("ndx", &Man::ndx, "Tangent space dimension.")
-        .def("neutral", &Man::neutral)
-        .def("rand", &Man::rand)
-        .def("integrate", int1)
-        .def("difference", diff1)
-        ;
-    }
-  };
 
   template<typename LieGroup>
   void exposeLieGroup(const char* name, const char* docstring)
   {
-
-    using Out_t = PinocchioLieGroup<LieGroup>;
-    bp::class_<Out_t>(
+    using ManType = PinocchioLieGroup<LieGroup>;
+    bp::class_<ManType>(
       name, docstring,
       bp::init<>())  // default ctor
-      .def(manifold_visitor<Out_t>());
+      .def(manifold_visitor<ManType>());
   }
 
+  /// Expose the tangent bundle of a manifold type @p M.
   template<typename M, class Init>
   bp::class_<TangentBundle<M>> exposeTangentBundle(const char* name, const char* docstring, Init init)
   {

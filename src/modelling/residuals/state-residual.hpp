@@ -14,8 +14,6 @@ namespace lienlp
   template<typename M>
   struct StateResidual : DifferentiableFunctor<typename M::Scalar>
   {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     using Scalar = typename M::Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
