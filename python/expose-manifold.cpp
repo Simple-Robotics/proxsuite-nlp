@@ -3,7 +3,7 @@
 
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/spaces/tangent-bundle.hpp"
-
+#include "lienlp/modelling/spaces/multibody.hpp"
 
 
 namespace lienlp
@@ -15,24 +15,24 @@ namespace python
   void exposeLieGroup(const char* name, const char* docstring)
   {
     using ManType = PinocchioLieGroup<LieGroup>;
-    bp::class_<ManType>(
-      name, docstring,
-      bp::init<>())  // default ctor
-      .def(manifold_visitor<ManType>());
+    bp::class_<ManType, bp::bases<context::ManifoldAbstract_t>>(
+      name, docstring, bp::init<>()
+    );
   }
 
   /// Expose the tangent bundle of a manifold type @p M.
   template<typename M, class Init>
-  bp::class_<TangentBundle<M>> exposeTangentBundle(const char* name, const char* docstring, Init init)
+  bp::class_<TangentBundle<M>, bp::bases<context::ManifoldAbstract_t>>
+  exposeTangentBundle(const char* name, const char* docstring, Init init)
   {
-    return bp::class_<TangentBundle<M>>(name, docstring, init)
-      .def(manifold_visitor<TangentBundle<M>>())
+    return bp::class_<TangentBundle<M>, bp::bases<context::ManifoldAbstract_t>>(name, docstring, init)
       // .def("getBaseSpace", &TangentBundle<M>::getBaseSpace)
       ;
   }
 
   template<typename M>
-  bp::class_<TangentBundle<M>> exposeTangentBundle(const char* name, const char* docstring)
+  bp::class_<TangentBundle<M>, bp::bases<context::ManifoldAbstract_t>>
+  exposeTangentBundle(const char* name, const char* docstring)
   {
     return exposeTangentBundle<M, bp::init<M>>(name, docstring, bp::init<M>(bp::args("self", "base")));
   }
@@ -41,13 +41,20 @@ namespace python
   {
     namespace pin = pinocchio;
     using context::Scalar;
+    using context::ManifoldAbstract_t;
+
+    bp::class_<ManifoldAbstract_t, boost::noncopyable>(
+      "ManifoldAbstract", "Manifold abstract class.",
+      bp::no_init
+    )
+      .def(manifold_visitor<ManifoldAbstract_t>())
+      ;
 
     using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
-    
-    bp::class_<PinocchioLieGroup<VectorSpace>>(
+    bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<ManifoldAbstract_t>>(
       "EuclideanSpace", "Euclidean vector space.",
-      bp::init<int>(bp::args("dim")))
-      .def(manifold_visitor<PinocchioLieGroup<VectorSpace>>());
+      bp::init<int>(bp::args("dim"))
+    );
 
     exposeLieGroup<pin::SpecialOrthogonalOperationTpl<2,Scalar>>("SO2", "SO(2) special orthogonal group.");
     exposeLieGroup<pin::SpecialOrthogonalOperationTpl<3,Scalar>>("SO3", "SO(3) special orthogonal group.");
@@ -67,17 +74,18 @@ namespace python
     exposeTangentBundle<SE3>("TSE3", "Tangent bundle of the SE(3) group.").def(bp::init<>());
 
 
+    /* Groups associated w/ Pinocchio models */
     using Multibody_t = MultibodyConfiguration<Scalar>;
     using Model_t = pin::ModelTpl<Scalar>;
-    /* Groups associated w/ Pinocchio models */
-    bp::class_<Multibody_t>(
+    bp::class_<Multibody_t, bp::bases<ManifoldAbstract_t>>(
       "MultibodyConfiguration", "Configuration group of a multibody",
       bp::init<const Model_t&>(bp::args("self", "model"))
-    )
-      .def(manifold_visitor<Multibody_t>())
-      ;
+    );
 
-    exposeTangentBundle<Multibody_t>("StateMultibody", "Tangent space of the multibody configuration group.");
+    bp::class_<StateMultibody<Scalar>, bp::bases<ManifoldAbstract_t>>(
+      "StateMultibody", "Tangent space of the multibody configuration group.",
+      bp::init<const Model_t&>(bp::args("model"))
+    );
 
   }
 

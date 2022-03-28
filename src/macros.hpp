@@ -14,7 +14,7 @@
 /// @brief Macro empty arg
 #define LIENLP_MACRO_EMPTY_ARG
 
-#define LIENLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj.derived())
+#define LIENLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj)
 
 #define LIENLP_FUNCTOR_TYPEDEFS(Scalar)          \
   LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)                 \

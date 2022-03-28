@@ -88,19 +88,19 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   pinocchio::buildModels::humanoidRandom(model, true);
 
   using Q_t = MultibodyConfiguration<double>;
-  using Vec_t = Q_t::PointType;
+  using Point_t = Q_t::PointType;
   Q_t space(model);
 
-  Vec_t x0 = pinocchio::neutral(model);
-  Vec_t d(model.nv);
+  Point_t x0 = pinocchio::neutral(model);
+  Point_t d(model.nv);
   d.setRandom();
 
-  Vec_t xout(model.nq);
+  Point_t xout(model.nq);
   space.integrate(x0, d, xout);
   auto xout2 = pinocchio::integrate(model, x0, d);
   BOOST_CHECK(xout.isApprox(xout2));
 
-  Vec_t x1;
+  Point_t x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
   space.difference(x0, x0, d);
@@ -119,11 +119,10 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
-  using M_t = StateMultibody<double>;
+  using Man = StateMultibody<double>;
 
   // MultibodyConfiguration<double> config_space(model);
-  // M_t space(config_space);
-  M_t space(model);
+  Man space(model);
 
   auto x0 = space.neutral();
   auto x1 = space.rand();

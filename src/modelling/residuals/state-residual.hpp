@@ -11,10 +11,10 @@ namespace lienlp
    * Constraint function to be equal to a given element of a manifold.
    * This is templated on the manifold.
    */
-  template<typename M>
-  struct StateResidual : DifferentiableFunctor<typename M::Scalar>
+  template<typename _Scalar>
+  struct StateResidual : DifferentiableFunctor<_Scalar>
   {
-    using Scalar = typename M::Scalar;
+    using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = DifferentiableFunctor<Scalar>;
@@ -22,6 +22,7 @@ namespace lienlp
     using Base::computeJacobian;
     using Base::m_ndx;
     using Base::m_nr;
+    using M = ManifoldAbstract<Scalar>;
 
     const M& m_manifold;
 

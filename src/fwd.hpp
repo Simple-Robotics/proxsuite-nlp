@@ -38,6 +38,9 @@ struct math_types
 template<typename Scalar>
 struct BaseFunctor;
 
+template<typename Scalar, int Options=0>
+struct ManifoldAbstract;
+
 // fwd DifferentiableFunctor
 template<typename Scalar>
 struct DifferentiableFunctor;

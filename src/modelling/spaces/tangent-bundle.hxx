@@ -1,13 +1,16 @@
+#include "lienlp/modelling/spaces/tangent-bundle.hpp"
+
+
 
 namespace lienlp
 {
 
     template<class Base>
     typename TangentBundle<Base>::PointType
-    TangentBundle<Base>::neutral_impl() const
+    TangentBundle<Base>::neutral() const
     {
       PointType out;
-      out.resize(nx_impl());
+      out.resize(nx());
       out.setZero();
       out.head(m_base.nx()) = m_base.neutral();
       return out;
@@ -15,10 +18,10 @@ namespace lienlp
 
     template<class Base>
     typename TangentBundle<Base>::PointType
-    TangentBundle<Base>::rand_impl() const
+    TangentBundle<Base>::rand() const
     {
       PointType out;
-      out.resize(nx_impl());
+      out.resize(nx());
       out.head(m_base.nx()) = m_base.rand();
       using BTanVec_t = typename Base::TangentVectorType;
       out.tail(m_base.ndx()) = BTanVec_t::Random(m_base.ndx());
@@ -27,70 +30,65 @@ namespace lienlp
 
     /// Operators
     template<class Base>
-    template<class Vec_t, class Tangent_t, class Out_t>
     void TangentBundle<Base>::
-    integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                   const Eigen::MatrixBase<Tangent_t>& dx,
-                   const Eigen::MatrixBase<Out_t>& out) const
+    integrate_impl(const ConstVectorRef& x,
+                   const ConstVectorRef& dx,
+                   VectorRef out) const
     {
       const int nv_ = m_base.ndx();
-      Out_t& out_ = LIENLP_EIGEN_CONST_CAST(Out_t, out);
-      out_.resize(nx_impl());
       m_base.integrate(
         getBasePoint(x),
         getBaseTangent(dx),
-        getBasePointWrite(out));
-      out_.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
+        out.head(m_base.nx()));
+      out.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
     }
 
     template<class Base>
-    template<class Vec1_t, class Vec2_t, class Out_t>
     void TangentBundle<Base>::
-    difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                    const Eigen::MatrixBase<Vec2_t>& x1,
-                    const Eigen::MatrixBase<Out_t>& out) const
+    difference_impl(const ConstVectorRef& x0,
+                    const ConstVectorRef& x1,
+                    VectorRef out) const
     {
       const int nv_ = m_base.ndx();
-      Out_t& out_ = LIENLP_EIGEN_CONST_CAST(Out_t, out);
-      out_.resize(ndx_impl());
+      out.resize(ndx());
       m_base.difference(
         getBasePoint(x0),
         getBasePoint(x1),
-        getTangentHeadWrite(out));
-      out_.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
+        out.head(nv_));
+      out.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
     }
 
     template<class Base>
-    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
-    void TangentBundle<Base>::
-    Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                    const Eigen::MatrixBase<Tangent_t>& dx,
-                    const Eigen::MatrixBase<Jout_t>& Jout) const
+    void TangentBundle<Base>::Jintegrate_impl(
+      const ConstVectorRef& x,
+      const ConstVectorRef& dx,
+      MatrixRef J_,
+      int arg) const
     {
       const int ndxbase = m_base.ndx();
-      Jout_t& J_ = LIENLP_EIGEN_CONST_CAST(Jout_t, Jout);
-      J_.resize(ndx_impl(), ndx_impl());
+      J_.resize(ndx(), ndx());
       J_.setZero();
-      m_base.template Jintegrate<arg>(
+      m_base.Jintegrate(
         getBasePoint(x), getBaseTangent(dx),
-        getBaseJacobian(J_));
+        getBaseJacobian(J_),
+        arg);
       J_.bottomRightCorner(ndxbase, ndxbase).setIdentity();
     }
 
     template<class Base>
-    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
-    void TangentBundle<Base>::
-    Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                     const Eigen::MatrixBase<Vec2_t>& x1,
-                     const Eigen::MatrixBase<Jout_t>& Jout) const
+    void TangentBundle<Base>::Jdifference_impl(
+      const ConstVectorRef& x0,
+      const ConstVectorRef& x1,
+      MatrixRef J_,
+      int arg) const
     {
       const int ndxbase = m_base.ndx();
-      Jout_t& J_ = LIENLP_EIGEN_CONST_CAST(Jout_t, Jout);
-      J_.resize(ndx_impl(), ndx_impl());
+      J_.resize(ndx(), ndx());
       J_.setZero();
-      m_base.template Jdifference<arg>(
+      m_base.template Jdifference(
         getBasePoint(x0), getBasePoint(x1),
-        getBaseJacobian(J_));
+        getBaseJacobian(J_),
+        arg);
       if (arg == 0)
       {
         J_.bottomRightCorner(ndxbase,ndxbase).diagonal().array() = Scalar(-1);

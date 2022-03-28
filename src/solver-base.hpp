@@ -40,7 +40,7 @@ namespace lienlp
     /// Merit function.
     Merit_t merit_fun;
     /// Proximal regularization penalty.
-    QuadDistanceCost<M> prox_penalty;
+    QuadDistanceCost<Scalar> prox_penalty;
 
     //// Other settings
 

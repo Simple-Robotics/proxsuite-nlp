@@ -20,7 +20,7 @@ print(config_space.neutral())
 print(config_space.rand())
 
 
-statemultibody = manifolds.StateMultibody(config_space)
+statemultibody = manifolds.StateMultibody(model)
 print("nx:", statemultibody.nx, " | ndx:", statemultibody.ndx)
 x0 = statemultibody.neutral()
 x1 = statemultibody.rand()

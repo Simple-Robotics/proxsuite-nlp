@@ -52,7 +52,7 @@ int submain()
 
   LinearResidual<double> res1(A, b);
 
-  QuadDistanceCost<Man> cost(space, Q_);
+  QuadDistanceCost<double> cost(space, Q_);
 
   auto cstr1 = std::make_shared<EqualityType>(res1);
   std::vector<Prob_t::ConstraintPtr> cstrs_;

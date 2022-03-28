@@ -16,14 +16,20 @@ namespace lienlp
   namespace pin = pinocchio;
 
   /**
-   * Wrap a Pinocchio Lie group into a ManifoldTpl object.
+   * Wrap a Pinocchio Lie group into a ManifoldAbstract object.
    */
   template<typename _LieGroup>
-  struct PinocchioLieGroup : public ManifoldTpl<PinocchioLieGroup<_LieGroup>>
+  struct PinocchioLieGroup : public ManifoldAbstract<typename _LieGroup::Scalar>
   {
+  public:
     using LieGroup = _LieGroup;
     using Self = PinocchioLieGroup<LieGroup>;
-    LIENLP_DEFINE_INTERFACE_TYPES(Self)
+    using Scalar = typename LieGroup::Scalar;
+    enum {
+      Options = LieGroup::Options
+    };
+    using Base = ManifoldAbstract<Scalar>;
+    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     LieGroup m_lg;
     PinocchioLieGroup() {}
@@ -34,100 +40,89 @@ namespace lienlp
 
     /// \name Implementations
 
-    template<class Vec_t, class Tangent_t, class Out_t>
-    void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                        const Eigen::MatrixBase<Tangent_t>& v,
-                        const Eigen::MatrixBase<Out_t>& out) const
+    void integrate_impl(const ConstVectorRef& x,
+                   const ConstVectorRef& v,
+                   VectorRef out) const
     {
-      m_lg.integrate(x.derived(), v.derived(), out.derived());
+      m_lg.integrate(x, v, out);
     }
 
-    template<class Vec1_t, class Vec2_t, class Tangent_t>
-    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                         const Eigen::MatrixBase<Vec2_t>& x1,
-                         const Eigen::MatrixBase<Tangent_t>& vout) const
+    void difference_impl(const ConstVectorRef& x0,
+                    const ConstVectorRef& x1,
+                    VectorRef vout) const
     {
-      m_lg.difference(x0.derived(), x1.derived(), vout.derived());
+      m_lg.difference(x0, x1, vout);
     }
 
-    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
-    void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                         const Eigen::MatrixBase<Tangent_t>& v,
-                         const Eigen::MatrixBase<Jout_t>& Jout) const
+    void Jintegrate_impl(const ConstVectorRef& x,
+                    const ConstVectorRef& v,
+                    MatrixRef Jout,
+                    int arg) const
     {
       switch (arg) {
         case 0:
-          m_lg.dIntegrate_dq(x.derived(), v.derived(), Jout.derived());
+          m_lg.dIntegrate_dq(x, v, Jout);
           break;
         case 1:
-          m_lg.dIntegrate_dv(x.derived(), v.derived(), Jout.derived());
+          m_lg.dIntegrate_dv(x, v, Jout);
           break;
       }
     }
 
-    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                          const Eigen::MatrixBase<Vec2_t>& x1,
-                          const Eigen::MatrixBase<Jout_t>& Jout) const
+    void Jdifference_impl(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
+                     MatrixRef Jout,
+                     int arg) const
     {
       switch (arg) {
         case 0:
-          m_lg.dDifference(x0.derived(), x1.derived(), Jout.derived(), pin::ARG0);
+          m_lg.dDifference(x0, x1, Jout, pin::ARG0);
           break;
         case 1:
-          m_lg.dDifference(x0.derived(), x1.derived(), Jout.derived(), pin::ARG1);
+          m_lg.dDifference(x0, x1, Jout, pin::ARG1);
           break;
       }
     }
 
-    inline int nx_impl() const { return m_lg.nq(); }
-    inline int ndx_impl() const { return m_lg.nv(); }
+    inline int nx() const { return m_lg.nq(); }
+    inline int ndx() const { return m_lg.nv(); }
 
-    PointType neutral_impl() const
+    PointType neutral() const
     {
       return m_lg.neutral();
     }
 
-    PointType rand_impl() const
+    PointType rand() const
     {
       return m_lg.random();
     }
 
   };
 
-  template<typename LieGroup>
-  struct traits<PinocchioLieGroup<LieGroup>>
-  {
-    using Scalar = typename LieGroup::Scalar;
-    enum {
-      NQ = LieGroup::NQ,
-      NV = LieGroup::NV,
-      Options = LieGroup::Options
-    };
-
-  };
-
-
-  template<typename _Scalar, int Options=0>
-  class MultibodyConfiguration : public ManifoldTpl<MultibodyConfiguration<_Scalar, Options>> {
+  template<typename _Scalar, int _Options=0>
+  class MultibodyConfiguration : public ManifoldAbstract<_Scalar, _Options> {
   public:
 
-    using Self = MultibodyConfiguration<_Scalar, Options>;
-    LIENLP_DEFINE_INTERFACE_TYPES(Self)
-
+    using Scalar = _Scalar;
+    enum {
+      Options = _Options
+    };
+    using Self = MultibodyConfiguration<Scalar, Options>;
     using PinModel = pin::ModelTpl<Scalar, Options>;
+    using Base = ManifoldAbstract<Scalar, Options>;
+    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     MultibodyConfiguration(const PinModel& model) : m_model(model)
     {};
 
     const PinModel& getModel() { return m_model; }
 
-    PointType neutral_impl() const
+    PointType neutral() const
     {
       return pinocchio::neutral(m_model);
     }
 
-    PointType rand_impl() const
+    PointType rand() const
     {
       return pinocchio::randomConfiguration(m_model);
     }
@@ -135,72 +130,58 @@ namespace lienlp
     /// \name implementations
     /// \{
 
-    template<class Vec_t, class Tangent_t, class Out_t>
-    void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                        const Eigen::MatrixBase<Tangent_t>& v,
-                        const Eigen::MatrixBase<Out_t>& xout) const
+    void integrate_impl(const ConstVectorRef& x,
+                        const ConstVectorRef& v,
+                        VectorRef xout) const
     {
-      pin::integrate(m_model, x.derived(), v.derived(), xout.derived());
+      pin::integrate(m_model, x, v, xout);
     }
 
-    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
-    void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                         const Eigen::MatrixBase<Tangent_t>& v,
-                         const Eigen::MatrixBase<Jout_t>& Jout) const
+    void Jintegrate_impl(const ConstVectorRef& x,
+                    const ConstVectorRef& v,
+                    MatrixRef Jout,
+                    int arg) const
     {
       switch (arg) {
         case 0:
-          pin::dIntegrate(m_model, x.derived(), v.derived(), Jout.derived(), pin::ARG0);
+          pin::dIntegrate(m_model, x, v, Jout, pin::ARG0);
           break;
         case 1:
-          pin::dIntegrate(m_model, x.derived(), v.derived(), Jout.derived(), pin::ARG1);
+          pin::dIntegrate(m_model, x, v, Jout, pin::ARG1);
           break;
       }
     }
 
-    template<class Vec1_t, class Vec2_t, class Out_t>
-    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                         const Eigen::MatrixBase<Vec2_t>& x1,
-                         const Eigen::MatrixBase<Out_t>& vout) const
+    void difference_impl(const ConstVectorRef& x0,
+                    const ConstVectorRef& x1,
+                    VectorRef vout) const
     {
-      pin::difference(m_model, x0.derived(), x1.derived(), vout.derived());
+      pin::difference(m_model, x0, x1, vout);
     }
 
-    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                          const Eigen::MatrixBase<Vec2_t>& x1,
-                          const Eigen::MatrixBase<Jout_t>& Jout) const
+    void Jdifference_impl(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
+                     MatrixRef Jout,
+                     int arg) const
     {
       switch (arg) {
         case 0:
-          pin::dDifference(m_model, x0.derived(), x1.derived(), Jout.derived(), pin::ARG0);
+          pin::dDifference(m_model, x0, x1, Jout, pin::ARG0);
           break;
         case 1:
-          pin::dDifference(m_model, x0.derived(), x1.derived(), Jout.derived(), pin::ARG1);
+          pin::dDifference(m_model, x0, x1, Jout, pin::ARG1);
           break;
       }
     }
 
-    inline int nx_impl() const { return m_model.nq; }
-    inline int ndx_impl() const { return m_model.nv; }
+    inline int nx() const { return m_model.nq; }
+    inline int ndx() const { return m_model.nv; }
 
     /// \}
 
   protected:
     const PinModel& m_model;
 
-  };
-
-
-  template<typename scalar, int options>
-  struct traits<MultibodyConfiguration<scalar, options>>
-  {
-    using Scalar = scalar;
-    enum {
-      NQ = -1,
-      NV = -1,
-      Options = options
-    };
   };
 
 

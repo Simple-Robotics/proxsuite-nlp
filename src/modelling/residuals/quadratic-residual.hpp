@@ -7,16 +7,17 @@
 
 namespace lienlp
 {
-  template<typename M>
-  struct QuadraticResidualFunctor : DifferentiableFunctor<typename M::Scalar>
+  template<typename _Scalar>
+  struct QuadraticResidualFunctor : DifferentiableFunctor<_Scalar>
   {
-    using Scalar = typename M::Scalar;
+    using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = DifferentiableFunctor<Scalar>;
     using Base::computeJacobian;
     using Base::m_ndx;
     using Base::m_nr;
+    using M = ManifoldAbstract<Scalar>;
 
     const M& m_manifold;
     const MatrixXs m_weights;

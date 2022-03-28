@@ -7,12 +7,13 @@
 
 namespace lienlp{
 
-  template<typename M>
-  struct QuadDistanceCost : QuadraticResidualCost<typename M::Scalar>
+  template<typename _Scalar>
+  struct QuadDistanceCost : QuadraticResidualCost<_Scalar>
   {
-    using Scalar = typename M::Scalar;
+    using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
-    using FunctorType = StateResidual<M>;
+    using FunctorType = StateResidual<Scalar>;
+    using M = ManifoldAbstract<Scalar>;
     using Base = QuadraticResidualCost<Scalar>;
     using Base::m_residual;
 

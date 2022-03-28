@@ -10,23 +10,18 @@ namespace lienlp
    * @brief     Tangent bundle of a base manifold M. This construction is recursive.
    */
   template<class Base>
-  struct TangentBundle : public ManifoldTpl<TangentBundle<Base>>
+  struct TangentBundle : public ManifoldAbstract<typename Base::Scalar>
   {
   protected:
     Base m_base;
   public:
     using Self = TangentBundle<Base>;
-
-    using Scalar = typename traits<Self>::Scalar;
+    using Scalar = typename Base::Scalar;
     enum {
-      NQ = traits<Self>::NQ,
-      NV = traits<Self>::NV,
-      Options = traits<Self>::Options
+      Options = Base::Options
     };
 
-    using PointType = Eigen::Matrix<Scalar, NQ, 1, Options>;
-    using TangentVectorType = Eigen::Matrix<Scalar, NV, 1, Options>;
-    using JacobianType = Eigen::Matrix<Scalar, NV, NV, Options>; 
+    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     /// Constructor using base space instance.
     TangentBundle(Base base) : m_base(base) {}; 
@@ -36,85 +31,71 @@ namespace lienlp
 
     /// Declare implementations
 
-    inline int nx_impl() const { return m_base.nx() + m_base.ndx(); }
-    inline int ndx_impl() const { return 2 * m_base.ndx(); }
+    inline int nx() const { return m_base.nx() + m_base.ndx(); }
+    inline int ndx() const { return 2 * m_base.ndx(); }
 
-    PointType neutral_impl() const;
-    PointType rand_impl() const;
+    PointType neutral() const;
+    PointType rand() const;
 
     const Base& getBaseSpace() const { return m_base; }
 
     /// @name   Implementations of operators
 
-    template<class Vec_t, class Tangent_t, class Out_t>
-    void integrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                        const Eigen::MatrixBase<Tangent_t>& dx,
-                        const Eigen::MatrixBase<Out_t>& out) const;
+    void integrate_impl(const ConstVectorRef& x,
+                        const ConstVectorRef& dx,
+                        VectorRef out) const;
 
-    template<class Vec1_t, class Vec2_t, class Out_t>
-    void difference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                         const Eigen::MatrixBase<Vec2_t>& x1,
-                         const Eigen::MatrixBase<Out_t>& out) const;
+    void difference_impl(const ConstVectorRef& x0,
+                         const ConstVectorRef& x1,
+                         VectorRef out) const;
 
-    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
-    void Jintegrate_impl(const Eigen::MatrixBase<Vec_t>& x,
-                         const Eigen::MatrixBase<Tangent_t>& v,
-                         const Eigen::MatrixBase<Jout_t>& Jout) const;
+    void Jintegrate_impl(const ConstVectorRef& x,
+                    const ConstVectorRef& v,
+                    MatrixRef Jout,
+                    int arg) const;
 
-    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
-    void Jdifference_impl(const Eigen::MatrixBase<Vec1_t>& x0,
-                          const Eigen::MatrixBase<Vec2_t>& x1,
-                          const Eigen::MatrixBase<Jout_t>& Jout) const;
+    void Jdifference_impl(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
+                     MatrixRef Jout,
+                     int arg) const;
 
     /// Get base point of an element of the tangent bundle.
     /// This map is exactly the natural projection.
     template<typename Point>
-    typename Point::template ConstFixedSegmentReturnType<Base::NQ>::Type
-    getBasePoint(const Eigen::MatrixBase<Point>& x) const
+    typename Point::ConstSegmentReturnType
+    getBasePoint(const Point& x) const
     {
-      return x.derived().template head<Base::NQ>(m_base.nx());
+      return x.head(m_base.nx());
     }
 
     template<typename Point>
-    typename Point::template      FixedSegmentReturnType<Base::NQ>::Type
-    getBasePointWrite(const Eigen::MatrixBase<Point>& x) const
+    typename Point::SegmentReturnType
+    getBasePointWrite(const Point& x) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Point, x).template head<Base::NQ>(m_base.nx());
+      return LIENLP_EIGEN_CONST_CAST(Point, x).head(m_base.nx());
     }
 
     template<typename Tangent>
-    typename Tangent::template ConstFixedSegmentReturnType<Base::NV>::Type
-    getBaseTangent(const Eigen::MatrixBase<Tangent>& v) const
+    typename Tangent::ConstSegmentReturnType
+    getBaseTangent(const Tangent& v) const
     {
-      return v.derived().template head<Base::NV>(m_base.ndx());
+      return v.head(m_base.ndx());
     }
 
     template<typename Tangent>
-    typename Tangent::template      FixedSegmentReturnType<Base::NV>::Type
-    getTangentHeadWrite(const Eigen::MatrixBase<Tangent>& v) const
+    typename Tangent::SegmentReturnType
+    getTangentHeadWrite(const Tangent& v) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Tangent, v).template head<Base::NV>(m_base.ndx());
+      return LIENLP_EIGEN_CONST_CAST(Tangent, v).head(m_base.ndx());
     }
 
     template<typename Jac>
-    Eigen::Block<Jac, Base::NV, Base::NV>
-    getBaseJacobian(const Eigen::MatrixBase<Jac>& J) const
+    Eigen::Block<Jac, Eigen::Dynamic, Eigen::Dynamic>
+    getBaseJacobian(const Jac& J) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Jac, J).template topLeftCorner<Base::NV,Base::NV>(m_base.ndx(), m_base.ndx());
+      return LIENLP_EIGEN_CONST_CAST(Jac, J).topLeftCorner(m_base.ndx(), m_base.ndx());
     }
 
-  };
-
-  template<class M>
-  struct traits<TangentBundle<M>>
-  {
-    using base_traits = traits<M>;
-    using Scalar = typename base_traits::Scalar;
-    enum {
-      NQ = Eigen::Dynamic,
-      NV = Eigen::Dynamic,
-      Options = base_traits::Options
-    };
   };
 
 } // namespace lienlp
