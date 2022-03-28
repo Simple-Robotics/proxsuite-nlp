@@ -56,7 +56,6 @@ namespace lienlp
                    const ConstVectorRef& v,
                    VectorRef out) const
     {
-      out.resize(nx());
       integrate_impl(x, v, out);
     }
 
@@ -72,7 +71,6 @@ namespace lienlp
                     MatrixRef Jout,
                     int arg) const
     {
-      Jout.resize(ndx(), ndx());
       Jintegrate_impl(x, v, Jout, arg);
     }
 
@@ -85,7 +83,6 @@ namespace lienlp
                     const ConstVectorRef& x1,
                     VectorRef out) const
     {
-      out.resize(ndx());
       difference_impl(x0, x1, out);
     }
 
@@ -100,7 +97,6 @@ namespace lienlp
                      MatrixRef Jout,
                      int arg) const
     {
-      Jout.resize(ndx(), ndx());
       Jdifference_impl(x, v, Jout, arg);
     }
 
