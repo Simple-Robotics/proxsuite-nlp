@@ -1,10 +1,12 @@
 import numpy as np
 import lienlp
 from lienlp.residuals import LinearResidual
-from lienlp.costs import QuadraticResidualCost
+from lienlp.costs import QuadDistanceCost
+from lienlp.manifolds import EuclideanSpace
 from lienlp import EqualityConstraint, NegativeOrthant, Problem
 
 nx = 3
+space = EuclideanSpace(nx)
 A = np.random.randn(2, nx)
 b = np.random.randn(2)
 x0 = np.linalg.lstsq(A, -b)[0]
@@ -34,6 +36,18 @@ print("proj  x1:", cstr2.projection(x1))
 print("dproj x1:", cstr2.normalConeProjection(x1))
 
 
-cost_ = QuadraticResidualCost(resdl, np.eye(nx))
+cost_ = QuadDistanceCost(space, x1, np.eye(nx))
 problem = Problem(cost_)
-# problem = Problem(cost_, [cstr2])
+print("Problem:", problem)
+
+
+problem = Problem(cost_, [cstr1])
+
+
+results = lienlp.Results(nx, problem)
+workspace = lienlp.Workspace(nx, nx, problem)
+
+solver = lienlp.Solver(space, problem)
+lams0 = lienlp.StdVec_Vector([np.random.randn(resdl.nr)])
+solver.solve(workspace, results, x0, lams0)
+

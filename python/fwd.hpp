@@ -21,6 +21,8 @@ namespace python
   void exposeConstraints();
   void exposeProblem();
   void exposeResults();
+  void exposeWorkspace();
+  void exposeSolver();
 
 } // namespace python
 
