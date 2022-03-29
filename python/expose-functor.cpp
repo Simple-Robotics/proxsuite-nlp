@@ -6,7 +6,6 @@ namespace lienlp
 {
 namespace python
 {
-  namespace bp = boost::python;
 
   void exposeFunctorTypes()
   {

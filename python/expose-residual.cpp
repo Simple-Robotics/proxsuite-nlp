@@ -10,8 +10,6 @@ namespace lienlp
 {
 namespace python
 {
-  namespace bp = boost::python;
-
 
   /// Expose a differentiable residual (subclass of DifferentiableFunctor).
   template<typename T, class Init>
