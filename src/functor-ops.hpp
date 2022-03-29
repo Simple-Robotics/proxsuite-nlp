@@ -16,15 +16,16 @@ namespace lienlp
     const F1& left;
     const F2& right;
   public:
-    using S1 = typename F1::Scalar;
-    using S2 = typename F2::Scalar;
-    using Scalar = decltype(std::declval<S1>() * std::declval<S2>());
+    using Scalar = typename F1::Scalar;
+    using Base = DifferentiableFunctor<Scalar>;
+    using Base::computeJacobian;
+    using Base::vectorHessianProduct;
 
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
-    using Base = DifferentiableFunctor<Scalar>;
 
-
-    ComposeFunctor(const F1& left, const F2& right) : left(left), right(right) {}
+    ComposeFunctor(const F1& left, const F2& right) :
+        DifferentiableFunctor<Scalar>(right.nx(), right.ndx(), left.nr())
+      , left(left), right(right) {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -37,7 +38,7 @@ namespace lienlp
       Jout = Jout * right.computeJacobian(x);
     }
 
-  }
+  };
   
 } // namespace lienlp
 
