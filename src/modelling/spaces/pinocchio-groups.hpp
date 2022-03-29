@@ -108,14 +108,15 @@ namespace lienlp
       Options = _Options
     };
     using Self = MultibodyConfiguration<Scalar, Options>;
-    using PinModel = pin::ModelTpl<Scalar, Options>;
+    using ModelType = pin::ModelTpl<Scalar, Options>;
     using Base = ManifoldAbstract<Scalar, Options>;
     LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
-    MultibodyConfiguration(const PinModel& model) : m_model(model)
-    {};
+    MultibodyConfiguration(const ModelType& model)
+      : m_model(model)
+      {};
 
-    const PinModel& getModel() { return m_model; }
+    const ModelType& getModel() { return m_model; }
 
     PointType neutral() const
     {
@@ -180,7 +181,7 @@ namespace lienlp
     /// \}
 
   protected:
-    const PinModel& m_model;
+    const ModelType& m_model;
 
   };
 

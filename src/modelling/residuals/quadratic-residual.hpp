@@ -10,6 +10,7 @@ namespace lienlp
   template<typename _Scalar>
   struct QuadraticResidualFunctor : DifferentiableFunctor<_Scalar>
   {
+  public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
@@ -22,7 +23,6 @@ namespace lienlp
     const M& m_manifold;
     const MatrixXs m_weights;
     const Scalar m_level;
-    const Scalar m_level_squared = m_level * m_level;
     const VectorXs m_target;
 
     QuadraticResidualFunctor(const M& manifold,
@@ -66,6 +66,8 @@ namespace lienlp
       m_manifold.Jdifference(m_target, x, Jerr, 1);
       Hout = 2. * v(0) * (Jerr.transpose() * m_weights * Jerr); // Gauss-Newton approx
     }
+  protected:
+    const Scalar m_level_squared = m_level * m_level;
 
   };
 } // namespace lienlp
