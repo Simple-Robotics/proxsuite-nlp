@@ -3,8 +3,6 @@
 #include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
 
-#include <eigenpy/eigen-typedef.hpp>
-
 
 namespace lienlp
 {
@@ -16,8 +14,8 @@ namespace python
     
     using Scalar = double;
 
-    // EIGENPY_MAKE_TYPEDEFS_ALL_SIZES(Scalar, Options, s)
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using Problem_t = Problem<Scalar>;
     using Result_t = SResults<Scalar>;
