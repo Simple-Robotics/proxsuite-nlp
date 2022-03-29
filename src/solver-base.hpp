@@ -90,7 +90,8 @@ namespace lienlp
       : manifold(man),
         problem(prob),
         merit_fun(problem),
-        prox_penalty(manifold),
+        prox_penalty(manifold, manifold.neutral(),
+                     rho * MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
         rho(rho),
         mu_eq_init(mu_eq_init),
         mu_factor(mu_factor),
@@ -186,6 +187,14 @@ namespace lienlp
       mu_eq = new_mu;
       mu_eq_inv = 1. / mu_eq;
       merit_fun.setPenalty(mu_eq);
+    }
+
+    /// Set proximal penalty parameter.
+    void setProxParam(const Scalar new_rho)
+    {
+      rho = new_rho;
+      prox_penalty.m_weights.setIdentity();
+      prox_penalty.m_weights *= rho;
     }
 
   protected:
