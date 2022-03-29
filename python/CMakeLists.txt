@@ -26,6 +26,7 @@ set_target_properties(${PY_NAME}
 
 # link solver, eigenpy, Boost.Python
 target_link_libraries(${PY_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
+target_link_libraries(${PY_NAME} PRIVATE fmt::fmt)
 target_link_boost_python(${PY_NAME} PUBLIC)
 install(TARGETS ${PY_NAME} DESTINATION ${${PY_NAME}_INSTALL_DIR})
 
