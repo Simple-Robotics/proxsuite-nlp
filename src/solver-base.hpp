@@ -22,17 +22,19 @@
 namespace lienlp
 {
 
-  template<typename M>
+  template<typename _Scalar>
   class Solver
   {
   public:
-    using Scalar = typename M::Scalar;
+    using Scalar = _Scalar;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
     using Prob_t = Problem<Scalar>;
     using Merit_t = PDALFunction<Scalar>;
 
     using Workspace = SWorkspace<Scalar>;
     using Results = SResults<Scalar>;
+  
+    using M = ManifoldAbstract<Scalar>;
 
     /// Manifold on which to optimize.
     const M& manifold;

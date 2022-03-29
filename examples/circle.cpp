@@ -119,7 +119,7 @@ int main()
   SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
   SResults<double> results(space.nx(), *prob);
 
-  Solver<Man> solver(space, prob);
+  Solver<double> solver(space, prob);
   solver.setPenalty(1. / 50);
   solver.use_gauss_newton = true;
 

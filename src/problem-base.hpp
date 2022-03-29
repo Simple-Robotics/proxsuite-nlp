@@ -57,7 +57,14 @@ namespace lienlp
     {
       reset_constraint_dim_vars();
     }
-    
+
+    /// Add a constraint to the problem, after initialization.
+    void addConstraint(const ConstraintPtr& cstr)
+    {
+      m_cstrs.push_back(cstr);
+      reset_constraint_dim_vars();
+    }    
+
     /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
     static void allocateMultipliersOrResiduals(
       const Problem<Scalar>& prob,
@@ -72,7 +79,7 @@ namespace lienlp
     }
   protected:
     /// Vector of equality constraints.
-    const std::vector<ConstraintPtr> m_cstrs;
+    std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
     const int m_nc_total;
     const std::vector<int> m_ncs;

@@ -60,7 +60,7 @@ int submain()
 
   auto prob = std::make_shared<Prob_t>(cost, cstrs_);
 
-  using Solver_t = Solver<Man>;
+  using Solver_t = Solver<double>;
   typename Solver_t::Workspace workspace(space.nx(), space.nx(), *prob);
   typename Solver_t::Results results(space.nx(), *prob);
 
