@@ -4,13 +4,15 @@
 #include "lienlp/modelling/constraints/equality-constraint.hpp"
 #include "lienlp/modelling/constraints/negative-orthant.hpp"
 
+/// TODO remove this include once functionality upstream
+#include <pinocchio/fwd.hpp>
+#include <pinocchio/bindings/python/utils/std-vector.hpp>
+
 
 namespace lienlp
 {
 namespace python
 {
-
-  namespace bp = boost::python;
 
   template<typename T>
   void exposeSpecificConstraint(const char* name, const char* docstring)
@@ -21,7 +23,7 @@ namespace python
     );
   }
 
-  void exposeConstraint()
+  void exposeConstraints()
   {
     using context::Scalar;
     using context::Constraint_t;
@@ -34,6 +36,10 @@ namespace python
       .def("normalConeProjection", &Constraint_t::normalConeProjection, bp::args("self", "z"))
       .def("computeActiveSet", &Constraint_t::computeActiveSet, bp::args("self", "z", "out"))
       ;
+
+    /* Expose constraint stack */
+    namespace pp = pinocchio::python;
+    pp::StdVectorPythonVisitor<std::vector<ConstraintPtr>, true>::expose("ConstraintVector");
 
     exposeSpecificConstraint<EqualityConstraint<Scalar>>(
       "EqualityConstraint",

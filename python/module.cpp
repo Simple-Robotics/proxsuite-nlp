@@ -27,7 +27,7 @@ BOOST_PYTHON_MODULE(pylienlp)
     bp::scope cost_scope = get_namespace("costs");
     exposeCost();
   }
-  exposeConstraint();
+  exposeConstraints();
   exposeProblem();
   exposeResults();
 }
