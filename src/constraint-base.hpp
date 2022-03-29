@@ -32,9 +32,9 @@ namespace lienlp
     }
 
     /// Get dimension of manifold element representation.
-    int nx() const { return m_func.nx(); }
+    int nx()  const { return m_func.nx(); }
     /// Get dimension of constraint representation.
-    int nr() const { return m_func.nr(); }
+    int nr()  const { return m_func.nr(); }
     /// Get tangent space dimension (no. of columns of Jacobian)
     int ndx() const { return m_func.ndx(); }
 
