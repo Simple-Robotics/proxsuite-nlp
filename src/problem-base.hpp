@@ -42,7 +42,7 @@ namespace lienlp
 
     int getTotalConstraintDim() const
     {
-      return m_ncTotal;
+      return m_nc_total;
     }
 
     std::vector<int> getConstraintDims() const
@@ -50,17 +50,12 @@ namespace lienlp
       return m_ncs;
     }
 
-    Problem(const CostType& cost) : m_cost(cost), m_ncTotal(0) {}
+    Problem(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
 
     Problem(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
-            : m_cost(cost), m_cstrs(constraints), m_ncTotal(0)
+            : m_cost(cost), m_cstrs(constraints), m_nc_total(0)
     {
-      int& nc = const_cast<int&>(m_ncTotal);
-      for (ConstraintPtr cstr : m_cstrs)
-      {
-        nc += cstr->nr();
-        m_ncs.push_back(cstr->nr());
-      }
+      reset_constraint_dim_vars();
     }
     
     /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
@@ -79,8 +74,21 @@ namespace lienlp
     /// Vector of equality constraints.
     const std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
-    const int m_ncTotal;
-    std::vector<int> m_ncs;
+    const int m_nc_total;
+    const std::vector<int> m_ncs;
+
+    /// Set values of const data members for constraint dimensions
+    void reset_constraint_dim_vars()
+    {
+      int& nc = const_cast<int&>(m_nc_total);
+      auto& ncs_ref = const_cast<std::vector<int>&>(m_ncs);
+      ncs_ref.clear();
+      for (ConstraintPtr cstr : m_cstrs)
+      {
+        nc += cstr->nr();
+        ncs_ref.push_back(cstr->nr());
+      }
+    }
   };
 
 } // namespace lienlp
