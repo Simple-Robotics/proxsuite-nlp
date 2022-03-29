@@ -105,7 +105,7 @@ namespace lienlp
       merit_fun.setPenalty(mu_eq);
     }
 
-    ConvergedFlag solve(Workspace& workspace,
+    ConvergenceFlag solve(Workspace& workspace,
                         Results& results,
                         const VectorXs& x0,
                         const VectorOfVectors& lams0)
@@ -142,7 +142,7 @@ namespace lienlp
           if ((workspace.primalInfeas < target_tol) && (workspace.dualInfeas < target_tol))
           {
             // terminate algorithm
-            results.converged = ConvergedFlag::SUCCESS;
+            results.converged = ConvergenceFlag::SUCCESS;
             break;
           }
           updateToleranceSuccess();
@@ -339,13 +339,13 @@ namespace lienlp
         results.numIters++;
         if (results.numIters >= MAX_ITERS)
         {
-          results.converged = ConvergedFlag::TOO_MANY_ITERS;
+          results.converged = ConvergenceFlag::MAX_ITERS_REACHED;
           break;
         }
       }
 
       if (results.numIters >= MAX_ITERS)
-        results.converged = ConvergedFlag::TOO_MANY_ITERS;
+        results.converged = ConvergenceFlag::MAX_ITERS_REACHED;
 
       return;
     }

@@ -17,14 +17,14 @@ namespace python
     void exposeBaseManifold()
     {
       using ConstVectorRef = context::ConstVectorRef;
-      using Man = context::ManifoldAbstract_t;
+      using Man = context::ManifoldType;
       using PointType = typename Man::PointType;
       using VecType = typename Man::TangentVectorType;
 
       using IntegrateRet_t = PointType(Man::*)(const ConstVectorRef&, const ConstVectorRef&) const;
       using IntegrateFun_t = void     (Man::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
-      using DifferenceRet_t = VecType(Man::*)(const ConstVectorRef&, const ConstVectorRef&) const;
-      using DifferenceFun_t = void   (Man::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
+      using DifferenceRet_t = VecType (Man::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using DifferenceFun_t = void    (Man::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
 
       bp::class_<Man, shared_ptr<Man>, boost::noncopyable>(
         "ManifoldAbstract", "Manifold abstract class.",

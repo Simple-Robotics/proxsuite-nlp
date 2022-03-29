@@ -3,6 +3,7 @@
 #include "lienlp/cost-function.hpp"
 
 #include "lienlp/modelling/costs/squared-residual.hpp"
+#include "lienlp/modelling/costs/squared-distance.hpp"
 
 
 namespace lienlp
@@ -15,9 +16,11 @@ namespace python
     using context::Cost_t;
     using context::VectorXs;
     using context::MatrixXs;
+    using context::ConstVectorRef;
+    using context::ManifoldType;
 
-    VectorXs (Cost_t::*compGrad1)(const context::ConstVectorRef&) const = &Cost_t::computeGradient;
-    MatrixXs (Cost_t::*compHess1)(const context::ConstVectorRef&) const = &Cost_t::computeHessian;
+    VectorXs (Cost_t::*compGrad1)(const ConstVectorRef&) const = &Cost_t::computeGradient;
+    MatrixXs (Cost_t::*compHess1)(const ConstVectorRef&) const = &Cost_t::computeHessian;
 
     bp::class_<Cost_t, boost::noncopyable>(
       "CostFunctionBase", bp::no_init
@@ -31,7 +34,17 @@ namespace python
       "QuadraticResidualCost", "Quadratic of a residual function",
       bp::init<shared_ptr<context::DFunctor_t>, const MatrixXs&>()
     );
-  }  
+
+    bp::class_<QuadDistanceCost<context::Scalar>, bp::bases<Cost_t>>(
+      "QuadDistanceCost", "Quadratic distance cost on the manifold.",
+      bp::init<const ManifoldType&, const VectorXs&, const MatrixXs&>(
+        bp::args("space", "target", "weights"))
+    )
+      .def(bp::init<const ManifoldType&, const VectorXs&>(
+        bp::args("space", "target")))
+      .def("update_target", &QuadDistanceCost<context::Scalar>::updateTarget, bp::args("new_target"))
+    ;
+  }
 
 } // namespace python
 } // namespace lienlp

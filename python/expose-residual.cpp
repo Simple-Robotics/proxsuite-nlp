@@ -28,7 +28,7 @@ namespace python
     using context::VectorXs;
     using context::MatrixXs;
     using context::ConstVectorRef;
-    using context::ManifoldAbstract_t;
+    using context::ManifoldType;
 
     expose_residual<LinearResidual<context::Scalar>>(
       "LinearResidual", "Residual f(x) = Ax + b.",
@@ -36,7 +36,12 @@ namespace python
 
     expose_residual<StateResidual<context::Scalar>>(
       "StateResidual", "Difference vector x (-) x0.",
-      bp::init<const ManifoldAbstract_t&, const ConstVectorRef&>(bp::args("space", "target")));
+      bp::init<const ManifoldType&, const ConstVectorRef&>(bp::args("space", "target")));
+
+    expose_residual<LinearStateResidual<context::Scalar>>(
+      "LinearStateResidual", "Linear function of the vector difference to a reference point.",
+      bp::init<const ManifoldType&, VectorXs, MatrixXs, VectorXs>(bp::args("space", "target", "A", "b"))
+    );
   }
 
 } // namespace python

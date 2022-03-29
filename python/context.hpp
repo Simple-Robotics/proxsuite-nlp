@@ -24,7 +24,7 @@ namespace python
     using Functor_t = BaseFunctor<Scalar>;
     using DFunctor_t = DifferentiableFunctor<Scalar>;
 
-    using ManifoldAbstract_t = ManifoldAbstract<Scalar>;
+    using ManifoldType = ManifoldAbstract<Scalar>;
 
     using VecFunc_t = void(const ConstVectorRef&, VectorRef) const;
     using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;

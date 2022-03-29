@@ -10,11 +10,11 @@
 namespace lienlp
 {
 
-  enum ConvergedFlag
+  enum ConvergenceFlag
   {
     UNINIT=-1,
     SUCCESS=0,
-    TOO_MANY_ITERS=1
+    MAX_ITERS_REACHED=1
   };
 
   /**
@@ -31,7 +31,7 @@ namespace lienlp
     using Prob_t = Problem<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    ConvergedFlag converged = ConvergedFlag::UNINIT;
+    ConvergenceFlag converged = ConvergenceFlag::UNINIT;
 
     Scalar value;
     VectorXs xOpt;
