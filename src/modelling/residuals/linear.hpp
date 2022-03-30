@@ -25,7 +25,9 @@ namespace lienlp
     const VectorXs b;
 
     LinearResidual(const ConstMatrixRef& A, const ConstVectorRef& b)
-      : Base(A.cols(), A.cols(), A.rows()), mat(A), b(b) {}
+      : Base((int)A.cols(), (int)A.cols(), (int)A.rows()),
+        mat(A),
+        b(b) {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
