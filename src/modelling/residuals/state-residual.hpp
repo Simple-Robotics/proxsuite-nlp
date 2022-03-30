@@ -25,8 +25,6 @@ namespace lienlp
     using Base = DifferentiableFunctor<Scalar>;
     using Base::operator();
     using Base::computeJacobian;
-    using Base::m_ndx;
-    using Base::m_nr;
     using M = ManifoldAbstract<Scalar>;
 
     /// Target point on the manifold.

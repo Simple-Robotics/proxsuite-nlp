@@ -49,7 +49,7 @@ namespace lienlp
   {
     using Scalar = _Scalar;
     using Base = ComposeFunctor<Scalar>;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
 
     using M = ManifoldAbstract<Scalar>;
 

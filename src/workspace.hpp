@@ -22,7 +22,7 @@ namespace lienlp
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
 
     /// Newton iteration variables

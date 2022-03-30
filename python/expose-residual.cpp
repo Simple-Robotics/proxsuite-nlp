@@ -2,7 +2,6 @@
 
 #include "lienlp/modelling/residuals/linear.hpp"
 #include "lienlp/modelling/residuals/state-residual.hpp"
-#include "lienlp/modelling/residuals/quadratic-residual.hpp"
 
 #include <boost/python/overloads.hpp>
 
@@ -42,13 +41,6 @@ namespace python
     expose_residual<LinearStateResidual<context::Scalar>>(
       "LinearStateResidual", "Linear function of the vector difference to a reference point.",
       bp::init<const ManifoldType&, VectorXs, MatrixXs, VectorXs>(bp::args("space", "target", "A", "b"))
-    );
-
-    expose_residual<QuadraticResidualFunctor<context::Scalar>>(
-      "QuadraticResidual", "Quadratic function of the distance to a point.",
-      bp::init<const ManifoldType&, const MatrixXs&, context::Scalar, const VectorXs&>(
-        bp::args("manifold", "weights", "level", "target")
-      )
     );
   }
 

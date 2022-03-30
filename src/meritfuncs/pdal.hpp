@@ -30,7 +30,7 @@ namespace lienlp
       typename math_types<_Scalar>::VectorOfVectors>
   {
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = MeritFunctorBase<Scalar, VectorOfVectors, VectorOfVectors>;
     using Base::m_prob;
     using Base::computeGradient;
@@ -90,7 +90,7 @@ namespace lienlp
                       const VectorOfVectors& lams,
                       const VectorOfVectors& lams_ext) const
     {
-      Scalar result_ = m_prob->m_cost(x);
+      Scalar result_ = m_prob->m_cost.call(x);
 
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)

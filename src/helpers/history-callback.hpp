@@ -13,9 +13,8 @@ namespace lienlp
     template<typename Scalar>
     struct history_callback : callback<Scalar>
     {
-      using Result_t = SResults<Scalar>;
       history_callback(const SWorkspace<Scalar>& workspace,
-                       const Result_t& results,
+                       const SResults<Scalar>& results,
                        bool store_pd_vars=true,
                        bool store_values=true,
                        bool store_residuals=true)
@@ -28,8 +27,8 @@ namespace lienlp
 
       struct
       {
-        std::vector<typename Result_t::VectorXs> xs;
-        std::vector<typename Result_t::VectorOfVectors> lams;
+        std::vector<typename SResults<Scalar>::VectorXs> xs;
+        std::vector<typename SResults<Scalar>::VectorOfVectors> lams;
         std::vector<Scalar> values;
         std::vector<Scalar> prim_infeas;
         std::vector<Scalar> dual_infeas;
@@ -53,7 +52,7 @@ namespace lienlp
 
     protected:
       const SWorkspace<Scalar>& workspace_;
-      const Result_t& results_;
+      const SResults<Scalar>& results_;
       const bool store_primal_dual_vars_;
       const bool store_values_;
       const bool store_residuals_;

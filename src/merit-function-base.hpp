@@ -14,7 +14,7 @@ namespace lienlp
   struct MeritFunctorBase
   {
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
 
     shared_ptr<Prob_t> m_prob;
@@ -44,7 +44,7 @@ namespace lienlp
   struct EvalObjective : public MeritFunctorBase<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
     using Base = MeritFunctorBase<Scalar>;
     using Base::m_prob;
@@ -55,7 +55,7 @@ namespace lienlp
 
     Scalar operator()(const ConstVectorRef& x) const
     {
-      return m_prob->m_cost(x);
+      return m_prob->m_cost.call(x);
     }
 
     void computeGradient(const ConstVectorRef& x, VectorRef out) const

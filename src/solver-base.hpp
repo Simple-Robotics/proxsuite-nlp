@@ -28,7 +28,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
     using Merit_t = PDALFunction<Scalar>;
 
@@ -233,7 +233,7 @@ namespace lienlp
 
         //// precompute temp data
 
-        results.value = problem->m_cost(x);
+        results.value = problem->m_cost.call(x);
         problem->m_cost.computeGradient(x, workspace.objectiveGradient);
         problem->m_cost.computeHessian(x, workspace.objectiveHessian);
 
@@ -301,7 +301,7 @@ namespace lienlp
         workspace.dualInfeas = infNorm(workspace.dualResidual);
         Scalar inner_crit = infNorm(workspace.kktRhs);
 
-        fmt::print("[iter {:>3d}] inner stop {:.2g}, d={:.3g}, p={:.3g}\n",
+        fmt::print("[iter {:>3d}] inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
                   results.numIters, inner_tol, workspace.dualInfeas, workspace.primalInfeas);
 
         if (inner_crit <= inner_tol)
@@ -334,7 +334,7 @@ namespace lienlp
         Scalar merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
         if (rho > 0.)
         {
-          merit0 += rho * prox_penalty(x);
+          merit0 += rho * prox_penalty.call(x);
           workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
         }
         Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep.head(ndx));
@@ -473,7 +473,7 @@ namespace lienlp
       {
         tryStep(workspace, results, alpha_try);
         merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
-        merit_trial += rho * prox_penalty(workspace.xTrial);
+        merit_trial += rho * prox_penalty.call(workspace.xTrial);
         dM = merit_trial - merit0;
         if (verbose)
           fmt::print(" | [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);

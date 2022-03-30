@@ -9,7 +9,7 @@ namespace lienlp
 {
 
   template<typename _Scalar>
-  class CostSum : CostFunctionBase<_Scalar>
+  struct CostSum : CostFunctionBase<_Scalar>
   {
   public:
     using Scalar = _Scalar;
@@ -39,7 +39,7 @@ namespace lienlp
       
     }
 
-    Scalar operator()(const ConstVectorRef& x) const
+    Scalar call(const ConstVectorRef& x) const
     {
       Scalar result_ = 0.;
       for (std::size_t i = 0; i < m_components.size(); i++)

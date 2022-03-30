@@ -11,7 +11,7 @@ namespace lienlp
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
   #define LIENLP_DEFINE_MANIFOLD_TYPES(M)                     \
-    LIENLP_DEFINE_DYNAMIC_TYPES(typename M::Scalar)           \
+    LIENLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
     using PointType = typename M::PointType;                  \
     using TangentVectorType = typename M::TangentVectorType;  \
     using JacobianType = typename M::JacobianType;
@@ -19,7 +19,7 @@ namespace lienlp
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
    */
-  template<class _Scalar, int _Options>
+  template<typename _Scalar, int _Options>
   struct ManifoldAbstract {
   public:
     using Scalar = _Scalar; /// Scalar type
@@ -27,7 +27,7 @@ namespace lienlp
       Options = _Options
     };
 
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 

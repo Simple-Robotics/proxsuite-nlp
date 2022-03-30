@@ -27,7 +27,7 @@ namespace lienlp
   struct SResults
   {
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 

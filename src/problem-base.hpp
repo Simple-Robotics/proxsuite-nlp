@@ -16,7 +16,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
 
     /// Generic constraint type
     using ConstraintType = ConstraintSetBase<Scalar>;

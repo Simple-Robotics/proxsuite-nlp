@@ -19,7 +19,7 @@ namespace lienlp
     >
   {
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Prob_t = Problem<Scalar>;
     using Base = MeritFunctorBase<Scalar, VectorOfVectors>;
     using Base::m_prob;
@@ -31,7 +31,7 @@ namespace lienlp
     Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams) const
     {
       Scalar result_ = 0.;
-      result_ = result_ + m_prob->m_cost(x);
+      result_ = result_ + m_prob->m_cost.call(x);
       const std::size_t num_c = m_prob->getNumConstraints();
       for (std::size_t i = 0; i < num_c; i++)
       {

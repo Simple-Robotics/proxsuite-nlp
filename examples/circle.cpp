@@ -6,7 +6,7 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/residuals/quadratic-residual.hpp"
+#include "lienlp/modelling/costs/quadratic-residual.hpp"
 #include "lienlp/modelling/constraints/negative-orthant.hpp"
 #include "lienlp/solver-base.hpp"
 
@@ -44,22 +44,26 @@ int main()
   Man::JacobianType weights(ndx, ndx);
   weights.setIdentity();
 
-  StateResidual<double> residual(space, p0);
+  QuadDistanceCost<double> cf(space, p0, weights);
+  fmt::print("cost: {}\n", cf.call(p1));
+  fmt::print("grad: {}\n", cf.computeGradient(p1));
+  fmt::print("hess: {}\n", cf.computeHessian(p1));
+
+  StateResidual<double> residual(space, space.neutral());
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<decltype(residual)>(residual);
 
-  QuadraticResidualCost<double> cf(resptr, weights);
-  fmt::print("cost: {}\n", cf(p1));
-  fmt::print("grad: {}\n", cf.computeGradient(p1));
-  fmt::print("hess: {}\n", cf.computeHessian(p1));
-
   /// DEFINE A PROBLEM
 
-  double radius_ = .7;
+  double radius_ = .6;
+  double radius_sq = radius_ * radius_;
+  Prob_t::MatrixXs w2(ndx, ndx);
+  w2.setIdentity();
+  w2 *= 2;
 
-  QuadraticResidualFunctor<double> residualCircle(space, radius_, space.neutral());
+  QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
   using Ineq_t = NegativeOrthant<double>;
   // Prob_t::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);

@@ -1,5 +1,4 @@
 #include "lienlp/modelling/residuals/linear.hpp"
-#include "lienlp/modelling/residuals/cost-to-functor.hpp"
 #include "lienlp/functor-ops.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
@@ -75,24 +74,5 @@ BOOST_AUTO_TEST_CASE(test_compose)
   BOOST_CHECK(v1_manual.isApprox(v0));
 
 }
-
-BOOST_AUTO_TEST_CASE(test_cost_to_functor)
-{
-  using V_t = PinocchioLieGroup<pin::VectorSpaceOperationTpl<2, double>>;
-  V_t space;
-  auto x0 = space.neutral();
-  auto x1 = space.rand();
-  auto x2 = space.rand();
-
-  QuadDistanceCost<double> cost(space, x0);
-  convert_cost_to_functor<QuadDistanceCost<double>>::out_type quad_dist_functor(cost);
-
-  fmt::print("  cost(x0): {:.3g}\n"
-             "  resd(x0): {}\n", cost(x0), quad_dist_functor(x0).transpose());
-  fmt::print("  cost(x1): {:.3g}\n"
-             "  resd(x1): {}\n", cost(x1), quad_dist_functor(x1).transpose());
-
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()

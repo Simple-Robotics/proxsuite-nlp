@@ -2,7 +2,7 @@
 
 /// Macro typedefs for dynamic-sized vectors/matrices, used for cost funcs, merit funcs
 /// because we don't CRTP them and virtual members funcs can't be templated.
-#define LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)                   \
+#define LIENLP_DYNAMIC_TYPEDEFS(Scalar)                       \
   using VectorXs = typename math_types<Scalar>::VectorXs;     \
   using MatrixXs = typename math_types<Scalar>::MatrixXs;     \
   using VectorOfVectors = typename math_types<Scalar>::VectorOfVectors; \
@@ -17,6 +17,6 @@
 #define LIENLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj)
 
 #define LIENLP_FUNCTOR_TYPEDEFS(Scalar)          \
-  LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)                 \
+  LIENLP_DYNAMIC_TYPEDEFS(Scalar)                \
   using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;   \
   using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;

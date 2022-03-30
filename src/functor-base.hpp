@@ -40,14 +40,15 @@ namespace lienlp
   /** @brief  Differentiable functor, with methods to compute both Jacobians and vector-hessian products.
    */
   template<typename _Scalar>
-  struct DifferentiableFunctor : BaseFunctor<_Scalar>
+  struct DifferentiableFunctor : public BaseFunctor<_Scalar>
   {
   public:
     using Scalar = _Scalar;
+    using Base = BaseFunctor<_Scalar>;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     DifferentiableFunctor(const int nx, const int ndx, const int nr)
-      : BaseFunctor<Scalar>(nx, ndx, nr) {}
+      : Base(nx, ndx, nr) {}
 
     /// @brief      Jacobian matrix of the constraint function.
     virtual void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const = 0;
