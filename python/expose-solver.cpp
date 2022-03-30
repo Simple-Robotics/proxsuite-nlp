@@ -18,12 +18,12 @@ namespace lienlp
         "Solver", "The numerical solver.",
         bp::init<const ManifoldType&,
                  shared_ptr<context::Problem_t>&,
-                 double,
-                 double,
-                 double,
+                 Scalar,
+                 Scalar,
+                 Scalar,
                  bool,
-                 double,
-                 double
+                 Scalar,
+                 Scalar
                  >((  bp::arg("self")
                     , bp::arg("space")
                     , bp::arg("problem")
@@ -36,6 +36,7 @@ namespace lienlp
                     ))
       )
         .def_readwrite("use_gauss_newton", &Solver_t::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
+        .def("register_callback", &Solver_t::registerCallback, bp::args("cb"), "Add a callback to the solver.")
         .def_readwrite("verbose", &Solver_t::verbose, "Solver verbose setting.")
         .def("solve", &Solver_t::solve,
              bp::args("workspace", "results", "x0", "lams0"))

@@ -126,6 +126,7 @@ file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/helpers
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/meritfuncs
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/autodiff
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/spaces
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/costs
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/residuals

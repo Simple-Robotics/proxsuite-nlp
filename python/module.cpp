@@ -16,6 +16,7 @@ void exposeContainerTypes()
   namespace pp = pinocchio::python;
 
   pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
+  pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
   pp::StdVectorPythonVisitor<context::VectorOfVectors, false>::expose("StdVec_Vector");
   pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
 }
@@ -52,4 +53,5 @@ BOOST_PYTHON_MODULE(pylienlp)
   exposeResults();
   exposeWorkspace();
   exposeSolver();
+  exposeCallbacks();
 }

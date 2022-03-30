@@ -66,6 +66,10 @@ struct Problem;
 template<typename Scalar>
 struct SResults;
 
+// fwd Workspace
+template<typename Scalar>
+struct SWorkspace;
+
 /// Shorthand for the infinity norm
 /// code from proxqp
 template<typename Mat_t>

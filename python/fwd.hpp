@@ -23,6 +23,7 @@ namespace python
   void exposeResults();
   void exposeWorkspace();
   void exposeSolver();
+  void exposeCallbacks();
 
 } // namespace python
 

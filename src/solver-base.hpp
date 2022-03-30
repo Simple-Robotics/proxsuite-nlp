@@ -15,6 +15,7 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/workspace.hpp"
 #include "lienlp/results.hpp"
+#include "lienlp/helpers-base.hpp"
 
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
@@ -77,6 +78,10 @@ namespace lienlp
     const Scalar alpha_min;
     const Scalar armijo_c1;
 
+    /// Callbacks
+    using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
+    std::vector<CallbackPtr> callbacks_;
+
     Solver(const M& man,
            shared_ptr<Prob_t>& prob,
            const Scalar tol=1e-6,
@@ -111,6 +116,11 @@ namespace lienlp
         armijo_c1(armijo_c1)
     {
       merit_fun.setPenalty(mu_eq);
+    }
+
+    inline void registerCallback(const CallbackPtr& cb)
+    {
+      callbacks_.push_back(cb);
     }
 
     ConvergenceFlag solve(Workspace& workspace,
@@ -299,6 +309,11 @@ namespace lienlp
         if (inner_crit <= inner_tol)
         {
           return;
+        }
+
+        for (auto cb : callbacks_)
+        {
+          cb->call();
         }
 
         // factorization

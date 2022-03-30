@@ -10,7 +10,7 @@ namespace lienlp
     void exposeWorkspace()
     {
       using context::Scalar;
-      bp::class_<SWorkspace<Scalar>>(
+      bp::class_<context::Workspace_t>(
         "Workspace", "Solver workspace.",
         bp::init<int, int, const context::Problem_t&>(bp::args("nx", "ndx", "problem"))
       );
