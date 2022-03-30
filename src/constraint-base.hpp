@@ -22,7 +22,7 @@ namespace lienlp
     const FunctorType& m_func;
 
 
-    ConstraintSetBase<Scalar>(const FunctorType& func)
+    explicit ConstraintSetBase<Scalar>(const FunctorType& func)
       : m_func(func)
       {}
 

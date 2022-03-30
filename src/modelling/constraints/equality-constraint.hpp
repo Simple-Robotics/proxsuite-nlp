@@ -25,7 +25,7 @@ namespace lienlp
     using Active_t = typename Base::Active_t;
     using FunctorType = typename Base::FunctorType;
 
-    EqualityConstraint(const FunctorType& func)
+    explicit EqualityConstraint(const FunctorType& func)
       : Base(func) {}
 
     inline ReturnType projection(const ConstVectorRef& z) const

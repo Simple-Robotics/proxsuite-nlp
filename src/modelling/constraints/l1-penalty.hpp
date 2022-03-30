@@ -28,7 +28,7 @@ namespace lienlp
 
     Scalar m_mu = 0.01;
 
-    L1Penalty(const FunctorType& func) : Base(func) {}
+    explicit L1Penalty(const FunctorType& func) : Base(func) {}
 
     ReturnType projection(const ConstVectorRef& z) const
     {
