@@ -310,7 +310,7 @@ namespace lienlp
 
         if (verbose)
         {
-          fmt::print(" | conditioning:  {}\n", conditioning_);
+          fmt::print(" | conditioning:  {:.3g}\n", conditioning_);
           fmt::print(" | KKT signature: {}\n", workspace.signature.transpose());
         }
 

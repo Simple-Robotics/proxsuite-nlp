@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_compose)
   Vector_t x0;
   x0.setOnes();
 
-  ComposeFunctor<ResType, ResType> res2(res1, res1);
+  ComposeFunctor<double> res2(res1, res1);
 
   fmt::print("A matrix:\n{}\n", A);
   fmt::print("A squared:\n{}\n", A * A);

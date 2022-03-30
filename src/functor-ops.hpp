@@ -7,23 +7,21 @@
 
 namespace lienlp
 {
-  /** @brief Compose functors @p F1 and @p F2.
+
+  /** @brief Compose two functors.
    */
-  template<typename F1, typename F2>
-  struct ComposeFunctor : DifferentiableFunctor<typename F1::Scalar>
+  template<typename _Scalar>
+  struct ComposeFunctor : DifferentiableFunctor<_Scalar>
   {
-  private:
-    const F1& left;
-    const F2& right;
   public:
-    using Scalar = typename F1::Scalar;
+    using Scalar = _Scalar;
     using Base = DifferentiableFunctor<Scalar>;
     using Base::computeJacobian;
     using Base::vectorHessianProduct;
 
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    ComposeFunctor(const F1& left, const F2& right) :
+    ComposeFunctor(const Base& left, const Base& right) :
         DifferentiableFunctor<Scalar>(right.nx(), right.ndx(), left.nr())
       , left(left), right(right) {}
 
@@ -37,6 +35,9 @@ namespace lienlp
       left.computeJacobian(right(x), Jout);
       Jout = Jout * right.computeJacobian(x);
     }
+  private:
+    const Base& left;
+    const Base& right;
 
   };
   

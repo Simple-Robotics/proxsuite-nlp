@@ -45,10 +45,10 @@ namespace lienlp
    *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
    */
   template<typename _Scalar>
-  struct LinearStateResidual : ComposeFunctor<LinearResidual<_Scalar>, StateResidual<_Scalar>>
+  struct LinearStateResidual : ComposeFunctor<_Scalar>
   {
     using Scalar = _Scalar;
-    using Base = ComposeFunctor<LinearResidual<Scalar>, StateResidual<Scalar>>;
+    using Base = ComposeFunctor<Scalar>;
     LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
 
     using M = ManifoldAbstract<Scalar>;
