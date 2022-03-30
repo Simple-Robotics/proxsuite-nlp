@@ -37,7 +37,10 @@ namespace python
                const ConstMatrixRef&,
                const ConstVectorRef&,
                context::Scalar>(
-                 ("residual", "weights", "slope", bp::arg("constant") = 0.)
+                 (bp::arg("residual"),
+                  bp::arg("weights"),
+                  bp::arg("slope"),
+                  bp::arg("constant") = 0.)
                )
     );
 
