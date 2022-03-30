@@ -19,7 +19,7 @@ function(create_library)
 
   target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
-  target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
+  target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
   set(INSTALL_DIRS_FROM_INTERFACE $<INSTALL_INTERFACE:include>)
 
