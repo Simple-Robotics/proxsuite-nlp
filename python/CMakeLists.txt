@@ -30,8 +30,13 @@ target_link_libraries(${PY_NAME} PRIVATE fmt::fmt)
 target_link_boost_python(${PY_NAME} PUBLIC)
 install(TARGETS ${PY_NAME} DESTINATION ${${PY_NAME}_INSTALL_DIR})
 
+# copy headers to build/include/ directory
 message(STATUS "Python headers: ${PY_HEADERS}")
 message(STATUS "Python sources: ${PY_SOURCES}")
+
+file(MAKE_DIRECTORY
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
+     )
 
 foreach(pyheader ${PY_HEADERS})
   message(STATUS "Processing Python header ${pyheader}")
@@ -40,10 +45,6 @@ foreach(pyheader ${PY_HEADERS})
                   ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
                   ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
 endforeach(pyheader)
-
-file(MAKE_DIRECTORY
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
-     )
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PY_NAME}_PYFILES
