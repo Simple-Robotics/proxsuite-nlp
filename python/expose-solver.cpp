@@ -17,19 +17,25 @@ namespace lienlp
       bp::class_<Solver_t>(
         "Solver", "The numerical solver.",
         bp::init<const ManifoldType&,
-                 shared_ptr<context::Problem_t>&
+                 shared_ptr<context::Problem_t>&,
+                 double,
+                 double,
+                 double,
+                 bool,
+                 double,
+                 double
                  >((  bp::arg("self")
                     , bp::arg("space")
                     , bp::arg("problem")
-                    // , bp::arg("tol") = 1e-6
-                    // , bp::arg("mu_init") = 1e-2
-                    // , bp::arg("rho") = 0.
-                    // , bp::arg("mu_factor") = 0.1
+                    , bp::arg("tol") = 1e-6
+                    , bp::arg("mu_init") = 1e-2
+                    , bp::arg("rho_init") = 0.
+                    , bp::arg("verbose") = true
+                    , bp::arg("mu_factor") = 0.1
+                    , bp::arg("mu_min") = 1e-9
                     ))
       )
-        // .def_readwrite("use_gauss_newton", &Solver_t::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
-        // .def_readwrite("alpha_min", &Solver_t::alpha_min, "Set linesearch minimum step size.")
-        // .def_readwrite("ls_c1", &Solver_t::ls_c1, "Linesearch Armijo rule decrease ratio.")
+        .def_readwrite("use_gauss_newton", &Solver_t::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
         .def_readwrite("verbose", &Solver_t::verbose, "Solver verbose setting.")
         .def("solve", &Solver_t::solve,
              bp::args("workspace", "results", "x0", "lams0"))

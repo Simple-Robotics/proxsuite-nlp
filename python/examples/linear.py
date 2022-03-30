@@ -3,9 +3,10 @@ import lienlp
 from lienlp.residuals import LinearResidual
 from lienlp.costs import QuadDistanceCost
 from lienlp.manifolds import EuclideanSpace
-from lienlp import EqualityConstraint, NegativeOrthant, Problem
+from lienlp.constraints import EqualityConstraint, NegativeOrthant
 
 nx = 3
+np.random.seed(42)
 space = EuclideanSpace(nx)
 A = np.random.randn(2, nx)
 b = np.random.randn(2)
@@ -37,17 +38,25 @@ print("dproj x1:", cstr2.normalConeProjection(x1))
 
 
 cost_ = QuadDistanceCost(space, x1, np.eye(nx))
-problem = Problem(cost_)
+problem = lienlp.Problem(cost_)
 print("Problem:", problem)
 
 
-problem = Problem(cost_, [cstr1])
+problem = lienlp.Problem(cost_, [cstr1])
 
 
 results = lienlp.Results(nx, problem)
 workspace = lienlp.Workspace(nx, nx, problem)
 
 solver = lienlp.Solver(space, problem)
-lams0 = lienlp.StdVec_Vector([np.random.randn(resdl.nr)])
+lams0 = [np.random.randn(resdl.nr)]
 solver.solve(workspace, results, x0, lams0)
 
+
+# Test no verbose
+print(" TEST NO VERBOSE ")
+results = lienlp.Results(nx, problem)
+workspace = lienlp.Workspace(nx, nx, problem)
+solver2 = lienlp.Solver(space, problem, mu_init=1e-6, verbose=False)
+solver2.solve(workspace, results, x0, lams0)
+print(" Solver done.")

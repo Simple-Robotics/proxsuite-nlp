@@ -55,7 +55,8 @@ namespace lienlp
     const Scalar prim_tol0 = 1.;
     Scalar inner_tol = inner_tol0;
     Scalar prim_tol = prim_tol0;
-    Scalar rho;                 /// Primal proximal penalty parameter.
+    Scalar rho_init;            /// Initial primal proximal penalty parameter.
+    Scalar rho = rho_init;      /// Primal proximal penalty parameter.
     Scalar mu_eq_init;          /// Initial penalty parameter.
     Scalar mu_eq = mu_eq_init;  /// Penalty parameter.
     Scalar mu_eq_inv = 1. / mu_eq;
@@ -73,26 +74,31 @@ namespace lienlp
     const Scalar dual_alpha;  /// BCL failure scaling (dual)
     const Scalar dual_beta;   /// BCL success scaling (dual)
 
-    const Scalar alpha_min = 1e-7;
-    const Scalar ls_c1 = 1e-4;
+    const Scalar alpha_min;
+    const Scalar armijo_c1;
 
     Solver(const M& man,
            shared_ptr<Prob_t>& prob,
            const Scalar tol=1e-6,
            const Scalar mu_eq_init=1e-2,
-           const Scalar rho=0.,
+           const Scalar rho_init=0.,
+           const bool verbose=true,
            const Scalar mu_factor=0.1,
            const Scalar mu_lower_=1e-9,
            const Scalar prim_alpha=0.1,
            const Scalar prim_beta=0.9,
            const Scalar dual_alpha=1.,
-           const Scalar dual_beta=1.)
+           const Scalar dual_beta=1.,
+           const Scalar alpha_min=1e-7,
+           const Scalar armijo_c1=1e-4
+           )
       : manifold(man),
         problem(prob),
         merit_fun(problem),
         prox_penalty(manifold, manifold.neutral(),
-                     rho * MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
-        rho(rho),
+                     rho_init * MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
+        verbose(verbose),
+        rho_init(rho_init),
         mu_eq_init(mu_eq_init),
         mu_factor(mu_factor),
         mu_lower_(mu_lower_),
@@ -100,7 +106,9 @@ namespace lienlp
         prim_alpha(prim_alpha),
         prim_beta(prim_beta),
         dual_alpha(dual_alpha),
-        dual_beta(dual_beta)
+        dual_beta(dual_beta),
+        alpha_min(alpha_min),
+        armijo_c1(armijo_c1)
     {
       merit_fun.setPenalty(mu_eq);
     }
@@ -123,11 +131,9 @@ namespace lienlp
       {
         results.mu = mu_eq;
         results.rho = rho;
-        if (verbose)
-        {
-          fmt::print(fmt::fg(fmt::color::yellow), "[Iter {:d}] omega={:.3g}, eta={:.3g}, mu={:g} (1/mu={:g})\n",
-                     i, inner_tol, prim_tol, mu_eq, mu_eq_inv);
-        }
+        fmt::print(fmt::fg(fmt::color::yellow),
+                   "[Outer iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n",
+                   i, inner_tol, prim_tol, mu_eq);
         solveInner(workspace, results);
 
         // accept new primal iterate
@@ -137,7 +143,7 @@ namespace lienlp
         if (workspace.primalInfeas < prim_tol)
         {
           // accept dual iterate
-          fmt::print(fmt::fg(fmt::color::lime_green), "  Accept multipliers\n");
+          fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers\n");
           acceptMultipliers(workspace);
           if ((workspace.primalInfeas < target_tol) && (workspace.dualInfeas < target_tol))
           {
@@ -147,7 +153,7 @@ namespace lienlp
           }
           updateToleranceSuccess();
         } else {
-          fmt::print(fmt::fg(fmt::color::orange_red), "  Reject multipliers\n");
+          fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers\n");
           updatePenalty();
           updateToleranceFailure();
         }
@@ -157,6 +163,11 @@ namespace lienlp
         i++;
       }
 
+      if (results.converged == SUCCESS)
+        fmt::print("Solver successfully converged\n"
+                   "  number of iterations: {:d}\n"
+                   "  residuals: p={:.3g}, d={:.3g}\n",
+                   results.numIters, workspace.primalInfeas, workspace.dualInfeas);
       return results.converged;
     }
 
@@ -282,13 +293,8 @@ namespace lienlp
         workspace.dualInfeas = infNorm(workspace.dualResidual);
         Scalar inner_crit = infNorm(workspace.kktRhs);
 
-        if (verbose)
-        {
-          // fmt::print(" | KKT RHS: {} << RHS\n",  workspace.kktRhs.transpose());
-          // fmt::print(" | KKT LHS:\n{} << LHS\n", workspace.kktMatrix);
-          fmt::print(" | inner stop {:.2g} / dualInfeas: {:.2g} / primInfeas = {:.2g}\n",
-                     inner_crit, workspace.dualInfeas, workspace.primalInfeas);
-        }
+        fmt::print("[iter {:>3d}] inner stop {:.2g}, d={:.3g}, p={:.3g}\n",
+                  results.numIters, inner_tol, workspace.dualInfeas, workspace.primalInfeas);
 
         if (inner_crit <= inner_tol)
         {
@@ -447,7 +453,8 @@ namespace lienlp
       Scalar alpha_try = 1.;
 
       const Scalar ls_beta = 0.5;
-      fmt::print(fmt::fg(fmt::color::yellow), "  [{}] current M = {:.5g} | d1 = {:.3g}\n", __func__, merit0, d1);
+      if (verbose)
+        fmt::print(" | [{}] current M = {:.5g} | d1 = {:.3g}\n", __func__, merit0, d1);
 
       Scalar merit_trial = 0., dM = 0.;
       while (alpha_try >= alpha_min)
@@ -456,9 +463,10 @@ namespace lienlp
         merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
         merit_trial += rho * prox_penalty(workspace.xTrial);
         dM = merit_trial - merit0;
-        fmt::print(fmt::fg(fmt::color::yellow), "  [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);
+        if (verbose)
+          fmt::print(" | [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);
 
-        bool armijo_cond = dM <= ls_c1 * alpha_try * d1;
+        bool armijo_cond = dM <= armijo_c1 * alpha_try * d1;
         if (armijo_cond)
         {
           break;
