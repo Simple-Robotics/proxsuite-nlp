@@ -249,19 +249,18 @@ namespace lienlp
         //// fill in LHS/RHS
         //// TODO create an Eigen::Map to map submatrices to the active sets of each constraint
 
-        auto idx_prim = Eigen::seq(0, ndx - 1);
         workspace.kktRhs.setZero();
         workspace.kktMatrix.setZero();
 
         workspace.meritGradient = workspace.objectiveGradient;
 
-        workspace.kktRhs(idx_prim) = workspace.objectiveGradient;
-        workspace.kktMatrix(idx_prim, idx_prim) = workspace.objectiveHessian;
+        workspace.kktRhs.head(ndx) = workspace.objectiveGradient;
+        workspace.kktMatrix.topLeftCorner(ndx, ndx) = workspace.objectiveHessian;
 
         if (rho > 0.)
         {
-          workspace.kktRhs(idx_prim).noalias() += rho * prox_penalty.computeGradient(x);
-          workspace.kktMatrix(idx_prim, idx_prim).noalias() += rho * prox_penalty.computeHessian(x);
+          workspace.kktRhs.head(ndx).noalias() += rho * prox_penalty.computeGradient(x);
+          workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += rho * prox_penalty.computeHessian(x);
         }
 
         int nc = 0;   // constraint size
@@ -270,10 +269,10 @@ namespace lienlp
         {
           Eigen::Ref<MatrixXs> J_ = workspace.cstrJacobians[i];
 
-          workspace.kktRhs(idx_prim).noalias() += J_.transpose() * results.lamsOpt[i];
+          workspace.kktRhs.head(ndx).noalias() += J_.transpose() * results.lamsOpt[i];
           if (not use_gauss_newton)
           {
-            workspace.kktMatrix(idx_prim, idx_prim) += workspace.cstrVectorHessProd[i];
+            workspace.kktMatrix.topLeftCorner(ndx, ndx) += workspace.cstrVectorHessProd[i];
           }
 
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
@@ -282,20 +281,19 @@ namespace lienlp
           auto cstr = problem->getConstraint(i);
           nc = cstr->nr();
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
-          auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-          workspace.kktRhs(block_slice) = workspace.subproblemDualErr[i];
+          workspace.kktRhs.segment(cursor, nc) = workspace.subproblemDualErr[i];
           // jacobian block and transpose
-          workspace.kktMatrix(block_slice, idx_prim) = J_;
-          workspace.kktMatrix(idx_prim, block_slice) = J_.transpose();
+          workspace.kktMatrix.block(cursor, 0, nc, ndx) = J_;
+          workspace.kktMatrix.block(0, cursor, ndx, nc) = J_.transpose();
           // reg block
-          workspace.kktMatrix(block_slice, block_slice).setIdentity();
-          workspace.kktMatrix(block_slice, block_slice).array() *= -mu_eq;
+          workspace.kktMatrix.block(cursor, cursor, nc, nc).setIdentity();
+          workspace.kktMatrix.block(cursor, cursor, nc, nc).array() *= -mu_eq;
 
           cursor += nc;
         }
 
         // now check if we can stop
-        workspace.dualResidual = workspace.kktRhs(idx_prim);
+        workspace.dualResidual = workspace.kktRhs.head(ndx);
         if (rho > 0.)
         {
           workspace.dualResidual -= rho * prox_penalty.computeGradient(x);
@@ -339,15 +337,14 @@ namespace lienlp
           merit0 += rho * prox_penalty(x);
           workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
         }
-        Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep(idx_prim));
+        Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep.head(ndx));
         Scalar dir_dual = 0;
         cursor = ndx;
         for (std::size_t i = 0; i < num_c; i++)
         {
           nc = problem->getConstraint(i)->nr();
-          auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
 
-          dir_dual += (-workspace.subproblemDualErr[i]).dot(workspace.pdStep(block_slice));
+          dir_dual += (-workspace.subproblemDualErr[i]).dot(workspace.pdStep.segment(cursor, nc));
           cursor += nc;
         }
 
@@ -508,8 +505,7 @@ namespace lienlp
     void tryStep(Workspace &workspace, Results& results, Scalar alpha) const
     {
       const int ndx = manifold.ndx();
-      const auto idx_prim = Eigen::seq(0, ndx - 1);
-      manifold.integrate(results.xOpt, alpha * workspace.pdStep(idx_prim), workspace.xTrial);
+      manifold.integrate(results.xOpt, alpha * workspace.pdStep.head(ndx), workspace.xTrial);
 
       int cursor = ndx;
       int nc = 0;
@@ -517,8 +513,7 @@ namespace lienlp
       {
         nc = problem->getConstraint(i)->nr();
 
-        auto block_slice = Eigen::seq(cursor, cursor + nc - 1);
-        workspace.lamsTrial[i].noalias() = results.lamsOpt[i] + alpha * workspace.pdStep(block_slice);
+        workspace.lamsTrial[i].noalias() = results.lamsOpt[i] + alpha * workspace.pdStep.segment(cursor, nc);
 
         cursor += nc;
       }
