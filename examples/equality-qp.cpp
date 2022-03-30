@@ -75,7 +75,7 @@ int submain()
   return 0;
 }
 
-int main(int argc, const char* argv[])
+int main()
 {
   submain<2>();
   submain<4>();
