@@ -9,18 +9,17 @@ namespace python
 
   void exposeResults()
   {
-    using context::Scalar;
     using context::Result_t;
 
-    bp::enum_<ConvergedFlag>("ConvergedFlag", "Convergence flag enum.")
-      .value("uninit", ConvergedFlag::UNINIT)
-      .value("success", ConvergedFlag::SUCCESS)
-      .value("too_many_iters", ConvergedFlag::TOO_MANY_ITERS)
+    bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
+      .value("uninit", ConvergenceFlag::UNINIT)
+      .value("success", ConvergenceFlag::SUCCESS)
+      .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED)
       ;
 
     bp::class_<Result_t>(
       "Results", "Results holder struct.",
-      bp::init<int, context::Problem_t&>())
+      bp::init<int, context::Problem_t&>(bp::args("self", "nx", "problem")))
       .def_readonly("converged", &Result_t::converged)
       .def_readonly("value", &Result_t::value)
       .def_readonly("xopt", &Result_t::xOpt)

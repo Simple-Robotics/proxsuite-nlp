@@ -18,9 +18,12 @@ namespace python
   /// Expose defined residuals for modelling
   void exposeResiduals();
   void exposeCost();
-  void exposeConstraint();
+  void exposeConstraints();
   void exposeProblem();
   void exposeResults();
+  void exposeWorkspace();
+  void exposeSolver();
+  void exposeCallbacks();
 
 } // namespace python
 

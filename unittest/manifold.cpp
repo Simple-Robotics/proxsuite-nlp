@@ -39,8 +39,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
   using SO2 = PinocchioLieGroup<_SO2>;
   using TSO2 = TangentBundle<SO2>;
-  SO2 base_space;
-  TSO2 tspace(base_space);
+  TSO2 tspace; // no arg constructor
 
   BOOST_TEST_MESSAGE("Checking bundle dimension");
   // tangent bundle dim should be 3.
@@ -49,26 +48,32 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   auto x0 = tspace.neutral();
   BOOST_CHECK(x0.isApprox(Eigen::Vector3d(1., 0., 0.)));
   auto x1 = tspace.rand();
-  
+
+  const int ndx = tspace.ndx();
+  BOOST_CHECK_EQUAL(ndx, 2);
   BOOST_TEST_MESSAGE(" testing diff");
-  TSO2::TangentVectorType dx0(2);
+  TSO2::TangentVectorType dx0(ndx);
+  dx0.setZero();
   tspace.difference(x0, x1, dx0);
 
   BOOST_TEST_MESSAGE(" diff Jacobians");
-  TSO2::JacobianType J0, J1;
+  TSO2::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  J0.setZero();
+  J1.setZero();
 
   tspace.Jdifference(x0, x1, J0, 0);
   tspace.Jdifference(x0, x1, J1, 1);
 
-  BOOST_CHECK(J0.isApprox(-TSO2::JacobianType::Identity(2, 2)));
-  BOOST_CHECK(J1.isApprox( TSO2::JacobianType::Identity(2, 2)));
-
-  J0.setZero();
-  J1.setZero();
+  fmt::print("J0 {}\n", J0);
+  fmt::print("J1 {}\n", J1);
+  TSO2::JacobianType id(2, 2);
+  id.setIdentity();
+  BOOST_CHECK(J0.isApprox(-id));
+  BOOST_CHECK(J1.isApprox( id));
 
   // INTEGRATION OP
   BOOST_TEST_MESSAGE(" testing integration");
-  TSO2::PointType x1_new;
+  TSO2::PointType x1_new(tspace.nx());
   tspace.integrate(x0, dx0, x1_new);
   BOOST_CHECK(x1_new.isApprox(x1));
 
@@ -88,19 +93,19 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   pinocchio::buildModels::humanoidRandom(model, true);
 
   using Q_t = MultibodyConfiguration<double>;
-  using Vec_t = Q_t::PointType;
+  using Point_t = Q_t::PointType;
   Q_t space(model);
 
-  Vec_t x0 = pinocchio::neutral(model);
-  Vec_t d(model.nv);
+  Point_t x0 = pinocchio::neutral(model);
+  Point_t d(model.nv);
   d.setRandom();
 
-  Vec_t xout(model.nq);
+  Point_t xout(model.nq);
   space.integrate(x0, d, xout);
   auto xout2 = pinocchio::integrate(model, x0, d);
   BOOST_CHECK(xout.isApprox(xout2));
 
-  Vec_t x1;
+  Point_t x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
   space.difference(x0, x0, d);
@@ -108,8 +113,6 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
 
   space.difference(x0, x1, d);
   BOOST_CHECK(d.isApprox(pinocchio::difference(model, x0, x1)));
-
-  fmt::print("model: {}", space.getModel());
 }
 // #endif
 
@@ -119,15 +122,13 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
-  using M_t = StateMultibody<double>;
+  using Man = StateMultibody<double>;
 
   // MultibodyConfiguration<double> config_space(model);
-  // M_t space(config_space);
-  M_t space(model);
+  Man space(model);
 
   auto x0 = space.neutral();
   auto x1 = space.rand();
-  pinocchio::normalize(x1.head(model.nq));
   auto dx0 = space.difference(x0, x1);
   auto x1_exp = space.integrate(x0, dx0);
   fmt::print("x1    : {}", x1);

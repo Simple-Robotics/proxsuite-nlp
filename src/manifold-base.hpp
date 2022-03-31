@@ -3,107 +3,102 @@
 #include <Eigen/Core>
 
 #include "lienlp/fwd.hpp"
+#include "lienlp/macros.hpp"
 
 
 namespace lienlp
 {
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
-  #define LIENLP_DEFINE_INTERFACE_TYPES(M)    \
-    using Scalar = typename M::Scalar;        \
-    using PointType = typename M::PointType;      \
-    using TangentVectorType = typename M::TangentVectorType;
+  #define LIENLP_DEFINE_MANIFOLD_TYPES(M)                     \
+    LIENLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
+    using PointType = typename M::PointType;                  \
+    using TangentVectorType = typename M::TangentVectorType;  \
+    using JacobianType = typename M::JacobianType;
 
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
    */
-  template<typename Scalar>
-  struct ManifoldAbstract
-  {};
-
-  template<class T>
-  struct ManifoldTpl : ManifoldAbstract<typename traits<T>::Scalar> {
-  protected:
-    using Self = ManifoldTpl<T>; /// Shorthand for the type of `this`
-
+  template<typename _Scalar, int _Options>
+  struct ManifoldAbstract {
   public:
-    using Scalar = typename traits<T>::Scalar; /// Scalar type
+    using Scalar = _Scalar; /// Scalar type
     enum {
-      NQ = traits<T>::NQ,
-      NV = traits<T>::NV,
-      Options = traits<T>::Options
+      Options = _Options
     };
 
-    using PointType = Eigen::Matrix<Scalar, NQ, 1, Options>;
-    using TangentVectorType = Eigen::Matrix<Scalar, NV, 1, Options>;
-    using JacobianType = Eigen::Matrix<Scalar, NV, NV, Options>; 
-
-    T& derived()
-    {
-      return static_cast<T&>(*this);
-    };
-
-    const T& derived() const
-    {
-      return static_cast<const T&>(*this);
-    }
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
+    using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
+    using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 
 
     /// @brief    Get manifold representation dimension.
-    int nx() const;
+    virtual int nx() const = 0;
     /// @brief    Get manifold tangent space dimension.
-    int ndx() const;
+    virtual int ndx() const = 0;
 
     /// @brief    Get the neutral element \f$e \in M\f$ from the manifold (if this makes sense).
-    PointType neutral() const { return derived().neutral_impl(); }
+    virtual PointType neutral() const { return PointType::Zero(nx()); }
     /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
-    PointType rand() const { return derived().rand_impl(); }
+    virtual PointType rand() const { return PointType::Zero(nx()); }
 
     /// @name     Operations
 
-    /**
-     * Perform the manifold integration operation.
+    /** Perform the manifold integration operation.
      * 
      * @details This is an interface. Specific implementations should be in the derived classes.
      */
-    template<class Vec_t, class Tangent_t, class Out_t>
-    void integrate(const Eigen::MatrixBase<Vec_t>& x,
-                   const Eigen::MatrixBase<Tangent_t>& v,
-                   const Eigen::MatrixBase<Out_t>& out) const;
+    virtual void integrate_impl(const ConstVectorRef& x,
+                                const ConstVectorRef& v,
+                                VectorRef out) const = 0;
 
-    /**
-     * @brief   Jacobian of the integation operation.
+    void integrate(const ConstVectorRef& x,
+                   const ConstVectorRef& v,
+                   VectorRef out) const
+    {
+      integrate_impl(x, v, out);
+    }
+
+    /** @brief   Jacobian of the integation operation.
      */
-    template<int arg, class Vec_t, class Tangent_t, class Jout_t>
-    void Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
-                    const Eigen::MatrixBase<Tangent_t>& v,
-                    const Eigen::MatrixBase<Jout_t>& Jout) const;
+    virtual void Jintegrate_impl(const ConstVectorRef& x,
+                                 const ConstVectorRef& v,
+                                 MatrixRef Jout,
+                                 int arg) const = 0;
 
-    /// @copybrief  Jintegrate()
-    /// Runtime argument variant.
-    template<class Vec_t, class Tangent_t, class Jout_t>
-    void Jintegrate(const Eigen::MatrixBase<Vec_t>& x,
-                    const Eigen::MatrixBase<Tangent_t>& v,
-                    const Eigen::MatrixBase<Jout_t>& Jout,
-                    int arg) const;
+    void Jintegrate(const ConstVectorRef& x,
+                    const ConstVectorRef& v,
+                    MatrixRef Jout,
+                    int arg) const
+    {
+      Jintegrate_impl(x, v, Jout, arg);
+    }
 
-    /**
-     * @brief Perform the manifold retraction operation.
-     */
-    template<class Vec1_t, class Vec2_t, class Tangent_t>
-    void difference(const Eigen::MatrixBase<Vec1_t>& x0,
-                    const Eigen::MatrixBase<Vec2_t>& x1,
-                    const Eigen::MatrixBase<Tangent_t>& out) const;
+    /// @brief Perform the manifold retraction operation.
+    virtual void difference_impl(const ConstVectorRef& x0,
+                                 const ConstVectorRef& x1,
+                                 VectorRef out) const = 0;
 
-    template<int arg, class Vec1_t, class Vec2_t, class Jout_t>
-    void Jdifference(const Eigen::MatrixBase<Vec1_t>& x0,
-                     const Eigen::MatrixBase<Vec2_t>& x1,
-                     const Eigen::MatrixBase<Jout_t>& Jout) const;
+    void difference(const ConstVectorRef& x0,
+                    const ConstVectorRef& x1,
+                    VectorRef out) const
+    {
+      difference_impl(x0, x1, out);
+    }
 
-    template<class Vec1_t, class Vec2_t, class Jout_t>
-    void Jdifference(const Eigen::MatrixBase<Vec1_t>& x0,
-                     const Eigen::MatrixBase<Vec2_t>& x1,
-                     const Eigen::MatrixBase<Jout_t>& Jout,
-                     int arg) const;
+    /// @brief    Jacobian of the retraction operation.
+    virtual void Jdifference_impl(const ConstVectorRef& x0,
+                                  const ConstVectorRef& x1,
+                                  MatrixRef Jout,
+                                  int arg) const = 0;
+
+    void Jdifference(const ConstVectorRef& x,
+                     const ConstVectorRef& v,
+                     MatrixRef Jout,
+                     int arg) const
+    {
+      Jdifference_impl(x, v, Jout, arg);
+    }
 
     /// \name Out-of-place (allocated) variants.
     /// \{
@@ -111,21 +106,27 @@ namespace lienlp
     /// @copybrief integrate()
     ///
     /// Out-of-place variant of integration operator.
-    template<class Vec_t, class Tangent_t>
-    PointType integrate(const Eigen::MatrixBase<Vec_t>& x,
-                        const Eigen::MatrixBase<Tangent_t>& v) const;
+    PointType integrate(const ConstVectorRef& x,
+                        const ConstVectorRef& v) const
+    {
+      PointType out(nx());
+      integrate_impl(x, v, out);
+      return out;
+    }
 
     /// @copybrief difference()
     ///
     /// Out-of-place version of diff operator.
-    template<class Vec1_t, class Vec2_t>
-    TangentVectorType difference(const Eigen::MatrixBase<Vec1_t>& x0,
-                                 const Eigen::MatrixBase<Vec2_t>& x1) const;
+    TangentVectorType difference(const ConstVectorRef& x0,
+                                 const ConstVectorRef& x1) const
+    {
+      TangentVectorType out(ndx());
+      difference_impl(x0, x1, out);
+      return out;
+    }
 
     /// \}
 
   };
 
 }  // namespace lienlp
-
-#include "lienlp/manifold-base.hxx"

@@ -4,44 +4,45 @@
 #include "lienlp/python/fwd.hpp"
 #include "lienlp/manifold-base.hpp"
 
-// manifold visitor will also expose manifold-templated functors
-#include "lienlp/python/manifold-functors.hpp"
-
 
 namespace lienlp
 {
 namespace python
 {
-  
-  template<typename Man>
-  struct manifold_visitor : public bp::def_visitor<manifold_visitor<Man>>
+
+  namespace internal
   {
-    using VectorXs = context::VectorXs;
-    using PointType = typename Man::PointType;
-    using VecType = typename Man::TangentVectorType;
-    using IntegrateFun_t = PointType(const Eigen::MatrixBase<VectorXs>&, const Eigen::MatrixBase<VectorXs>&) const;
-    using DifferenceFun_t = VecType(const Eigen::MatrixBase<VectorXs>&, const Eigen::MatrixBase<VectorXs>&) const;
-
-
-    template<class PyClass>
-    void visit(PyClass& cl) const
+    
+    /// Expose the base manifold type
+    void exposeBaseManifold()
     {
-      IntegrateFun_t Man::*int1 = &Man::template integrate<VectorXs, VectorXs>;
-      DifferenceFun_t Man::*diff1 = &Man::template difference<VectorXs, VectorXs>;
+      using ConstVectorRef = context::ConstVectorRef;
+      using Man = context::ManifoldType;
+      using PointType = typename Man::PointType;
+      using VecType = typename Man::TangentVectorType;
 
-      cl
+      using IntegrateRet_t = PointType(Man::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using IntegrateFun_t = void     (Man::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
+      using DifferenceRet_t = VecType (Man::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using DifferenceFun_t = void    (Man::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
+
+      bp::class_<Man, shared_ptr<Man>, boost::noncopyable>(
+        "ManifoldAbstract", "Manifold abstract class.",
+        bp::no_init
+      )
         .add_property("nx", &Man::nx, "Manifold representation dimension.")
         .add_property("ndx", &Man::ndx, "Tangent space dimension.")
         .def("neutral", &Man::neutral, "Get the neutral point from the manifold (if a Lie group).")
         .def("rand", &Man::rand, "Sample a random point from the manifold.")
-        .def("integrate", int1, bp::args("x", "v"))
-        .def("difference", diff1, bp::args("x0", "x1"))
+        .def("integrate", static_cast<IntegrateRet_t>  (&Man::integrate), bp::args("x", "v"))
+        .def("integrate", static_cast<IntegrateFun_t>  (&Man::integrate), bp::args("x", "v", "out"))
+        .def("difference", static_cast<DifferenceRet_t>(&Man::difference), bp::args("x0", "x1"))
+        .def("difference", static_cast<DifferenceFun_t>(&Man::difference), bp::args("x0", "x1", "out"))
         ;
 
-      ResidualVisitor<Man>::expose();
-
     }
-  };
+  } // namespace internal
+  
 
 } // namespace python
 

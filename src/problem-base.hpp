@@ -16,7 +16,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DEFINE_DYNAMIC_TYPES(Scalar)
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
 
     /// Generic constraint type
     using ConstraintType = ConstraintSetBase<Scalar>;
@@ -40,24 +40,31 @@ namespace lienlp
       return m_cstrs.size();
     }
 
-    int getNcTotal() const
+    int getTotalConstraintDim() const
     {
-      return m_ncTotal;
+      return m_nc_total;
     }
 
-    Problem(const CostType& cost) : m_cost(cost), m_ncTotal(0) {}
-
-    Problem(const CostType& cost,
-            const std::vector<ConstraintPtr>& constraints)
-            : m_cost(cost), m_cstrs(constraints), m_ncTotal(0)
+    std::vector<int> getConstraintDims() const
     {
-      int& nc = const_cast<int&>(m_ncTotal);
-      for (ConstraintPtr cstr : m_cstrs)
-      {
-        nc += cstr->nr();
-      }
+      return m_ncs;
     }
-    
+
+    Problem(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
+
+    Problem(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
+            : m_cost(cost), m_cstrs(constraints), m_nc_total(0)
+    {
+      reset_constraint_dim_vars();
+    }
+
+    /// Add a constraint to the problem, after initialization.
+    void addConstraint(const ConstraintPtr& cstr)
+    {
+      m_cstrs.push_back(cstr);
+      reset_constraint_dim_vars();
+    }    
+
     /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
     static void allocateMultipliersOrResiduals(
       const Problem<Scalar>& prob,
@@ -72,9 +79,23 @@ namespace lienlp
     }
   protected:
     /// Vector of equality constraints.
-    const std::vector<ConstraintPtr> m_cstrs;
+    std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
-    const int m_ncTotal;
+    const int m_nc_total;
+    const std::vector<int> m_ncs;
+
+    /// Set values of const data members for constraint dimensions
+    void reset_constraint_dim_vars()
+    {
+      int& nc = const_cast<int&>(m_nc_total);
+      auto& ncs_ref = const_cast<std::vector<int>&>(m_ncs);
+      ncs_ref.clear();
+      for (ConstraintPtr cstr : m_cstrs)
+      {
+        nc += cstr->nr();
+        ncs_ref.push_back(cstr->nr());
+      }
+    }
   };
 
 } // namespace lienlp

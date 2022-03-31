@@ -2,6 +2,8 @@
 
 
 #include "lienlp/functor-base.hpp"
+#include "lienlp/functor-ops.hpp"
+#include "lienlp/modelling/residuals/state-residual.hpp"
 
 
 namespace lienlp
@@ -23,7 +25,9 @@ namespace lienlp
     const VectorXs b;
 
     LinearResidual(const ConstMatrixRef& A, const ConstVectorRef& b)
-      : Base(A.cols(), A.cols(), A.rows()), mat(A), b(b) {}
+      : Base((int)A.cols(), (int)A.cols(), (int)A.rows()),
+        mat(A),
+        b(b) {}
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -35,4 +39,28 @@ namespace lienlp
       Jout = mat;
     }
   };
+
+
+  /** @brief    Linear function of difference vector on a manifold, of the form
+   *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
+   */
+  template<typename _Scalar>
+  struct LinearStateResidual : ComposeFunctor<_Scalar>
+  {
+    using Scalar = _Scalar;
+    using Base = ComposeFunctor<Scalar>;
+    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+
+    using M = ManifoldAbstract<Scalar>;
+
+    LinearStateResidual(const M& manifold, const ConstVectorRef& target,
+                        const ConstMatrixRef& A, const ConstVectorRef& b)
+                        : Base(LinearResidual<Scalar>(A, b),
+                               StateResidual<Scalar>(manifold, target)
+                               ) {}
+
+  };
+
+
+
 } // namespace lienlp

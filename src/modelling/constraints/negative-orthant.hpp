@@ -27,7 +27,7 @@ namespace lienlp
     using Active_t = typename Base::Active_t;
     using FunctorType = typename Base::FunctorType;
 
-    NegativeOrthant(const FunctorType& func) : Base(func) {}
+    explicit NegativeOrthant(const FunctorType& func) : Base(func) {}
 
     ReturnType projection(const ConstVectorRef& z) const
     {

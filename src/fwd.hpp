@@ -14,10 +14,6 @@ namespace lienlp
 /// Use the STL shared_ptr.
 using std::shared_ptr;
 
-/// Base trait struct for CRTP.
-template<class C>
-struct traits {};
-
 /** @brief  Typedefs for math (Eigen vectors, matrices) depending on scalar type.
  * 
  */
@@ -42,6 +38,14 @@ struct BaseFunctor;
 template<typename Scalar>
 struct DifferentiableFunctor;
 
+// fwd ComposeFunctor
+template<typename Scalar>
+struct ComposeFunctor;
+
+// fwd ManifoldAbstract
+template<typename Scalar, int Options=0>
+struct ManifoldAbstract;
+
 // fwd Cost
 template<typename Scalar>
 struct CostFunctionBase;
@@ -57,6 +61,10 @@ struct Problem;
 // fwd SResults
 template<typename Scalar>
 struct SResults;
+
+// fwd Workspace
+template<typename Scalar>
+struct SWorkspace;
 
 /// Shorthand for the infinity norm
 /// code from proxqp

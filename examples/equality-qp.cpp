@@ -17,9 +17,9 @@
 template<typename Scalar>
 Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
 {
-  using ReturnType = Eigen::Matrix<Scalar, -1, -1>;
-  ReturnType out = ReturnType::Random(N, N);
-  Eigen::FullPivHouseholderQR<Eigen::Ref<ReturnType>> qr(out);
+  using MatrixXs = Eigen::Matrix<Scalar, -1, -1>;
+  MatrixXs out = MatrixXs::Random(N, N);
+  Eigen::FullPivHouseholderQR<Eigen::Ref<MatrixXs>> qr(out);
   Eigen::Matrix<Scalar, -1, -1> Q(qr.matrixQ());
   return Q.template topLeftCorner(M, N);
 }
@@ -52,7 +52,7 @@ int submain()
 
   LinearResidual<double> res1(A, b);
 
-  QuadDistanceCost<Man> cost(space, Q_);
+  QuadDistanceCost<double> cost(space, space.neutral(), Q_);
 
   auto cstr1 = std::make_shared<EqualityType>(res1);
   std::vector<Prob_t::ConstraintPtr> cstrs_;
@@ -60,7 +60,7 @@ int submain()
 
   auto prob = std::make_shared<Prob_t>(cost, cstrs_);
 
-  using Solver_t = Solver<Man>;
+  using Solver_t = Solver<double>;
   typename Solver_t::Workspace workspace(space.nx(), space.nx(), *prob);
   typename Solver_t::Results results(space.nx(), *prob);
 
@@ -75,7 +75,7 @@ int submain()
   return 0;
 }
 
-int main(int argc, const char* argv[])
+int main()
 {
   submain<2>();
   submain<4>();

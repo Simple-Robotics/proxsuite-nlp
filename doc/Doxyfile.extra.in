@@ -16,7 +16,7 @@ MACRO_EXPANSION         = YES
 EXPAND_ONLY_PREDEF      = YES
 PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
                            LIENLP_FUNCTOR_TYPEDEFS \
-                           LIENLP_DEFINE_DYNAMIC_TYPES
+                           LIENLP_DYNAMIC_TYPEDEFS
 
 INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/src
 

@@ -6,7 +6,7 @@
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/residuals/quadratic-residual.hpp"
+#include "lienlp/modelling/costs/quadratic-residual.hpp"
 #include "lienlp/modelling/constraints/negative-orthant.hpp"
 #include "lienlp/solver-base.hpp"
 
@@ -22,45 +22,48 @@ using Prob_t = Problem<double>;
 int main()
 {
   Man space;
-  auto lg = space.m_lg;
-  Man::PointType p0 = lg.random();  // target
-  p0.normalize();
+  const int nx = space.nx();
+  Man::PointType p0(nx);  // target
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
-  Man::PointType p1;
+  Man::PointType p1(nx);
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
-  Man::TangentVectorType d;
+  const int ndx = space.ndx();
+  Man::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
-  Man::JacobianType J0, J1;
-  space.Jdifference<0>(p0, p1, J0);
-  space.Jdifference<1>(p0, p1, J1);
+  Man::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  space.Jdifference(p0, p1, J0, 0);
+  space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Man::JacobianType weights;
+  Man::JacobianType weights(ndx, ndx);
   weights.setIdentity();
 
-  StateResidual<Man> residual(space, p0);
+  QuadDistanceCost<double> cf(space, p0, weights);
+  fmt::print("cost: {}\n", cf.call(p1));
+  fmt::print("grad: {}\n", cf.computeGradient(p1));
+  fmt::print("hess: {}\n", cf.computeHessian(p1));
+
+  StateResidual<double> residual(space, space.neutral());
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<decltype(residual)>(residual);
 
-  QuadraticResidualCost<double> cf(resptr, weights);
-  // auto cf = WeightedSquareDistanceCost<Man>(space, p0, weights);
-  fmt::print("cost: {}\n", cf(p1));
-  fmt::print("grad: {}\n", cf.computeGradient(p1));
-  fmt::print("hess: {}\n", cf.computeHessian(p1));
-
   /// DEFINE A PROBLEM
 
-  double radius_ = .7;
+  double radius_ = .6;
+  double radius_sq = radius_ * radius_;
+  Prob_t::MatrixXs w2(ndx, ndx);
+  w2.setIdentity();
+  w2 *= 2;
 
-  QuadraticResidualFunctor<Man> residualCircle(space, radius_, space.neutral());
+  QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
   using Ineq_t = NegativeOrthant<double>;
   // Prob_t::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
@@ -120,7 +123,7 @@ int main()
   SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
   SResults<double> results(space.nx(), *prob);
 
-  Solver<Man> solver(space, prob);
+  Solver<double> solver(space, prob);
   solver.setPenalty(1. / 50);
   solver.use_gauss_newton = true;
 
