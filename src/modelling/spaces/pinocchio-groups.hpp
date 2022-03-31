@@ -16,10 +16,10 @@ namespace lienlp
   namespace pin = pinocchio;
 
   /**
-   * Wrap a Pinocchio Lie group into a ManifoldAbstract object.
+   * Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
    */
   template<typename _LieGroup>
-  struct PinocchioLieGroup : public ManifoldAbstract<typename _LieGroup::Scalar>
+  struct PinocchioLieGroup : public ManifoldAbstractTpl<typename _LieGroup::Scalar>
   {
   public:
     using LieGroup = _LieGroup;
@@ -28,7 +28,7 @@ namespace lienlp
     enum {
       Options = LieGroup::Options
     };
-    using Base = ManifoldAbstract<Scalar>;
+    using Base = ManifoldAbstractTpl<Scalar>;
     LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     LieGroup m_lg;
@@ -100,7 +100,7 @@ namespace lienlp
   };
 
   template<typename _Scalar, int _Options=0>
-  class MultibodyConfiguration : public ManifoldAbstract<_Scalar, _Options> {
+  class MultibodyConfiguration : public ManifoldAbstractTpl<_Scalar, _Options> {
   public:
 
     using Scalar = _Scalar;
@@ -109,7 +109,7 @@ namespace lienlp
     };
     using Self = MultibodyConfiguration<Scalar, Options>;
     using ModelType = pin::ModelTpl<Scalar, Options>;
-    using Base = ManifoldAbstract<Scalar, Options>;
+    using Base = ManifoldAbstractTpl<Scalar, Options>;
     LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     MultibodyConfiguration(const ModelType& model)

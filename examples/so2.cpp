@@ -21,34 +21,34 @@ using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 using fmt::format;
 
 using namespace lienlp;
-using Man = PinocchioLieGroup<SO2>;
-using Prob_t = Problem<double>;
+using Manifold = PinocchioLieGroup<SO2>;
+using Problem = ProblemTpl<double>;
 
 int main()
 {
-  Man space;
+  Manifold space;
   SO2 lg = space.m_lg;
-  Man::PointType neut = lg.neutral();
-  Man::PointType p0 = lg.random();  // target
-  Man::PointType p1 = lg.random();
+  Manifold::PointType neut = lg.neutral();
+  Manifold::PointType p0 = lg.random();  // target
+  Manifold::PointType p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
-  Man::TangentVectorType th0(1), th1(1);
+  Manifold::TangentVectorType th0(1), th1(1);
   space.difference(neut, p0, th0);
   space.difference(neut, p1, th1);
 
   fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
-  Man::TangentVectorType d;
+  Manifold::TangentVectorType d;
   space.difference(p0, p1, d);
-  Man::JacobianType J0, J1;
+  Manifold::JacobianType J0, J1;
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Man::JacobianType weights;
+  Manifold::JacobianType weights;
   weights.setIdentity();
 
   StateResidual<double> residual(space, p0);
@@ -63,15 +63,15 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  Prob_t::ConstraintPtr cstr1(new Prob_t::EqualityType(residual));
-  std::vector<Prob_t::ConstraintPtr> cstrs;
+  Problem::ConstraintPtr cstr1(new Problem::EqualityType(residual));
+  std::vector<Problem::ConstraintPtr> cstrs;
   cstrs.push_back(cstr1);
-  shared_ptr<Prob_t> prob(new Prob_t(cf, cstrs));
+  shared_ptr<Problem> prob(new Problem(cf, cstrs));
   fmt::print("\tConstraint dimension: {:d}\n", prob->getConstraint(0)->nr());
 
   /// Test out merit functions
 
-  Prob_t::VectorXs grad(space.ndx());
+  Problem::VectorXs grad(space.ndx());
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
@@ -83,8 +83,8 @@ int main()
 
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
-  Prob_t::VectorOfVectors lams;
-  Prob_t::allocateMultipliersOrResiduals(*prob, lams);
+  Problem::VectorOfVectors lams;
+  helpers::allocateMultipliersOrResiduals(*prob, lams);
 
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n", lams.size(), lams[0]);
@@ -97,7 +97,7 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  Prob_t::MatrixXs hess(space.ndx(), space.ndx());
+  Problem::MatrixXs hess(space.ndx(), space.ndx());
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);

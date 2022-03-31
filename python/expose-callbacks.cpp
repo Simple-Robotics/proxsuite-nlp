@@ -23,7 +23,7 @@ namespace lienlp
 
       bp::class_<CallbackWrapper, shared_ptr<CallbackWrapper>, boost::noncopyable>(
         "BaseCallback", "Base callback for solvers.", bp::no_init)
-        .def("call", bp::pure_virtual(&callback_t::call), bp::args("self"))
+        .def("call", bp::pure_virtual(&callback_t::call), bp::args("self", "workspace", "results"))
         ;
 
       {
@@ -31,12 +31,8 @@ namespace lienlp
 
         bp::scope in_history = bp::class_<helpers::history_callback<Scalar>, bp::bases<callback_t>>(
           "HistoryCallback", "Store the history of solver's variables.",
-          bp::init<const context::Workspace_t&,
-                   const context::Result_t&,
-                   bool, bool, bool>((
-                      bp::arg("workspace")
-                    , bp::arg("results")
-                    , bp::arg("store_pd_vars") = true
+          bp::init<bool, bool, bool>((
+                      bp::arg("store_pd_vars") = true
                     , bp::arg("store_values") = true
                     , bp::arg("store_residuals") = true
                    ))

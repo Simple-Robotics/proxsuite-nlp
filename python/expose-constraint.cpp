@@ -19,7 +19,7 @@ namespace python
   {
     bp::class_<T, shared_ptr<T>, bp::bases<context::Constraint_t>>(
       name, docstring,
-      bp::init<const context::DFunctor_t&>()
+      bp::init<const context::C2Function_t&>()
     );
   }
 
@@ -43,11 +43,11 @@ namespace python
 
     exposeSpecificConstraint<EqualityConstraint<Scalar>>(
       "EqualityConstraint",
-      "Cast  functor into an equality constraint");
+      "Cast  function into an equality constraint");
 
     exposeSpecificConstraint<NegativeOrthant<Scalar>>(
       "NegativeOrthant",
-      "Cast a functor into a negative inequality constraint h(x) \\leq 0");
+      "Cast a function into a negative inequality constraint h(x) \\leq 0");
   }
 
 }

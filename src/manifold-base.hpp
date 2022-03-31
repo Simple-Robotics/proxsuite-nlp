@@ -20,7 +20,7 @@ namespace lienlp
    * Base class for manifolds, to use in cost funcs, solvers...
    */
   template<typename _Scalar, int _Options>
-  struct ManifoldAbstract {
+  struct ManifoldAbstractTpl {
   public:
     using Scalar = _Scalar; /// Scalar type
     enum {

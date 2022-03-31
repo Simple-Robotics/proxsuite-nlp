@@ -24,17 +24,17 @@ namespace lienlp
    */
   template<typename _Scalar>
   struct PDALFunction :
-    public MeritFunctorBase<
+    public MeritFunctionBase<
       _Scalar,
       typename math_types<_Scalar>::VectorOfVectors,
       typename math_types<_Scalar>::VectorOfVectors>
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Base = MeritFunctorBase<Scalar, VectorOfVectors, VectorOfVectors>;
+    using Base = MeritFunctionBase<Scalar, VectorOfVectors, VectorOfVectors>;
     using Base::m_prob;
     using Base::computeGradient;
-    using Prob_t = Problem<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
     Lagrangian_t m_lagr;
@@ -51,7 +51,7 @@ namespace lienlp
     /// Get the merit function penalty parameter;
     const Scalar& getPenalty() { return m_muEq; }
 
-    PDALFunction(shared_ptr<Prob_t> prob)
+    PDALFunction(shared_ptr<Problem> prob)
       : Base(prob), m_lagr(Lagrangian_t(prob)) {}
 
     /**

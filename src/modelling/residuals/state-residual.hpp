@@ -1,10 +1,10 @@
 /**
- * @file    Implements a functor which is the residual between two points on the manifold,
+ * @file    Implements a function which is the residual between two points on the manifold,
  *          obtained by the manifold retraction op.
  */
 #pragma once
 
-#include "lienlp/functor-base.hpp"
+#include "lienlp/function-base.hpp"
 #include "lienlp/manifold-base.hpp"
 
 
@@ -16,16 +16,16 @@ namespace lienlp
    * This is templated on the manifold.
    */
   template<typename _Scalar>
-  struct StateResidual : DifferentiableFunctor<_Scalar>
+  struct StateResidual : C2Function<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = DifferentiableFunctor<Scalar>;
+    using Base = C2Function<Scalar>;
     using Base::operator();
     using Base::computeJacobian;
-    using M = ManifoldAbstract<Scalar>;
+    using M = ManifoldAbstractTpl<Scalar>;
 
     /// Target point on the manifold.
     typename M::PointType m_target;

@@ -14,18 +14,18 @@ namespace lienlp
    */
   template<typename _Scalar>
   struct LagrangianFunction :
-  public MeritFunctorBase<
+  public MeritFunctionBase<
     _Scalar, typename math_types<_Scalar>::VectorOfVectors
     >
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
-    using Base = MeritFunctorBase<Scalar, VectorOfVectors>;
+    using Problem = ProblemTpl<Scalar>;
+    using Base = MeritFunctionBase<Scalar, VectorOfVectors>;
     using Base::m_prob;
     using Base::computeGradient;
 
-    LagrangianFunction(shared_ptr<Prob_t> prob)
+    LagrangianFunction(shared_ptr<Problem> prob)
       : Base(prob) {}
 
     Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams) const

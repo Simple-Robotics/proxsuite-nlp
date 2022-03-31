@@ -23,7 +23,7 @@ namespace lienlp
 
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
 
     /// Newton iteration variables
 
@@ -75,7 +75,7 @@ namespace lienlp
 
     SWorkspace(const int nx,
                const int ndx,
-               const Prob_t& prob)
+               const Problem& prob)
       :
       kktMatrix(ndx + prob.getTotalConstraintDim(), ndx + prob.getTotalConstraintDim()),
       kktRhs(ndx + prob.getTotalConstraintDim()),
@@ -92,7 +92,7 @@ namespace lienlp
       init(prob);
     }
 
-    void init(const Prob_t& prob)
+    void init(const Problem& prob)
     {
       kktMatrix.setZero();
       kktRhs.setZero();
@@ -101,20 +101,20 @@ namespace lienlp
 
       xPrev.setZero();
       xTrial.setZero();
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsPrev);
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsTrial);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPrev);
+      helpers::allocateMultipliersOrResiduals(prob, lamsTrial);
 
       dualResidual.setZero();
-      Prob_t::allocateMultipliersOrResiduals(prob, primalResiduals);  // not multipliers but same dims
+      helpers::allocateMultipliersOrResiduals(prob, primalResiduals);  // not multipliers but same dims
 
       objectiveGradient.setZero();
       meritGradient.setZero();
       objectiveHessian.setZero();
 
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsPlusPre);
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsPlus);
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsPDAL);
-      Prob_t::allocateMultipliersOrResiduals(prob, subproblemDualErr);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlus);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPDAL);
+      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr);
 
 
       const std::size_t nc = prob.getNumConstraints();

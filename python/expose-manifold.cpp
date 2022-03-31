@@ -14,23 +14,23 @@ namespace python
   template<typename LieGroup>
   void exposeLieGroup(const char* name, const char* docstring)
   {
-    using ManType = PinocchioLieGroup<LieGroup>;
-    bp::class_<ManType, bp::bases<context::ManifoldType>>(
+    using Manifold = PinocchioLieGroup<LieGroup>;
+    bp::class_<Manifold, bp::bases<context::Manifold>>(
       name, docstring, bp::init<>()
     );
   }
 
   /// Expose the tangent bundle of a manifold type @p M.
   template<typename M, class Init>
-  bp::class_<TangentBundle<M>, bp::bases<context::ManifoldType>>
+  bp::class_<TangentBundleTpl<M>, bp::bases<context::Manifold>>
   exposeTangentBundle(const char* name, const char* docstring, Init init)
   {
-    return bp::class_<TangentBundle<M>, bp::bases<context::ManifoldType>>(name, docstring, init)
+    return bp::class_<TangentBundleTpl<M>, bp::bases<context::Manifold>>(name, docstring, init)
       ;
   }
 
   template<typename M>
-  bp::class_<TangentBundle<M>, bp::bases<context::ManifoldType>>
+  bp::class_<TangentBundleTpl<M>, bp::bases<context::Manifold>>
   exposeTangentBundle(const char* name, const char* docstring)
   {
     return exposeTangentBundle<M, bp::init<M>>(name, docstring, bp::init<M>(bp::args("self", "base")));
@@ -40,12 +40,12 @@ namespace python
   {
     namespace pin = pinocchio;
     using context::Scalar;
-    using context::ManifoldType;
+    using context::Manifold;
 
     internal::exposeBaseManifold();
 
     using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
-    bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<ManifoldType>>(
+    bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<Manifold>>(
       "EuclideanSpace", "Euclidean vector space.",
       bp::init<int>(bp::args("dim"))
     );
@@ -71,12 +71,12 @@ namespace python
     /* Groups associated w/ Pinocchio models */
     using Multibody_t = MultibodyConfiguration<Scalar>;
     using Model_t = pin::ModelTpl<Scalar>;
-    bp::class_<Multibody_t, bp::bases<ManifoldType>>(
+    bp::class_<Multibody_t, bp::bases<Manifold>>(
       "MultibodyConfiguration", "Configuration group of a multibody",
       bp::init<const Model_t&>(bp::args("self", "model"))
     );
 
-    bp::class_<StateMultibody<Scalar>, bp::bases<ManifoldType>>(
+    bp::class_<StateMultibody<Scalar>, bp::bases<Manifold>>(
       "StateMultibody", "Tangent space of the multibody configuration group.",
       bp::init<const Model_t&>(bp::args("model"))
     );

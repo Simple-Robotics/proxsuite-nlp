@@ -10,12 +10,12 @@ namespace lienlp
    * @brief     Tangent bundle of a base manifold M. This construction is recursive.
    */
   template<class Base>
-  struct TangentBundle : public ManifoldAbstract<typename Base::Scalar>
+  struct TangentBundleTpl : public ManifoldAbstractTpl<typename Base::Scalar>
   {
   protected:
     Base m_base;
   public:
-    using Self = TangentBundle<Base>;
+    using Self = TangentBundleTpl<Base>;
     using Scalar = typename Base::Scalar;
     enum {
       Options = Base::Options
@@ -24,10 +24,10 @@ namespace lienlp
     LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     /// Constructor using base space instance.
-    TangentBundle(Base base) : m_base(base) {}; 
+    TangentBundleTpl(Base base) : m_base(base) {}; 
     /// Constructor using base space constructor.
     template<typename... BaseCtorArgs>
-    TangentBundle(BaseCtorArgs... args) : m_base(Base(args...)) {}
+    TangentBundleTpl(BaseCtorArgs... args) : m_base(Base(args...)) {}
 
     /// Declare implementations
 

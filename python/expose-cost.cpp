@@ -18,12 +18,12 @@ namespace python
     using context::MatrixXs;
     using context::ConstMatrixRef;
     using context::ConstVectorRef;
-    using context::ManifoldType;
+    using context::Manifold;
 
     VectorXs (Cost_t::*compGrad1)(const ConstVectorRef&) const = &Cost_t::computeGradient;
     MatrixXs (Cost_t::*compHess1)(const ConstVectorRef&) const = &Cost_t::computeHessian;
 
-    bp::class_<Cost_t, shared_ptr<Cost_t>, bp::bases<context::DFunctor_t>, boost::noncopyable>(
+    bp::class_<Cost_t, shared_ptr<Cost_t>, bp::bases<context::C2Function_t>, boost::noncopyable>(
       "CostFunctionBase", bp::no_init
     )
       .def("__call__", &Cost_t::call, bp::args("self", "x"))
@@ -33,7 +33,7 @@ namespace python
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
-      bp::init<shared_ptr<context::DFunctor_t>,
+      bp::init<shared_ptr<context::C2Function_t>,
                const ConstMatrixRef&,
                const ConstVectorRef&,
                context::Scalar>(
@@ -44,14 +44,14 @@ namespace python
                )
     );
 
-    bp::class_<QuadDistanceCost<context::Scalar>, bp::bases<Cost_t>>(
-      "QuadDistanceCost", "Quadratic distance cost on the manifold.",
-      bp::init<const ManifoldType&, const VectorXs&, const MatrixXs&>(
+    bp::class_<QuadraticDistanceCost<context::Scalar>, bp::bases<Cost_t>>(
+      "QuadraticDistanceCost", "Quadratic distance cost on the manifold.",
+      bp::init<const Manifold&, const VectorXs&, const MatrixXs&>(
         bp::args("space", "target", "weights"))
     )
-      .def(bp::init<const ManifoldType&, const VectorXs&>(
+      .def(bp::init<const Manifold&, const VectorXs&>(
         bp::args("space", "target")))
-      .def("update_target", &QuadDistanceCost<context::Scalar>::updateTarget, bp::args("new_target"))
+      .def("update_target", &QuadraticDistanceCost<context::Scalar>::updateTarget, bp::args("new_target"))
     ;
   }
 

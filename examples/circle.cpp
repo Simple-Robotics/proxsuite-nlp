@@ -16,35 +16,35 @@
 using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
 
 using namespace lienlp;
-using Man = PinocchioLieGroup<Vs>;
-using Prob_t = Problem<double>;
+using Manifold = PinocchioLieGroup<Vs>;
+using Problem = ProblemTpl<double>;
 
 int main()
 {
-  Man space;
+  Manifold space;
   const int nx = space.nx();
-  Man::PointType p0(nx);  // target
+  Manifold::PointType p0(nx);  // target
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
-  Man::PointType p1(nx);
+  Manifold::PointType p1(nx);
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
   const int ndx = space.ndx();
-  Man::TangentVectorType d(ndx);
+  Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
-  Man::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Man::JacobianType weights(ndx, ndx);
+  Manifold::JacobianType weights(ndx, ndx);
   weights.setIdentity();
 
-  QuadDistanceCost<double> cf(space, p0, weights);
+  QuadraticDistanceCost<double> cf(space, p0, weights);
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
@@ -59,25 +59,25 @@ int main()
 
   double radius_ = .6;
   double radius_sq = radius_ * radius_;
-  Prob_t::MatrixXs w2(ndx, ndx);
+  Problem::MatrixXs w2(ndx, ndx);
   w2.setIdentity();
   w2 *= 2;
 
   QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
   using Ineq_t = NegativeOrthant<double>;
-  // Prob_t::EqualityType cstr1(residualCircle);
+  // Problem::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
   fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
-  std::vector<Prob_t::ConstraintPtr> cstrs;
+  std::vector<Problem::ConstraintPtr> cstrs;
   cstrs.push_back(std::make_shared<Ineq_t>(cstr1));
-  auto prob = std::make_shared<Prob_t>(cf, cstrs);
+  auto prob = std::make_shared<Problem>(cf, cstrs);
 
   /// Test out merit functions
 
-  Prob_t::VectorXs grad(space.ndx());
+  Problem::VectorXs grad(space.ndx());
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
@@ -89,8 +89,8 @@ int main()
 
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
-  Prob_t::VectorOfVectors lams;
-  Prob_t::allocateMultipliersOrResiduals(*prob, lams);
+  Problem::VectorOfVectors lams;
+  helpers::allocateMultipliersOrResiduals(*prob, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
              lams.size(), lams[0]);
@@ -103,7 +103,7 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  Prob_t::MatrixXs hess(space.ndx(), space.ndx());
+  Problem::MatrixXs hess(space.ndx(), space.ndx());
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);
@@ -123,7 +123,7 @@ int main()
   SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
   SResults<double> results(space.nx(), *prob);
 
-  Solver<double> solver(space, prob);
+  SolverTpl<double> solver(space, prob);
   solver.setPenalty(1. / 50);
   solver.use_gauss_newton = true;
 

@@ -28,7 +28,7 @@ namespace lienlp
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     ConvergenceFlag converged = ConvergenceFlag::UNINIT;
@@ -43,13 +43,13 @@ namespace lienlp
     Scalar mu;
     Scalar rho;
 
-    SResults(const int nx, const Prob_t& prob)
+    SResults(const int nx, const Problem& prob)
              : xOpt(nx),
                numIters(0),
                mu(0.),
                rho(0.)
     {
-      Prob_t::allocateMultipliersOrResiduals(prob, lamsOpt);
+      helpers::allocateMultipliersOrResiduals(prob, lamsOpt);
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {

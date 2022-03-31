@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "lienlp/functor-base.hpp"
-#include "lienlp/functor-ops.hpp"
+#include "lienlp/function-base.hpp"
+#include "lienlp/function-ops.hpp"
 #include "lienlp/modelling/residuals/state-residual.hpp"
 
 
@@ -13,18 +13,18 @@ namespace lienlp
    * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
-  struct LinearResidual : DifferentiableFunctor<_Scalar>
+  struct LinearFunction : C2Function<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = DifferentiableFunctor<Scalar>;
+    using Base = C2Function<Scalar>;
     using Base::computeJacobian;
 
     const MatrixXs mat;
     const VectorXs b;
 
-    LinearResidual(const ConstMatrixRef& A, const ConstVectorRef& b)
+    LinearFunction(const ConstMatrixRef& A, const ConstVectorRef& b)
       : Base((int)A.cols(), (int)A.cols(), (int)A.rows()),
         mat(A),
         b(b) {}
@@ -45,17 +45,17 @@ namespace lienlp
    *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
    */
   template<typename _Scalar>
-  struct LinearStateResidual : ComposeFunctor<_Scalar>
+  struct LinearStateResidual : ComposeFunction<_Scalar>
   {
     using Scalar = _Scalar;
-    using Base = ComposeFunctor<Scalar>;
+    using Base = ComposeFunction<Scalar>;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
 
-    using M = ManifoldAbstract<Scalar>;
+    using M = ManifoldAbstractTpl<Scalar>;
 
     LinearStateResidual(const M& manifold, const ConstVectorRef& target,
                         const ConstMatrixRef& A, const ConstVectorRef& b)
-                        : Base(LinearResidual<Scalar>(A, b),
+                        : Base(LinearFunction<Scalar>(A, b),
                                StateResidual<Scalar>(manifold, target)
                                ) {}
 

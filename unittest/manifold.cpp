@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_TEST_MESSAGE("Starting T(SO2) test");
   using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
   using SO2 = PinocchioLieGroup<_SO2>;
-  using TSO2 = TangentBundle<SO2>;
+  using TSO2 = TangentBundleTpl<SO2>;
   TSO2 tspace; // no arg constructor
 
   BOOST_TEST_MESSAGE("Checking bundle dimension");

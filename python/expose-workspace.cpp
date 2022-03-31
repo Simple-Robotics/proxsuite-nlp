@@ -11,7 +11,7 @@ namespace lienlp
     {
       using context::Scalar;
       bp::class_<context::Workspace_t>(
-        "Workspace", "Solver workspace.",
+        "Workspace", "SolverTpl workspace.",
         bp::init<int, int, const context::Problem_t&>(bp::args("nx", "ndx", "problem"))
       );
     }

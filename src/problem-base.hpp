@@ -12,7 +12,7 @@ namespace lienlp
 {
 
   template<typename _Scalar>
-  struct Problem
+  struct ProblemTpl
   {
   public:
     using Scalar = _Scalar;
@@ -50,9 +50,9 @@ namespace lienlp
       return m_ncs;
     }
 
-    Problem(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
+    ProblemTpl(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
 
-    Problem(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
+    ProblemTpl(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
             : m_cost(cost), m_cstrs(constraints), m_nc_total(0)
     {
       reset_constraint_dim_vars();
@@ -65,18 +65,6 @@ namespace lienlp
       reset_constraint_dim_vars();
     }    
 
-    /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
-    static void allocateMultipliersOrResiduals(
-      const Problem<Scalar>& prob,
-      VectorOfVectors& out)
-    {
-      out.reserve(prob.getNumConstraints());
-      for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
-      {
-        ConstraintPtr cur_cstr = prob.getConstraint(i);
-        out.push_back(VectorXs::Zero(cur_cstr->nr()));
-      }
-    }
   protected:
     /// Vector of equality constraints.
     std::vector<ConstraintPtr> m_cstrs;
@@ -97,6 +85,27 @@ namespace lienlp
       }
     }
   };
+
+  namespace helpers
+  {
+    /// @brief   Allocate a set of multipliers (or residuals) for a given problem instance.
+    template<typename Scalar>
+    void allocateMultipliersOrResiduals(
+      const ProblemTpl<Scalar>& prob,
+      typename ProblemTpl<Scalar>::VectorOfVectors& out)
+    {
+      using Problem = ProblemTpl<Scalar>;
+      using VectorXs = typename Problem::VectorXs;
+      out.reserve(prob.getNumConstraints());
+      for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
+      {
+        typename Problem::ConstraintPtr cur_cstr = prob.getConstraint(i);
+        out.push_back(VectorXs::Zero(cur_cstr->nr()));
+      }
+    }
+    
+  } // namespace helpers
+  
 
 } // namespace lienlp
 

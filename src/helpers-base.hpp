@@ -5,13 +5,14 @@
 
 namespace lienlp
 {
+  /// Helper functions and structs.
   namespace helpers
   {
     
     template<typename Scalar>
     struct callback
     {
-      virtual void call() = 0;
+      virtual void call(const SWorkspace<Scalar>&, const SResults<Scalar>&) = 0;
       virtual ~callback() = default;
     };
 

@@ -1,5 +1,5 @@
 #include "lienlp/modelling/residuals/linear.hpp"
-#include "lienlp/functor-ops.hpp"
+#include "lienlp/function-ops.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
 #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 
@@ -18,13 +18,13 @@ using namespace lienlp;
 
 BOOST_AUTO_TEST_CASE(test_linear)
 {
-  BOOST_TEST_MESSAGE("Test linear functor:");
+  BOOST_TEST_MESSAGE("Test linear function:");
   Eigen::Matrix4d A;
   A.setIdentity();
   A.topLeftCorner(2, 2).setConstant(0.5);
   Eigen::Vector4d b;
   b.setRandom();
-  LinearResidual<double> res(A, b);
+  LinearFunction<double> res(A, b);
 
   Eigen::Vector4d x0, x1;
   x0.setZero();
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_linear)
 
 BOOST_AUTO_TEST_CASE(test_compose)
 {
-  BOOST_TEST_MESSAGE("Test functor composition:");
+  BOOST_TEST_MESSAGE("Test function composition:");
   const int N = 3;
   using Matrix_t = Eigen::Matrix<double, N, N>;
   using Vector_t = Eigen::Matrix<double, N, 1>;
@@ -52,13 +52,13 @@ BOOST_AUTO_TEST_CASE(test_compose)
   Vector_t b;
   A.setRandom();
   b.setRandom();
-  using ResType = LinearResidual<double>;
+  using ResType = LinearFunction<double>;
   ResType res1(A, b);
   
   Vector_t x0;
   x0.setOnes();
 
-  ComposeFunctor<double> res2(res1, res1);
+  ComposeFunction<double> res2(res1, res1);
 
   fmt::print("A matrix:\n{}\n", A);
   fmt::print("A squared:\n{}\n", A * A);

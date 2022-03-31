@@ -11,15 +11,15 @@ namespace lienlp
 {
 
   template<typename _Scalar, typename... Args>
-  struct MeritFunctorBase
+  struct MeritFunctionBase
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
 
-    shared_ptr<Prob_t> m_prob;
+    shared_ptr<Problem> m_prob;
 
-    MeritFunctorBase(shared_ptr<Prob_t> prob) : m_prob(prob) {}
+    MeritFunctionBase(shared_ptr<Problem> prob) : m_prob(prob) {}
 
     /// Evaluate the merit function.
     virtual Scalar operator()(const ConstVectorRef& x, const Args&... args) const = 0;
@@ -41,16 +41,16 @@ namespace lienlp
 
   /// Simply evaluate the objective function.
   template<typename _Scalar>
-  struct EvalObjective : public MeritFunctorBase<_Scalar>
+  struct EvalObjective : public MeritFunctionBase<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
-    using Base = MeritFunctorBase<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
+    using Base = MeritFunctionBase<Scalar>;
     using Base::m_prob;
     using Base::computeGradient;
 
-    EvalObjective(shared_ptr<Prob_t> prob)
+    EvalObjective(shared_ptr<Problem> prob)
       : Base(prob) {}
 
     Scalar operator()(const ConstVectorRef& x) const

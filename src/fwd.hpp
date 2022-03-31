@@ -30,21 +30,28 @@ struct math_types
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
 };
 
-// fwd BaseFunctor
+// fwd BaseFunction
 template<typename Scalar>
-struct BaseFunctor;
+struct BaseFunction;
 
-// fwd DifferentiableFunctor
+// fwd C1Function
 template<typename Scalar>
-struct DifferentiableFunctor;
+struct C1Function;
 
-// fwd ComposeFunctor
+// fwd C2Function
 template<typename Scalar>
-struct ComposeFunctor;
+struct C2Function;
 
-// fwd ManifoldAbstract
+// fwd ComposeFunction
+template<typename Scalar>
+struct ComposeFunction;
+
+// fwd ManifoldAbstractTpl
 template<typename Scalar, int Options=0>
-struct ManifoldAbstract;
+struct ManifoldAbstractTpl;
+
+template<typename Base>
+struct TangentBundleTpl;
 
 // fwd Cost
 template<typename Scalar>
@@ -56,7 +63,7 @@ struct ConstraintSetBase;
 
 // fwd Problem
 template<typename Scalar>
-struct Problem;
+struct ProblemTpl;
 
 // fwd SResults
 template<typename Scalar>
@@ -65,6 +72,9 @@ struct SResults;
 // fwd Workspace
 template<typename Scalar>
 struct SWorkspace;
+
+template<typename Scalar>
+struct SolverTpl;
 
 /// Shorthand for the infinity norm
 /// code from proxqp

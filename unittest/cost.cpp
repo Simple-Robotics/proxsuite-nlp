@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10))
   auto x1 = space.rand();
   auto x2 = space.rand();
 
-  QuadDistanceCost<double> cost1(space, x0);
-  QuadDistanceCost<double> cost2(space, x1);
+  QuadraticDistanceCost<double> cost1(space, x0);
+  QuadraticDistanceCost<double> cost2(space, x1);
   CostSum<double> cost_sum = cost1 + cost2;
 
   BOOST_CHECK_EQUAL(cost_sum.call(x2), cost1.call(x2) + cost2.call(x2));

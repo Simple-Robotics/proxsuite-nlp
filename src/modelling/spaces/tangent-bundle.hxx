@@ -6,8 +6,8 @@ namespace lienlp
 {
 
     template<class Base>
-    typename TangentBundle<Base>::PointType
-    TangentBundle<Base>::neutral() const
+    typename TangentBundleTpl<Base>::PointType
+    TangentBundleTpl<Base>::neutral() const
     {
       PointType out;
       out.resize(nx());
@@ -17,8 +17,8 @@ namespace lienlp
     }
 
     template<class Base>
-    typename TangentBundle<Base>::PointType
-    TangentBundle<Base>::rand() const
+    typename TangentBundleTpl<Base>::PointType
+    TangentBundleTpl<Base>::rand() const
     {
       PointType out;
       out.resize(nx());
@@ -30,7 +30,7 @@ namespace lienlp
 
     /// Operators
     template<class Base>
-    void TangentBundle<Base>::
+    void TangentBundleTpl<Base>::
     integrate_impl(const ConstVectorRef& x,
                    const ConstVectorRef& dx,
                    VectorRef out) const
@@ -44,7 +44,7 @@ namespace lienlp
     }
 
     template<class Base>
-    void TangentBundle<Base>::
+    void TangentBundleTpl<Base>::
     difference_impl(const ConstVectorRef& x0,
                     const ConstVectorRef& x1,
                     VectorRef out) const
@@ -59,7 +59,7 @@ namespace lienlp
     }
 
     template<class Base>
-    void TangentBundle<Base>::Jintegrate_impl(
+    void TangentBundleTpl<Base>::Jintegrate_impl(
       const ConstVectorRef& x,
       const ConstVectorRef& dx,
       MatrixRef J_,
@@ -76,7 +76,7 @@ namespace lienlp
     }
 
     template<class Base>
-    void TangentBundle<Base>::Jdifference_impl(
+    void TangentBundleTpl<Base>::Jdifference_impl(
       const ConstVectorRef& x0,
       const ConstVectorRef& x1,
       MatrixRef J_,

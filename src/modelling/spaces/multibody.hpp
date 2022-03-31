@@ -13,7 +13,7 @@ namespace lienlp
    *              \f$q \in \mathcal{Q} \f$ is a configuration.
    */
   template<typename Scalar, int Options=0>
-  struct StateMultibody : TangentBundle<MultibodyConfiguration<Scalar, Options>>
+  struct StateMultibody : TangentBundleTpl<MultibodyConfiguration<Scalar, Options>>
   {
     using ConfigSpace = MultibodyConfiguration<Scalar, Options>;
     using ModelType = typename ConfigSpace::ModelType;
@@ -21,7 +21,7 @@ namespace lienlp
     const ModelType& getModel() { return this->m_base.getModel(); }
 
     StateMultibody(const ModelType& model)
-      : TangentBundle<ConfigSpace>(ConfigSpace(model))
+      : TangentBundleTpl<ConfigSpace>(ConfigSpace(model))
       {}
   };
 

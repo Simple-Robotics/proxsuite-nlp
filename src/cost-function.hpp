@@ -3,24 +3,24 @@
 #include "lienlp/macros.hpp"
 #include "lienlp/manifold-base.hpp"
 
-#include "lienlp/functor-base.hpp"
+#include "lienlp/function-base.hpp"
 
 
 namespace lienlp
 {
 
   /** @brief    Base class for differentiable cost functions.
-   *  @remark   Cost functions derive from differentiable functors,
-   *            and implement the DifferentiableFunctor<Scalar> API.
+   *  @remark   Cost functions derive from differentiable functions,
+   *            and implement the C2Function<Scalar> API.
    *            As such, they can be used as constraints and composed.
    */
   template<typename _Scalar>
-  struct CostFunctionBase : public DifferentiableFunctor<_Scalar>
+  struct CostFunctionBase : public C2Function<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
-    using Base = DifferentiableFunctor<Scalar>;
+    using Base = C2Function<Scalar>;
 
     CostFunctionBase(const int nx, const int ndx) : Base(nx, ndx, 1) {}
 

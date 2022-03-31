@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lienlp/cost-function.hpp"
-#include "lienlp/functor-base.hpp"
+#include "lienlp/function-base.hpp"
 
 namespace lienlp
 {
@@ -17,18 +17,18 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    using FunctorType = DifferentiableFunctor<Scalar>;  // base constraint func to use
+    using FunctionType = C2Function<Scalar>;  // base constraint func to use
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = CostFunctionBase<Scalar>;
     using Base::computeGradient;
     using Base::computeHessian;
 
-    shared_ptr<FunctorType> m_residual;
+    shared_ptr<FunctionType> m_residual;
     MatrixXs m_weights;
     VectorXs m_slope;
     Scalar m_constant;
 
-    QuadraticResidualCost(const shared_ptr<FunctorType>& residual,
+    QuadraticResidualCost(const shared_ptr<FunctionType>& residual,
                           const ConstMatrixRef& weights,
                           const ConstVectorRef& slope,
                           const Scalar constant = Scalar(0.))
@@ -39,7 +39,7 @@ namespace lienlp
       , m_constant(constant)
     {}
 
-    QuadraticResidualCost(const shared_ptr<FunctorType>& residual,
+    QuadraticResidualCost(const shared_ptr<FunctionType>& residual,
                           const ConstMatrixRef& weights,
                           const Scalar constant = Scalar(0.))
       : QuadraticResidualCost(residual, weights, VectorXs::Zero(residual->nr()), constant)
@@ -51,7 +51,7 @@ namespace lienlp
                           const ConstVectorRef& slope,
                           const Scalar constant,
                           ResidualArgs&... args)
-    : QuadraticResidualCost(new FunctorType(args...),  weights, slope, constant)
+    : QuadraticResidualCost(new FunctionType(args...),  weights, slope, constant)
     {}
 
     Scalar call(const ConstVectorRef& x) const

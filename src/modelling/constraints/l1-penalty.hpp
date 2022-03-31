@@ -24,11 +24,11 @@ namespace lienlp
     using Base = ConstraintSetBase<Scalar>;
     using Base::operator();
     using Active_t = typename Base::Active_t;
-    using FunctorType = typename Base::FunctorType;
+    using FunctionType = typename Base::FunctionType;
 
     Scalar m_mu = 0.01;
 
-    explicit L1Penalty(const FunctorType& func) : Base(func) {}
+    explicit L1Penalty(const FunctionType& func) : Base(func) {}
 
     ReturnType projection(const ConstVectorRef& z) const
     {

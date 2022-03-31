@@ -5,18 +5,24 @@
 namespace lienlp
 {
 
-  template<int Dim, typename Scalar, int Options = 0>
-  struct Sphere : ManifoldAbstract<Dim, Scalar, Options>
-  {};
+  template<int _Dim, typename _Scalar, int _Options = 0>
+  struct Sphere : ManifoldAbstractTpl<Scalar, Options>
+  {
+    using Scalar = _Scalar;
+    enum {
+      Dim=_Dim,
+      Options=_Options
+    };
+  };
 
-  template<typename _Scalar, int _Options=0>
-  struct Sphere<3, _Scalar, _Options> : ManifoldAbstract<3, _Scalar, _Options>
+  template<typename _Scalar, int _Options>
+  struct Sphere<3, _Scalar, _Options> : ManifoldAbstractTpl<3, _Scalar, _Options>
   {
     using Scalar = _Scalar;
     enum {
       Options = _Options
     };
-    using Base = ManifoldAbstract<Scalar, Options>;
+    using Base = ManifoldAbstractTpl<Scalar, Options>;
     LIENLP_DEFINE_MANIFOLD_TYPES(Base)
 
     /**
@@ -41,8 +47,5 @@ namespace lienlp
 
     }
   };
-
-  template<typename Scalar, intt Options=0>
-  using Sphere3D = Sphere<3, Scalar, Options>;
 
 }

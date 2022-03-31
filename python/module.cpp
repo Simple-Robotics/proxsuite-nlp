@@ -31,7 +31,7 @@ BOOST_PYTHON_MODULE(pylienlp)
 
   bp::import("warnings");
 
-  exposeFunctorTypes();
+  exposeFunctionTypes();
   exposeContainerTypes();
   {
     bp::scope man_scope = get_namespace("manifolds");

@@ -17,15 +17,16 @@ namespace python
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    using Problem_t = Problem<Scalar>;
+    using Problem_t = ProblemTpl<Scalar>;
     using Result_t = SResults<Scalar>;
     using Workspace_t = SWorkspace<Scalar>;
     using Cost_t = CostFunctionBase<Scalar>;
     using Constraint_t = ConstraintSetBase<Scalar>;
-    using Functor_t = BaseFunctor<Scalar>;
-    using DFunctor_t = DifferentiableFunctor<Scalar>;
+    using Function_t = BaseFunction<Scalar>;
+    using C2Function_t = C2Function<Scalar>;
 
-    using ManifoldType = ManifoldAbstract<Scalar>;
+    using Manifold = ManifoldAbstractTpl<Scalar>;
+    using Solver = SolverTpl<Scalar>;
 
     using VecFunc_t = void(const ConstVectorRef&, VectorRef) const;
     using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;

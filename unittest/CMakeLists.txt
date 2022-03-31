@@ -44,7 +44,7 @@ endmacro(add_lienlp_test)
 
 
 add_lienlp_test(manifold)
-add_lienlp_test(functor)
+add_lienlp_test(function)
 add_lienlp_test(cost)
 add_lienlp_test(constraint)
 

@@ -23,9 +23,9 @@ namespace lienlp
     using Base = ConstraintSetBase<Scalar>;
     using Base::operator();
     using Active_t = typename Base::Active_t;
-    using FunctorType = typename Base::FunctorType;
+    using FunctionType = typename Base::FunctionType;
 
-    explicit EqualityConstraint(const FunctorType& func)
+    explicit EqualityConstraint(const FunctionType& func)
       : Base(func) {}
 
     inline ReturnType projection(const ConstVectorRef& z) const

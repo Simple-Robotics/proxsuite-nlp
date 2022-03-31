@@ -24,26 +24,26 @@ namespace lienlp
 {
 
   template<typename _Scalar>
-  class Solver
+  class SolverTpl
   {
   public:
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Prob_t = Problem<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
     using Merit_t = PDALFunction<Scalar>;
 
     using Workspace = SWorkspace<Scalar>;
     using Results = SResults<Scalar>;
   
-    using M = ManifoldAbstract<Scalar>;
+    using M = ManifoldAbstractTpl<Scalar>;
 
     /// Manifold on which to optimize.
     const M& manifold;
-    shared_ptr<Prob_t> problem;
+    shared_ptr<Problem> problem;
     /// Merit function.
     Merit_t merit_fun;
     /// Proximal regularization penalty.
-    QuadDistanceCost<Scalar> prox_penalty;
+    QuadraticDistanceCost<Scalar> prox_penalty;
 
     //// Other settings
 
@@ -82,8 +82,8 @@ namespace lienlp
     using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
     std::vector<CallbackPtr> callbacks_;
 
-    Solver(const M& man,
-           shared_ptr<Prob_t>& prob,
+    SolverTpl(const M& man,
+           shared_ptr<Problem>& prob,
            const Scalar tol=1e-6,
            const Scalar mu_eq_init=1e-2,
            const Scalar rho_init=0.,
@@ -186,7 +186,7 @@ namespace lienlp
     /// Set solver maximum allowed number of iterations.
     void setMaxIters(const std::size_t val) { MAX_ITERS = val; }
 
-    /// Update penalty parameter using the provided factor (with a safeguard Solver::mu_lower_).
+    /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower_).
     inline void updatePenalty()
     {
       if (mu_eq == mu_lower_)
@@ -311,7 +311,7 @@ namespace lienlp
 
         for (auto cb : callbacks_)
         {
-          cb->call();
+          cb->call(workspace, results);
         }
 
         // factorization
