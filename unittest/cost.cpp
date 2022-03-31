@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_cost_sum)
   fmt::print("c3(x2): {:.3f}\n", c3.call(x2));
   c3 *= .5;
   fmt::print("c3(x2): {:.3f}\n", c3.call(x2));
-  auto c4 = .5 * cost1;
+  auto c4 = .5 * cost1 + cost2;  // invokes operator+ with CostSum&& lhs, should be c3
   fmt::print("c4(x2): {:.3f}\n", c4.call(x2));
 }
 
