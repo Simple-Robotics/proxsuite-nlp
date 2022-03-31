@@ -24,12 +24,21 @@ BOOST_AUTO_TEST_CASE(test_cost_sum)
 
   QuadDistanceCost<double> cost1(space, x0);
   QuadDistanceCost<double> cost2(space, x1);
-  auto cost_sum = cost1 + cost2;
+  CostSum<double> cost_sum = cost1 + cost2;
 
   BOOST_CHECK_EQUAL(cost_sum.call(x2), cost1.call(x2) + cost2.call(x2));
 
-  cost_sum += cost1;
+  cost_sum += cost1; // operator+=(lvalue costfunctionbase&)
   BOOST_CHECK_EQUAL(cost_sum.call(x2), 2 * cost1.call(x2) + cost2.call(x2));
+
+  CostSum<double> c3 = cost1 + cost2 + cost2; // invokes operator+ with rvalue ref
+  BOOST_CHECK_EQUAL(c3.call(x2), cost1.call(x2) + 2 * cost2.call(x2));
+
+  fmt::print("c3(x2): {:.3f}\n", c3.call(x2));
+  c3 *= .5;
+  fmt::print("c3(x2): {:.3f}\n", c3.call(x2));
+  auto c4 = .5 * cost1;
+  fmt::print("c4(x2): {:.3f}\n", c4.call(x2));
 }
 
 

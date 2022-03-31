@@ -75,15 +75,33 @@ namespace lienlp
       addComponent(comp, 1.);
     }
 
-    void operator+=(Base& other)
+    CostSum<Scalar>& operator+=(Base& other)
     {
       addComponent(other);
+      return *this;
     }
 
-    void operator+=(CostSum<Scalar>& other)
+    CostSum<Scalar>& operator+=(CostSum<Scalar>& other)
     {
       m_components.insert(m_components.end(), other.m_components.begin(), other.m_components.end());
       m_weights.insert(m_weights.end(), other.m_weights.begin(), other.m_weights.end());
+      return *this;
+    }
+
+    // increment this using an rvalue (for ex tmp rhs)
+    CostSum<Scalar>& operator+=(CostSum<Scalar>&& rhs)
+    {
+      (*this) += std::forward<CostSum<Scalar>>(rhs);
+      return *this;
+    }
+
+    CostSum<Scalar>& operator*=(const Scalar rhs)
+    {
+      for (auto& weight : m_weights)
+      {
+        weight = rhs * weight;
+      }
+      return *this;
     }
 
   };
@@ -97,6 +115,30 @@ namespace lienlp
     out += left;
     out += right;
     return out;
+  }
+
+  // left is rvalue reference, so we modify it, return a move of the left after adding right
+  template<typename Scalar>
+  CostSum<Scalar>&& operator+(CostSum<Scalar>&& left, CostFunctionBase<Scalar>& right)
+  {
+    left += right;
+    return std::move(left);
+  }
+
+  // create a CostSum object with the desired weight
+  template<typename Scalar>
+  CostSum<Scalar> operator*(const Scalar left, CostFunctionBase<Scalar>& right)
+  {
+    CostSum<Scalar> out(right.nx(), right.ndx());
+    out.addComponent(right, left);
+    return out;
+  }
+
+  template<typename Scalar>
+  CostSum<Scalar>&& operator*(const Scalar left, CostSum<Scalar>&& right)
+  {
+    right *= left;
+    return std::move(right);
   }
 
 } // namespace lienlp
