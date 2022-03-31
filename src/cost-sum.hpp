@@ -64,15 +64,10 @@ namespace lienlp
       }
     }
 
-    void addComponent(Base& comp, const Scalar& w)
+    void addComponent(Base& comp, const Scalar w = 1.)
     {
       m_components.push_back(std::ref(comp));
       m_weights.push_back(w);
-    }
-
-    void addComponent(Base& comp)
-    {
-      addComponent(comp, 1.);
     }
 
     CostSum<Scalar>& operator+=(Base& other)
