@@ -49,7 +49,7 @@ int main()
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
 
-  StateResidual<double> residual(space, space.neutral());
+  ManifoldDifferenceToPoint<double> residual(space, space.neutral());
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));

@@ -16,7 +16,7 @@ namespace lienlp
    * This is templated on the manifold.
    */
   template<typename _Scalar>
-  struct StateResidual : C2Function<_Scalar>
+  struct ManifoldDifferenceToPoint : C2Function<_Scalar>
   {
   public:
     using Scalar = _Scalar;
@@ -30,7 +30,7 @@ namespace lienlp
     /// Target point on the manifold.
     typename M::PointType m_target;
 
-    StateResidual(const M& manifold, const ConstVectorRef& target)
+    ManifoldDifferenceToPoint(const M& manifold, const ConstVectorRef& target)
       : Base(manifold.nx(), manifold.ndx(), manifold.ndx()),
           m_target(target),
           m_manifold(manifold)

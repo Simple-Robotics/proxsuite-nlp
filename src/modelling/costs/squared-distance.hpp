@@ -11,7 +11,7 @@ namespace lienlp
   /** @brief    Weighted quadratic distance \f$\frac{1}{2}\|x\ominus \bar{x}\|^2_W\f$ on a manifold.
    * 
    *  @details  This function subclasses from QuadraticResidualCost and
-   *            provides a convenient constructor. It uses StateResidual under the hood
+   *            provides a convenient constructor. It uses ManifoldDifferenceToPoint under the hood
    *            as the input residual for the parent.
    *            This struct also exposes a method to update the target point.
    */
@@ -20,7 +20,7 @@ namespace lienlp
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using FunctionType = StateResidual<Scalar>;
+    using FunctionType = ManifoldDifferenceToPoint<Scalar>;
     using M = ManifoldAbstractTpl<Scalar>;
     using Base = QuadraticResidualCost<Scalar>;
     using Base::m_residual;

@@ -51,10 +51,10 @@ int main()
   Manifold::JacobianType weights;
   weights.setIdentity();
 
-  StateResidual<double> residual(space, p0);
+  ManifoldDifferenceToPoint<double> residual(space, p0);
   fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
-  auto resptr = std::make_shared<StateResidual<double>>(residual);
+  auto resptr = std::make_shared<ManifoldDifferenceToPoint<double>>(residual);
 
   QuadraticResidualCost<double> cf(resptr, weights);
   fmt::print("cost: {}\n", cf(p1));

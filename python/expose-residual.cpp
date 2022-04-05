@@ -34,12 +34,12 @@ namespace python
       "LinearFunction", "Residual f(x) = Ax + b.",
       bp::init<MatrixXs, VectorXs>(bp::args("A", "b")));
 
-    expose_function<StateResidual<context::Scalar>>(
-      "StateResidual", "Difference vector x (-) x0.",
+    expose_function<ManifoldDifferenceToPoint<context::Scalar>>(
+      "ManifoldDifferenceToPoint", "Difference vector x (-) x0.",
       bp::init<const Manifold&, const ConstVectorRef&>(bp::args("space", "target")));
 
-    expose_function<LinearStateResidual<context::Scalar>>(
-      "LinearStateResidual", "Linear function of the vector difference to a reference point.",
+    expose_function<LinearFunctionDifferenceToPoint<context::Scalar>>(
+      "LinearFunctionDifferenceToPoint", "Linear function of the vector difference to a reference point.",
       bp::init<const Manifold&, VectorXs, MatrixXs, VectorXs>(bp::args("space", "target", "A", "b"))
     );
   }

@@ -1,7 +1,7 @@
 import numpy as np
 import lienlp
-from lienlp.residuals import StateResidual
-from lienlp.costs import QuadDistanceCost, QuadraticResidualCost
+from lienlp.residuals import ManifoldDifferenceToPoint
+from lienlp.costs import QuadraticDistanceCost, QuadraticResidualCost
 from lienlp.manifolds import EuclideanSpace
 from lienlp.constraints import NegativeOrthant
 
@@ -15,9 +15,9 @@ radius_ = .6
 radius_sq = radius_ ** 2
 weights = np.eye(nx)
 
-cost_ = QuadDistanceCost(space, p0, weights)
+cost_ = QuadraticDistanceCost(space, p0, weights)
 circl_center = space.neutral()
-inner_res_ = StateResidual(space, circl_center)
+inner_res_ = ManifoldDifferenceToPoint(space, circl_center)
 print(cost_(p0))
 print(cost_(p1))
 print(inner_res_(p0))
@@ -43,7 +43,7 @@ workspace = lienlp.Workspace(nx, nx, prob)
 mu_init = 0.02
 solver = lienlp.Solver(space, prob, mu_init=mu_init)
 solver.use_gauss_newton = True
-cb = lienlp.HistoryCallback(workspace, results)
+cb = lienlp.HistoryCallback()
 solver.register_callback(cb)
 
 lams0 = [np.random.randn(residual.nr)]

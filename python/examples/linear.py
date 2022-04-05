@@ -1,7 +1,7 @@
 import numpy as np
 import lienlp
-from lienlp.residuals import LinearResidual
-from lienlp.costs import QuadDistanceCost
+from lienlp.residuals import LinearFunction
+from lienlp.costs import QuadraticDistanceCost
 from lienlp.manifolds import EuclideanSpace
 from lienlp.constraints import EqualityConstraint, NegativeOrthant
 
@@ -14,7 +14,7 @@ b = np.random.randn(nres)
 x0 = np.linalg.lstsq(A, -b)[0]
 x1 = np.random.randn(nx) * 3
 
-resdl = LinearResidual(A, b)
+resdl = LinearFunction(A, b)
 
 print("x0:", x0, "resdl(x0):", resdl(x0))
 print("x1:", x1, "resdl(x1):", resdl(x1))
@@ -40,7 +40,7 @@ print("dproj x1:", cstr2.normalConeProjection(x1))
 
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10
-cost_ = QuadDistanceCost(space, x_target, np.eye(nx))
+cost_ = QuadraticDistanceCost(space, x_target, np.eye(nx))
 problem = lienlp.Problem(cost_)
 print("Problem:", problem)
 print("Target :", x_target)
@@ -61,7 +61,7 @@ class DumbCallback(lienlp.BaseCallback):
         print("Calling dumb callback!")
 
 
-cb = lienlp.HistoryCallback(workspace, results)
+cb = lienlp.HistoryCallback()
 cb2 = DumbCallback()
 
 solver = lienlp.Solver(space, problem)
@@ -70,6 +70,8 @@ solver.register_callback(cb)
 x_init = np.random.randn(nx) * 10
 lams0 = [np.random.randn(resdl.nr)]
 solver.solve(workspace, results, x_init, lams0)
+
+solver.clear_callbacks()
 
 print(" values:\n", cb.storage.values.tolist())
 

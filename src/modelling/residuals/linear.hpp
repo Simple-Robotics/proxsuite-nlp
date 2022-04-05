@@ -45,7 +45,7 @@ namespace lienlp
    *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
    */
   template<typename _Scalar>
-  struct LinearStateResidual : ComposeFunction<_Scalar>
+  struct LinearFunctionDifferenceToPoint : ComposeFunction<_Scalar>
   {
     using Scalar = _Scalar;
     using Base = ComposeFunction<Scalar>;
@@ -53,10 +53,10 @@ namespace lienlp
 
     using M = ManifoldAbstractTpl<Scalar>;
 
-    LinearStateResidual(const M& manifold, const ConstVectorRef& target,
+    LinearFunctionDifferenceToPoint(const M& manifold, const ConstVectorRef& target,
                         const ConstMatrixRef& A, const ConstVectorRef& b)
                         : Base(LinearFunction<Scalar>(A, b),
-                               StateResidual<Scalar>(manifold, target)
+                               ManifoldDifferenceToPoint<Scalar>(manifold, target)
                                ) {}
 
   };
