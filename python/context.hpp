@@ -23,6 +23,7 @@ namespace python
     using Cost_t = CostFunctionBase<Scalar>;
     using Constraint_t = ConstraintSetBase<Scalar>;
     using Function_t = BaseFunction<Scalar>;
+    using C1Function_t = C1Function<Scalar>;
     using C2Function_t = C2Function<Scalar>;
 
     using Manifold = ManifoldAbstractTpl<Scalar>;
