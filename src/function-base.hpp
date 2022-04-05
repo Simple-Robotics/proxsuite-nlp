@@ -47,6 +47,11 @@ namespace lienlp
     using Base = BaseFunction<_Scalar>;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
+    Base& toBase()
+    {
+      return static_cast<Base&>(*this);
+    }
+
     C1Function(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
   
@@ -75,6 +80,11 @@ namespace lienlp
     using Scalar = _Scalar;
     using Base = C1Function<_Scalar>;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+
+    Base& toC1()
+    {
+      return static_cast<Base&>(*this);
+    }
 
     C2Function(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
