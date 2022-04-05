@@ -16,6 +16,7 @@ set(CMAKE_VERBOSE_MAKEFILE True)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
