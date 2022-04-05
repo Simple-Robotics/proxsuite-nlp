@@ -37,6 +37,7 @@ namespace lienlp
       )
         .def_readwrite("use_gauss_newton", &Solver::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
         .def("register_callback", &Solver::registerCallback, bp::args("cb"), "Add a callback to the solver.")
+        .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
         .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
         .def("solve", &Solver::solve,
              bp::args("workspace", "results", "x0", "lams0"))

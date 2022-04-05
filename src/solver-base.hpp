@@ -118,9 +118,16 @@ namespace lienlp
       merit_fun.setPenalty(mu_eq);
     }
 
+    /// @brief    Add a callback to the solver instance.
     inline void registerCallback(const CallbackPtr& cb)
     {
       callbacks_.push_back(cb);
+    }
+
+    /// @brief    Remove all callbacks from the instance.
+    inline void clearCallbacks()
+    {
+      callbacks_.clear();
     }
 
     ConvergenceFlag solve(Workspace& workspace,
