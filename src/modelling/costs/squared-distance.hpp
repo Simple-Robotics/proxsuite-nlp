@@ -5,7 +5,8 @@
 #include "lienlp/modelling/costs/quadratic-residual.hpp"
 #include "lienlp/modelling/residuals/state-residual.hpp"
 
-namespace lienlp{
+namespace lienlp
+{
 
   /** @brief    Weighted quadratic distance \f$\frac{1}{2}\|x\ominus \bar{x}\|^2_W\f$ on a manifold.
    * 
