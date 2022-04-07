@@ -85,7 +85,7 @@ namespace lienlp
       const int ndxbase = m_base.ndx();
       J_.resize(ndx(), ndx());
       J_.setZero();
-      m_base.template Jdifference(
+      m_base.Jdifference(
         getBasePoint(x0), getBasePoint(x1),
         getBaseJacobian(J_),
         arg);
