@@ -36,6 +36,7 @@ message(STATUS "Python sources: ${PY_SOURCES}")
 
 file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
+     ${CMAKE_CURRENT_BINARY_DIR}/examples
      )
 
 foreach(pyheader ${PY_HEADERS})
@@ -61,9 +62,9 @@ endforeach()
 
 foreach(pyfile ${PY_EXAMPLES})
 	get_filename_component(pyfile_name ${pyfile} NAME)
-	configure_file(
-		${pyfile}
-		${CMAKE_CURRENT_BINARY_DIR}/examples/${pyfile_name}
-		COPYONLY
-		)
+     execute_process(
+          COMMAND ${CMAKE_COMMAND} -E create_symlink
+          ${pyfile}
+          ${CMAKE_CURRENT_BINARY_DIR}/examples/${pyfile_name}
+     )
 endforeach()
