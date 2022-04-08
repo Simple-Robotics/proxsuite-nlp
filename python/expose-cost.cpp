@@ -20,7 +20,6 @@ namespace python
       CostWrapper(const int nx, const int ndx) : context::Cost_t(nx, ndx) {}
 
       context::Scalar call(const ConstVectorRef& x) const { return get_override("call")(x); }
-
       void computeGradient(const ConstVectorRef& x, VectorRef out) const { get_override("computeGradient")(x, out); }
       void computeHessian (const ConstVectorRef& x, MatrixRef out) const { get_override("computeHessian") (x, out); }
 
@@ -41,19 +40,22 @@ namespace python
 
     void(Cost_t::*compGrad1)(const ConstVectorRef&, VectorRef) const = &Cost_t::computeGradient;
     void(Cost_t::*compHess1)(const ConstVectorRef&, MatrixRef) const = &Cost_t::computeHessian;
+    VectorXs(Cost_t::*compGrad2)(const ConstVectorRef&) const = &Cost_t::computeGradient;
 
     bp::class_<internal::CostWrapper, bp::bases<context::C2Function_t>, boost::noncopyable>(
       "CostFunctionBase", bp::init<int,int>()
     )
-      .def("__call__", bp::pure_virtual(&Cost_t::call), bp::args("self", "x"))
-      .def("computeGradient", bp::pure_virtual(compGrad1), bp::args("self", "x"))
-      .def("computeHessian",  bp::pure_virtual(compHess1), bp::args("self", "x"))
+      .def("call", bp::pure_virtual(&Cost_t::call), bp::args("self", "x"))
+      .def("computeGradient", bp::pure_virtual(compGrad1), bp::args("self", "x", "gout"))
+      .def("computeGradient", compGrad2, bp::args("self", "x"))
+      .def("computeHessian",  bp::pure_virtual(compHess1), bp::args("self", "x", "Hout"))
       ;
 
     bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost_t>>(
       "CostFromFunction",
       "Wrap a scalar-values C2 function into a cost function.",
-      bp::init<const context::C2Function_t&>(bp::args("self", "func")))
+      bp::init<const context::C2Function_t&>(bp::args("self", "func"))
+    )
       ;
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(

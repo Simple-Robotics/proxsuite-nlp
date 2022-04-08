@@ -15,9 +15,10 @@ namespace python
 
       FunctionWrap(const int nx, const int ndx, const int nr) : context::Function_t(nx, ndx, nr) {}
 
-      ReturnType operator()(const ConstVectorRef& x) const override
+      ReturnType operator()(const ConstVectorRef& x) const
       {
-        return get_override("operator()")(x);
+        bp::override f = get_override("__call__");
+        return f(x);
       }
     };
 
@@ -25,8 +26,17 @@ namespace python
     {
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
+      C1FunctionWrap(const int nx, const int ndx, const int nr) : context::C1Function_t(nx, ndx, nr) {}
+
+      ReturnType operator()(const ConstVectorRef& x) const
+      {
+        bp::override f = get_override("__call__");
+        return f(x);
+      }
+
       void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
       {
+        Jout.resize(this->nr(), this->ndx());
         get_override("computeJacobian")(x, Jout);
       }
     };
@@ -35,9 +45,35 @@ namespace python
     {
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
-      void computeVectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+      C2FunctionWrap(const int nx, const int ndx, const int nr) : context::C2Function_t(nx, ndx, nr) {}
+
+      ReturnType operator()(const ConstVectorRef& x) const
       {
-        get_override("vectorHessianProduct")(x, v, Hout);
+        bp::override f = get_override("__call__");
+        return f(x);
+      }
+
+      void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+      {
+        Jout.resize(this->nr(), this->ndx());
+        get_override("computeJacobian")(x, Jout);
+      }
+
+      void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+      {
+        Hout.resize(this->ndx(), this->ndx());
+        if (bp::override f = this->get_override("vectorHessianProduct"))
+        {
+          f(x, v, Hout);
+          return;
+        } else {
+          return context::C2Function_t::vectorHessianProduct(x, v, Hout);
+        }
+      }
+
+      void default_vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+      {
+        return context::C2Function_t::vectorHessianProduct(x, v, Hout);
       }
     };
 
@@ -50,10 +86,12 @@ namespace python
     using context::C1Function_t;
     using context::C2Function_t;
 
-    bp::class_<internal::FunctionWrap, boost::noncopyable>("BaseFunction", "Base class for functions.", bp::init<int, int, int>())
+    bp::class_<internal::FunctionWrap,
+               boost::noncopyable
+               >("BaseFunction", "Base class for functions.", bp::init<int, int, int>())
       .def("__call__", bp::pure_virtual(&Function_t::operator()), bp::args("self", "z"), "Call the function.")
       .add_property("nx", &Function_t::nx, "Input dimension")
-      .add_property("ndx", &Function_t::ndx, "Input tangent space dimension.")
+      .add_property("ndx",&Function_t::ndx,"Input tangent space dimension.")
       .add_property("nr", &Function_t::nr, "Function codimension.")
       ;
 
@@ -62,22 +100,21 @@ namespace python
 
     bp::class_<internal::C1FunctionWrap,
                bp::bases<Function_t>,
-               boost::noncopyable>("C1Function", "Base class for differentiable functions", bp::no_init)
+               boost::noncopyable
+               >("C1Function", "Base class for differentiable functions", bp::init<int, int, int>())
       .def("computeJacobian", bp::pure_virtual(compJac1), bp::args("self", "x", "Jout"))
-      .def("computeJacobian", compJac2, bp::args("self", "x"))
-      .def("to_base", &C1Function_t::toBase, "Downcast to the base function type.",
-           bp::return_internal_reference<>())
+      .def("get_jacobian", compJac2, bp::args("self", "x"), "Compute and return Jacobian.")
       ;
 
     context::VHPFunc_t C2Function_t::*compHess1 = &C2Function_t::vectorHessianProduct;
+    context::VHPFuncRet_t C2Function_t::*compHess2 = &C2Function_t::vectorHessianProduct;
 
     bp::class_<internal::C2FunctionWrap,
                bp::bases<C1Function_t>,
                boost::noncopyable
-               >("C2Function", "Base class for twice-differentiable functions.", bp::no_init)
-      .def("vectorHessianProduct", bp::pure_virtual(compHess1), bp::args("self", "x", "v", "Hout"))
-      .def("to_c1_function", &C2Function_t::toC1, "Downcast to the C1 function type.",
-           bp::return_internal_reference<>())
+               >("C2Function", "Base class for twice-differentiable functions.", bp::init<int,int,int>())
+      .def("vectorHessianProduct", compHess1, &internal::C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))
+      .def("get_vhp", compHess2, bp::args("self", "x", "v"), "Compute and return the vector-Hessian product.")
       ;
   }
 

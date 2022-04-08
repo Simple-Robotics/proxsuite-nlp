@@ -10,9 +10,9 @@ namespace lienlp
     struct CallbackWrapper : helpers::callback<context::Scalar>,
                              bp::wrapper<helpers::callback<context::Scalar>>
     {
-      void call()
+      void call(const context::Workspace_t& w, const context::Result_t& r)
       {
-        this->get_override("call")();
+        this->get_override("call")(w, r);
       }
     };
 
