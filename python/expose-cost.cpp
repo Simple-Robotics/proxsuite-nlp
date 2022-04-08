@@ -10,25 +10,50 @@ namespace lienlp
 {
 namespace python
 {
+  namespace internal
+  {
+    
+    struct CostWrapper : context::Cost_t, bp::wrapper<context::Cost_t>
+    {
+      LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
+
+      CostWrapper(const int nx, const int ndx) : context::Cost_t(nx, ndx) {}
+
+      context::Scalar call(const ConstVectorRef& x) const { return get_override("call")(x); }
+
+      void computeGradient(const ConstVectorRef& x, VectorRef out) const { get_override("computeGradient")(x, out); }
+      void computeHessian (const ConstVectorRef& x, MatrixRef out) const { get_override("computeHessian") (x, out); }
+
+    };
+  } // namespace internal
+  
 
   void exposeCost()
   {
     using context::Cost_t;
     using context::VectorXs;
     using context::MatrixXs;
-    using context::ConstMatrixRef;
+    using context::VectorRef;
     using context::ConstVectorRef;
+    using context::MatrixRef;
+    using context::ConstMatrixRef;
     using context::Manifold;
 
-    VectorXs (Cost_t::*compGrad1)(const ConstVectorRef&) const = &Cost_t::computeGradient;
-    MatrixXs (Cost_t::*compHess1)(const ConstVectorRef&) const = &Cost_t::computeHessian;
+    void(Cost_t::*compGrad1)(const ConstVectorRef&, VectorRef) const = &Cost_t::computeGradient;
+    void(Cost_t::*compHess1)(const ConstVectorRef&, MatrixRef) const = &Cost_t::computeHessian;
 
-    bp::class_<Cost_t, shared_ptr<Cost_t>, bp::bases<context::C2Function_t>, boost::noncopyable>(
-      "CostFunctionBase", bp::no_init
+    bp::class_<internal::CostWrapper, bp::bases<context::C2Function_t>, boost::noncopyable>(
+      "CostFunctionBase", bp::init<int,int>()
     )
-      .def("__call__", &Cost_t::call, bp::args("self", "x"))
-      .def("computeGradient", compGrad1, bp::args("self", "x"))
-      .def("computeHessian", compHess1, bp::args("self", "x"))
+      .def("__call__", bp::pure_virtual(&Cost_t::call), bp::args("self", "x"))
+      .def("computeGradient", bp::pure_virtual(compGrad1), bp::args("self", "x"))
+      .def("computeHessian",  bp::pure_virtual(compHess1), bp::args("self", "x"))
+      ;
+
+    bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost_t>>(
+      "CostFromFunction",
+      "Wrap a scalar-values C2 function into a cost function.",
+      bp::init<const context::C2Function_t&>(bp::args("self", "func")))
       ;
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(
