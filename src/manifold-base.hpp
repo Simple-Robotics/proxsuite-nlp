@@ -32,6 +32,8 @@ namespace lienlp
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 
 
+    virtual ~ManifoldAbstractTpl() = default;
+
     /// @brief    Get manifold representation dimension.
     virtual int nx() const = 0;
     /// @brief    Get manifold tangent space dimension.
