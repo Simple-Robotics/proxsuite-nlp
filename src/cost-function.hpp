@@ -8,6 +8,8 @@
 
 namespace lienlp
 {
+  template<typename Scalar>
+  struct func_to_cost;
 
   /** @brief    Base class for differentiable cost functions.
    *  @remark   Cost functions derive from differentiable functions,
@@ -23,13 +25,16 @@ namespace lienlp
     using Base = C2Function<Scalar>;
 
     CostFunctionBase(const int nx, const int ndx) : Base(nx, ndx, 1) {}
+    CostFunctionBase(const CostFunctionBase<Scalar>&) = default;
 
     /* Define cost function-specific API */
 
     /// @brief Evaluate the cost function.
     virtual Scalar call(const ConstVectorRef& x) const = 0;
     virtual void computeGradient(const ConstVectorRef& x, VectorRef out) const = 0;
-    virtual void computeHessian(const ConstVectorRef& x, MatrixRef out) const = 0;
+    virtual void computeHessian (const ConstVectorRef& x, MatrixRef out) const = 0;
+
+    /* Allocated versions */
 
     VectorXs computeGradient(const ConstVectorRef& x) const
     {
@@ -45,7 +50,7 @@ namespace lienlp
       return out;
     }
 
-    /* Defer parent class funcs to cost specific stuff */
+    /* Implement C2Function interface. */
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -65,6 +70,50 @@ namespace lienlp
     }
 
     virtual ~CostFunctionBase<Scalar>() = default;
+
+    /// @brief    Conversion from C2Function.
+    CostFunctionBase(const C2Function<Scalar>& func)
+      : CostFunctionBase<Scalar>(func_to_cost<Scalar>(func)) {}
+  };
+
+  template<typename _Scalar>
+  struct func_to_cost : CostFunctionBase<_Scalar>
+  {
+  private:
+    const C2Function<_Scalar>& underlying_;
+  public:
+    using Scalar = _Scalar;
+    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+
+    /** @brief    Constructor.
+     *  @details  This defines an implicit conversion from the C2Function type.
+     */
+    func_to_cost(const C2Function<Scalar>& func)
+      : CostFunctionBase<Scalar>(func.nx(), func.ndx())
+      , underlying_(func)
+      {
+        assert(func.nr() == 1);
+      }
+
+    const C2Function<Scalar>& underlying() const
+    { return underlying_; }
+
+
+    inline Scalar call(const ConstVectorRef& x) const
+    {
+      return underlying_(x)(0);
+    }
+
+    void computeGradient(const ConstVectorRef& x, VectorRef out) const
+    {
+      underlying_.computeJacobian(x, out.transpose());
+    }
+
+    void computeHessian(const ConstVectorRef& x, MatrixRef Hout) const
+    {
+      VectorXs v = VectorXs::Ones(1);
+      underlying_.vectorHessianProduct(x, v, Hout);
+    }
 
   };
 
