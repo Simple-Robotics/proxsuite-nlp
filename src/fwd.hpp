@@ -74,7 +74,7 @@ template<typename Scalar>
 struct SWorkspace;
 
 template<typename Scalar>
-struct SolverTpl;
+class SolverTpl;
 
 /// Shorthand for the infinity norm
 /// code from proxqp
