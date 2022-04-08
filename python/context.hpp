@@ -30,11 +30,13 @@ namespace python
     using Solver = SolverTpl<Scalar>;
 
     using VecFunc_t = void(const ConstVectorRef&, VectorRef) const;
-    using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;
     using MatFunc_t = void(const ConstVectorRef&, MatrixRef) const;
-    using MatFuncRet_t = MatrixXs(const ConstVectorRef&) const;
-    /// Signature of no-allocation vector-hessian product.
     using VHPFunc_t = void(const ConstVectorRef&, const ConstVectorRef&, MatrixRef) const;
+
+    // allocated func signatures
+    using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;
+    using MatFuncRet_t = MatrixXs(const ConstVectorRef&) const;
+    using VHPFuncRet_t = MatrixXs(const ConstVectorRef&, const ConstVectorRef&) const;
 
 
   } // namespace context

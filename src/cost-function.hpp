@@ -99,7 +99,7 @@ namespace lienlp
     { return underlying_; }
 
 
-    inline Scalar call(const ConstVectorRef& x) const
+    Scalar call(const ConstVectorRef& x) const
     {
       return underlying_(x)(0);
     }

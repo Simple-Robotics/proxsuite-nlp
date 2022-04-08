@@ -83,20 +83,20 @@ namespace lienlp
     std::vector<CallbackPtr> callbacks_;
 
     SolverTpl(const M& man,
-           shared_ptr<Problem>& prob,
-           const Scalar tol=1e-6,
-           const Scalar mu_eq_init=1e-2,
-           const Scalar rho_init=0.,
-           const bool verbose=true,
-           const Scalar mu_factor=0.1,
-           const Scalar mu_lower_=1e-9,
-           const Scalar prim_alpha=0.1,
-           const Scalar prim_beta=0.9,
-           const Scalar dual_alpha=1.,
-           const Scalar dual_beta=1.,
-           const Scalar alpha_min=1e-7,
-           const Scalar armijo_c1=1e-4
-           )
+              shared_ptr<Problem>& prob,
+              const Scalar tol=1e-6,
+              const Scalar mu_eq_init=1e-2,
+              const Scalar rho_init=0.,
+              const bool verbose=true,
+              const Scalar mu_factor=0.1,
+              const Scalar mu_lower_=1e-9,
+              const Scalar prim_alpha=0.1,
+              const Scalar prim_beta=0.9,
+              const Scalar dual_alpha=1.,
+              const Scalar dual_beta=1.,
+              const Scalar alpha_min=1e-7,
+              const Scalar armijo_c1=1e-4
+              )
       : manifold(man),
         problem(prob),
         merit_fun(problem),
@@ -131,9 +131,9 @@ namespace lienlp
     }
 
     ConvergenceFlag solve(Workspace& workspace,
-                        Results& results,
-                        const VectorXs& x0,
-                        const VectorOfVectors& lams0)
+                          Results& results,
+                          const VectorXs& x0,
+                          const VectorOfVectors& lams0)
     {
       // init variables
       results.xOpt = x0;
