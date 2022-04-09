@@ -17,16 +17,16 @@ namespace lienlp
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = CostFunctionBase<Scalar>;
-    using BaseRef = std::reference_wrapper<const Base>;
+    using BasePtr = Base const*;
 
-    std::vector<BaseRef> m_components; /// component sub-costs
+    std::vector<BasePtr> m_components; /// component sub-costs
     std::vector<Scalar> m_weights; /// cost component weights
 
     CostSum(int nx, int ndx) : Base(nx, ndx) {}
 
     /// Constructor with a predefined vector of components.
     CostSum(int nx, int ndx,
-            const std::vector<BaseRef>& comps,
+            const std::vector<BasePtr>& comps,
             const std::vector<Scalar>& weights)
             : Base(nx, ndx)
             , m_components(comps)
@@ -45,7 +45,7 @@ namespace lienlp
       Scalar result_ = 0.;
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        result_ += m_weights[i] * m_components[i].get().call(x);
+        result_ += m_weights[i] * m_components[i]->call(x);
       }
       return result_;
     }
@@ -55,7 +55,7 @@ namespace lienlp
       out.setZero();
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        out.noalias() = out + m_weights[i] * m_components[i].get().computeGradient(x);
+        out.noalias() = out + m_weights[i] * m_components[i]->computeGradient(x);
       }
     }
 
@@ -64,7 +64,7 @@ namespace lienlp
       out.setZero();
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        out.noalias() = out + m_weights[i] * m_components[i].get().computeHessian(x);
+        out.noalias() = out + m_weights[i] * m_components[i]->computeHessian(x);
       }
     }
 
@@ -72,7 +72,7 @@ namespace lienlp
 
     void addComponent(const Base& comp, const Scalar w = 1.)
     {
-      m_components.push_back(std::cref(comp));
+      m_components.push_back(&comp);
       m_weights.push_back(w);
     }
 

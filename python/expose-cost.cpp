@@ -71,7 +71,7 @@ namespace python
       "Sum of cost functions.",
       bp::init<int,
                int,
-               const std::vector<CostSum_t::BaseRef>&,
+               const std::vector<CostSum_t::BasePtr>&,
                const std::vector<context::Scalar>&
                >(bp::args("nx", "ndx", "components", "weights"))
     )

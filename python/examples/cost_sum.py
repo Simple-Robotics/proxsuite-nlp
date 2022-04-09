@@ -8,13 +8,16 @@ from lienlp.costs import CostSum, QuadraticDistanceCost
 space = manifolds.SE2()
 p0 = space.neutral()
 p1 = space.rand()
+p2 = space.rand()
 print("p0:", p0)
 print("p1:", p1)
+print("p2:", p2)
 
 weights = np.eye(space.ndx)
 
 dist_fun0 = QuadraticDistanceCost(space, p0, weights)
 dist_fun1 = QuadraticDistanceCost(space, p1, weights)
+dist_fun2 = QuadraticDistanceCost(space, p2, weights)
 
 Hg0 = dist_fun0.computeHessian(p0)
 Hg1 = dist_fun1.computeHessian(p0)
@@ -45,6 +48,16 @@ def test_cost_sum():
     print("after *= :", sum_2)
     Hs_2 = sum_2.computeHessian(p0)
     assert np.allclose(Hs_2, .5 * (Hg0 + Hg1)), "Should be\n{}".format(0.5 * (Hg0 + Hg1))
+
+    sum_3 = sum_2 + 0.5 * dist_fun2
+    print("sum3 init:", sum_3)
+    prob = lienlp.Problem(sum_2)
+    ws = lienlp.Workspace(space.nx, space.ndx, prob)
+    rs = lienlp.Results(space.nx, prob)
+    solver = lienlp.Solver(space, prob, mu_init=0.1)
+    flag = solver.solve(ws, rs, p0, [])
+    print("Flag:", flag)
+    print("xopt:", rs.xopt)
 
 
 if __name__ == '__main__':
