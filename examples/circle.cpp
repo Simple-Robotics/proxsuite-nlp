@@ -63,13 +63,18 @@ int main()
   w2.setIdentity();
   w2 *= 2;
 
-  QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
+  const QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
   using Ineq_t = NegativeOrthant<double>;
   // Problem::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
   fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
   fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
+
+  /// Cast scalar cost to func
+  const C2Function<double>& resfunc = residualCircle;
+  const func_to_cost<double> recast_to_cost(resfunc);
+
 
   std::vector<Problem::ConstraintPtr> cstrs;
   cstrs.push_back(std::make_shared<Ineq_t>(cstr1));
