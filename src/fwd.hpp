@@ -23,7 +23,9 @@ struct math_types
   using Scalar = _Scalar;
   using VectorXs = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
   using MatrixXs = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+  using VectorMap = Eigen::Map<VectorXs>;
   using VectorOfVectors = std::vector<VectorXs>;
+  using VectorOfVecMap = std::vector<VectorMap>;
   using VectorRef = Eigen::Ref<VectorXs>;
   using MatrixRef = Eigen::Ref<MatrixXs>;
   using ConstVectorRef = Eigen::Ref<const VectorXs>;

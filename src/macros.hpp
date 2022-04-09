@@ -4,8 +4,10 @@
 /// because we don't CRTP them and virtual members funcs can't be templated.
 #define LIENLP_DYNAMIC_TYPEDEFS(Scalar)                       \
   using VectorXs = typename math_types<Scalar>::VectorXs;     \
+  using VectorMap = typename math_types<Scalar>::VectorMap;   \
   using MatrixXs = typename math_types<Scalar>::MatrixXs;     \
   using VectorOfVectors = typename math_types<Scalar>::VectorOfVectors; \
+  using VectorOfVecMap = typename math_types<Scalar>::VectorOfVecMap;   \
   using VectorRef = typename math_types<Scalar>::VectorRef;   \
   using MatrixRef = typename math_types<Scalar>::MatrixRef;   \
   using ConstVectorRef = typename math_types<Scalar>::ConstVectorRef;   \
