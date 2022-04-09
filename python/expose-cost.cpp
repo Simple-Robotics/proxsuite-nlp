@@ -1,10 +1,12 @@
 
 #include "lienlp/python/fwd.hpp"
 #include "lienlp/cost-function.hpp"
+#include "lienlp/cost-sum.hpp"
 
 #include "lienlp/modelling/costs/quadratic-residual.hpp"
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
+#include "boost/python/operators.hpp"
 
 namespace lienlp
 {
@@ -41,14 +43,19 @@ namespace python
     void(Cost_t::*compGrad1)(const ConstVectorRef&, VectorRef) const = &Cost_t::computeGradient;
     void(Cost_t::*compHess1)(const ConstVectorRef&, MatrixRef) const = &Cost_t::computeHessian;
     VectorXs(Cost_t::*compGrad2)(const ConstVectorRef&) const = &Cost_t::computeGradient;
+    MatrixXs(Cost_t::*compHess2)(const ConstVectorRef&) const = &Cost_t::computeHessian;
 
     bp::class_<internal::CostWrapper, bp::bases<context::C2Function_t>, boost::noncopyable>(
       "CostFunctionBase", bp::init<int,int>()
     )
       .def("call", bp::pure_virtual(&Cost_t::call), bp::args("self", "x"))
       .def("computeGradient", bp::pure_virtual(compGrad1), bp::args("self", "x", "gout"))
-      .def("computeGradient", compGrad2, bp::args("self", "x"))
+      .def("computeGradient", compGrad2, bp::args("self", "x"), "Compute and return the gradient.")
       .def("computeHessian",  bp::pure_virtual(compHess1), bp::args("self", "x", "Hout"))
+      .def("computeHessian",  compHess2, bp::args("self", "x"), "Compute and return the Hessian.")
+      // define non-member operators
+      .def(bp::self + bp::self)   // see cost_sum.hpp / returns CostSum<Scalar>
+      .def(context::Scalar() * bp::self)   // see cost_sum.hpp / returns CostSum<Scalar>
       ;
 
     bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost_t>>(
@@ -57,6 +64,36 @@ namespace python
       bp::init<const context::C2Function_t&>(bp::args("self", "func"))
     )
       ;
+
+    using CostSum_t = CostSum<context::Scalar>;
+    bp::class_<CostSum_t, bp::bases<Cost_t>>(
+      "CostSum",
+      "Sum of cost functions.",
+      bp::init<int,
+               int,
+               const std::vector<CostSum_t::BaseRef>&,
+               const std::vector<context::Scalar>&
+               >(bp::args("nx", "ndx", "components", "weights"))
+    )
+      .def(bp::init<int, int>(bp::args("nx", "ndx")))
+      .add_property("num_components", &CostSum_t::numComponents, "Number of components.")
+      .def_readonly("weights", &CostSum_t::m_weights)
+      .def("add_component", &CostSum_t::addComponent,
+           ((bp::arg("self"), bp::arg("comp"),
+             bp::arg("w") = 1.)),
+           "Add a component to the cost."
+           )
+      // expose inplace operators
+      .def(bp::self += bp::self)
+      .def(bp::self += internal::CostWrapper(0, 0))  // declval doesn't work in context, use non-abstract wrapper
+      .def(bp::self *= context::Scalar())
+      // expose operator overloads 
+      .def(context::Scalar() * bp::self)
+      // printing
+      .def(bp::self_ns::str(bp::self))
+      ;
+
+    /* Expose specific cost functions */
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
