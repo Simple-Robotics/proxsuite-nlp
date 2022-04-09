@@ -7,7 +7,8 @@ import lienlp
 import numpy as np
 import casadi as cas
 
-from lienlp.constraints import NegativeOrthant
+from lienlp.residuals import LinearFunction
+from lienlp.constraints import EqualityConstraint, NegativeOrthant
 from lienlp.manifolds import EuclideanSpace
 
 
@@ -36,13 +37,12 @@ assert np.allclose(fun1(x0), np.log(np.abs(x0 - 1.)))
 # 2: Overload a twice-differentiable function
 
 
-class DiffFunc(lienlp.C2Function):
+class NegEntropyFunc(lienlp.C2Function):
     def __init__(self, nx, ndx):
         x = cas.SX.sym("x", nx)
         dx = cas.SX.sym("dx", ndx)
 
         x_dx = x + dx
-        x_dx = cas.sqrt(x_dx ** 2 + 1e-10)
         self.expr = cas.sum1(x_dx * cas.log(x_dx))
         self.Jexpr = cas.jacobian(self.expr, dx)
 
@@ -68,12 +68,15 @@ class DiffFunc(lienlp.C2Function):
         H[:] = np.asarray(self.Hfun(x, v, self._zer))
 
 
-fun2 = DiffFunc(nx, nx)
+fun2 = NegEntropyFunc(nx, nx)
 nr = 1
 space = EuclideanSpace(nx)
 x1 = space.rand()
-cstr = NegativeOrthant(fun2)
 
+sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.]))
+cstr = EqualityConstraint(sum_to_one_res)
+
+x0 = np.array([1., 2.])
 print("Diff func:")
 print("x0:  ", x0)
 print("eval:", fun2(x0))
@@ -87,7 +90,6 @@ fun2.vectorHessianProduct(x0, v0, H_)
 print(f"Hessian: \n{H_}")
 print(fun2.nx, fun2.ndx, fun2.nr)
 
-cs2 = lienlp.costs.QuadraticDistanceCost(space, x0, np.eye(nx))
 cs = lienlp.costs.CostFromFunction(fun2)
 grad = np.zeros(nx)
 cH = np.zeros((nx, nx))
@@ -97,24 +99,34 @@ def plot_fun():
     import matplotlib.pyplot as plt
 
     Ngx = 31
-    xg = np.linspace(-1., 2., Ngx)
+    xg = np.linspace(0., 1., Ngx)
+    dx = xg[1] - xg[0]
     grid = np.stack(np.meshgrid(xg, xg))
 
     zvals = np.stack([fun2(u) for u in grid.swapaxes(0, -1).reshape(-1, 2)])
     zvals = zvals.reshape(Ngx, Ngx)
-    cs_ = plt.contour(grid[0], grid[1], zvals, levels=20)
+    cs_ = plt.contourf(grid[0], grid[1], zvals, levels=40, alpha=0.5)
     plt.colorbar(cs_)
-    plt.show()
     print("shape:", zvals.shape)
+
+    zv2 = np.stack([sum_to_one_res(u) for u in grid.swapaxes(0, -1).reshape(-1, 2)])
+    zv2 = zv2.reshape(Ngx, Ngx)
+    cs2_ = plt.contour(grid[0], grid[1], zv2, levels=[0.], colors='white')
+    plt.title("Constrained problem")
+    plt.xlim(left=dx)
+    plt.ylim(bottom=dx)
+    plt.show()
 
 
 plot_fun()
 
-prob = lienlp.Problem(cs)
+# prob = lienlp.Problem(cs)
+prob = lienlp.Problem(cs, [cstr])
 ws = lienlp.Workspace(nx, nx, prob)
 rs = lienlp.Results(nx, prob)
 
-solver = lienlp.Solver(space, prob, rho_init=10.)
+solver = lienlp.Solver(space, prob)
+x0 = np.array([2., 2.])
 flag = solver.solve(ws, rs, x0, rs.lamsopt)
 
 print("Flag:", flag)

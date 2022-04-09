@@ -13,12 +13,21 @@ A = np.random.randn(nres, nx)
 b = np.random.randn(nres)
 x0 = np.linalg.lstsq(A, -b)[0]
 x1 = np.random.randn(nx) * 3
+v0 = np.random.randn(nres) * 2
 
 resdl = LinearFunction(A, b)
+assert resdl.nx == nx
+assert resdl.ndx == nx
+assert resdl.nr == nres
 
 print("x0:", x0, "resdl(x0):", resdl(x0))
 print("x1:", x1, "resdl(x1):", resdl(x1))
-assert np.allclose(resdl.computeJacobian(x0), A)
+J1 = np.zeros((nres, nx))
+J2 = np.zeros((nres, nx))
+resdl.computeJacobian(x0, J1)
+print(A)
+print(J1)
+assert np.allclose(J1, A)
 assert np.allclose(resdl(x0), 0.)
 assert np.allclose(resdl(np.zeros_like(x0)), b)
 
@@ -45,7 +54,6 @@ problem = lienlp.Problem(cost_)
 print("Problem:", problem)
 print("Target :", x_target)
 problem = lienlp.Problem(cost_, [cstr1])
-# problem = lienlp.Problem(cost_, [cstr2])
 
 
 results = lienlp.Results(nx, problem)
