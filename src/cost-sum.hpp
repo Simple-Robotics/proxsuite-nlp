@@ -152,7 +152,7 @@ namespace lienlp
   }
 
   template<typename Scalar>
-  CostSum<Scalar>&& operator*(const Scalar& left, CostSum<Scalar>&& right)
+  CostSum<Scalar>&& operator*(Scalar&& left, CostSum<Scalar>&& right)
   {
     right *= left;
     return std::move(right);

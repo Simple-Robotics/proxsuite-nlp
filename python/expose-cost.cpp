@@ -88,6 +88,7 @@ namespace python
       .def(bp::self += internal::CostWrapper(0, 0))  // declval doesn't work in context, use non-abstract wrapper
       .def(bp::self *= context::Scalar())
       // expose operator overloads 
+      .def(bp::self + bp::self)
       .def(context::Scalar() * bp::self)
       // printing
       .def(bp::self_ns::str(bp::self))
