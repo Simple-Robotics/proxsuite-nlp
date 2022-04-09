@@ -8,6 +8,7 @@ Copyright (C) 2022 LAAS-CNRS / Inria
 ## Building from source
 
 Clone this repo using
+
 ```bash
 git clone [url-to-repo] --recursive
 ```
@@ -15,11 +16,12 @@ git clone [url-to-repo] --recursive
 **Dependencies**:
 
 * CMake (with the [JRL CMake modules](https://github.com/jrl-umi3218/jrl-cmakemodules))
-* Eigenpy ([GitHub](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/eigenpy))
+* Eigenpy >=2.7.1 ([GitHub](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/eigenpy))
 * Pinocchio 3
 * [fmtlib](https://github.com/fmtlib/fmt)
 
 Building:
+
 ```bash
 cmake -S . -B build
 cmake --build build/
