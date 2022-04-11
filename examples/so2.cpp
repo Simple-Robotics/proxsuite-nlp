@@ -9,11 +9,7 @@
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
-
-
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-#include <Eigen/Core>
+#include "example-base.hpp"
 
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
@@ -39,16 +35,17 @@ int main()
 
   fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
-  Manifold::TangentVectorType d;
+  const int ndx = space.ndx();
+  Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
-  Manifold::JacobianType J0, J1;
+  Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Manifold::JacobianType weights;
+  Manifold::JacobianType weights(ndx, ndx);
   weights.setIdentity();
 
   ManifoldDifferenceToPoint<double> residual(space, p0);
@@ -71,7 +68,7 @@ int main()
 
   /// Test out merit functions
 
-  Problem::VectorXs grad(space.ndx());
+  Problem::VectorXs grad(ndx);
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
