@@ -5,6 +5,9 @@
 
 #include "lienlp/function-base.hpp"
 
+#include <boost/core/demangle.hpp>
+#include <ostream>
+
 
 namespace lienlp
 {
@@ -74,6 +77,13 @@ namespace lienlp
     /// @brief    Conversion from C2FunctionTpl.
     CostFunctionBaseTpl(const C2FunctionTpl<Scalar>& func)
       : CostFunctionBaseTpl<Scalar>(func_to_cost<Scalar>(func)) {}
+
+    friend std::ostream& operator<<(std::ostream& ostr, const CostFunctionBaseTpl<Scalar>& cost)
+    {
+      const std::string name = boost::core::demangle(typeid(cost).name());
+      ostr << name;
+      return ostr;
+    }
   };
 
   template<typename _Scalar>

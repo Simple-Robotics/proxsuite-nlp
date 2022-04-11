@@ -1,10 +1,7 @@
 #pragma once
 
-
 #include "lienlp/macros.hpp"
 #include "lienlp/cost-function.hpp"
-
-#include <ostream>
 
 
 namespace lienlp
@@ -106,7 +103,7 @@ namespace lienlp
     }
 
     // printing
-    friend std::ostream& operator<<(std::ostream &ostr, const CostSum<Scalar>& cost)
+    friend std::ostream& operator<<(std::ostream& ostr, const CostSum<Scalar>& cost)
     {
       const std::size_t nc = cost.numComponents();
       ostr << "CostSum(num_components=" << nc;
