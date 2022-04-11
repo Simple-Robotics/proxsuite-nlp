@@ -17,26 +17,27 @@ namespace python
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    using Problem_t = ProblemTpl<Scalar>;
-    using Result_t = SResults<Scalar>;
-    using Workspace_t = SWorkspace<Scalar>;
-    using Cost_t = CostFunctionBase<Scalar>;
-    using Constraint_t = ConstraintSetBase<Scalar>;
-    using Function_t = BaseFunction<Scalar>;
-    using C1Function_t = C1Function<Scalar>;
-    using C2Function_t = C2Function<Scalar>;
+    using Problem = ProblemTpl<Scalar>;
+    using Result = SResults<Scalar>;
+    using Workspace = SWorkspace<Scalar>;
+    using Cost = CostFunctionBase<Scalar>;
+    using Constraint = ConstraintSetBase<Scalar>;
+    using Function = BaseFunctionTpl<Scalar>;
+    using C1Function = C1FunctionTpl<Scalar>;
+    using C2Function = C2FunctionTpl<Scalar>;
 
     using Manifold = ManifoldAbstractTpl<Scalar>;
     using Solver = SolverTpl<Scalar>;
 
-    using VecFunc_t = void(const ConstVectorRef&, VectorRef) const;
-    using MatFunc_t = void(const ConstVectorRef&, MatrixRef) const;
-    using VHPFunc_t = void(const ConstVectorRef&, const ConstVectorRef&, MatrixRef) const;
+    // func pointer signatures
+    using VecFuncType = void(const ConstVectorRef&, VectorRef) const;
+    using MatFuncType = void(const ConstVectorRef&, MatrixRef) const;
+    using VHPFuncType = void(const ConstVectorRef&, const ConstVectorRef&, MatrixRef) const;
 
     // allocated func signatures
-    using VecFuncRet_t = VectorXs(const ConstVectorRef&) const;
-    using MatFuncRet_t = MatrixXs(const ConstVectorRef&) const;
-    using VHPFuncRet_t = MatrixXs(const ConstVectorRef&, const ConstVectorRef&) const;
+    using VecFuncRetType = VectorXs(const ConstVectorRef&) const;
+    using MatFuncRetType = MatrixXs(const ConstVectorRef&) const;
+    using VHPFuncRetType = MatrixXs(const ConstVectorRef&, const ConstVectorRef&) const;
 
 
   } // namespace context

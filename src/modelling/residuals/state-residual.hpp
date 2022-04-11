@@ -16,13 +16,13 @@ namespace lienlp
    * This is templated on the manifold.
    */
   template<typename _Scalar>
-  struct ManifoldDifferenceToPoint : C2Function<_Scalar>
+  struct ManifoldDifferenceToPoint : C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
     using Base::operator();
     using Base::computeJacobian;
     using M = ManifoldAbstractTpl<Scalar>;

@@ -8,12 +8,12 @@ namespace python
 {
   namespace internal
   {
-    struct FunctionWrap : context::Function_t, bp::wrapper<context::Function_t>
+    struct FunctionWrap : context::Function, bp::wrapper<context::Function>
     {
     public:
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
-      FunctionWrap(const int nx, const int ndx, const int nr) : context::Function_t(nx, ndx, nr) {}
+      FunctionWrap(const int nx, const int ndx, const int nr) : context::Function(nx, ndx, nr) {}
 
       ReturnType operator()(const ConstVectorRef& x) const
       {
@@ -22,11 +22,11 @@ namespace python
       }
     };
 
-    struct C1FunctionWrap : context::C1Function_t, bp::wrapper<context::C1Function_t>
+    struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function>
     {
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
-      C1FunctionWrap(const int nx, const int ndx, const int nr) : context::C1Function_t(nx, ndx, nr) {}
+      C1FunctionWrap(const int nx, const int ndx, const int nr) : context::C1Function(nx, ndx, nr) {}
 
       ReturnType operator()(const ConstVectorRef& x) const
       {
@@ -41,11 +41,11 @@ namespace python
       }
     };
 
-    struct C2FunctionWrap : context::C2Function_t, bp::wrapper<context::C2Function_t>
+    struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function>
     {
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
-      C2FunctionWrap(const int nx, const int ndx, const int nr) : context::C2Function_t(nx, ndx, nr) {}
+      C2FunctionWrap(const int nx, const int ndx, const int nr) : context::C2Function(nx, ndx, nr) {}
 
       ReturnType operator()(const ConstVectorRef& x) const
       {
@@ -67,13 +67,13 @@ namespace python
           f(x, v, Hout);
           return;
         } else {
-          return context::C2Function_t::vectorHessianProduct(x, v, Hout);
+          return context::C2Function::vectorHessianProduct(x, v, Hout);
         }
       }
 
       void default_vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
       {
-        return context::C2Function_t::vectorHessianProduct(x, v, Hout);
+        return context::C2Function::vectorHessianProduct(x, v, Hout);
       }
     };
 
@@ -82,35 +82,35 @@ namespace python
 
   void exposeFunctionTypes()
   {
-    using context::Function_t;
-    using context::C1Function_t;
-    using context::C2Function_t;
+    using context::Function;
+    using context::C1Function;
+    using context::C2Function;
 
     bp::class_<internal::FunctionWrap,
                boost::noncopyable
                >("BaseFunction", "Base class for functions.", bp::init<int, int, int>())
-      .def("__call__", bp::pure_virtual(&Function_t::operator()), bp::args("self", "z"), "Call the function.")
-      .add_property("nx", &Function_t::nx, "Input dimension")
-      .add_property("ndx",&Function_t::ndx,"Input tangent space dimension.")
-      .add_property("nr", &Function_t::nr, "Function codimension.")
+      .def("__call__", bp::pure_virtual(&Function::operator()), bp::args("self", "z"), "Call the function.")
+      .add_property("nx", &Function::nx, "Input dimension")
+      .add_property("ndx",&Function::ndx,"Input tangent space dimension.")
+      .add_property("nr", &Function::nr, "Function codimension.")
       ;
 
-    context::MatFunc_t C1Function_t::*compJac1 = &C1Function_t::computeJacobian;
-    context::MatFuncRet_t C1Function_t::*compJac2 = &C1Function_t::computeJacobian;
+    context::MatFuncType C1Function::*compJac1 = &C1Function::computeJacobian;
+    context::MatFuncRetType C1Function::*compJac2 = &C1Function::computeJacobian;
 
     bp::class_<internal::C1FunctionWrap,
-               bp::bases<Function_t>,
+               bp::bases<Function>,
                boost::noncopyable
                >("C1Function", "Base class for differentiable functions", bp::init<int, int, int>())
       .def("computeJacobian", bp::pure_virtual(compJac1), bp::args("self", "x", "Jout"))
       .def("get_jacobian", compJac2, bp::args("self", "x"), "Compute and return Jacobian.")
       ;
 
-    context::VHPFunc_t C2Function_t::*compHess1 = &C2Function_t::vectorHessianProduct;
-    context::VHPFuncRet_t C2Function_t::*compHess2 = &C2Function_t::vectorHessianProduct;
+    context::VHPFuncType C2Function::*compHess1 = &C2Function::vectorHessianProduct;
+    context::VHPFuncRetType C2Function::*compHess2 = &C2Function::vectorHessianProduct;
 
     bp::class_<internal::C2FunctionWrap,
-               bp::bases<C1Function_t>,
+               bp::bases<C1Function>,
                boost::noncopyable
                >("C2Function", "Base class for twice-differentiable functions.", bp::init<int,int,int>())
       .def("vectorHessianProduct", compHess1, &internal::C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))

@@ -13,16 +13,16 @@ namespace lienlp
 
   /** @brief    Base class for differentiable cost functions.
    *  @remark   Cost functions derive from differentiable functions,
-   *            and implement the C2Function<Scalar> API.
+   *            and implement the C2FunctionTpl<Scalar> API.
    *            As such, they can be used as constraints and composed.
    */
   template<typename _Scalar>
-  struct CostFunctionBase : public C2Function<_Scalar>
+  struct CostFunctionBase : public C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
 
     CostFunctionBase(const int nx, const int ndx) : Base(nx, ndx, 1) {}
     CostFunctionBase(const CostFunctionBase<Scalar>&) = default;
@@ -50,7 +50,7 @@ namespace lienlp
       return out;
     }
 
-    /* Implement C2Function interface. */
+    /* Implement C2FunctionTpl interface. */
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -71,8 +71,8 @@ namespace lienlp
 
     virtual ~CostFunctionBase<Scalar>() = default;
 
-    /// @brief    Conversion from C2Function.
-    CostFunctionBase(const C2Function<Scalar>& func)
+    /// @brief    Conversion from C2FunctionTpl.
+    CostFunctionBase(const C2FunctionTpl<Scalar>& func)
       : CostFunctionBase<Scalar>(func_to_cost<Scalar>(func)) {}
   };
 
@@ -80,22 +80,22 @@ namespace lienlp
   struct func_to_cost : CostFunctionBase<_Scalar>
   {
   private:
-    const C2Function<_Scalar>& underlying_;
+    const C2FunctionTpl<_Scalar>& underlying_;
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     /** @brief    Constructor.
-     *  @details  This defines an implicit conversion from the C2Function type.
+     *  @details  This defines an implicit conversion from the C2FunctionTpl type.
      */
-    func_to_cost(const C2Function<Scalar>& func)
+    func_to_cost(const C2FunctionTpl<Scalar>& func)
       : CostFunctionBase<Scalar>(func.nx(), func.ndx())
       , underlying_(func)
       {
         assert(func.nr() == 1);
       }
 
-    const C2Function<Scalar>& underlying() const
+    const C2FunctionTpl<Scalar>& underlying() const
     { return underlying_; }
 
 

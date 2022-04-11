@@ -11,18 +11,18 @@ namespace lienlp
   /** @brief Compose two functions.
    */
   template<typename _Scalar>
-  struct ComposeFunction : C2Function<_Scalar>
+  struct ComposeFunction : C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
     using Base::computeJacobian;
     using Base::vectorHessianProduct;
 
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     ComposeFunction(const Base& left, const Base& right) :
-        C2Function<Scalar>(right.nx(), right.ndx(), left.nr())
+        C2FunctionTpl<Scalar>(right.nx(), right.ndx(), left.nr())
       , left(left), right(right) {}
 
     ReturnType operator()(const ConstVectorRef& x) const

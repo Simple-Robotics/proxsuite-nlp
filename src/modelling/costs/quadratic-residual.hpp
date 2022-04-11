@@ -17,7 +17,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    using FunctionType = C2Function<Scalar>;  // base constraint func to use
+    using FunctionType = C2FunctionTpl<Scalar>;  // base constraint func to use
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = CostFunctionBase<Scalar>;
     using Base::computeGradient;

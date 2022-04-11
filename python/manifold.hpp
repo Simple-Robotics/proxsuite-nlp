@@ -21,9 +21,9 @@ namespace python
       using PointType = typename Manifold::PointType;
       using VecType = typename Manifold::TangentVectorType;
 
-      using IntegrateRet_t = PointType(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using IntegrateRetType = PointType(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
       using IntegrateFun_t = void     (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
-      using DifferenceRet_t = VecType (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using DifferenceRetType = VecType (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
       using DifferenceFun_t = void    (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
 
       bp::class_<Manifold, shared_ptr<Manifold>, boost::noncopyable>(
@@ -34,10 +34,10 @@ namespace python
         .add_property("ndx", &Manifold::ndx, "Tangent space dimension.")
         .def("neutral", &Manifold::neutral, "Get the neutral point from the manifold (if a Lie group).")
         .def("rand", &Manifold::rand, "Sample a random point from the manifold.")
-        .def("integrate", static_cast<IntegrateRet_t>  (&Manifold::integrate), bp::args("x", "v"))
-        .def("integrate", static_cast<IntegrateFun_t>  (&Manifold::integrate), bp::args("x", "v", "out"))
-        .def("difference", static_cast<DifferenceRet_t>(&Manifold::difference), bp::args("x0", "x1"))
-        .def("difference", static_cast<DifferenceFun_t>(&Manifold::difference), bp::args("x0", "x1", "out"))
+        .def("integrate", static_cast<IntegrateRetType>  (&Manifold::integrate), bp::args("x", "v"))
+        .def("integrate", static_cast<IntegrateFun_t>    (&Manifold::integrate), bp::args("x", "v", "out"))
+        .def("difference", static_cast<DifferenceRetType>(&Manifold::difference),bp::args("x0", "x1"))
+        .def("difference", static_cast<DifferenceFun_t>  (&Manifold::difference),bp::args("x0", "x1", "out"))
         ;
 
     }

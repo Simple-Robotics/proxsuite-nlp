@@ -18,7 +18,7 @@ namespace lienlp
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
     using Active_t = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    using FunctionType = C2Function<Scalar>;
+    using FunctionType = C2FunctionTpl<Scalar>;
     const FunctionType& m_func;
 
 

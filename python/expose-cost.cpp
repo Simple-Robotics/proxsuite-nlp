@@ -15,11 +15,11 @@ namespace python
   namespace internal
   {
     
-    struct CostWrapper : context::Cost_t, bp::wrapper<context::Cost_t>
+    struct CostWrapper : context::Cost, bp::wrapper<context::Cost>
     {
       LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
-      CostWrapper(const int nx, const int ndx) : context::Cost_t(nx, ndx) {}
+      CostWrapper(const int nx, const int ndx) : context::Cost(nx, ndx) {}
 
       context::Scalar call(const ConstVectorRef& x) const { return get_override("call")(x); }
       void computeGradient(const ConstVectorRef& x, VectorRef out) const { get_override("computeGradient")(x, out); }
@@ -31,7 +31,7 @@ namespace python
 
   void exposeCost()
   {
-    using context::Cost_t;
+    using context::Cost;
     using context::VectorXs;
     using context::MatrixXs;
     using context::VectorRef;
@@ -40,15 +40,15 @@ namespace python
     using context::ConstMatrixRef;
     using context::Manifold;
 
-    void(Cost_t::*compGrad1)(const ConstVectorRef&, VectorRef) const = &Cost_t::computeGradient;
-    void(Cost_t::*compHess1)(const ConstVectorRef&, MatrixRef) const = &Cost_t::computeHessian;
-    VectorXs(Cost_t::*compGrad2)(const ConstVectorRef&) const = &Cost_t::computeGradient;
-    MatrixXs(Cost_t::*compHess2)(const ConstVectorRef&) const = &Cost_t::computeHessian;
+    void(Cost::*compGrad1)(const ConstVectorRef&, VectorRef) const = &Cost::computeGradient;
+    void(Cost::*compHess1)(const ConstVectorRef&, MatrixRef) const = &Cost::computeHessian;
+    VectorXs(Cost::*compGrad2)(const ConstVectorRef&) const = &Cost::computeGradient;
+    MatrixXs(Cost::*compHess2)(const ConstVectorRef&) const = &Cost::computeHessian;
 
-    bp::class_<internal::CostWrapper, bp::bases<context::C2Function_t>, boost::noncopyable>(
+    bp::class_<internal::CostWrapper, bp::bases<context::C2Function>, boost::noncopyable>(
       "CostFunctionBase", bp::init<int,int>()
     )
-      .def("call", bp::pure_virtual(&Cost_t::call), bp::args("self", "x"))
+      .def("call", bp::pure_virtual(&Cost::call), bp::args("self", "x"))
       .def("computeGradient", bp::pure_virtual(compGrad1), bp::args("self", "x", "gout"))
       .def("computeGradient", compGrad2, bp::args("self", "x"), "Compute and return the gradient.")
       .def("computeHessian",  bp::pure_virtual(compHess1), bp::args("self", "x", "Hout"))
@@ -58,15 +58,15 @@ namespace python
       .def(context::Scalar() * bp::self)   // see cost_sum.hpp / returns CostSum<Scalar>
       ;
 
-    bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost_t>>(
+    bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost>>(
       "CostFromFunction",
       "Wrap a scalar-values C2 function into a cost function.",
-      bp::init<const context::C2Function_t&>(bp::args("self", "func"))
+      bp::init<const context::C2Function&>(bp::args("self", "func"))
     )
       ;
 
     using CostSum_t = CostSum<context::Scalar>;
-    bp::class_<CostSum_t, bp::bases<Cost_t>>(
+    bp::class_<CostSum_t, bp::bases<Cost>>(
       "CostSum",
       "Sum of cost functions.",
       bp::init<int,
@@ -96,9 +96,9 @@ namespace python
 
     /* Expose specific cost functions */
 
-    bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost_t>>(
+    bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
-      bp::init<shared_ptr<context::C2Function_t>,
+      bp::init<shared_ptr<context::C2Function>,
                const ConstMatrixRef&,
                const ConstVectorRef&,
                context::Scalar>(
@@ -109,7 +109,7 @@ namespace python
                )
     );
 
-    bp::class_<QuadraticDistanceCost<context::Scalar>, bp::bases<Cost_t>>(
+    bp::class_<QuadraticDistanceCost<context::Scalar>, bp::bases<Cost>>(
       "QuadraticDistanceCost", "Quadratic distance cost on the manifold.",
       bp::init<const Manifold&, const VectorXs&, const MatrixXs&>(
         bp::args("space", "target", "weights"))

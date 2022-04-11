@@ -34,15 +34,15 @@ struct math_types
 
 // fwd BaseFunction
 template<typename Scalar>
-struct BaseFunction;
+struct BaseFunctionTpl;
 
-// fwd C1Function
+// fwd C1FunctionTpl
 template<typename Scalar>
-struct C1Function;
+struct C1FunctionTpl;
 
-// fwd C2Function
+// fwd C2FunctionTpl
 template<typename Scalar>
-struct C2Function;
+struct C2FunctionTpl;
 
 // fwd ComposeFunction
 template<typename Scalar>

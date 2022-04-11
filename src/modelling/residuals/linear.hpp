@@ -13,12 +13,12 @@ namespace lienlp
    * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
-  struct LinearFunction : C2Function<_Scalar>
+  struct LinearFunction : C2FunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
     using Base::computeJacobian;
 
     const MatrixXs mat;

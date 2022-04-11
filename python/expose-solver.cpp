@@ -17,7 +17,7 @@ namespace lienlp
       bp::class_<Solver>(
         "Solver", "The numerical solver.",
         bp::init<const Manifold&,
-                 shared_ptr<context::Problem_t>&,
+                 shared_ptr<context::Problem>&,
                  Scalar,
                  Scalar,
                  Scalar,

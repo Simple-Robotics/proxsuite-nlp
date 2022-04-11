@@ -72,7 +72,7 @@ int main()
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
   /// Cast scalar cost to func
-  const C2Function<double>& resfunc = residualCircle;
+  const C2FunctionTpl<double>& resfunc = residualCircle;
   const func_to_cost<double> recast_to_cost(resfunc);
 
 

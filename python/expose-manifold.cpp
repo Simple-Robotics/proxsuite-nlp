@@ -1,24 +1,17 @@
 #include "lienlp/python/manifold.hpp"
 
 
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/spaces/tangent-bundle.hpp"
+#ifdef WITH_PINOCCHIO
+#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
 #include "lienlp/modelling/spaces/multibody.hpp"
+#endif
 
 
 namespace lienlp
 {
 namespace python
 {
-
-  template<typename LieGroup>
-  void exposeLieGroup(const char* name, const char* docstring)
-  {
-    using Manifold = PinocchioLieGroup<LieGroup>;
-    bp::class_<Manifold, bp::bases<context::Manifold>>(
-      name, docstring, bp::init<>()
-    );
-  }
 
   /// Expose the tangent bundle of a manifold type @p M.
   template<typename M, class Init>
@@ -36,14 +29,26 @@ namespace python
     return exposeTangentBundle<M, bp::init<M>>(name, docstring, bp::init<M>(bp::args("self", "base")));
   }
 
+#ifdef WITH_PINOCCHIO
+  template<typename LieGroup>
+  void exposeLieGroup(const char* name, const char* docstring)
+  {
+    using Manifold = PinocchioLieGroup<LieGroup>;
+    bp::class_<Manifold, bp::bases<context::Manifold>>(
+      name, docstring, bp::init<>()
+    );
+  }
+#endif
+
   void exposeManifold()
   {
-    namespace pin = pinocchio;
     using context::Scalar;
     using context::Manifold;
 
     internal::exposeBaseManifold();
 
+#ifdef WITH_PINOCCHIO
+    namespace pin = pinocchio;
     using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
     bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<Manifold>>(
       "EuclideanSpace", "Euclidean vector space.",
@@ -80,6 +85,7 @@ namespace python
       "StateMultibody", "Tangent space of the multibody configuration group.",
       bp::init<const Model_t&>(bp::args("model"))
     );
+#endif
 
   }
 

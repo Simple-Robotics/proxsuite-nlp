@@ -17,24 +17,24 @@ namespace python
   template<typename T>
   void exposeSpecificConstraint(const char* name, const char* docstring)
   {
-    bp::class_<T, shared_ptr<T>, bp::bases<context::Constraint_t>>(
+    bp::class_<T, shared_ptr<T>, bp::bases<context::Constraint>>(
       name, docstring,
-      bp::init<const context::C2Function_t&>()
+      bp::init<const context::C2Function&>()
     );
   }
 
   void exposeConstraints()
   {
     using context::Scalar;
-    using context::Constraint_t;
-    using ConstraintPtr = shared_ptr<Constraint_t>;
-    bp::class_<Constraint_t, ConstraintPtr, boost::noncopyable>(
+    using context::Constraint;
+    using ConstraintPtr = shared_ptr<Constraint>;
+    bp::class_<Constraint, ConstraintPtr, boost::noncopyable>(
       "ConstraintSetBase", "Base class for constraint sets.",
       bp::no_init
     )
-      .def("projection", &Constraint_t::projection, bp::args("self", "z"))
-      .def("normalConeProjection", &Constraint_t::normalConeProjection, bp::args("self", "z"))
-      .def("computeActiveSet", &Constraint_t::computeActiveSet, bp::args("self", "z", "out"))
+      .def("projection", &Constraint::projection, bp::args("self", "z"))
+      .def("normalConeProjection", &Constraint::normalConeProjection, bp::args("self", "z"))
+      .def("computeActiveSet", &Constraint::computeActiveSet, bp::args("self", "z", "out"))
       ;
 
     /* Expose constraint stack */
