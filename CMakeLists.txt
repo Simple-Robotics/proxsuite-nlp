@@ -103,7 +103,7 @@ if(BUILD_PYTHON_INTERFACE)
   set(PY_NAME "py${PROJECT_NAME}")
   set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
   SEARCH_FOR_BOOST_PYTHON(REQUIRED)
-  ADD_PROJECT_DEPENDENCY(eigenpy 2.6.7 REQUIRED)
+  ADD_PROJECT_DEPENDENCY(eigenpy 2.7.1 REQUIRED)
 
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value

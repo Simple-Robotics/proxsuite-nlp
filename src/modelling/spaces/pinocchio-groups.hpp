@@ -38,6 +38,9 @@ namespace lienlp
     template<typename... Args>
     PinocchioLieGroup(Args... args) : m_lg(args...) {}
 
+    inline int nx() const { return m_lg.nq(); }
+    inline int ndx() const { return m_lg.nv(); }
+
     /// \name Implementations
 
     void integrate_impl(const ConstVectorRef& x,
@@ -84,8 +87,13 @@ namespace lienlp
       }
     }
 
-    inline int nx() const { return m_lg.nq(); }
-    inline int ndx() const { return m_lg.nv(); }
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                             const ConstVectorRef& x1,
+                             const Scalar& u,
+                             VectorRef out) const
+    {
+      m_lg.interpolate(x0, x1, u, out);
+    }
 
     PointType neutral() const
     {
@@ -173,6 +181,14 @@ namespace lienlp
           pin::dDifference(m_model, x0, x1, Jout, pin::ARG1);
           break;
       }
+    }
+
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                             const ConstVectorRef& x1,
+                             const Scalar& u,
+                             VectorRef out) const
+    {
+      pin::interpolate(m_model, x0, x1, u, out);
     }
 
     inline int nx() const { return m_model.nq; }

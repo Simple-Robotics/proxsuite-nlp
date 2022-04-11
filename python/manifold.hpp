@@ -16,15 +16,17 @@ namespace python
     /// Expose the base manifold type
     void exposeBaseManifold()
     {
-      using ConstVectorRef = context::ConstVectorRef;
-      using Manifold = context::Manifold;
+      using context::Scalar;
+      using context::VectorRef;
+      using context::ConstVectorRef;
+      using context::Manifold;
       using PointType = typename Manifold::PointType;
       using VecType = typename Manifold::TangentVectorType;
 
-      using IntegrateRetType = PointType(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
-      using IntegrateFun_t = void     (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
-      using DifferenceRetType = VecType (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
-      using DifferenceFun_t = void    (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, context::VectorRef) const;
+      using IntegrateRetType  = PointType(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using IntegrateFun_t    = void     (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
+      using DifferenceRetType = VecType  (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+      using DifferenceFun_t   = void     (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
 
       bp::class_<Manifold, shared_ptr<Manifold>, boost::noncopyable>(
         "ManifoldAbstract", "Manifold abstract class.",
@@ -34,10 +36,14 @@ namespace python
         .add_property("ndx", &Manifold::ndx, "Tangent space dimension.")
         .def("neutral", &Manifold::neutral, "Get the neutral point from the manifold (if a Lie group).")
         .def("rand", &Manifold::rand, "Sample a random point from the manifold.")
-        .def("integrate", static_cast<IntegrateRetType>  (&Manifold::integrate), bp::args("x", "v"))
-        .def("integrate", static_cast<IntegrateFun_t>    (&Manifold::integrate), bp::args("x", "v", "out"))
-        .def("difference", static_cast<DifferenceRetType>(&Manifold::difference),bp::args("x0", "x1"))
-        .def("difference", static_cast<DifferenceFun_t>  (&Manifold::difference),bp::args("x0", "x1", "out"))
+        .def("integrate", static_cast<IntegrateRetType>  (&Manifold::integrate),  bp::args("x", "v"))
+        .def("integrate", static_cast<IntegrateFun_t>    (&Manifold::integrate),  bp::args("x", "v", "out"))
+        .def("difference", static_cast<DifferenceRetType>(&Manifold::difference), bp::args("x0", "x1"))
+        .def("difference", static_cast<DifferenceFun_t>  (&Manifold::difference), bp::args("x0", "x1", "out"))
+        .def("interpolate", (void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&,const Scalar&, VectorRef) const)(&Manifold::interpolate),
+             bp::args("self", "x0", "x1", "u", "out"))
+        .def("interpolate", (PointType(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&,const Scalar&) const)(&Manifold::interpolate),
+             bp::args("self", "x0", "x1", "u"))
         ;
 
     }

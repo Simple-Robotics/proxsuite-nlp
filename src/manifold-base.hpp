@@ -102,7 +102,21 @@ namespace lienlp
       Jdifference_impl(x, v, Jout, arg);
     }
 
-    /// \name Out-of-place (allocated) variants.
+    /// @brief    Interpolation operation.
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                                  const ConstVectorRef& x1,
+                                  const Scalar& u,
+                                  VectorRef out) const = 0;
+
+    void interpolate(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
+                     const Scalar& u,
+                     VectorRef out) const
+    {
+      interpolate_impl(x0, x1, u, out);
+    }
+
+    /// \name Out-of-place (allocated) overloads.
     /// \{
 
     /// @copybrief integrate()
@@ -124,6 +138,16 @@ namespace lienlp
     {
       TangentVectorType out(ndx());
       difference_impl(x0, x1, out);
+      return out;
+    }
+
+    /// @copybrief interpolate_impl()
+    PointType interpolate(const ConstVectorRef& x0,
+                          const ConstVectorRef& x1,
+                          const Scalar& u) const
+    {
+      PointType out(nx());
+      interpolate_impl(x0, x1, u, out);
       return out;
     }
 

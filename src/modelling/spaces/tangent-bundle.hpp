@@ -59,6 +59,15 @@ namespace lienlp
                      MatrixRef Jout,
                      int arg) const;
 
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                             const ConstVectorRef& x1,
+                             const Scalar& u,
+                             VectorRef out) const
+    {
+      m_base.interpolate(getBasePoint(x0), getBasePoint(x1), u, getBasePointWrite(out));
+      out.tail(m_base.ndx()) = (Scalar(1.) - u) * getBaseTangent(x0) + u * getBaseTangent(x1);
+    }
+
     /// Get base point of an element of the tangent bundle.
     /// This map is exactly the natural projection.
     template<typename Point>
