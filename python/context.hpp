@@ -20,7 +20,7 @@ namespace python
     using Problem = ProblemTpl<Scalar>;
     using Result = SResults<Scalar>;
     using Workspace = SWorkspace<Scalar>;
-    using Cost = CostFunctionBase<Scalar>;
+    using Cost = CostFunctionBaseTpl<Scalar>;
     using Constraint = ConstraintSetBase<Scalar>;
     using Function = BaseFunctionTpl<Scalar>;
     using C1Function = C1FunctionTpl<Scalar>;

@@ -13,13 +13,13 @@ namespace lienlp
    * residual function \f$r :\calX\to \RR^p\f$.
    */
   template<typename _Scalar>
-  struct QuadraticResidualCost : public CostFunctionBase<_Scalar>
+  struct QuadraticResidualCost : public CostFunctionBaseTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     using FunctionType = C2FunctionTpl<Scalar>;  // base constraint func to use
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Base = CostFunctionBase<Scalar>;
+    using Base = CostFunctionBaseTpl<Scalar>;
     using Base::computeGradient;
     using Base::computeHessian;
 

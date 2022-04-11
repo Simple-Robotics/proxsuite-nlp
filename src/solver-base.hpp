@@ -305,8 +305,8 @@ namespace lienlp
         {
           workspace.dualResidual -= rho * prox_penalty.computeGradient(x);
         }
-        workspace.dualInfeas = infNorm(workspace.dualResidual);
-        Scalar inner_crit = infNorm(workspace.kktRhs);
+        workspace.dualInfeas = math::infNorm(workspace.dualResidual);
+        Scalar inner_crit = math::infNorm(workspace.kktRhs);
 
         fmt::print("[iter {:>3d}] inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
                   results.numIters, inner_tol, workspace.dualInfeas, workspace.primalInfeas);
@@ -436,7 +436,7 @@ namespace lienlp
         auto cstr = problem->getConstraint(i);
         workspace.primalInfeas = std::max(
           workspace.primalInfeas,
-          infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
+          math::infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
       }
     }
 

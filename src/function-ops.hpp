@@ -11,7 +11,7 @@ namespace lienlp
   /** @brief Compose two functions.
    */
   template<typename _Scalar>
-  struct ComposeFunction : C2FunctionTpl<_Scalar>
+  struct ComposeFunctionTpl : C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
@@ -21,8 +21,8 @@ namespace lienlp
 
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    ComposeFunction(const Base& left, const Base& right) :
-        C2FunctionTpl<Scalar>(right.nx(), right.ndx(), left.nr())
+    ComposeFunctionTpl(const Base& left, const Base& right)
+      : Base(right.nx(), right.ndx(), left.nr())
       , left(left), right(right) {}
 
     ReturnType operator()(const ConstVectorRef& x) const

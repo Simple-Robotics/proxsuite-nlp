@@ -45,10 +45,10 @@ namespace lienlp
    *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
    */
   template<typename _Scalar>
-  struct LinearFunctionDifferenceToPoint : ComposeFunction<_Scalar>
+  struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
-    using Base = ComposeFunction<Scalar>;
+    using Base = ComposeFunctionTpl<Scalar>;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
 
     using M = ManifoldAbstractTpl<Scalar>;

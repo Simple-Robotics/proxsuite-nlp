@@ -32,6 +32,8 @@ struct math_types
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
 };
 
+/* Function types */
+
 // fwd BaseFunction
 template<typename Scalar>
 struct BaseFunctionTpl;
@@ -44,9 +46,15 @@ struct C1FunctionTpl;
 template<typename Scalar>
 struct C2FunctionTpl;
 
-// fwd ComposeFunction
+// fwd ComposeFunctionTpl
 template<typename Scalar>
-struct ComposeFunction;
+struct ComposeFunctionTpl;
+
+// fwd Cost
+template<typename Scalar>
+struct CostFunctionBaseTpl;
+
+/* Manifolds */
 
 // fwd ManifoldAbstractTpl
 template<typename Scalar, int Options=0>
@@ -55,13 +63,11 @@ struct ManifoldAbstractTpl;
 template<typename Base>
 struct TangentBundleTpl;
 
-// fwd Cost
-template<typename Scalar>
-struct CostFunctionBase;
-
 // fwd ConstraintSetBase
 template<typename Scalar>
 struct ConstraintSetBase;
+
+/* Solver structs */
 
 // fwd Problem
 template<typename Scalar>
@@ -78,18 +84,24 @@ struct SWorkspace;
 template<typename Scalar>
 class SolverTpl;
 
-/// Shorthand for the infinity norm
-/// code from proxqp
-template<typename Mat_t>
-typename Mat_t::Scalar
-infNorm(const Eigen::MatrixBase<Mat_t>& z)
+/// Math utils
+namespace math
 {
-  if (z.rows() == 0 || z.cols() == 0)
+  
+  /// Shorthand for the infinity norm
+  /// code from proxqp
+  template<typename MatType>
+  typename MatType::Scalar
+  infNorm(const Eigen::MatrixBase<MatType>& z)
   {
-    return typename Mat_t::Scalar(0);
-  } else {
-    return z.template lpNorm<Eigen::Infinity>();
+    if (z.rows() == 0 || z.cols() == 0)
+    {
+      return 0.;
+    } else {
+      return z.template lpNorm<Eigen::Infinity>();
+    }
   }
-}
+
+} // namespace math
 
 }  // namespace lienlp

@@ -17,15 +17,15 @@ namespace lienlp
    *            As such, they can be used as constraints and composed.
    */
   template<typename _Scalar>
-  struct CostFunctionBase : public C2FunctionTpl<_Scalar>
+  struct CostFunctionBaseTpl : public C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
     using Base = C2FunctionTpl<Scalar>;
 
-    CostFunctionBase(const int nx, const int ndx) : Base(nx, ndx, 1) {}
-    CostFunctionBase(const CostFunctionBase<Scalar>&) = default;
+    CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
+    CostFunctionBaseTpl(const CostFunctionBaseTpl<Scalar>&) = default;
 
     /* Define cost function-specific API */
 
@@ -69,15 +69,15 @@ namespace lienlp
       computeHessian(x, Hout);
     }
 
-    virtual ~CostFunctionBase<Scalar>() = default;
+    virtual ~CostFunctionBaseTpl<Scalar>() = default;
 
     /// @brief    Conversion from C2FunctionTpl.
-    CostFunctionBase(const C2FunctionTpl<Scalar>& func)
-      : CostFunctionBase<Scalar>(func_to_cost<Scalar>(func)) {}
+    CostFunctionBaseTpl(const C2FunctionTpl<Scalar>& func)
+      : CostFunctionBaseTpl<Scalar>(func_to_cost<Scalar>(func)) {}
   };
 
   template<typename _Scalar>
-  struct func_to_cost : CostFunctionBase<_Scalar>
+  struct func_to_cost : CostFunctionBaseTpl<_Scalar>
   {
   private:
     const C2FunctionTpl<_Scalar>& underlying_;
@@ -89,7 +89,7 @@ namespace lienlp
      *  @details  This defines an implicit conversion from the C2FunctionTpl type.
      */
     func_to_cost(const C2FunctionTpl<Scalar>& func)
-      : CostFunctionBase<Scalar>(func.nx(), func.ndx())
+      : CostFunctionBaseTpl<Scalar>(func.nx(), func.ndx())
       , underlying_(func)
       {
         assert(func.nr() == 1);

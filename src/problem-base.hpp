@@ -24,7 +24,7 @@ namespace lienlp
     /// Equality constraint type
     using EqualityType = EqualityConstraint<Scalar>;
     /// Cost function type
-    using CostType = CostFunctionBase<Scalar>;
+    using CostType = CostFunctionBaseTpl<Scalar>;
 
     /// The cost functional
     const CostType& m_cost;
