@@ -129,6 +129,7 @@ solver = lienlp.Solver(space, prob)
 x0 = np.array([2., 2.])
 flag = solver.solve(ws, rs, x0, rs.lamsopt)
 
-print("Flag:", flag)
+print("Flag:   ", flag)
 
 print("xopt:   ", rs.xopt)
+print("lamsopt:", rs.lamsopt.tolist())
