@@ -133,7 +133,7 @@ namespace lienlp
     ConvergenceFlag solve(Workspace& workspace,
                           Results& results,
                           const VectorXs& x0,
-                          const VectorOfVectors& lams0)
+                          const std::vector<VectorRef>& lams0)
     {
       // init variables
       results.xOpt = x0;
@@ -415,7 +415,7 @@ namespace lienlp
     void computeResidualsAndMultipliers(
       const ConstVectorRef& x,
       Workspace& workspace,
-      VectorOfVectors& lams) const
+      VectorOfRef& lams) const
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {

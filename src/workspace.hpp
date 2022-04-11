@@ -27,6 +27,8 @@ namespace lienlp
 
     /// Newton iteration variables
 
+    const int numcstr;
+
     /// KKT iteration matrix.
     MatrixXs kktMatrix;
     /// KKT iteration right-hand side.
@@ -43,15 +45,18 @@ namespace lienlp
 
     VectorXs xPrev;
     VectorXs xTrial;
-    VectorOfVectors lamsPrev;
-    VectorOfVectors lamsTrial;
+    VectorXs lamsPrev_d;
+    VectorXs lamsTrial_d;
+    VectorOfRef lamsPrev;
+    VectorOfRef lamsTrial;
 
     /// Residuals
 
     VectorXs dualResidual;
     Scalar dualInfeas;
 
-    VectorOfVectors primalResiduals;
+    VectorXs primalResiduals_d;
+    VectorOfRef primalResiduals;
     Scalar primalInfeas;
 
     /// Objective function gradient.
@@ -64,30 +69,34 @@ namespace lienlp
     std::vector<MatrixXs> cstrJacobians;
     std::vector<MatrixXs> cstrVectorHessProd;
     /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
-    VectorOfVectors lamsPlus;
+    VectorXs lamsPlus_d;
+    VectorOfRef lamsPlus;
     /// Pre-projected multipliers.
-    VectorOfVectors lamsPlusPre;
+    VectorXs lamsPlusPre_d;
+    VectorOfRef lamsPlusPre;
     /// Primal-dual multiplier estimates (from the pdBCL algorithm)
-    VectorOfVectors lamsPDAL;
+    VectorXs lamsPDAL_d;
+    VectorOfRef lamsPDAL;
     /// Subproblem proximal dual error.
-    VectorOfVectors subproblemDualErr;
+    VectorXs subproblemDualErr_d;
+    VectorOfRef subproblemDualErr;
 
 
     SWorkspace(const int nx,
                const int ndx,
                const Problem& prob)
-      :
-      kktMatrix(ndx + prob.getTotalConstraintDim(), ndx + prob.getTotalConstraintDim()),
-      kktRhs(ndx + prob.getTotalConstraintDim()),
-      pdStep(ndx + prob.getTotalConstraintDim()),
-      signature(ndx + prob.getTotalConstraintDim()),
-      ldlt_(ndx + prob.getTotalConstraintDim()),
-      xPrev(nx),
-      xTrial(nx),
-      dualResidual(ndx),
-      objectiveGradient(ndx),
-      meritGradient(ndx),
-      objectiveHessian(ndx, ndx)
+      : numcstr(prob.getTotalConstraintDim())
+      , kktMatrix(ndx + numcstr, ndx + numcstr)
+      , kktRhs(ndx + numcstr)
+      , pdStep(ndx + numcstr)
+      , signature(ndx + numcstr)
+      , ldlt_(ndx + numcstr)
+      , xPrev(nx)
+      , xTrial(nx)
+      , dualResidual(ndx)
+      , objectiveGradient(ndx)
+      , meritGradient(ndx)
+      , objectiveHessian(ndx, ndx)
     {
       init(prob);
     }
@@ -101,20 +110,20 @@ namespace lienlp
 
       xPrev.setZero();
       xTrial.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, lamsPrev);
-      helpers::allocateMultipliersOrResiduals(prob, lamsTrial);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPrev_d, lamsPrev);
+      helpers::allocateMultipliersOrResiduals(prob, lamsTrial_d, lamsTrial);
 
       dualResidual.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, primalResiduals);  // not multipliers but same dims
+      helpers::allocateMultipliersOrResiduals(prob, primalResiduals_d, primalResiduals);  // not multipliers but same dims
 
       objectiveGradient.setZero();
       meritGradient.setZero();
       objectiveHessian.setZero();
 
-      helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre);
-      helpers::allocateMultipliersOrResiduals(prob, lamsPlus);
-      helpers::allocateMultipliersOrResiduals(prob, lamsPDAL);
-      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_d, lamsPlusPre);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlus_d, lamsPlus);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPDAL_d, lamsPDAL);
+      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr_d, subproblemDualErr);
 
 
       const std::size_t nc = prob.getNumConstraints();

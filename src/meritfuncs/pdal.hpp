@@ -26,12 +26,12 @@ namespace lienlp
   struct PDALFunction :
     public MeritFunctionBase<
       _Scalar,
-      typename math_types<_Scalar>::VectorOfVectors,
-      typename math_types<_Scalar>::VectorOfVectors>
+      typename math_types<_Scalar>::VectorOfRef,
+      typename math_types<_Scalar>::VectorOfRef>
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Base = MeritFunctionBase<Scalar, VectorOfVectors, VectorOfVectors>;
+    using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
     using Problem = ProblemTpl<Scalar>;
@@ -59,13 +59,13 @@ namespace lienlp
      */
     void computeFirstOrderMultipliers(
       const ConstVectorRef& x,
-      const VectorOfVectors& lams_ext,
-      VectorOfVectors& out) const
+      const VectorOfRef& lams_ext,
+      VectorOfRef& out) const
     {
       for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
       {
         auto cstr = m_prob->getConstraint(i);
-        out.push_back((*cstr)(x) + lams_ext[i] / m_muEq);
+        out[i].noalias() = (*cstr)(x) + lams_ext[i] / m_muEq;
         out[i].noalias() = cstr->normalConeProjection(out[i]);
       }
     }
@@ -74,21 +74,23 @@ namespace lienlp
     /// @todo   fix recomputing 1st order multipliers (w/ workspace)
     void computePDALMultipliers(
       const ConstVectorRef& x,
-      const VectorOfVectors& lams,
-      const VectorOfVectors& lams_ext,
-      VectorOfVectors& out) const
+      const VectorOfRef& lams,
+      const VectorOfRef& lams_ext,
+      VectorOfRef& out) const
     {
       // TODO fix calling this again; grab values from workspace
       computeFirstOrderMultipliers(x, lams_ext, out);
       for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
       {
+        auto cstr = m_prob->getConstraint(i);
         out[i].noalias() = 2 * out[i] - lams[i] / m_muEq;
+        out[i].noalias() = cstr->normalConeProjection(out[i]);
       }
     }
 
     Scalar operator()(const ConstVectorRef& x,
-                      const VectorOfVectors& lams,
-                      const VectorOfVectors& lams_ext) const
+                      const VectorOfRef& lams,
+                      const VectorOfRef& lams_ext) const
     {
       Scalar result_ = m_prob->m_cost.call(x);
 
@@ -108,13 +110,13 @@ namespace lienlp
     }
 
     void computeGradient(const ConstVectorRef& x,
-                         const VectorOfVectors& lams,
-                         const VectorOfVectors& lams_ext,
+                         const VectorOfRef& lams,
+                         const VectorOfRef& lams_ext,
                          VectorRef out) const;
 
     void computeHessian(const ConstVectorRef& x,
-                        const VectorOfVectors& lams,
-                        const VectorOfVectors& lams_ext,
+                        const VectorOfRef& lams,
+                        const VectorOfRef& lams_ext,
                         MatrixRef out) const;
   };
 

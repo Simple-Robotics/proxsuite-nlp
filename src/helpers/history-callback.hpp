@@ -24,7 +24,8 @@ namespace lienlp
       struct
       {
         std::vector<typename SResults<Scalar>::VectorXs> xs;
-        std::vector<typename SResults<Scalar>::VectorOfVectors> lams;
+        std::vector<typename SResults<Scalar>::VectorXs> lams_data;
+        std::vector<typename SResults<Scalar>::VectorOfRef> lams;
         std::vector<Scalar> values;
         std::vector<Scalar> prim_infeas;
         std::vector<Scalar> dual_infeas;
@@ -36,6 +37,7 @@ namespace lienlp
         if (store_primal_dual_vars_)
         {
           storage.xs.push_back(results.xOpt);
+          storage.lams_data.push_back(results.lamsOpt_d);
           storage.lams.push_back(results.lamsOpt);
         }
         if (store_values_)

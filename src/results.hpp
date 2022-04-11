@@ -35,7 +35,8 @@ namespace lienlp
 
     Scalar value;
     VectorXs xOpt;
-    VectorOfVectors lamsOpt;
+    VectorXs lamsOpt_d;
+    VectorOfRef lamsOpt;
     std::vector<VecBool> activeSet;
 
     /// Final solver parameters
@@ -44,12 +45,13 @@ namespace lienlp
     Scalar rho;
 
     SResults(const int nx, const Problem& prob)
-             : xOpt(nx),
-               numIters(0),
-               mu(0.),
-               rho(0.)
+             : xOpt(nx)
+             , lamsOpt_d(prob.getTotalConstraintDim())
+             , numIters(0)
+             , mu(0.)
+             , rho(0.)
     {
-      helpers::allocateMultipliersOrResiduals(prob, lamsOpt);
+      helpers::allocateMultipliersOrResiduals(prob, lamsOpt_d, lamsOpt);
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {

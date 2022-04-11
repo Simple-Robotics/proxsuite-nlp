@@ -18,6 +18,7 @@ void exposeContainerTypes()
   pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
   pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
   pp::StdVectorPythonVisitor<context::VectorOfVectors, false>::expose("StdVec_Vector");
+  pp::StdVectorPythonVisitor<context::VectorOfRef, false>::expose("StdVec_VecRef");
   pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
 }
 

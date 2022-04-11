@@ -92,15 +92,19 @@ namespace lienlp
     template<typename Scalar>
     void allocateMultipliersOrResiduals(
       const ProblemTpl<Scalar>& prob,
-      typename ProblemTpl<Scalar>::VectorOfVectors& out)
+      typename ProblemTpl<Scalar>::VectorXs& data,
+      typename ProblemTpl<Scalar>::VectorOfRef& out)
     {
+      data.resize(prob.getTotalConstraintDim());
+      data.setZero();
       using Problem = ProblemTpl<Scalar>;
-      using VectorXs = typename Problem::VectorXs;
       out.reserve(prob.getNumConstraints());
+      int cursor = 0;
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
         typename Problem::ConstraintPtr cur_cstr = prob.getConstraint(i);
-        out.push_back(VectorXs::Zero(cur_cstr->nr()));
+        out.push_back(data.segment(cursor, cursor + cur_cstr->nr()));
+        cursor += cur_cstr->nr();
       }
     }
     

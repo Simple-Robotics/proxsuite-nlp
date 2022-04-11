@@ -94,8 +94,9 @@ int main()
 
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
-  Problem::VectorOfVectors lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams);
+  Problem::VectorXs lams_d;
+  Problem::VectorOfRef lams;
+  helpers::allocateMultipliersOrResiduals(*prob, lams_d, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
              lams.size(), lams[0]);

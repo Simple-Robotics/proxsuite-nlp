@@ -15,20 +15,20 @@ namespace lienlp
   template<typename _Scalar>
   struct LagrangianFunction :
   public MeritFunctionBase<
-    _Scalar, typename math_types<_Scalar>::VectorOfVectors
+    _Scalar, typename math_types<_Scalar>::VectorOfRef
     >
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
-    using Base = MeritFunctionBase<Scalar, VectorOfVectors>;
+    using Base = MeritFunctionBase<Scalar, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
 
     LagrangianFunction(shared_ptr<Problem> prob)
       : Base(prob) {}
 
-    Scalar operator()(const ConstVectorRef& x, const VectorOfVectors& lams) const
+    Scalar operator()(const ConstVectorRef& x, const VectorOfRef& lams) const
     {
       Scalar result_ = 0.;
       result_ = result_ + m_prob->m_cost.call(x);
@@ -42,7 +42,7 @@ namespace lienlp
     }
 
     void computeGradient(const ConstVectorRef& x,
-                         const VectorOfVectors& lams,
+                         const VectorOfRef& lams,
                          VectorRef out) const
     {
       out = m_prob->m_cost.computeGradient(x);
@@ -55,7 +55,7 @@ namespace lienlp
     }
 
     void computeHessian(const ConstVectorRef& x,
-                        const VectorOfVectors& lams,
+                        const VectorOfRef& lams,
                         MatrixRef out) const
     {
       m_prob->m_cost.computeHessian(x, out);

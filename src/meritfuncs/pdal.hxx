@@ -5,11 +5,11 @@ namespace lienlp
   template<typename Scalar>
   void PDALFunction<Scalar>::computeGradient(
     const ConstVectorRef& x,
-    const VectorOfVectors& lams,
-    const VectorOfVectors& lams_ext,
+    const VectorOfRef& lams,
+    const VectorOfRef& lams_ext,
     VectorRef out) const
   {
-    VectorOfVectors lams_plus;
+    VectorOfRef lams_plus;
     lams_plus.reserve(m_prob->getNumConstraints());
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
     m_lagr.computeGradient(x, lams_plus, out);
@@ -18,8 +18,8 @@ namespace lienlp
   template<typename Scalar>
   void PDALFunction<Scalar>::computeHessian(
     const ConstVectorRef& x,
-    const VectorOfVectors& lams,
-    const VectorOfVectors& lams_ext,
+    const VectorOfRef& lams,
+    const VectorOfRef& lams_ext,
     MatrixRef out) const
   {
     /// Compute cost hessian // TODO rip this out, use workspace
@@ -28,7 +28,7 @@ namespace lienlp
     const auto ndx = m_prob->m_cost.ndx();
 
     // Compute appropriate multiplier estimates, TODO rip this out
-    VectorOfVectors lams_plus;
+    VectorOfRef lams_plus;
     lams_plus.reserve(num_c);
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
 

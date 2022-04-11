@@ -27,6 +27,7 @@ struct math_types
   using VectorOfVectors = std::vector<VectorXs>;
   using VectorOfVecMap = std::vector<VectorMap>;
   using VectorRef = Eigen::Ref<VectorXs>;
+  using VectorOfRef = std::vector<VectorRef>;
   using MatrixRef = Eigen::Ref<MatrixXs>;
   using ConstVectorRef = Eigen::Ref<const VectorXs>;
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
