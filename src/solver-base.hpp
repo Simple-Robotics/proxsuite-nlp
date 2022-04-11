@@ -463,7 +463,7 @@ namespace lienlp
      * Perform the inexact backtracking line-search procedure.
      * 
      * @param workspace Workspace.
-     * @param results   Result struct.
+     * @param results   Results struct.
      * @param merit0    Value of the merit function at the previous point.
      * @param d1        Directional derivative of the merit function in the search direction.
      */

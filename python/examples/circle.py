@@ -29,12 +29,14 @@ residual = QuadraticResidualCost(
     np.zeros(inner_res_.nr),
     -radius_sq
 )
-print(residual(p0))
-print(residual(p1))
+r0 = residual(p0)
+r1 = residual(p1)
+print(r0)
+print(r1)
 
 cstr1 = NegativeOrthant(residual)
-print(cstr1.projection(p0))
-print(cstr1.projection(p1))
+print(cstr1.projection(r0))
+print(cstr1.projection(r1))
 
 prob = lienlp.Problem(cost_, [cstr1])
 results = lienlp.Results(nx, prob)

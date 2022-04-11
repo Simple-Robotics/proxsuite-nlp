@@ -9,7 +9,7 @@ namespace python
 
   void exposeResults()
   {
-    using context::Result;
+    using context::Results;
 
     bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
       .value("uninit", ConvergenceFlag::UNINIT)
@@ -17,17 +17,17 @@ namespace python
       .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED)
       ;
 
-    bp::class_<Result>(
+    bp::class_<Results>(
       "Results", "Results holder struct.",
       bp::init<int, context::Problem&>(bp::args("self", "nx", "problem")))
-      .def_readonly("converged", &Result::converged)
-      .def_readonly("value", &Result::value)
-      .def_readonly("xopt", &Result::xOpt)
-      .def_readonly("lamsopt", &Result::lamsOpt)
-      .def_readonly("activeset", &Result::activeSet)
-      .def_readonly("numiters", &Result::numIters)
-      .def_readonly("mu", &Result::mu)
-      .def_readonly("rho", &Result::rho)
+      .def_readonly("converged", &Results::converged)
+      .def_readonly("value", &Results::value)
+      .def_readonly("xopt", &Results::xOpt)
+      .def_readonly("lamsopt", &Results::lamsOpt)
+      .def_readonly("activeset", &Results::activeSet)
+      .def_readonly("numiters", &Results::numIters)
+      .def_readonly("mu", &Results::mu)
+      .def_readonly("rho", &Results::rho)
       ;
   }  
 
