@@ -100,11 +100,13 @@ namespace lienlp
       using Problem = ProblemTpl<Scalar>;
       out.reserve(prob.getNumConstraints());
       int cursor = 0;
+      int nr = 0;
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
         typename Problem::ConstraintPtr cur_cstr = prob.getConstraint(i);
-        out.push_back(data.segment(cursor, cursor + cur_cstr->nr()));
-        cursor += cur_cstr->nr();
+        nr = cur_cstr->nr();
+        out.push_back(data.segment(cursor, nr));
+        cursor += nr;
       }
     }
     

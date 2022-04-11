@@ -274,7 +274,7 @@ namespace lienlp
         int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
         {
-          Eigen::Ref<MatrixXs> J_ = workspace.cstrJacobians[i];
+          MatrixRef J_ = workspace.cstrJacobians[i];
 
           workspace.kktRhs.head(ndx).noalias() += J_.transpose() * results.lamsOpt[i];
           if (not use_gauss_newton)
@@ -452,7 +452,7 @@ namespace lienlp
       {
         auto cstr = problem->getConstraint(i);
 
-        MatrixXs& J_ = workspace.cstrJacobians[i];
+        MatrixRef J_ = workspace.cstrJacobians[i];
         cstr->m_func.computeJacobian(x, J_);
         cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], J_);
         cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);

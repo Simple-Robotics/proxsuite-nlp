@@ -27,6 +27,7 @@ namespace lienlp
 
     /// Newton iteration variables
 
+    const int ndx;
     const int numcstr;
 
     /// KKT iteration matrix.
@@ -66,8 +67,10 @@ namespace lienlp
     /// Objective function Hessian.
     MatrixXs objectiveHessian;
 
-    std::vector<MatrixXs> cstrJacobians;
-    std::vector<MatrixXs> cstrVectorHessProd;
+    MatrixXs jacobians_data;
+    MatrixXs hessians_data;
+    std::vector<MatrixRef> cstrJacobians;
+    std::vector<MatrixRef> cstrVectorHessProd;
     /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorXs lamsPlus_d;
     VectorOfRef lamsPlus;
@@ -85,7 +88,8 @@ namespace lienlp
     SWorkspace(const int nx,
                const int ndx,
                const Problem& prob)
-      : numcstr(prob.getTotalConstraintDim())
+      : ndx(ndx)
+      , numcstr(prob.getTotalConstraintDim())
       , kktMatrix(ndx + numcstr, ndx + numcstr)
       , kktRhs(ndx + numcstr)
       , pdStep(ndx + numcstr)
@@ -97,6 +101,8 @@ namespace lienlp
       , objectiveGradient(ndx)
       , meritGradient(ndx)
       , objectiveHessian(ndx, ndx)
+      , jacobians_data(numcstr, ndx)
+      , hessians_data(numcstr * ndx, ndx)
     {
       init(prob);
     }
@@ -119,6 +125,8 @@ namespace lienlp
       objectiveGradient.setZero();
       meritGradient.setZero();
       objectiveHessian.setZero();
+      jacobians_data.setZero();
+      hessians_data.setZero();
 
       helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_d, lamsPlusPre);
       helpers::allocateMultipliersOrResiduals(prob, lamsPlus_d, lamsPlus);
@@ -132,12 +140,15 @@ namespace lienlp
       cstrJacobians.reserve(nc);
       cstrVectorHessProd.reserve(nc);
 
+      int cursor = 0;
+      int nr = 0;
       for (std::size_t i = 0; i < nc; i++)
       {
         auto cstr = prob.getConstraint(i);
-        int nr = cstr->nr();
-        cstrJacobians.push_back(MatrixXs::Zero(nr, ndx));
-        cstrVectorHessProd.push_back(MatrixXs::Zero(ndx, ndx));
+        nr = cstr->nr();
+        cstrJacobians.push_back(jacobians_data.middleRows(cursor, nr));
+        cstrVectorHessProd.push_back(hessians_data.middleRows(cursor * ndx, nr * ndx));
+        cursor += nr;
       }
 
     }
