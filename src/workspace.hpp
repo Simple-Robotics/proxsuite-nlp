@@ -147,7 +147,7 @@ namespace lienlp
         auto cstr = prob.getConstraint(i);
         nr = cstr->nr();
         cstrJacobians.push_back(jacobians_data.middleRows(cursor, nr));
-        cstrVectorHessProd.push_back(hessians_data.middleRows(cursor * ndx, nr * ndx));
+        cstrVectorHessProd.push_back(hessians_data.middleRows(cursor * ndx, ndx));
         cursor += nr;
       }
 
