@@ -47,7 +47,7 @@ namespace lienlp
 
     //// Other settings
 
-    bool verbose = true;
+    bool verbose = false;
     bool use_gauss_newton = false;    /// Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
@@ -77,6 +77,9 @@ namespace lienlp
 
     const Scalar alpha_min;
     const Scalar armijo_c1;
+    
+    const Scalar DELTA_MIN = 1e-14;   /// Minimum nonzero regularization strength.
+    const Scalar DELTA_MAX = 1.;    /// Maximum regularization strength.
 
     /// Callbacks
     using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
@@ -322,11 +325,30 @@ namespace lienlp
         }
 
         // factorization
-        workspace.ldlt_.compute(workspace.kktMatrix);
+        // regularization strength
+        Scalar delta = 0.;
+        Scalar old_delta = 0.;
+        Scalar del_up_k = 3.;
+        Scalar del_down_k = 0.5;
+        InertiaFlag is_inertia_correct = BAD;
+        Scalar conditioning_ = 0;
+        while (not(is_inertia_correct == OK) && delta <= DELTA_MAX)
+        {
+          correctInertia(workspace, delta, old_delta);
+          workspace.ldlt_.compute(workspace.kktMatrix);
+          conditioning_ = 1. / workspace.ldlt_.rcond();
+          workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
+          is_inertia_correct = checkInertia(workspace.signature);
+          if (delta == 0.) {
+            delta = DELTA_MIN;
+          } else {
+            delta = std::min(delta * del_up_k, DELTA_MAX);
+          }
+          old_delta = delta;
+        }
+
         workspace.pdStep = -workspace.kktRhs;
         workspace.ldlt_.solveInPlace(workspace.pdStep);
-        const Scalar conditioning_ = 1. / workspace.ldlt_.rcond();
-        workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
 
         if (verbose)
         {
@@ -375,6 +397,53 @@ namespace lienlp
       return;
     }
 
+    /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
+    inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta=0.) const
+    {
+      const int ndx = manifold.ndx();
+      workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
+      workspace.kktMatrix.diagonal().head(ndx).array() += delta;
+    }
+
+    enum InertiaFlag
+    {
+      OK = 0,
+      BAD = 1,
+      ZEROS = 2
+    };
+
+    /// Check the matrix has the desired inertia.
+    /// @param    kktMatrix The KKT matrix.
+    /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
+    const InertiaFlag checkInertia(const Eigen::VectorXi& signature) const
+    {
+      const int ndx = manifold.ndx();
+      const int numc = problem->getTotalConstraintDim();
+      const long n = signature.size();
+      int numpos = 0;
+      int numneg = 0;
+      int numzer = 0;
+      for (long i = 0; i < n; i++)
+      {
+        if (signature[i] > 0) numpos++;
+        else if (signature[i] < 0) numneg++;
+        else numzer++;
+      }
+      if (numpos < ndx)
+      {
+        fmt::print(" | Inertia is wrong: num+ < ndx!\n");
+        return BAD;
+      } else if (numneg < numc) {
+        fmt::print(" | Inertia is wrong: num- < num_cstr!\n");
+        return BAD;
+      } else if (numzer > 0) {
+        fmt::print(" | Inertia is wrong: there are null eigenvalues!\n");
+        return ZEROS;
+      }
+      fmt::print(" | Inertia ({:d}+, {:d}, {:d}-) is OK\n", numpos, numzer, numneg);
+      return OK;
+    }
+
     /**
      * Update primal-dual subproblem tolerances upon
      * failure (insufficient primal feasibility)
@@ -400,7 +469,7 @@ namespace lienlp
     /// @brief  Accept Lagrange multiplier estimates.
     void acceptMultipliers(Workspace& workspace) const
     {
-      const auto nc = problem->getNumConstraints();
+      const std::size_t nc = problem->getNumConstraints();
       for (std::size_t i = 0; i < nc; i++)
       {
         // copy the (cached) estimates from the algo

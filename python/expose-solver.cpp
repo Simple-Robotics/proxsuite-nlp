@@ -30,7 +30,7 @@ namespace lienlp
                     , bp::arg("tol") = 1e-6
                     , bp::arg("mu_init") = 1e-2
                     , bp::arg("rho_init") = 0.
-                    , bp::arg("verbose") = true
+                    , bp::arg("verbose") = false
                     , bp::arg("mu_factor") = 0.1
                     , bp::arg("mu_min") = 1e-9
                     ))
