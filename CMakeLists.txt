@@ -2,7 +2,7 @@
 # Copyright (C) 2022 CNRS INRIA
 #
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 set(PROJECT_NAME lienlp)
 set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
@@ -12,10 +12,7 @@ set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 # Disable -Werror on Unix for now.
 set(CXX_DISABLE_WERROR True)
-set(CMAKE_VERBOSE_MAKEFILE True)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
