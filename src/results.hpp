@@ -35,9 +35,11 @@ namespace lienlp
 
     Scalar value;
     VectorXs xOpt;
-    VectorXs lamsOpt_d;
+    VectorXs lamsOpt_data;
     VectorOfRef lamsOpt;
     std::vector<VecBool> activeSet;
+    Scalar dualInfeas = 0.;
+    Scalar primalInfeas = 0.;
 
     /// Final solver parameters
     std::size_t numIters = 0;
@@ -46,13 +48,13 @@ namespace lienlp
 
     SResults(const int nx, const Problem& prob)
              : xOpt(nx)
-             , lamsOpt_d(prob.getTotalConstraintDim())
+             , lamsOpt_data(prob.getTotalConstraintDim())
              , numIters(0)
              , mu(0.)
              , rho(0.)
     {
       xOpt.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, lamsOpt_d, lamsOpt);
+      helpers::allocateMultipliersOrResiduals(prob, lamsOpt_data, lamsOpt);
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
@@ -67,7 +69,9 @@ namespace lienlp
         << "  value:        " << self.value << ",\n"
         << "  numIters:     " << self.numIters << ",\n"
         << "  mu:           " << self.mu << ",\n"
-        << "  rho:          " << self.rho << ",\n";
+        << "  rho:          " << self.rho << ",\n"
+        << "  dual_infeas   " << self.dualInfeas << ",\n"
+        << "  primal_infeas " << self.primalInfeas << ",\n";
       for (std::size_t i = 0; i < self.activeSet.size(); i++)
       {
         s << "  activeSet[" << i << "]: "

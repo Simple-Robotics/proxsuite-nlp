@@ -16,6 +16,8 @@ namespace lienlp
       )
         .def_readonly("kkt_matrix", &context::Workspace::kktMatrix, "KKT matrix buffer.")
         .def_readonly("kkt_rhs", &context::Workspace::kktRhs, "KKT system right-hand side buffer.")
+        .def_readonly("primal_residuals", &context::Workspace::primalResiduals, "Vector constraint residuals.")
+        .def_readonly("dual_residuals", &context::Workspace::dualResidual, "Dual vector residual.")
       ;
     }
     

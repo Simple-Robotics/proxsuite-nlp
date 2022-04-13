@@ -19,6 +19,7 @@ git clone [url-to-repo] --recursive
 * Eigenpy >=2.7.1 ([GitHub](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/eigenpy))
 * Pinocchio 3
 * [fmtlib](https://github.com/fmtlib/fmt)
+* Boost >=1.74
 
 Building:
 

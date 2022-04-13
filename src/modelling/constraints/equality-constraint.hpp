@@ -21,8 +21,7 @@ namespace lienlp
     LIENLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
-    using Base::operator();
-    using Active_t = typename Base::Active_t;
+    using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
 
     explicit EqualityConstraint(const FunctionType& func)
@@ -43,7 +42,7 @@ namespace lienlp
       return;  // do nothing
     }
 
-    inline void computeActiveSet(const ConstVectorRef&, Eigen::Ref<Active_t> out) const
+    inline void computeActiveSet(const ConstVectorRef&, Eigen::Ref<ActiveType> out) const
     {
       out.array() = true;
     }

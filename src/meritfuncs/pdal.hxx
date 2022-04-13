@@ -1,6 +1,29 @@
+#pragma once
 
 namespace lienlp
 {
+  template<typename Scalar>
+  Scalar PDALFunction<Scalar>::operator()(
+    const ConstVectorRef& x,
+    const VectorOfRef& lams,
+    const VectorOfRef& lams_ext) const
+  {
+    Scalar result_ = m_prob->m_cost.call(x);
+
+    const std::size_t num_c = m_prob->getNumConstraints();
+    for (std::size_t i = 0; i < num_c; i++)
+    {
+      auto cstr = m_prob->getConstraint(i);
+      VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
+      cval.noalias() = cstr->normalConeProjection(cval);
+      result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
+      // dual penalty
+      VectorXs dual_res = cval - m_muEq * lams[i];
+      result_ += (Scalar(0.5) / m_muEq) * dual_res.squaredNorm();
+    }
+
+    return result_;
+  }
 
   template<typename Scalar>
   void PDALFunction<Scalar>::computeGradient(
@@ -10,7 +33,8 @@ namespace lienlp
     VectorRef out) const
   {
     VectorOfRef lams_plus;
-    lams_plus.reserve(m_prob->getNumConstraints());
+    VectorXs data(m_prob->getTotalConstraintDim());
+    helpers::allocateMultipliersOrResiduals(*m_prob, data, lams_plus);
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
     m_lagr.computeGradient(x, lams_plus, out);
   }
@@ -24,12 +48,12 @@ namespace lienlp
   {
     /// Compute cost hessian // TODO rip this out, use workspace
     m_prob->m_cost.computeHessian(x, out);
-    const auto num_c = m_prob->getNumConstraints();
-    const auto ndx = m_prob->m_cost.ndx();
+    const std::size_t num_c = m_prob->getNumConstraints();
+    const int ndx = m_prob->m_cost.ndx();
 
-    // Compute appropriate multiplier estimates, TODO rip this out
     VectorOfRef lams_plus;
-    lams_plus.reserve(num_c);
+    VectorXs data(m_prob->getTotalConstraintDim());
+    helpers::allocateMultipliersOrResiduals(*m_prob, data, lams_plus);
     computePDALMultipliers(x, lams, lams_ext, lams_plus);
 
     // m_lagr.computeHessian(x, lams_plus, out);  // useless because recompute
@@ -45,4 +69,34 @@ namespace lienlp
     }
   }
 
+  template<typename Scalar>
+  void PDALFunction<Scalar>::computeFirstOrderMultipliers(
+    const ConstVectorRef& x,
+    const VectorOfRef& lams_ext,
+    VectorOfRef& out) const
+  {
+    for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
+    {
+      auto cstr = m_prob->getConstraint(i);
+      out[i] = cstr->m_func(x) + lams_ext[i] / m_muEq;
+      out[i] = cstr->normalConeProjection(out[i]);
+    }
+  }
+
+  template<typename Scalar>
+  void PDALFunction<Scalar>::computePDALMultipliers(
+    const ConstVectorRef& x,
+    const VectorOfRef& lams,
+    const VectorOfRef& lams_ext,
+    VectorOfRef& out) const
+  {
+    // TODO fix calling this again; grab values from workspace
+    computeFirstOrderMultipliers(x, lams_ext, out);
+    for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
+    {
+      auto cstr = m_prob->getConstraint(i);
+      out[i] = 2 * out[i] - lams[i] / m_muEq;
+      out[i] = cstr->normalConeProjection(out[i]);
+    }
+  }
 } // namespace lienlp

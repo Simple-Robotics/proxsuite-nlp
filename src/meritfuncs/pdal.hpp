@@ -60,15 +60,7 @@ namespace lienlp
     void computeFirstOrderMultipliers(
       const ConstVectorRef& x,
       const VectorOfRef& lams_ext,
-      VectorOfRef& out) const
-    {
-      for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        out[i].noalias() = (*cstr)(x) + lams_ext[i] / m_muEq;
-        out[i].noalias() = cstr->normalConeProjection(out[i]);
-      }
-    }
+      VectorOfRef& out) const;
 
     /// @brief Compute the pdAL (Gill-Robinson) multipliers
     /// @todo   fix recomputing 1st order multipliers (w/ workspace)
@@ -76,38 +68,11 @@ namespace lienlp
       const ConstVectorRef& x,
       const VectorOfRef& lams,
       const VectorOfRef& lams_ext,
-      VectorOfRef& out) const
-    {
-      // TODO fix calling this again; grab values from workspace
-      computeFirstOrderMultipliers(x, lams_ext, out);
-      for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        out[i].noalias() = 2 * out[i] - lams[i] / m_muEq;
-        out[i].noalias() = cstr->normalConeProjection(out[i]);
-      }
-    }
+      VectorOfRef& out) const;
 
     Scalar operator()(const ConstVectorRef& x,
                       const VectorOfRef& lams,
-                      const VectorOfRef& lams_ext) const
-    {
-      Scalar result_ = m_prob->m_cost.call(x);
-
-      const std::size_t num_c = m_prob->getNumConstraints();
-      for (std::size_t i = 0; i < num_c; i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
-        cval.noalias() = cstr->normalConeProjection(cval);
-        result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
-        // dual penalty
-        VectorXs dual_res = cval - m_muEq * lams[i];
-        result_ += (Scalar(0.5) / m_muEq) * dual_res.squaredNorm();
-      }
-
-      return result_;
-    }
+                      const VectorOfRef& lams_ext) const;
 
     void computeGradient(const ConstVectorRef& x,
                          const VectorOfRef& lams,

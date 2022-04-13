@@ -31,21 +31,21 @@ namespace lienlp
         std::vector<Scalar> dual_infeas;
       } storage;
 
-      void call(const SWorkspace<Scalar>& workspace,
+      void call(const SWorkspace<Scalar>&,
                 const SResults<Scalar>& results)
       {
         if (store_primal_dual_vars_)
         {
           storage.xs.push_back(results.xOpt);
-          storage.lams.push_back(results.lamsOpt_d);
+          storage.lams.push_back(results.lamsOpt_data);
           storage.lams_view.push_back(results.lamsOpt);
         }
         if (store_values_)
           storage.values.push_back(results.value);
         if (store_residuals_)
         {
-          storage.prim_infeas.push_back(workspace.primalInfeas);
-          storage.dual_infeas.push_back(workspace.dualInfeas);
+          storage.prim_infeas.push_back(results.primalInfeas);
+          storage.dual_infeas.push_back(results.dualInfeas);
         }
       }
 

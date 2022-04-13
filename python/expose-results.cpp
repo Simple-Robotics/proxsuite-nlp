@@ -28,6 +28,8 @@ namespace python
       .def_readonly("numiters", &Results::numIters)
       .def_readonly("mu", &Results::mu)
       .def_readonly("rho", &Results::rho)
+      .def_readonly("dual_infeas", &Results::dualInfeas)
+      .def_readonly("primal_infeas", &Results::primalInfeas)
       .def(bp::self_ns::str(bp::self))
       ;
   }  

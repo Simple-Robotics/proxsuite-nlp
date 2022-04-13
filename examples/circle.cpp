@@ -34,7 +34,10 @@ int main()
   const int ndx = space.ndx();
   Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
+  d.setZero();
   Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  J0.setZero();
+  J1.setZero();
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
@@ -83,6 +86,10 @@ int main()
   /// Test out merit functions
 
   Problem::VectorXs grad(space.ndx());
+  grad.setZero();
+  Problem::MatrixXs hess(space.ndx(), space.ndx());
+  hess.setZero();
+
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
@@ -93,10 +100,10 @@ int main()
   fmt::print("  LAGR FUNC TEST\n");
 
   PDALFunction<double> pdmerit(prob);
-  auto lagr = pdmerit.m_lagr;
-  Problem::VectorXs lams_d;
+  LagrangianFunction<double>& lagr = pdmerit.m_lagr;
+  Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams_d, lams);
+  helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
              lams.size(), lams[0]);
@@ -109,7 +116,6 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  Problem::MatrixXs hess(space.ndx(), space.ndx());
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);

@@ -46,42 +46,41 @@ namespace lienlp
 
     VectorXs xPrev;
     VectorXs xTrial;
-    VectorXs lamsPrev_d;
-    VectorXs lamsTrial_d;
+    VectorXs lamsPrev_data;
+    VectorXs lamsTrial_data;
     VectorOfRef lamsPrev;
     VectorOfRef lamsTrial;
 
     /// Residuals
 
     VectorXs dualResidual;
-    Scalar dualInfeas;
-
-    VectorXs primalResiduals_d;
+    VectorXs primalResiduals_data;
     VectorOfRef primalResiduals;
-    Scalar primalInfeas;
 
     /// Objective function gradient.
     VectorXs objectiveGradient;
-    /// Merit function gradient.
-    VectorXs meritGradient;
     /// Objective function Hessian.
     MatrixXs objectiveHessian;
+    /// Merit function gradient.
+    VectorXs meritGradient;
 
     MatrixXs jacobians_data;
     MatrixXs hessians_data;
     std::vector<MatrixRef> cstrJacobians;
     std::vector<MatrixRef> cstrVectorHessProd;
-    /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
+
+    VectorXs lamsPlusPre_d;
     VectorXs lamsPlus_d;
+    VectorXs lamsPDAL_d;
+    VectorXs subproblemDualErr_d;
+
+    /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorOfRef lamsPlus;
     /// Pre-projected multipliers.
-    VectorXs lamsPlusPre_d;
     VectorOfRef lamsPlusPre;
     /// Primal-dual multiplier estimates (from the pdBCL algorithm)
-    VectorXs lamsPDAL_d;
     VectorOfRef lamsPDAL;
     /// Subproblem proximal dual error.
-    VectorXs subproblemDualErr_d;
     VectorOfRef subproblemDualErr;
 
 
@@ -97,12 +96,18 @@ namespace lienlp
       , ldlt_(ndx + numcstr)
       , xPrev(nx)
       , xTrial(nx)
+      , lamsPrev_data(numcstr)
+      , lamsTrial_data(numcstr)
       , dualResidual(ndx)
+      , primalResiduals_data(numcstr)
       , objectiveGradient(ndx)
-      , meritGradient(ndx)
       , objectiveHessian(ndx, ndx)
+      , meritGradient(ndx)
       , jacobians_data(numcstr, ndx)
       , hessians_data(numcstr * ndx, ndx)
+      , lamsPlus_d(numcstr)
+      , lamsPDAL_d(numcstr)
+      , subproblemDualErr_d(numcstr)
     {
       init(prob);
     }
@@ -112,19 +117,19 @@ namespace lienlp
       kktMatrix.setZero();
       kktRhs.setZero();
       pdStep.setZero();
-      signature.setConstant(1);
+      signature.setZero();
 
       xPrev.setZero();
       xTrial.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, lamsPrev_d, lamsPrev);
-      helpers::allocateMultipliersOrResiduals(prob, lamsTrial_d, lamsTrial);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPrev_data, lamsPrev);
+      helpers::allocateMultipliersOrResiduals(prob, lamsTrial_data, lamsTrial);
 
       dualResidual.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, primalResiduals_d, primalResiduals);  // not multipliers but same dims
+      helpers::allocateMultipliersOrResiduals(prob, primalResiduals_data, primalResiduals);  // not multipliers but same dims
 
       objectiveGradient.setZero();
-      meritGradient.setZero();
       objectiveHessian.setZero();
+      meritGradient.setZero();
       jacobians_data.setZero();
       hessians_data.setZero();
 

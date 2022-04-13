@@ -79,7 +79,7 @@ namespace lienlp
     const Scalar armijo_c1;
     
     const Scalar DELTA_MIN = 1e-14;   /// Minimum nonzero regularization strength.
-    const Scalar DELTA_MAX = 1.;    /// Maximum regularization strength.
+    const Scalar DELTA_MAX = 1e3;    /// Maximum regularization strength.
 
     /// Callbacks
     using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
@@ -160,12 +160,13 @@ namespace lienlp
         workspace.xPrev = results.xOpt;
         prox_penalty.updateTarget(workspace.xPrev);
 
-        if (workspace.primalInfeas < prim_tol)
+        if (results.primalInfeas < prim_tol)
         {
           // accept dual iterate
-          fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers\n");
+          fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers");
+          fmt::print("\n");
           acceptMultipliers(workspace);
-          if ((workspace.primalInfeas < target_tol) && (workspace.dualInfeas < target_tol))
+          if ((results.primalInfeas < target_tol) && (results.dualInfeas < target_tol))
           {
             // terminate algorithm
             results.converged = ConvergenceFlag::SUCCESS;
@@ -173,7 +174,8 @@ namespace lienlp
           }
           updateToleranceSuccess();
         } else {
-          fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers\n");
+          fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers");
+          fmt::print("\n");
           updatePenalty();
           updateToleranceFailure();
         }
@@ -185,9 +187,9 @@ namespace lienlp
 
       if (results.converged == SUCCESS)
         fmt::print("Solver successfully converged\n"
-                   "  number of iterations: {:d}\n"
+                   "  numIters : {:d}\n"
                    "  residuals: p={:.3g}, d={:.3g}\n",
-                   results.numIters, workspace.primalInfeas, workspace.dualInfeas);
+                   results.numIters, results.primalInfeas, results.dualInfeas);
       return results.converged;
     }
 
@@ -302,17 +304,25 @@ namespace lienlp
           cursor += nc;
         }
 
-        // now check if we can stop
+        // Compute dual residual and infeasibility
         workspace.dualResidual = workspace.kktRhs.head(ndx);
         if (rho > 0.)
         {
           workspace.dualResidual -= rho * prox_penalty.computeGradient(x);
         }
-        workspace.dualInfeas = math::infNorm(workspace.dualResidual);
+        results.dualInfeas = math::infNorm(workspace.dualResidual);
+        results.primalInfeas = 0.;
+        for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
+        {
+          auto cstr = problem->getConstraint(i);
+          results.primalInfeas = std::max(results.primalInfeas,
+                                          math::infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
+        }
+        // Compute inner stopping criterion
         Scalar inner_crit = math::infNorm(workspace.kktRhs);
 
         fmt::print("[iter {:>3d}] inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
-                  results.numIters, inner_tol, workspace.dualInfeas, workspace.primalInfeas);
+                  results.numIters, inner_tol, results.dualInfeas, results.primalInfeas);
 
         if (inner_crit <= inner_tol)
         {
@@ -342,7 +352,7 @@ namespace lienlp
           if (delta == 0.) {
             delta = DELTA_MIN;
           } else {
-            delta = std::min(delta * del_up_k, DELTA_MAX);
+            delta *= del_up_k;
           }
           old_delta = delta;
         }
@@ -398,7 +408,7 @@ namespace lienlp
     }
 
     /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
-    inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta=0.) const
+    inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
     {
       const int ndx = manifold.ndx();
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
@@ -496,16 +506,6 @@ namespace lienlp
         workspace.lamsPlus[i] = cstr->normalConeProjection(workspace.lamsPlusPre[i]);
         workspace.subproblemDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
         workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
-      } 
-
-      // update primal infeas measure
-      workspace.primalInfeas = 0.;
-      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
-      {
-        auto cstr = problem->getConstraint(i);
-        workspace.primalInfeas = std::max(
-          workspace.primalInfeas,
-          math::infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
       }
     }
 
@@ -521,9 +521,8 @@ namespace lienlp
       {
         auto cstr = problem->getConstraint(i);
 
-        MatrixRef J_ = workspace.cstrJacobians[i];
-        cstr->m_func.computeJacobian(x, J_);
-        cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], J_);
+        cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
+        cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
         cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
       }
     } 

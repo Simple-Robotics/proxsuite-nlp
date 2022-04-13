@@ -103,8 +103,8 @@ namespace lienlp
       int nr = 0;
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        typename Problem::ConstraintPtr cur_cstr = prob.getConstraint(i);
-        nr = cur_cstr->nr();
+        typename Problem::ConstraintPtr cstr = prob.getConstraint(i);
+        nr = cstr->nr();
         out.push_back(data.segment(cursor, nr));
         cursor += nr;
       }

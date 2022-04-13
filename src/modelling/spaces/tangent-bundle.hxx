@@ -1,3 +1,5 @@
+#pragma once
+
 #include "lienlp/modelling/spaces/tangent-bundle.hpp"
 
 

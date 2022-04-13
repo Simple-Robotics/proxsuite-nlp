@@ -38,7 +38,10 @@ int main()
   const int ndx = space.ndx();
   Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
+  d.setZero();
   Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  J0.setZero();
+  J1.setZero();
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
@@ -80,9 +83,9 @@ int main()
 
   PDALFunction<double> pdmerit(prob);
   auto lagr = pdmerit.m_lagr;
-  Problem::VectorXs lams_d;
+  Problem::VectorXs lams_data;
   Problem::VectorOfRef lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams_d, lams);
+  helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n", lams.size(), lams[0]);
@@ -96,6 +99,7 @@ int main()
   fmt::print("\tgradL(p1) = {}\n", grad);
 
   Problem::MatrixXs hess(space.ndx(), space.ndx());
+  hess.setZero();
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);

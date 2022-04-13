@@ -29,12 +29,14 @@ namespace python
     using context::Constraint;
     using ConstraintPtr = shared_ptr<Constraint>;
     bp::class_<Constraint, ConstraintPtr, boost::noncopyable>(
-      "ConstraintSetBase", "Base class for constraint sets.",
+      "ConstraintSetBase", "Base class for constraint sets or nonsmooth penalties.",
       bp::no_init
     )
       .def("projection", &Constraint::projection, bp::args("self", "z"))
-      .def("normalConeProjection", &Constraint::normalConeProjection, bp::args("self", "z"))
-      .def("computeActiveSet", &Constraint::computeActiveSet, bp::args("self", "z", "out"))
+      .def("normal_cone_proj", &Constraint::normalConeProjection, bp::args("self", "z"))
+      .def("apply_jacobian", &Constraint::applyProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
+      .def("compute_active_set", &Constraint::computeActiveSet, bp::args("self", "z", "out"))
+      .def(bp::self == bp::self)
       ;
 
     /* Expose constraint stack */
