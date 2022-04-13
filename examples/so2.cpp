@@ -72,6 +72,10 @@ int main()
   /// Test out merit functions
 
   Problem::VectorXs grad(ndx);
+  grad.setZero();
+  Problem::MatrixXs hess(space.ndx(), space.ndx());
+  hess.setZero();
+
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
@@ -98,8 +102,6 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  Problem::MatrixXs hess(space.ndx(), space.ndx());
-  hess.setZero();
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);
