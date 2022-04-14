@@ -30,6 +30,8 @@ int main()
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
   Manifold::TangentVectorType th0(1), th1(1);
+  th0.setZero();
+  th1.setZero();
   space.difference(neut, p0, th0);
   space.difference(neut, p1, th1);
 
@@ -37,11 +39,12 @@ int main()
 
   const int ndx = space.ndx();
   Manifold::TangentVectorType d(ndx);
-  space.difference(p0, p1, d);
   d.setZero();
   Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
   J0.setZero();
   J1.setZero();
+
+  space.difference(p0, p1, d);
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
