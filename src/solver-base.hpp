@@ -77,6 +77,7 @@ namespace lienlp
 
     const Scalar alpha_min;
     const Scalar armijo_c1;
+    const Scalar ls_beta;
     
     const Scalar DELTA_MIN = 1e-14;   /// Minimum nonzero regularization strength.
     const Scalar DELTA_MAX = 1e3;    /// Maximum regularization strength.
@@ -98,25 +99,26 @@ namespace lienlp
               const Scalar dual_alpha=1.,
               const Scalar dual_beta=1.,
               const Scalar alpha_min=1e-7,
-              const Scalar armijo_c1=1e-4
+              const Scalar armijo_c1=1e-4,
+              const Scalar ls_beta=0.5
               )
-      : manifold(man),
-        problem(prob),
-        merit_fun(problem),
-        prox_penalty(manifold, manifold.neutral(),
-                     rho_init * MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
-        verbose(verbose),
-        rho_init(rho_init),
-        mu_eq_init(mu_eq_init),
-        mu_factor(mu_factor),
-        mu_lower_(mu_lower_),
-        target_tol(tol),
-        prim_alpha(prim_alpha),
-        prim_beta(prim_beta),
-        dual_alpha(dual_alpha),
-        dual_beta(dual_beta),
-        alpha_min(alpha_min),
-        armijo_c1(armijo_c1)
+      : manifold(man)
+      , problem(prob)
+      , merit_fun(problem)
+      , prox_penalty(manifold, manifold.neutral(), rho_init * MatrixXs::Identity(manifold.ndx(), manifold.ndx()))
+      , verbose(verbose)
+      , rho_init(rho_init)
+      , mu_eq_init(mu_eq_init)
+      , mu_factor(mu_factor)
+      , mu_lower_(mu_lower_)
+      , target_tol(tol)
+      , prim_alpha(prim_alpha)
+      , prim_beta(prim_beta)
+      , dual_alpha(dual_alpha)
+      , dual_beta(dual_beta)
+      , alpha_min(alpha_min)
+      , armijo_c1(armijo_c1)
+      , ls_beta(ls_beta)
     {
       merit_fun.setPenalty(mu_eq);
     }
@@ -162,9 +164,7 @@ namespace lienlp
 
         if (results.primalInfeas < prim_tol)
         {
-          // accept dual iterate
-          fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers");
-          fmt::print("\n");
+          fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers\n");
           acceptMultipliers(workspace);
           if ((results.primalInfeas < target_tol) && (results.dualInfeas < target_tol))
           {
@@ -174,8 +174,7 @@ namespace lienlp
           }
           updateToleranceSuccess();
         } else {
-          fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers");
-          fmt::print("\n");
+          fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers\n");
           updatePenalty();
           updateToleranceFailure();
         }
@@ -190,6 +189,17 @@ namespace lienlp
                    "  numIters : {:d}\n"
                    "  residuals: p={:.3g}, d={:.3g}\n",
                    results.numIters, results.primalInfeas, results.dualInfeas);
+
+      switch(results.converged)
+      {
+      case MAX_ITERS_REACHED: fmt::print(fmt::fg(fmt::color::orange_red), "Max number of iterations reached.\n");
+                              break;
+      default: break;
+      }
+      fmt::print("\n");
+
+      invokeCallbacks(workspace, results);
+
       return results.converged;
     }
 
@@ -197,6 +207,7 @@ namespace lienlp
     void setTolerance(const Scalar tol) { target_tol = tol; }
     /// Set solver maximum allowed number of iterations.
     void setMaxIters(const std::size_t val) { MAX_ITERS = val; }
+    std::size_t getMaxIters() const { return MAX_ITERS; }
 
     /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower_).
     inline void updatePenalty()
@@ -239,6 +250,13 @@ namespace lienlp
       VectorXs& x = results.xOpt; // shorthand
       const std::size_t num_c = problem->getNumConstraints();
 
+      Scalar old_delta = 0.;
+      Scalar del_up_k = 3.;
+      Scalar del_down_k = 0.5;
+      Scalar conditioning_ = 0;
+
+      Scalar merit0 = results.merit;
+
       std::size_t k;
       for (k = 0; k < MAX_ITERS; k++)
       {
@@ -278,10 +296,13 @@ namespace lienlp
         int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
         {
-          MatrixRef J_ = workspace.cstrJacobians[i];
+          auto cstr = problem->getConstraint(i);
+
+          MatrixRef& J_ = workspace.cstrJacobians[i];
 
           workspace.kktRhs.head(ndx).noalias() += J_.transpose() * results.lamsOpt[i];
-          if (not use_gauss_newton)
+          bool use_vhp = (use_gauss_newton && not cstr->disable_gauss_newton) || not use_gauss_newton; 
+          if (use_vhp)
           {
             workspace.kktMatrix.topLeftCorner(ndx, ndx) += workspace.cstrVectorHessProd[i];
           }
@@ -289,7 +310,6 @@ namespace lienlp
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
 
           // fill in the dual part of the KKT
-          auto cstr = problem->getConstraint(i);
           nc = cstr->nr();
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
           workspace.kktRhs.segment(cursor, nc) = workspace.subproblemDualErr[i];
@@ -329,19 +349,14 @@ namespace lienlp
           return;
         }
 
-        for (auto cb : callbacks_)
-        {
-          cb->call(workspace, results);
-        }
+        invokeCallbacks(workspace, results);
+
+        /* Compute the step */
 
         // factorization
         // regularization strength
         Scalar delta = 0.;
-        Scalar old_delta = 0.;
-        Scalar del_up_k = 3.;
-        Scalar del_down_k = 0.5;
         InertiaFlag is_inertia_correct = BAD;
-        Scalar conditioning_ = 0;
         while (not(is_inertia_correct == OK) && delta <= DELTA_MAX)
         {
           correctInertia(workspace, delta, old_delta);
@@ -369,11 +384,9 @@ namespace lienlp
 
         //// Take the step
 
-        Scalar merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
-        if (rho > 0.)
-        {
-          merit0 += rho * prox_penalty.call(x);
-          workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
+        merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        merit0 += rho * prox_penalty.call(x);
+        workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
         results.merit = merit0;
 
         Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep.head(ndx));
@@ -410,6 +423,8 @@ namespace lienlp
     /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
     inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
     {
+      if (verbose)
+        fmt::print(" | xreg : {:.3g}", delta);
       const int ndx = manifold.ndx();
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
       workspace.kktMatrix.diagonal().head(ndx).array() += delta;
@@ -439,18 +454,19 @@ namespace lienlp
         else if (signature[i] < 0) numneg++;
         else numzer++;
       }
+      fmt::print(" | Inertia ({:d}+, {:d}, {:d}-)", numpos, numzer, numneg);
       if (numpos < ndx)
       {
-        fmt::print(" | Inertia is wrong: num+ < ndx!\n");
+        fmt::print(" is wrong: num+ < ndx!\n");
         return BAD;
       } else if (numneg < numc) {
-        fmt::print(" | Inertia is wrong: num- < num_cstr!\n");
+        fmt::print(" is wrong: num- < num_cstr!\n");
         return BAD;
       } else if (numzer > 0) {
-        fmt::print(" | Inertia is wrong: there are null eigenvalues!\n");
+        fmt::print(" is wrong: there are null eigenvalues!\n");
         return ZEROS;
       }
-      fmt::print(" | Inertia ({:d}+, {:d}, {:d}-) is OK\n", numpos, numzer, numneg);
+      fmt::print(" is OK\n");
       return OK;
     }
 
@@ -530,26 +546,28 @@ namespace lienlp
      * @param merit0    Value of the merit function at the previous point.
      * @param d1        Directional derivative of the merit function in the search direction.
      */
-    Scalar doLinesearch(Workspace& workspace, Results& results, Scalar merit0, Scalar d1) const
+    Scalar doLinesearch(Workspace& workspace, Results& results, const Scalar merit0, const Scalar d1) const
     {
       Scalar alpha_try = 1.;
 
-      const Scalar ls_beta = 0.5;
       if (verbose)
-        fmt::print(" | [{}] current M = {:.5g} | d1 = {:.3g}\n", __func__, merit0, d1);
+        fmt::print(" | current M = {:.5g} | d1 = {:.3g}\n", merit0, d1);
 
       Scalar merit_trial = 0., dM = 0.;
       while (alpha_try >= alpha_min)
       {
         tryStep(workspace, results, alpha_try);
+        if (std::abs(d1) < 1e-13)
+        {
+          return alpha_try;
+        }
         merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
         merit_trial += rho * prox_penalty.call(workspace.xTrial);
         dM = merit_trial - merit0;
         if (verbose)
-          fmt::print(" | [{}] alpha {:.2e}, M = {:.5g}, dM = {:.5g}\n", __func__, alpha_try, merit_trial, dM);
+          fmt::print(" | alpha {:5.2e}, M = {:5.5g}, dM = {:5.5g}\n", alpha_try, merit_trial, dM);
 
-        bool armijo_cond = dM <= armijo_c1 * alpha_try * d1;
-        if (armijo_cond)
+        if (dM <= armijo_c1 * alpha_try * d1)
         {
           break;
         }
@@ -572,12 +590,20 @@ namespace lienlp
      * @param results   Contains the previous primal-dual point
      * @param alpha     Step size
      */
-    void tryStep(Workspace &workspace, Results& results, Scalar alpha) const
+    void tryStep(Workspace& workspace, Results& results, Scalar alpha) const
     {
       const int ndx = manifold.ndx();
       const long ntot = workspace.pdStep.rows();
       manifold.integrate(results.xOpt, alpha * workspace.pdStep.head(ndx), workspace.xTrial);
       workspace.lamsTrial_data = results.lamsOpt_data + alpha * workspace.pdStep.tail(ntot - ndx);
+    }
+
+    void invokeCallbacks(Workspace& workspace, Results& results)
+    {
+      for (auto cb : callbacks_)
+      {
+        cb->call(workspace, results);
+      }
     }
 
   };
