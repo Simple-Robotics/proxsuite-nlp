@@ -23,6 +23,7 @@ namespace python
     );
   }
 
+  /// @todo Expose properly using pure_virtual, to allow overriding from Python
   void exposeConstraints()
   {
     using context::Scalar;
