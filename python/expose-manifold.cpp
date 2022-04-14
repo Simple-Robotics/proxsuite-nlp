@@ -3,8 +3,8 @@
 
 #include "lienlp/modelling/spaces/tangent-bundle.hpp"
 #ifdef WITH_PINOCCHIO
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/spaces/multibody.hpp"
+  #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+  #include "lienlp/modelling/spaces/multibody.hpp"
 #endif
 
 
@@ -81,8 +81,8 @@ namespace python
       bp::init<const Model_t&>(bp::args("self", "model"))
     );
 
-    bp::class_<StateMultibody<Scalar>, bp::bases<Manifold>>(
-      "StateMultibody", "Tangent space of the multibody configuration group.",
+    bp::class_<MultibodyPhaseSpace<Scalar>, bp::bases<Manifold>>(
+      "MultibodyPhaseSpace", "Tangent space of the multibody configuration group.",
       bp::init<const Model_t&>(bp::args("model"))
     );
 #endif

@@ -94,12 +94,12 @@ namespace lienlp
                                   MatrixRef Jout,
                                   int arg) const = 0;
 
-    void Jdifference(const ConstVectorRef& x,
-                     const ConstVectorRef& v,
+    void Jdifference(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
                      MatrixRef Jout,
                      int arg) const
     {
-      Jdifference_impl(x, v, Jout, arg);
+      Jdifference_impl(x0, x1, Jout, arg);
     }
 
     /// @brief    Interpolation operation.
