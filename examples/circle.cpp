@@ -70,8 +70,6 @@ int main()
   using Ineq_t = NegativeOrthant<double>;
   // Problem::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
-  fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
-  fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
   /// Cast scalar cost to func
@@ -144,7 +142,7 @@ int main()
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.xOpt.transpose());
-  fmt::print("Constraint value {}\n", cstr1(results.xOpt).transpose());
+  fmt::print("Constraint value {}\n", cstr1.m_func(results.xOpt).transpose());
   fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;

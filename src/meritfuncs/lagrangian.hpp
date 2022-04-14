@@ -36,7 +36,7 @@ namespace lienlp
       for (std::size_t i = 0; i < num_c; i++)
       {
         const auto cstr = m_prob->getConstraint(i);
-        result_ = result_ + lams[i].dot((*cstr)(x));
+        result_ = result_ + lams[i].dot(cstr->m_func(x));
       }
       return result_;
     }

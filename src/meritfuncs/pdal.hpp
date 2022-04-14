@@ -34,22 +34,29 @@ namespace lienlp
     using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
+    using Base::computeHessian;
     using Problem = ProblemTpl<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
     Lagrangian_t m_lagr;
 
     /// AL penalty parameter
-    Scalar m_muEq = 0.01;
+    Scalar m_mu = 0.01;
+    /// Reciprocal penalty parameter
+    Scalar m_muInv = 1. / m_mu;
 
     /// Generalized pdAL dual penalty param
     const Scalar m_gamma = 1.;
 
     /// Set the merit function penalty parameter.
-    void setPenalty(const Scalar& new_mu) { m_muEq = new_mu; };
+    void setPenalty(const Scalar& new_mu)
+    {
+      m_mu = new_mu;
+      m_muInv = 1. / new_mu;
+    };
 
     /// Get the merit function penalty parameter;
-    const Scalar& getPenalty() { return m_muEq; }
+    const Scalar& getPenalty() { return m_mu; }
 
     PDALFunction(shared_ptr<Problem> prob)
       : Base(prob), m_lagr(Lagrangian_t(prob)) {}

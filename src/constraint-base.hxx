@@ -15,6 +15,7 @@ namespace lienlp
     MatrixRef Jout) const
   {
     const int nr = this->nr();
+    assert(nr == Jout.rows());
     ActiveType active_set(nr);
     computeActiveSet(z, active_set);
     for (int i = 0; i < nr; i++)
@@ -33,6 +34,7 @@ namespace lienlp
     MatrixRef Jout) const
   {
     const int nr = this->nr();
+    assert(nr == Jout.rows());
     ActiveType active_set(nr);
     computeActiveSet(z, active_set);
     for (int i = 0; i < nr; i++)

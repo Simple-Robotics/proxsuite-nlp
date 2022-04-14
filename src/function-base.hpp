@@ -30,11 +30,11 @@ namespace lienlp
     virtual ~BaseFunctionTpl() = default;
 
     /// Get function input vector size (representation of manifold).
-    int nx() const { return m_nx; }
+    int nx() const  { return m_nx; }
     /// Get input manifold's tangent space dimension.
     int ndx() const { return m_ndx; }
     /// Get function codimension.
-    int nr() const { return m_nr; }
+    int nr() const  { return m_nr; }
   };
 
   /** @brief  Differentiable function, with method for the Jacobian.

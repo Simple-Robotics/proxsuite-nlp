@@ -1,5 +1,8 @@
 #pragma once
 
+#include "lienlp/meritfuncs/pdal.hpp"
+
+
 namespace lienlp
 {
   template<typename Scalar>
@@ -10,16 +13,14 @@ namespace lienlp
   {
     Scalar result_ = m_prob->m_cost.call(x);
 
-    const std::size_t num_c = m_prob->getNumConstraints();
-    for (std::size_t i = 0; i < num_c; i++)
+    const std::size_t nc = m_prob->getNumConstraints();
+    for (std::size_t i = 0; i < nc; i++)
     {
-      auto cstr = m_prob->getConstraint(i);
-      VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
-      cval.noalias() = cstr->normalConeProjection(cval);
-      result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
+      const auto cstr = m_prob->getConstraint(i);
+      VectorXs cval = cstr->normalConeProjection(cstr->m_func(x) + m_mu * lams_ext[i]);
+      result_ += Scalar(0.5) * m_muInv * cval.squaredNorm();
       // dual penalty
-      VectorXs dual_res = cval - m_muEq * lams[i];
-      result_ += (Scalar(0.5) / m_muEq) * dual_res.squaredNorm();
+      result_ += Scalar(0.5) * m_muInv * (cval - m_mu * lams[i]).squaredNorm();
     }
 
     return result_;
@@ -48,7 +49,7 @@ namespace lienlp
   {
     /// Compute cost hessian // TODO rip this out, use workspace
     m_prob->m_cost.computeHessian(x, out);
-    const std::size_t num_c = m_prob->getNumConstraints();
+    const std::size_t nc = m_prob->getNumConstraints();
     const int ndx = m_prob->m_cost.ndx();
 
     VectorOfRef lams_plus;
@@ -59,13 +60,13 @@ namespace lienlp
     // m_lagr.computeHessian(x, lams_plus, out);  // useless because recompute
 
     MatrixXs J, vhp_buffer(ndx, ndx); // TODO refactor this allocation using workspace
-    for (std::size_t i = 0; i < num_c; i++)
+    for (std::size_t i = 0; i < nc; i++)
     {
       typename Problem::ConstraintPtr cstr = m_prob->getConstraint(i);
       J.resize(cstr->nr(), ndx);
       cstr->m_func.computeJacobian(x, J);
       cstr->m_func.vectorHessianProduct(x, lams_plus[i], vhp_buffer);
-      out.noalias() += vhp_buffer + 2 * m_muEq * J.transpose() * J;
+      out.noalias() += vhp_buffer + 2 * m_mu * J.transpose() * J;
     }
   }
 
@@ -78,8 +79,7 @@ namespace lienlp
     for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
     {
       auto cstr = m_prob->getConstraint(i);
-      out[i] = cstr->m_func(x) + lams_ext[i] / m_muEq;
-      out[i] = cstr->normalConeProjection(out[i]);
+      out[i].noalias() = cstr->normalConeProjection(lams_ext[i] + m_muInv * cstr->m_func(x));
     }
   }
 
@@ -95,8 +95,7 @@ namespace lienlp
     for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
     {
       auto cstr = m_prob->getConstraint(i);
-      out[i] = 2 * out[i] - lams[i] / m_muEq;
-      out[i] = cstr->normalConeProjection(out[i]);
+      out[i].noalias() = cstr->normalConeProjection(2 * out[i] - lams[i]);
     }
   }
 } // namespace lienlp

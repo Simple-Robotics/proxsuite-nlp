@@ -21,16 +21,13 @@ namespace lienlp
     using FunctionType = C2FunctionTpl<Scalar>;
     const FunctionType& m_func;
 
+    /// Do not use the vector-Hessian product in the Hessian
+    /// for Gauss Newton.
+    bool disable_gauss_newton = false;
 
     explicit ConstraintSetBase<Scalar>(const FunctionType& func)
       : m_func(func)
       {}
-
-    /// Call the underlying function
-    inline ReturnType operator()(const ConstVectorRef& x) const
-    {
-      return m_func(x);
-    }
 
     /// Get dimension of manifold element representation.
     int nx()  const { return m_func.nx(); }

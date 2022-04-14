@@ -28,14 +28,6 @@ namespace lienlp
     /// Compute the merit function Hessian matrix.
     virtual void computeHessian(const ConstVectorRef& x, const Args&... args, MatrixRef out) const = 0;
 
-    /// @copybrief computeGradient()
-    VectorXs computeGradient(const ConstVectorRef& x, const Args&... args) const
-    {
-      VectorXs out;
-      computeGradient(x, args..., out);
-      return out;
-    }
-
   };
 
 
