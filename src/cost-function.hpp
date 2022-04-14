@@ -64,12 +64,15 @@ namespace lienlp
 
     void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
     {
-      computeGradient(x, Jout.transpose());
+      MatrixXs gout = Jout.transpose();
+      computeGradient(x, gout);
+      Jout = gout.transpose();
     }
 
-    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef&, Eigen::Ref<JacobianType> Hout) const
+    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
     {
       computeHessian(x, Hout);
+      Hout *= v(0);
     }
 
     virtual ~CostFunctionBaseTpl<Scalar>() = default;
