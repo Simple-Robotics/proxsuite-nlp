@@ -1,11 +1,13 @@
 #include "lienlp/manifold-base.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/spaces/multibody.hpp"
-
-#include <pinocchio/parsers/sample-models.hpp>
-#include <pinocchio/multibody/liegroup/vector-space.hpp>
 
 #include <boost/test/unit_test.hpp>
+
+#ifdef WITH_PINOCCHIO
+  #include <pinocchio/parsers/sample-models.hpp>
+  #include <pinocchio/multibody/liegroup/vector-space.hpp>
+  #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+  #include "lienlp/modelling/spaces/multibody.hpp"
+#endif
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -14,6 +16,8 @@ using namespace lienlp;
 
 
 BOOST_AUTO_TEST_SUITE(manifold)
+
+#ifdef WITH_PINOCCHIO
 
 BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 {
@@ -88,7 +92,6 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
 }
 
 
-// #ifdef WITH_PINOCCHIO_SUPPORT
 BOOST_AUTO_TEST_CASE(test_pinmodel)
 {
   BOOST_TEST_MESSAGE("Starting");
@@ -130,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
-  using Man = StateMultibody<double>;
+  using Man = MultibodyPhaseSpace<double>;
 
   // MultibodyConfiguration<double> config_space(model);
   Man space(model);
@@ -141,6 +144,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   auto x1_exp = space.integrate(x0, dx0);
 
 }
+#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()
