@@ -21,6 +21,7 @@ namespace python
       "Results", "Results holder struct.",
       bp::init<int, context::Problem&>(bp::args("self", "nx", "problem")))
       .def_readonly("converged", &Results::converged)
+      .def_readonly("merit", &Results::merit, "Merit function value.")
       .def_readonly("value", &Results::value)
       .def_readonly("xopt", &Results::xOpt)
       .def_readonly("lamsopt", &Results::lamsOpt)

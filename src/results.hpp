@@ -33,6 +33,7 @@ namespace lienlp
 
     ConvergenceFlag converged = ConvergenceFlag::UNINIT;
 
+    Scalar merit;
     Scalar value;
     VectorXs xOpt;
     VectorXs lamsOpt_data;
@@ -66,6 +67,7 @@ namespace lienlp
     {
       s << "{\n"
         << "  convergence:  " << self.converged << ",\n"
+        << "  merit:        " << self.merit << ",\n"
         << "  value:        " << self.value << ",\n"
         << "  numIters:     " << self.numIters << ",\n"
         << "  mu:           " << self.mu << ",\n"

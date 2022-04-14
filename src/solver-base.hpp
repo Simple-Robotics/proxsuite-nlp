@@ -251,8 +251,7 @@ namespace lienlp
 
         if (verbose)
         {
-          fmt::print("[{}] Iterate {:d}\n", __func__, results.numIters);
-          fmt::print(" | objective: {:g}\n", results.value);
+          fmt::print("[iter {:>3d}] objective: {:g}\n", results.numIters, results.value);
         }
 
         computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
@@ -321,10 +320,11 @@ namespace lienlp
         // Compute inner stopping criterion
         Scalar inner_crit = math::infNorm(workspace.kktRhs);
 
-        fmt::print("[iter {:>3d}] inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
-                  results.numIters, inner_tol, results.dualInfeas, results.primalInfeas);
+        fmt::print(" | inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
+                  inner_tol, results.dualInfeas, results.primalInfeas);
 
-        if (inner_crit <= inner_tol)
+        bool outer_cond = (results.primalInfeas <= target_tol && results.dualInfeas <= target_tol);
+        if ((inner_crit <= inner_tol) || outer_cond)
         {
           return;
         }
@@ -363,7 +363,6 @@ namespace lienlp
         if (verbose)
         {
           fmt::print(" | conditioning:  {:.3g}\n", conditioning_);
-          fmt::print(" | KKT signature: {}\n", workspace.signature.transpose());
         }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
@@ -375,7 +374,8 @@ namespace lienlp
         {
           merit0 += rho * prox_penalty.call(x);
           workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
-        }
+        results.merit = merit0;
+
         Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep.head(ndx));
         Scalar dir_dual = 0;
         cursor = ndx;
@@ -391,7 +391,7 @@ namespace lienlp
 
         doLinesearch(workspace, results, merit0, dir_deriv);
         results.xOpt = workspace.xTrial;
-        results.lamsOpt = workspace.lamsTrial;
+        results.lamsOpt_data = workspace.lamsTrial_data;
 
         results.numIters++;
         if (results.numIters >= MAX_ITERS)
@@ -479,12 +479,7 @@ namespace lienlp
     /// @brief  Accept Lagrange multiplier estimates.
     void acceptMultipliers(Workspace& workspace) const
     {
-      const std::size_t nc = problem->getNumConstraints();
-      for (std::size_t i = 0; i < nc; i++)
-      {
-        // copy the (cached) estimates from the algo
-        workspace.lamsPrev[i] = workspace.lamsPDAL[i];
-      }
+      workspace.lamsPrev_data = workspace.lamsPDAL_d;
     }
 
     /** 
@@ -580,18 +575,9 @@ namespace lienlp
     void tryStep(Workspace &workspace, Results& results, Scalar alpha) const
     {
       const int ndx = manifold.ndx();
+      const long ntot = workspace.pdStep.rows();
       manifold.integrate(results.xOpt, alpha * workspace.pdStep.head(ndx), workspace.xTrial);
-
-      int cursor = ndx;
-      int nc = 0;
-      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
-      {
-        nc = problem->getConstraint(i)->nr();
-
-        workspace.lamsTrial[i].noalias() = results.lamsOpt[i] + alpha * workspace.pdStep.segment(cursor, nc);
-
-        cursor += nc;
-      }
+      workspace.lamsTrial_data = results.lamsOpt_data + alpha * workspace.pdStep.tail(ntot - ndx);
     }
 
   };

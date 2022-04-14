@@ -23,6 +23,11 @@ namespace lienlp
                  Scalar,
                  bool,
                  Scalar,
+                 Scalar,
+                 Scalar,
+                 Scalar,
+                 Scalar,
+                 Scalar,
                  Scalar
                  >((  bp::arg("self")
                     , bp::arg("space")
@@ -33,6 +38,11 @@ namespace lienlp
                     , bp::arg("verbose") = false
                     , bp::arg("mu_factor") = 0.1
                     , bp::arg("mu_min") = 1e-9
+                    , bp::arg("prim_alpha") = 0.1
+                    , bp::arg("prim_beta") = 0.9
+                    , bp::arg("dual_alpha") = 1.
+                    , bp::arg("dual_beta") = 1.
+                    , bp::arg("alpha_min") = 1e-7
                     ))
       )
         .def_readwrite("use_gauss_newton", &Solver::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
@@ -43,8 +53,12 @@ namespace lienlp
              bp::args("workspace", "results", "x0", "lams0"))
         .def("set_penalty",    &Solver::setPenalty,   bp::args("self", "mu"), "Set the augmented Lagrangian penalty parameter.")
         .def("set_prox_param", &Solver::setProxParam, bp::args("self", "rho"), "Set the primal proximal penalty parameter.")
-        .def("set_maxiters",   &Solver::setMaxIters,  bp::args("self", "n"), "Set the maximum number of iterations for the solver.")
         .def("set_tolerance",  &Solver::setTolerance, bp::args("self", "tol"), "Set the solver's target tolerance.")
+        .add_property("maxiters",
+                      &Solver::getMaxIters,
+                      &Solver::setMaxIters,
+                      "Maximum number of iterations.")
+        .add_property("alpha_min", &Solver::alpha_min)
         ;
     }
   } // namespace python
