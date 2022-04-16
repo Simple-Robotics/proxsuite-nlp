@@ -38,6 +38,9 @@ namespace python
       .def("apply_jacobian", &Constraint::applyProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
       .def("apply_normal_jacobian", &Constraint::applyNormalConeProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the normal cone projection Jacobian.")
       .def("compute_active_set", &Constraint::computeActiveSet, bp::args("self", "z", "out"))
+      .add_property("nx",  &Constraint::nx)
+      .add_property("ndx", &Constraint::ndx)
+      .add_property("nr",  &Constraint::nr)
       .def(bp::self == bp::self)
       ;
 
