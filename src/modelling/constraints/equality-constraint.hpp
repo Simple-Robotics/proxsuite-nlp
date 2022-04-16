@@ -24,7 +24,7 @@ namespace lienlp
     using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
 
-    bool disable_gauss_newton = true;
+    bool disableGaussNewton() const { return true; }
 
     explicit EqualityConstraint(const FunctionType& func)
       : Base(func) {}

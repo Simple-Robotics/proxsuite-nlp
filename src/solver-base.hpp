@@ -300,11 +300,10 @@ namespace lienlp
 
           MatrixRef& J_ = workspace.cstrJacobians[i];
 
-          workspace.kktRhs.head(ndx).noalias() += J_.transpose() * results.lamsOpt[i];
-          bool use_vhp = (use_gauss_newton && not cstr->disable_gauss_newton) || not use_gauss_newton; 
+          bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
           {
-            workspace.kktMatrix.topLeftCorner(ndx, ndx) += workspace.cstrVectorHessProd[i];
+            workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessProd[i];
           }
 
           workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
