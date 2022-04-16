@@ -2,14 +2,7 @@
  */
 #pragma once
 
-#include <Eigen/Core>
-#include <Eigen/Cholesky>
-#include <cassert>
-
-#include <fmt/core.h>
-#include <fmt/color.h>
-#include <fmt/ostream.h>
-
+#include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
 #include "lienlp/problem-base.hpp"
 #include "lienlp/meritfuncs/pdal.hpp"
@@ -19,6 +12,17 @@
 
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
+#include <Eigen/Cholesky>
+#ifndef NDEBUG
+  #include <Eigen/Eigenvalues>
+#endif
+
+#include <cassert>
+#include <stdexcept>
+
+#include <fmt/core.h>
+#include <fmt/color.h>
+#include <fmt/ostream.h>
 
 namespace lienlp
 {
@@ -30,7 +34,6 @@ namespace lienlp
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
-    using Merit_t = PDALFunction<Scalar>;
 
     using Workspace = SWorkspace<Scalar>;
     using Results = SResults<Scalar>;
@@ -41,7 +44,7 @@ namespace lienlp
     const M& manifold;
     shared_ptr<Problem> problem;
     /// Merit function.
-    Merit_t merit_fun;
+    PDALFunction<Scalar> merit_fun;
     /// Proximal regularization penalty.
     QuadraticDistanceCost<Scalar> prox_penalty;
 

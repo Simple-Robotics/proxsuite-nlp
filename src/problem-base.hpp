@@ -50,8 +50,8 @@ namespace lienlp
       return m_ncs;
     }
 
-    std::size_t nx()  const { m_cost.nx(); }
-    std::size_t ndx() const { m_cost.ndx(); }
+    std::size_t nx()  const { return m_cost.nx(); }
+    std::size_t ndx() const { return m_cost.ndx(); }
 
     ProblemTpl(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
 
