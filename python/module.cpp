@@ -10,16 +10,23 @@
 using namespace lienlp::python;
 
 
-/// Expose some useful container types
-void exposeContainerTypes()
+namespace lienlp
 {
-  namespace pp = pinocchio::python;
+namespace python
+{
+  /// Expose some useful container types
+  void exposeContainerTypes()
+  {
+    namespace pp = pinocchio::python;
 
-  pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
-  pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
-  pp::StdVectorPythonVisitor<context::VectorOfVectors, false>::expose("StdVec_Vector");
-  pp::StdVectorPythonVisitor<context::VectorOfRef, true>::expose("StdVec_VecRef");
-  pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
+    pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
+    pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
+    pp::StdVectorPythonVisitor<context::VectorOfVectors, true>::expose("StdVec_Vector");
+    pp::StdVectorPythonVisitor<context::VectorOfRef, true>::expose("StdVec_VecRef");
+    pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
+  }
+
+}
 }
 
 
@@ -32,8 +39,8 @@ BOOST_PYTHON_MODULE(pylienlp)
 
   bp::import("warnings");
 
-  exposeFunctionTypes();
   exposeContainerTypes();
+  exposeFunctionTypes();
   {
     bp::scope man_scope = get_namespace("manifolds");
     exposeManifold();
