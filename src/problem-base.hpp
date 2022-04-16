@@ -50,6 +50,12 @@ namespace lienlp
       return m_ncs;
     }
 
+    /// Get dimension of constraint \p i.
+    int getConstraintDim(int i) const
+    {
+      return m_ncs[i];
+    }
+
     std::size_t nx()  const { return m_cost.nx(); }
     std::size_t ndx() const { return m_cost.ndx(); }
 
@@ -68,25 +74,42 @@ namespace lienlp
       reset_constraint_dim_vars();
     }    
 
+    std::vector<int> getIndices() const
+    {
+      return m_indices;
+    }
+
+    int getIndex(int i) const
+    {
+      return m_indices[i];
+    }
+
   protected:
     /// Vector of equality constraints.
     std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
-    const int m_nc_total;
-    const std::vector<int> m_ncs;
+    int m_nc_total;
+    std::vector<int> m_ncs;
+    std::vector<int> m_indices;
 
     /// Set values of const data members for constraint dimensions
     void reset_constraint_dim_vars()
     {
-      int& nc = const_cast<int&>(m_nc_total);
-      auto& ncs_ref = const_cast<std::vector<int>&>(m_ncs);
+      int& nc = m_nc_total;
+      std::vector<int>& ncs_ref = m_ncs;
       ncs_ref.clear();
-      for (ConstraintPtr cstr : m_cstrs)
+      m_indices.clear();
+      int cursor = 0;
+      for (std::size_t i = 0; i < m_cstrs.size(); i++)
       {
+        const auto cstr = m_cstrs[i];
         nc += cstr->nr();
         ncs_ref.push_back(cstr->nr());
+        m_indices.push_back(cursor);
+        cursor += nc;
       }
     }
+
   };
 
   namespace helpers
@@ -95,8 +118,8 @@ namespace lienlp
     template<typename Scalar>
     void allocateMultipliersOrResiduals(
       const ProblemTpl<Scalar>& prob,
-      typename ProblemTpl<Scalar>::VectorXs& data,
-      typename ProblemTpl<Scalar>::VectorOfRef& out)
+      typename math_types<Scalar>::VectorXs& data,
+      typename math_types<Scalar>::VectorOfRef& out)
     {
       data.resize(prob.getTotalConstraintDim());
       data.setZero();
@@ -108,7 +131,7 @@ namespace lienlp
       {
         typename Problem::ConstraintPtr cstr = prob.getConstraint(i);
         nr = cstr->nr();
-        out.push_back(data.segment(cursor, nr));
+        out.emplace_back(data.segment(cursor, nr));
         cursor += nr;
       }
     }

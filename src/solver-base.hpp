@@ -348,8 +348,6 @@ namespace lienlp
           workspace.kktRhs.head(ndx).noalias() += prox_grad;
           workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += prox_penalty.computeHessian(results.xOpt);
         }
-        fmt::print("Merit grad: {}\n", workspace.meritGradient.transpose());
-        fmt::print("Dual  grad: {}\n", -workspace.subproblemDualErr_data.transpose());
 
         // int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
