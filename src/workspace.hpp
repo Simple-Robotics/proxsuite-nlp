@@ -3,11 +3,10 @@
  */
 #pragma once
 
-#include <Eigen/Cholesky>
-
 #include "lienlp/macros.hpp"
 #include "lienlp/problem-base.hpp"
 
+#include <Eigen/Cholesky>
 
 namespace lienlp
 {
