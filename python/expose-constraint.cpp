@@ -50,7 +50,7 @@ namespace python
 
     exposeSpecificConstraint<EqualityConstraint<Scalar>>(
       "EqualityConstraint",
-      "Cast  function into an equality constraint");
+      "Cast a function into an equality constraint");
 
     exposeSpecificConstraint<NegativeOrthant<Scalar>>(
       "NegativeOrthant",
