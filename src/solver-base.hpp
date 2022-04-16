@@ -82,8 +82,13 @@ namespace lienlp
     const Scalar armijo_c1;
     const Scalar ls_beta;
     
+    const Scalar del_inc_k = 8.;
+    const Scalar del_inc_big = 100.;
+    const Scalar del_dec_k = 1./3.;
+
     const Scalar DELTA_MIN = 1e-14;   /// Minimum nonzero regularization strength.
-    const Scalar DELTA_MAX = 1e3;    /// Maximum regularization strength.
+    const Scalar DELTA_MAX = 1e5;    /// Maximum regularization strength.
+    const Scalar DELTA_NONZERO_INIT = 1e-4;
 
     /// Callbacks
     using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
@@ -259,9 +264,11 @@ namespace lienlp
       VectorXs& x = results.xOpt; // shorthand
       const std::size_t num_c = problem->getNumConstraints();
 
+      results.lamsOpt_data = workspace.lamsPrev_data;
+
+      Scalar delta_last = 0.;
+      Scalar delta = delta_last;
       Scalar old_delta = 0.;
-      Scalar del_up_k = 3.;
-      Scalar del_down_k = 0.5;
       Scalar conditioning_ = 0;
 
       Scalar merit0 = results.merit;
@@ -362,8 +369,8 @@ namespace lienlp
         /* Compute the step */
 
         // factorization
-        // regularization strength
-        Scalar delta = 0.;
+        // regularization strength : always try 0
+        delta = 0.;
         InertiaFlag is_inertia_correct = BAD;
         while (not(is_inertia_correct == OK) && delta <= DELTA_MAX)
         {
@@ -372,10 +379,33 @@ namespace lienlp
           conditioning_ = 1. / workspace.ldlt_.rcond();
           workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
           is_inertia_correct = checkInertia(workspace.signature);
-          if (delta == 0.) {
-            delta = DELTA_MIN;
-          } else {
-            delta *= del_up_k;
+
+          if (is_inertia_correct == OK)
+          {
+            delta_last = delta;
+            break;
+          }
+          else if (delta == 0.) {
+
+            // check if previous was zero:
+            // either use some nonzero value
+            // or try some fraction of previous
+            if (delta_last == 0.)
+            {
+              delta = DELTA_NONZERO_INIT; // try a set nonzero value
+            } else {
+              delta = std::max(DELTA_MIN, del_dec_k * delta_last);
+            }
+
+          } else  {
+
+            // check previous; decide increase factor
+            if (delta_last == 0.)
+            {
+              delta *= del_inc_big;
+            } else {
+              delta *= del_inc_k;
+            }
           }
           old_delta = delta;
         }
@@ -510,7 +540,7 @@ namespace lienlp
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getConstraint(i);
+        typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
         workspace.primalResiduals[i] = cstr->m_func(x);
 
         // multiplier
@@ -531,7 +561,7 @@ namespace lienlp
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getConstraint(i);
+        const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
 
         cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
         cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
@@ -591,10 +621,10 @@ namespace lienlp
      * @param results   Contains the previous primal-dual point
      * @param alpha     Step size
      */
-    void tryStep(Workspace& workspace, Results& results, Scalar alpha) const
+    void tryStep(Workspace& workspace, const Results& results, Scalar alpha) const
     {
       const int ndx = manifold.ndx();
-      const long ntot = workspace.pdStep.rows();
+      const long ntot = workspace.kktRhs.rows();
       manifold.integrate(results.xOpt, alpha * workspace.pdStep.head(ndx), workspace.xTrial);
       workspace.lamsTrial_data = results.lamsOpt_data + alpha * workspace.pdStep.tail(ntot - ndx);
     }
