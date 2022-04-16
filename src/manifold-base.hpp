@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Eigen/Core>
-
 #include "lienlp/fwd.hpp"
 #include "lienlp/macros.hpp"
 
