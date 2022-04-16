@@ -215,6 +215,7 @@ namespace lienlp
     void setTolerance(const Scalar tol) { target_tol = tol; }
     /// Set solver maximum allowed number of iterations.
     void setMaxIters(const std::size_t val) { MAX_ITERS = val; }
+    /// Get solver maximum number of iterations.
     std::size_t getMaxIters() const { return MAX_ITERS; }
 
     /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower_).
