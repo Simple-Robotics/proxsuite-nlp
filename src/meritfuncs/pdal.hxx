@@ -18,8 +18,7 @@ namespace lienlp
     {
       const auto cstr = m_prob->getConstraint(i);
       VectorXs cval = cstr->normalConeProjection(cstr->m_func(x) + m_mu * lams_ext[i]);
-      result_ += Scalar(0.5) * m_muInv * cval.squaredNorm();
-      // dual penalty
+      result_ += Scalar(0.5) * (m_muInv * cval.squaredNorm() - m_mu * lams_ext[i].squaredNorm());
       result_ += Scalar(0.5) * m_muInv * (cval - m_mu * lams[i]).squaredNorm();
     }
 

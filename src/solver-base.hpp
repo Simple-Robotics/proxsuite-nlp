@@ -12,7 +12,6 @@
 
 #include "lienlp/modelling/costs/squared-distance.hpp"
 
-#include <Eigen/Cholesky>
 #ifndef NDEBUG
   #include <Eigen/Eigenvalues>
 #endif
@@ -136,26 +135,40 @@ namespace lienlp
       ZEROS = 2
     };
 
-    /// @brief    Add a callback to the solver instance.
-    inline void registerCallback(const CallbackPtr& cb)
+    ConvergenceFlag solve(Workspace& workspace,
+                          Results& results,
+                          const ConstVectorRef& x0,
+                          const std::vector<VectorRef>& lams0)
     {
-      callbacks_.push_back(cb);
-    }
-
-    /// @brief    Remove all callbacks from the instance.
-    inline void clearCallbacks()
-    {
-      callbacks_.clear();
+      VectorXs new_lam(problem->getTotalConstraintDim());
+      new_lam.setZero();
+      int cursor = 0;
+      int nr = 0;
+      const std::size_t numc = problem->getNumConstraints();
+      if (numc != lams0.size())
+      {
+        throw std::runtime_error("Specified number of constraints is not the same "
+                                 "as the provided number of multipliers!");
+      }
+      for (std::size_t i = 0; i < numc; i++)
+      {
+        nr = problem->getConstraintDims()[i];
+        new_lam.segment(cursor, nr) = lams0[i];
+        cursor += nr;
+      }
+      return solve(workspace, results, x0, new_lam);
     }
 
     ConvergenceFlag solve(Workspace& workspace,
                           Results& results,
-                          const VectorXs& x0,
-                          const std::vector<VectorRef>& lams0)
+                          const ConstVectorRef& x0,
+                          const ConstVectorRef& lams0)
     {
       // init variables
       results.xOpt = x0;
-      results.lamsOpt = lams0;
+      workspace.xPrev = x0;
+      results.lamsOpt_data = lams0;
+      workspace.lamsPrev_data = lams0;
 
       updateToleranceFailure();
 
@@ -234,13 +247,13 @@ namespace lienlp
       }
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        auto cstr = problem->getConstraint(i);
+        typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
         cstr->updateProxParameters(mu_eq);
       }
     }
 
     /// Set penalty parameter, its inverse and propagate to merit function.
-    void setPenalty(const Scalar new_mu)
+    void setPenalty(const Scalar& new_mu)
     {
       mu_eq = new_mu;
       mu_eq_inv = 1. / mu_eq;
@@ -248,11 +261,23 @@ namespace lienlp
     }
 
     /// Set proximal penalty parameter.
-    void setProxParam(const Scalar new_rho)
+    void setProxParam(const Scalar& new_rho)
     {
       rho = new_rho;
-      prox_penalty.m_weights.setIdentity();
-      prox_penalty.m_weights *= rho;
+      prox_penalty.m_weights.setZero();
+      prox_penalty.m_weights.diagonal().setConstant(rho);
+    }
+
+    /// @brief    Add a callback to the solver instance.
+    inline void registerCallback(const CallbackPtr& cb)
+    {
+      callbacks_.push_back(cb);
+    }
+
+    /// @brief    Remove all callbacks from the instance.
+    inline void clearCallbacks()
+    {
+      callbacks_.clear();
     }
 
   protected:
@@ -260,8 +285,8 @@ namespace lienlp
 
     void solveInner(Workspace& workspace, Results& results)
     {
-      const auto ndx = manifold.ndx();
-      VectorXs& x = results.xOpt; // shorthand
+      const int ndx = manifold.ndx();
+      const long ntot = workspace.kktRhs.size();
       const std::size_t num_c = problem->getNumConstraints();
 
       results.lamsOpt_data = workspace.lamsPrev_data;
@@ -271,7 +296,8 @@ namespace lienlp
       Scalar old_delta = 0.;
       Scalar conditioning_ = 0;
 
-      Scalar merit0 = results.merit;
+      Scalar& merit0 = results.merit;
+      merit_fun.setPenalty(mu_eq);
 
       std::size_t k;
       for (k = 0; k < MAX_ITERS; k++)
@@ -279,17 +305,21 @@ namespace lienlp
 
         //// precompute temp data
 
-        results.value = problem->m_cost.call(x);
-        problem->m_cost.computeGradient(x, workspace.objectiveGradient);
-        problem->m_cost.computeHessian(x, workspace.objectiveHessian);
+        results.value = problem->m_cost.call(results.xOpt);
+        problem->m_cost.computeGradient(results.xOpt, workspace.objectiveGradient);
+        problem->m_cost.computeHessian(results.xOpt, workspace.objectiveHessian);
+
+        computeResidualsAndMultipliers(results.xOpt, results.lamsOpt_data, workspace);
+        computeResidualDerivatives(results.xOpt, workspace);
+
+        merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        if (rho > 0.)
+          merit0 += prox_penalty.call(results.xOpt);
 
         if (verbose)
         {
-          fmt::print("[iter {:>3d}] objective: {:g}\n", results.numIters, results.value);
+          fmt::print("[iter {:>3d}] objective: {:g} merit: {:g}\n", results.numIters, results.value, merit0);
         }
-
-        computeResidualsAndMultipliers(x, workspace, results.lamsOpt);
-        computeResidualDerivatives(x, workspace);
 
         //// fill in LHS/RHS
         //// TODO create an Eigen::Map to map submatrices to the active sets of each constraint
@@ -298,23 +328,38 @@ namespace lienlp
         workspace.kktMatrix.setZero();
 
         workspace.meritGradient = workspace.objectiveGradient;
-
         workspace.kktRhs.head(ndx) = workspace.objectiveGradient;
-        workspace.kktMatrix.topLeftCorner(ndx, ndx) = workspace.objectiveHessian;
+        workspace.kktRhs.tail(ntot - ndx) = workspace.subproblemDualErr_data;
 
+        workspace.kktMatrix.topLeftCorner(ndx, ndx)           = workspace.objectiveHessian;
+        workspace.kktMatrix.topRightCorner(ndx, ntot - ndx)   = workspace.jacobians_data.transpose();
+        workspace.kktMatrix.bottomLeftCorner(ntot - ndx, ndx) = workspace.jacobians_data;
+        workspace.kktMatrix.bottomRightCorner(ntot - ndx, ntot - ndx).diagonal().setConstant(-mu_eq);
+
+        // add jacobian-vector products to gradients
+        workspace.meritGradient.noalias()    += workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+        workspace.kktRhs.head(ndx).noalias() += workspace.jacobians_data.transpose() * results.lamsOpt_data;
+
+        // add proximal penalty terms
+        VectorXs prox_grad = prox_penalty.computeGradient(results.xOpt);
         if (rho > 0.)
         {
-          workspace.kktRhs.head(ndx).noalias() += rho * prox_penalty.computeGradient(x);
-          workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += rho * prox_penalty.computeHessian(x);
+          workspace.meritGradient.noalias() += prox_grad;
+          workspace.kktRhs.head(ndx).noalias() += prox_grad;
+          workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += prox_penalty.computeHessian(results.xOpt);
         }
+        fmt::print("Merit grad: {}\n", workspace.meritGradient.transpose());
+        fmt::print("Dual  grad: {}\n", -workspace.subproblemDualErr_data.transpose());
 
-        int nc = 0;   // constraint size
-        int cursor = ndx;  // starts after ndx (primal grad size)
+        // int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
         {
-          auto cstr = problem->getConstraint(i);
-
+          const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
+          cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
           MatrixRef& J_ = workspace.cstrJacobians[i];
+
+          fmt::print("Jacobian:\n{}\n", J_);
+          fmt::print("Primal residuals:\n{}\n", workspace.primalResiduals[i].transpose());
 
           bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
@@ -322,41 +367,30 @@ namespace lienlp
             workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessProd[i];
           }
 
-          workspace.meritGradient.noalias() += J_.transpose() * workspace.lamsPDAL[i];
-
-          // fill in the dual part of the KKT
-          nc = cstr->nr();
-          cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
-          workspace.kktRhs.segment(cursor, nc) = workspace.subproblemDualErr[i];
-          // jacobian block and transpose
-          workspace.kktMatrix.block(cursor, 0, nc, ndx) = J_;
-          workspace.kktMatrix.block(0, cursor, ndx, nc) = J_.transpose();
-          // reg block
-          workspace.kktMatrix.block(cursor, cursor, nc, nc).setIdentity();
-          workspace.kktMatrix.block(cursor, cursor, nc, nc).array() *= -mu_eq;
-
-          cursor += nc;
+          // cursor += nc;
         }
+        // cursor = 0;
 
         // Compute dual residual and infeasibility
         workspace.dualResidual = workspace.kktRhs.head(ndx);
         if (rho > 0.)
-        {
-          workspace.dualResidual -= rho * prox_penalty.computeGradient(x);
-        }
-        results.dualInfeas = math::infNorm(workspace.dualResidual);
+          workspace.dualResidual.noalias() -= prox_grad;
+
+        results.dualInfeas = math::infty_norm(workspace.dualResidual);
         results.primalInfeas = 0.;
         for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
         {
-          auto cstr = problem->getConstraint(i);
-          results.primalInfeas = std::max(results.primalInfeas,
-                                          math::infNorm(cstr->normalConeProjection(workspace.primalResiduals[i])));
+          typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
+          workspace.primalResiduals[i].noalias() = cstr->normalConeProjection(workspace.primalResiduals[i]);
+          fmt::print("cstr #{:d} - active set: {}\nproj: {}\n",
+                     i, results.activeSet[i].transpose(), workspace.primalResiduals[i].transpose());
         }
+        results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
         // Compute inner stopping criterion
-        Scalar inner_crit = math::infNorm(workspace.kktRhs);
+        Scalar inner_crit = math::infty_norm(workspace.kktRhs);
 
-        fmt::print(" | inner stop {:.4g}, d={:.3g}, p={:.3g}\n",
-                  inner_tol, results.dualInfeas, results.primalInfeas);
+        fmt::print(" | inner crit {:4.4g}, d={:.3g}, p={:.3g} (inner stop {:4.4g})\n",
+                  inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
 
         bool outer_cond = (results.primalInfeas <= target_tol && results.dualInfeas <= target_tol);
         if ((inner_crit <= inner_tol) || outer_cond)
@@ -368,6 +402,9 @@ namespace lienlp
 
         /* Compute the step */
 
+#ifndef NDEBUG
+        Eigen::SelfAdjointEigenSolver<MatrixXs> eigsolve(workspace.kktRhs.size());
+#endif
         // factorization
         // regularization strength : always try 0
         delta = 0.;
@@ -378,6 +415,10 @@ namespace lienlp
           workspace.ldlt_.compute(workspace.kktMatrix);
           conditioning_ = 1. / workspace.ldlt_.rcond();
           workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
+#ifndef NDEBUG
+          eigsolve.compute(workspace.kktMatrix, Eigen::EigenvaluesOnly);
+          fmt::print(" | KKT Eigenvalues:\n{}\n", eigsolve.eigenvalues().transpose());
+#endif
           is_inertia_correct = checkInertia(workspace.signature);
 
           if (is_inertia_correct == OK)
@@ -412,9 +453,11 @@ namespace lienlp
 
         workspace.pdStep = -workspace.kktRhs;
         workspace.ldlt_.solveInPlace(workspace.pdStep);
+        VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
 
         if (verbose)
         {
+          fmt::print(" | KKT system residual: {:4.3e}", math::infty_norm(resdl));
           fmt::print(" | conditioning:  {:.3g}\n", conditioning_);
         }
 
@@ -422,25 +465,12 @@ namespace lienlp
 
         //// Take the step
 
-        merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
-        merit0 += rho * prox_penalty.call(x);
-        workspace.meritGradient.noalias() += rho * prox_penalty.computeGradient(x);
-        results.merit = merit0;
+        Scalar total_directional_derivative = \
+                  workspace.meritGradient.dot(workspace.pdStep.head(ndx)) \
+                  - workspace.subproblemDualErr_data.dot(workspace.pdStep.tail(ntot - ndx));
+        workspace.d1 = total_directional_derivative;
 
-        Scalar dir_x = workspace.meritGradient.dot(workspace.pdStep.head(ndx));
-        Scalar dir_dual = 0;
-        cursor = ndx;
-        for (std::size_t i = 0; i < num_c; i++)
-        {
-          nc = problem->getConstraint(i)->nr();
-
-          dir_dual += (-workspace.subproblemDualErr[i]).dot(workspace.pdStep.segment(cursor, nc));
-          cursor += nc;
-        }
-
-        Scalar dir_deriv = dir_x + dir_dual;
-
-        doLinesearch(workspace, results, merit0, dir_deriv);
+        doLinesearch(workspace, results, merit0, total_directional_derivative);
         results.xOpt = workspace.xTrial;
         results.lamsOpt_data = workspace.lamsTrial_data;
 
@@ -462,7 +492,7 @@ namespace lienlp
     inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
     {
       if (verbose)
-        fmt::print(" | xreg : {:.3g}", delta);
+        fmt::print(" | xreg: {:5.2e}\n", delta);
       const int ndx = manifold.ndx();
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
       workspace.kktMatrix.diagonal().head(ndx).array() += delta;
@@ -481,24 +511,33 @@ namespace lienlp
       int numzer = 0;
       for (long i = 0; i < n; i++)
       {
-        if (signature[i] > 0) numpos++;
-        else if (signature[i] < 0) numneg++;
-        else numzer++;
+        switch (signature(i))
+        {
+        case 1 : numpos++;
+                 break;
+        case 0 : numzer++;
+                 break;
+        case -1: numneg++;
+                 break;
+        default: throw std::runtime_error("Matrix signature should only have Os, 1s, and -1s.");
+        }
       }
+      InertiaFlag flag = OK;
       fmt::print(" | Inertia ({:d}+, {:d}, {:d}-)", numpos, numzer, numneg);
       if (numpos < ndx)
       {
         fmt::print(" is wrong: num+ < ndx!\n");
-        return BAD;
+        flag = BAD;
       } else if (numneg < numc) {
         fmt::print(" is wrong: num- < num_cstr!\n");
-        return BAD;
+        flag = BAD;
       } else if (numzer > 0) {
         fmt::print(" is wrong: there are null eigenvalues!\n");
-        return ZEROS;
+        flag = ZEROS;
+      } else {
+        fmt::print(" is OK\n");
       }
-      fmt::print(" is OK\n");
-      return OK;
+      return flag;
     }
 
     /**
@@ -526,7 +565,7 @@ namespace lienlp
     /// @brief  Accept Lagrange multiplier estimates.
     void acceptMultipliers(Workspace& workspace) const
     {
-      workspace.lamsPrev_data = workspace.lamsPDAL_d;
+      workspace.lamsPrev_data = workspace.lamsPDAL_data;
     }
 
     /** 
@@ -535,8 +574,8 @@ namespace lienlp
      */
     void computeResidualsAndMultipliers(
       const ConstVectorRef& x,
-      Workspace& workspace,
-      VectorOfRef& lams) const
+      const ConstVectorRef& lams_data,
+      Workspace& workspace) const
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
@@ -546,9 +585,9 @@ namespace lienlp
         // multiplier
         workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
         workspace.lamsPlus[i] = cstr->normalConeProjection(workspace.lamsPlusPre[i]);
-        workspace.subproblemDualErr[i] = mu_eq * (workspace.lamsPlus[i] - lams[i]);
-        workspace.lamsPDAL[i] = 2 * workspace.lamsPlus[i] - lams[i];
       }
+      workspace.subproblemDualErr_data = mu_eq * (workspace.lamsPlus_data - lams_data);
+      workspace.lamsPDAL_data = 2 * workspace.lamsPlus_data - lams_data;
     }
 
     /**
@@ -577,23 +616,44 @@ namespace lienlp
      * @param merit0    Value of the merit function at the previous point.
      * @param d1        Directional derivative of the merit function in the search direction.
      */
-    Scalar doLinesearch(Workspace& workspace, Results& results, const Scalar merit0, const Scalar d1) const
+    Scalar doLinesearch(Workspace& workspace, const Results& results, const Scalar merit0, const Scalar d1) const
     {
       Scalar alpha_try = 1.;
 
       if (verbose)
         fmt::print(" | current M = {:.5g} | d1 = {:.3g}\n", merit0, d1);
 
+#ifndef NDEBUG
+      std::vector<Scalar>& alphas_ = workspace.ls_alphas;
+      std::vector<Scalar>& values_ = workspace.ls_values;
+      alphas_.clear();
+      values_.clear();
+      VectorXs alphplot = VectorXs::LinSpaced(400, 0., 1.);
+      for (long i = 0; i < alphplot.size(); i++)
+      {
+        tryStep(workspace, results, alphplot(i));
+        alphas_.push_back(alphplot(i));
+        values_.push_back(
+          merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev)
+          + prox_penalty.call(workspace.xTrial)
+        );
+      }
+#endif
+
       Scalar merit_trial = 0., dM = 0.;
-      while (alpha_try >= alpha_min)
+      while (alpha_try > alpha_min)
       {
         tryStep(workspace, results, alpha_try);
+        merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
+        if (rho > 0.) {
+          merit_trial += prox_penalty.call(workspace.xTrial);
+        }
+        alphas_.push_back(alpha_try);
+        values_.push_back(merit_trial);
         if (std::abs(d1) < 1e-13)
         {
           return alpha_try;
         }
-        merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
-        merit_trial += rho * prox_penalty.call(workspace.xTrial);
         dM = merit_trial - merit0;
         if (verbose)
           fmt::print(" | alpha {:5.2e}, M = {:5.5g}, dM = {:5.5g}\n", alpha_try, merit_trial, dM);

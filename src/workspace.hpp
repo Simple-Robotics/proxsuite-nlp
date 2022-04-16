@@ -68,10 +68,10 @@ namespace lienlp
     std::vector<MatrixRef> cstrJacobians;
     std::vector<MatrixRef> cstrVectorHessProd;
 
-    VectorXs lamsPlusPre_d;
-    VectorXs lamsPlus_d;
-    VectorXs lamsPDAL_d;
-    VectorXs subproblemDualErr_d;
+    VectorXs lamsPlusPre_data;
+    VectorXs lamsPlus_data;
+    VectorXs lamsPDAL_data;
+    VectorXs subproblemDualErr_data;
 
     /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorOfRef lamsPlus;
@@ -82,6 +82,9 @@ namespace lienlp
     /// Subproblem proximal dual error.
     VectorOfRef subproblemDualErr;
 
+    std::vector<Scalar> ls_alphas;
+    std::vector<Scalar> ls_values;
+    Scalar d1;
 
     SWorkspace(const int nx,
                const int ndx,
@@ -104,9 +107,9 @@ namespace lienlp
       , meritGradient(ndx)
       , jacobians_data(numcstr, ndx)
       , hessians_data(numcstr * ndx, ndx)
-      , lamsPlus_d(numcstr)
-      , lamsPDAL_d(numcstr)
-      , subproblemDualErr_d(numcstr)
+      , lamsPlus_data(numcstr)
+      , lamsPDAL_data(numcstr)
+      , subproblemDualErr_data(numcstr)
     {
       init(prob);
     }
@@ -132,10 +135,10 @@ namespace lienlp
       jacobians_data.setZero();
       hessians_data.setZero();
 
-      helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_d, lamsPlusPre);
-      helpers::allocateMultipliersOrResiduals(prob, lamsPlus_d, lamsPlus);
-      helpers::allocateMultipliersOrResiduals(prob, lamsPDAL_d, lamsPDAL);
-      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr_d, subproblemDualErr);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_data, lamsPlusPre);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPlus_data, lamsPlus);
+      helpers::allocateMultipliersOrResiduals(prob, lamsPDAL_data, lamsPDAL);
+      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr_data, subproblemDualErr);
 
 
       const std::size_t nc = prob.getNumConstraints();

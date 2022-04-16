@@ -13,6 +13,8 @@ namespace lienlp
       using context::Scalar;
       using context::Manifold;
       using Solver = context::Solver;
+      using context::VectorRef;
+      using context::ConstVectorRef;
 
       bp::class_<Solver>(
         "Solver", "The numerical solver.",
@@ -49,7 +51,9 @@ namespace lienlp
         .def("register_callback", &Solver::registerCallback, bp::args("cb"), "Add a callback to the solver.")
         .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
         .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
-        .def("solve", &Solver::solve,
+        .def("solve",
+             (ConvergenceFlag(Solver::*)(context::Workspace&, context::Results&,
+                                         const ConstVectorRef&, const std::vector<VectorRef>&))&Solver::solve,
              bp::args("workspace", "results", "x0", "lams0"))
         .def("set_penalty",    &Solver::setPenalty,   bp::args("self", "mu"), "Set the augmented Lagrangian penalty parameter.")
         .def("set_prox_param", &Solver::setProxParam, bp::args("self", "rho"), "Set the primal proximal penalty parameter.")

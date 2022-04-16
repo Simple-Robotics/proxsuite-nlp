@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lienlp/macros.hpp"
 #include "lienlp/helpers-base.hpp"
 #include "lienlp/solver-base.hpp"
 
@@ -21,17 +22,22 @@ namespace lienlp
                        , store_residuals_(store_residuals)
       {}
 
+      LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+
       struct
       {
-        std::vector<typename SResults<Scalar>::VectorXs> xs;
-        std::vector<typename SResults<Scalar>::VectorXs> lams;
-        std::vector<typename SResults<Scalar>::VectorOfRef> lams_view;
+        std::vector<VectorXs> xs;
+        std::vector<VectorXs> lams;
+        std::vector<VectorOfRef> lams_view;
         std::vector<Scalar> values;
         std::vector<Scalar> prim_infeas;
         std::vector<Scalar> dual_infeas;
+        std::vector<VectorXs> ls_alphas;
+        std::vector<VectorXs> ls_values;
+        std::vector<Scalar> d1_s;
       } storage;
 
-      void call(const SWorkspace<Scalar>&,
+      void call(const SWorkspace<Scalar>& workspace,
                 const SResults<Scalar>& results)
       {
         if (store_primal_dual_vars_)
@@ -47,6 +53,10 @@ namespace lienlp
           storage.prim_infeas.push_back(results.primalInfeas);
           storage.dual_infeas.push_back(results.dualInfeas);
         }
+        const std::size_t asize = workspace.ls_alphas.size();
+        storage.ls_alphas.push_back(Eigen::Map<const VectorXs>(&workspace.ls_alphas[0], asize));
+        storage.ls_values.push_back(Eigen::Map<const VectorXs>(&workspace.ls_values[0], asize));
+        storage.d1_s.push_back(workspace.d1);
       }
 
     protected:

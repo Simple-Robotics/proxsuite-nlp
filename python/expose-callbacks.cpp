@@ -39,12 +39,15 @@ namespace lienlp
           )
           .def_readonly("storage", &helpers::history_callback<Scalar>::storage);
 
-        bp::class_<history_storage_t>("_history_storage", bp::no_init)
+        bp::class_<history_storage_t, shared_ptr<history_storage_t>>("_history_storage")
           .def_readonly("xs", &history_storage_t::xs)
           .def_readonly("lams", &history_storage_t::lams)
           .def_readonly("values", &history_storage_t::values)
           .def_readonly("prim_infeas", &history_storage_t::prim_infeas)
           .def_readonly("dual_infeas", &history_storage_t::dual_infeas)
+          .def_readonly("ls_alphas", &history_storage_t::ls_alphas)
+          .def_readonly("ls_values", &history_storage_t::ls_values)
+          .def_readonly("d1_s", &history_storage_t::d1_s)
           ;
       }
     }    

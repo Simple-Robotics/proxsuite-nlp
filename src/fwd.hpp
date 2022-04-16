@@ -30,10 +30,10 @@ struct math_types
   using MatrixXs = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
   using VectorOfVectors = std::vector<VectorXs>;
   using VectorRef = Eigen::Ref<VectorXs>;
-  using VectorOfRef = std::vector<VectorRef>;
   using MatrixRef = Eigen::Ref<MatrixXs>;
   using ConstVectorRef = Eigen::Ref<const VectorXs>;
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
+  using VectorOfRef = std::vector<VectorRef>;
 };
 
 /* Function types */
@@ -91,12 +91,8 @@ class SolverTpl;
 /// Math utils
 namespace math
 {
-  
-  /// Shorthand for the infinity norm
-  /// code from proxqp
   template<typename MatType>
-  typename MatType::Scalar
-  infNorm(const Eigen::MatrixBase<MatType>& z)
+  typename MatType::Scalar infty_norm(const Eigen::MatrixBase<MatType>& z)
   {
     if (z.rows() == 0 || z.cols() == 0)
     {
@@ -104,6 +100,18 @@ namespace math
     } else {
       return z.template lpNorm<Eigen::Infinity>();
     }
+  }
+
+  template<typename MatType>
+  typename MatType::Scalar infty_norm(const std::vector<Eigen::MatrixBase<MatType>>& z)
+  {
+    const std::size_t n = z.size();
+    typename MatType::Scalar out = 0.;
+    for (std::size_t i = 0; i < n; i++)
+    {
+      out = std::max(out, infty_norm(z));
+    }
+    return out;
   }
 
 } // namespace math
