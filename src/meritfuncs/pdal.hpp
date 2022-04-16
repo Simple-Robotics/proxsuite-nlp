@@ -41,7 +41,7 @@ namespace lienlp
     Lagrangian_t m_lagr;
 
     /// AL penalty parameter
-    Scalar m_mu = 0.01;
+    Scalar m_mu;
     /// Reciprocal penalty parameter
     Scalar m_muInv = 1. / m_mu;
 
@@ -55,11 +55,11 @@ namespace lienlp
       m_muInv = 1. / new_mu;
     };
 
-    /// Get the merit function penalty parameter;
-    const Scalar& getPenalty() { return m_mu; }
-
-    PDALFunction(shared_ptr<Problem> prob)
-      : Base(prob), m_lagr(Lagrangian_t(prob)) {}
+    PDALFunction(shared_ptr<Problem> prob, const Scalar mu = 0.01)
+      : Base(prob)
+      , m_lagr(Lagrangian_t(prob))
+      , m_mu(mu)
+      {}
 
     /**
      *  @brief Compute the first-order multiplier estimates.

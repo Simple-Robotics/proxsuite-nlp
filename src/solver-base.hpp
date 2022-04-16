@@ -107,7 +107,7 @@ namespace lienlp
               )
       : manifold(man)
       , problem(prob)
-      , merit_fun(problem)
+      , merit_fun(problem, mu_eq_init)
       , prox_penalty(manifold, manifold.neutral(), rho_init * MatrixXs::Identity(manifold.ndx(), manifold.ndx()))
       , verbose(verbose)
       , rho_init(rho_init)
@@ -122,9 +122,14 @@ namespace lienlp
       , alpha_min(alpha_min)
       , armijo_c1(armijo_c1)
       , ls_beta(ls_beta)
+    {}
+
+    enum InertiaFlag
     {
-      merit_fun.setPenalty(mu_eq);
-    }
+      OK = 0,
+      BAD = 1,
+      ZEROS = 2
+    };
 
     /// @brief    Add a callback to the solver instance.
     inline void registerCallback(const CallbackPtr& cb)
@@ -431,13 +436,6 @@ namespace lienlp
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
       workspace.kktMatrix.diagonal().head(ndx).array() += delta;
     }
-
-    enum InertiaFlag
-    {
-      OK = 0,
-      BAD = 1,
-      ZEROS = 2
-    };
 
     /// Check the matrix has the desired inertia.
     /// @param    kktMatrix The KKT matrix.
