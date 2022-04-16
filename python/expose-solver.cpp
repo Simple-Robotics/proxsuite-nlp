@@ -58,7 +58,8 @@ namespace lienlp
                       &Solver::getMaxIters,
                       &Solver::setMaxIters,
                       "Maximum number of iterations.")
-        .add_property("alpha_min", &Solver::alpha_min)
+        .def_readonly("alpha_min", &Solver::alpha_min)
+        .def_readonly("armijo_c1", &Solver::armijo_c1)
         ;
     }
   } // namespace python
