@@ -36,3 +36,4 @@ Python dependencies:
 * typed-argument-parser
 * tqdm
 * meshcat-python
+* [meshcat-utils](https://gitlab.inria.fr/wjallet/pin-meshcat-utils)
