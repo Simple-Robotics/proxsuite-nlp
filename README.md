@@ -20,7 +20,7 @@ git clone [url-to-repo] --recursive
 * Pinocchio 3
 * Eigen >=3.4.0 (for now)
 * [fmtlib](https://github.com/fmtlib/fmt)
-* Boost >=1.74
+* Boost >=1.71
 
 Building:
 

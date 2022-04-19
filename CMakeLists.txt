@@ -69,7 +69,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # ----------------------------------------------------
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
-ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
+ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.4.0")
 ADD_PROJECT_DEPENDENCY(fmt)
 
 # Variable containing all the cflags definition relative to optional dependencies
@@ -81,7 +81,7 @@ endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
-  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED)
+  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.2")
   add_definitions(-DWITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
