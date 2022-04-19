@@ -49,6 +49,12 @@ namespace lienlp
 
     //// Other settings
 
+    enum VerboseLevel
+    {
+      NONE=0,
+      VERBOSE=1,
+      VERY=2
+    };
 
     bool verbose = false;
     bool use_gauss_newton = false;    // Use a Gauss-Newton approximation for the Lagrangian Hessian.
@@ -642,8 +648,10 @@ namespace lienlp
         if (rho > 0.) {
           merit_trial += prox_penalty.call(workspace.xTrial);
         }
+#ifndef NDEBUG
         alphas_.push_back(alpha_try);
         values_.push_back(merit_trial);
+#endif
         if (std::abs(d1) < 1e-13)
         {
           return alpha_try;
