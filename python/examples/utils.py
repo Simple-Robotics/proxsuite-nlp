@@ -29,7 +29,7 @@ class CasadiFunction(lienlp.C2Function):
         J[:] = np.asarray(self.Jfun(x))
 
     def vectorHessianProduct(self, x, v, H):
-        H[:] = np.asarray(self.Hfun(x, v))
+        H[:, :] = np.asarray(self.Hfun(x, v))
 
 
 def display_trajectory(vizer: MeshcatVisualizer, qs, dt: float):
