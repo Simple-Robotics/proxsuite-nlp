@@ -95,19 +95,17 @@ namespace lienlp
     /// Set values of const data members for constraint dimensions
     void reset_constraint_dim_vars()
     {
-      int& nc = m_nc_total;
-      std::vector<int>& ncs_ref = m_ncs;
-      ncs_ref.clear();
+      m_ncs.clear();
       m_indices.clear();
       int cursor = 0;
       for (std::size_t i = 0; i < m_cstrs.size(); i++)
       {
-        const auto cstr = m_cstrs[i];
-        nc += cstr->nr();
-        ncs_ref.push_back(cstr->nr());
+        const ConstraintPtr cstr = m_cstrs[i];
+        m_ncs.push_back(cstr->nr());
         m_indices.push_back(cursor);
-        cursor += nc;
+        cursor += cstr->nr();
       }
+      m_nc_total = cursor;
     }
 
   };
