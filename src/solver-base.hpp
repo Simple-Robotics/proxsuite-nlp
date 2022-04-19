@@ -450,12 +450,13 @@ namespace lienlp
 
         workspace.pdStep = -workspace.kktRhs;
         workspace.ldlt_.solveInPlace(workspace.pdStep);
-        VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
 
-        if (verbose >= 2)
+        if (verbose >= 1)
         {
+          VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
           fmt::print(" | KKT system residual: {:4.3e} / conditioning {:.3g}\n",
                      math::infty_norm(resdl), conditioning_);
+          fmt::print(" | xreg: {:5.2e}\n", delta);
         }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
@@ -488,8 +489,6 @@ namespace lienlp
     /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
     inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
     {
-      if (verbose >= 1)
-        fmt::print(" | xreg: {:5.2e}\n", delta);
       const int ndx = manifold.ndx();
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
       workspace.kktMatrix.diagonal().head(ndx).array() += delta;
