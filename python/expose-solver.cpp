@@ -16,14 +16,22 @@ namespace lienlp
       using context::VectorRef;
       using context::ConstVectorRef;
 
+      bp::enum_<VerboseLevel>("VerboseLevel", "Verbose level for the solver.")
+        .value("QUIET", QUIET)
+        .value("VERBOSE", VERBOSE)
+        .value("VERYVERBOSE", VERY)
+        .export_values()
+        ;
+
       bp::class_<Solver>(
-        "Solver", "The numerical solver.",
+        "Solver",
+        "The numerical solver.",
         bp::init<const Manifold&,
                  shared_ptr<context::Problem>&,
                  Scalar,
                  Scalar,
                  Scalar,
-                 bool,
+                 VerboseLevel,
                  Scalar,
                  Scalar,
                  Scalar,
@@ -37,7 +45,7 @@ namespace lienlp
                     , bp::arg("tol") = 1e-6
                     , bp::arg("mu_init") = 1e-2
                     , bp::arg("rho_init") = 0.
-                    , bp::arg("verbose") = false
+                    , bp::arg("verbose") = VerboseLevel::QUIET
                     , bp::arg("mu_factor") = 0.1
                     , bp::arg("mu_min") = 1e-9
                     , bp::arg("prim_alpha") = 0.1

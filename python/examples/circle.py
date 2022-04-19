@@ -7,24 +7,31 @@ from lienlp.constraints import NegativeOrthant, EqualityConstraint
 
 
 nx = 2
-p0 = np.array([-.4, .7])
+p0 = np.array([.7, .2])
 p1 = np.array([1., .5])
 space = EuclideanSpace(nx)
 
-radius_ = .6
-radius_sq = radius_ ** 2
+radius = .6
+radius_sq = radius ** 2
 weights = np.eye(nx)
 
+
+# A_mat = np.array([[0., 1.],
+#                   [0., 1.]])
+# b = np.array([0., -0.2])
+# reslin = lienlp.residuals.LinearFunction(A_mat, b)
+
+
 cost_ = QuadraticDistanceCost(space, p0, weights)
-circl_center = space.neutral()
+center1 = space.neutral()
 print(cost_(p0))
 print(cost_(p1))
 
-res1_in = ManifoldDifferenceToPoint(space, circl_center)
-w2 = 2 * np.eye(res1_in.nr)
-res1 = QuadraticResidualCost(res1_in, w2,
-                             np.zeros(res1_in.nr),
-                             -radius_sq)
+res1_in = ManifoldDifferenceToPoint(space, center1)
+nr = res1_in.nr
+w2 = 2 * np.eye(nr)
+slope_ = np.zeros(nr)
+res1 = QuadraticResidualCost(res1_in, w2, slope_, -radius_sq)
 print(res1_in(p0))
 print(res1_in(p1))
 r0 = res1(p0)
@@ -32,31 +39,35 @@ r1 = res1(p1)
 print(r0)
 print(r1)
 
-center2 = space.rand()
+np.random.seed(42)
+center2 = np.random.randn(2)
 res2_in = ManifoldDifferenceToPoint(space, center2)
-res2 = QuadraticResidualCost(res2_in, w2, np.zeros(res2_in.nr), -radius_sq)
+res2 = QuadraticResidualCost(res2_in, w2, slope_, -radius_sq)
 
-cstr1 = NegativeOrthant(res1)
-cstr2 = NegativeOrthant(res2)
+center3 = np.array([1., .2])
+res3 = QuadraticResidualCost(ManifoldDifferenceToPoint(space, center3), w2, slope_, -radius_sq)
 
-print(cstr1.projection(r0))
-print(cstr1.projection(r1))
+cstrs_ = [
+    # NegativeOrthant(reslin),
+    NegativeOrthant(res1),
+    # NegativeOrthant(res2),
+    NegativeOrthant(res2),
+    NegativeOrthant(res3)
+]
 
-prob = lienlp.Problem(cost_,
-                      [
-                          cstr1,
-                          cstr2
-                       ])
+prob = lienlp.Problem(cost_, cstrs_)
 results = lienlp.Results(nx, prob)
 workspace = lienlp.Workspace(nx, nx, prob)
 
-mu_init = 0.02
-solver = lienlp.Solver(space, prob, mu_init=mu_init, rho_init=1e-8, verbose=True, alpha_min=1e-7)
+mu_init = 0.05
+rho_init = 0.
+solver = lienlp.Solver(space, prob, mu_init=mu_init, rho_init=rho_init,
+                       verbose=lienlp.VERBOSE)
 solver.use_gauss_newton = True
-cb = lienlp.HistoryCallback()
-solver.register_callback(cb)
+callback = lienlp.HistoryCallback()
+solver.register_callback(callback)
 
-lams0 = [np.random.randn(res1.nr)]
+lams0 = [np.zeros(cs.nr) for cs in cstrs_]
 solver.solve(workspace, results, p1, lams0)
 
 
@@ -69,20 +80,25 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["lines.linewidth"] = 1.
 
-xs_ = np.stack(cb.storage.xs.tolist())
+xs_ = np.stack(callback.storage.xs.tolist())
 
 bound_xs = (np.min(xs_[:, 0]), np.max(xs_[:, 0]),
             np.min(xs_[:, 1]), np.max(xs_[:, 1]))
 # left,right,bottom,up
 
 ax: plt.Axes = plt.axes()
-ax.plot(*xs_.T, marker='o', markersize=3, alpha=.7)
-ar_c1 = plt.Circle(res1_in.target, radius_, facecolor='r', alpha=.4, edgecolor='k')
-ar_c2 = plt.Circle(res2_in.target, radius_, facecolor='b', alpha=.4, edgecolor='k')
-print(ar_c1)
+ax.plot(*xs_.T, marker='.', markersize=3, alpha=.7)
+ax.plot(*xs_[-1], marker='o', markersize=3, color='r')
+ar_c1 = plt.Circle(center1, radius, facecolor='r', alpha=.4, edgecolor='k')
+ar_c2 = plt.Circle(center2, radius, facecolor='b', alpha=.4, edgecolor='k')
+ar_c3 = plt.Circle(center3, radius, facecolor='g', alpha=.4, edgecolor='k')
+
 ax.add_patch(ar_c1)
 ax.add_patch(ar_c2)
+ax.add_patch(ar_c3)
 ax.set_aspect('equal')
+
+plt.scatter(*p0, c='green', marker='o', label='$p_0$')
 
 xlims = ax.get_xlim()
 xlims = (min(bound_xs[0], xlims[0]), max(bound_xs[1], xlims[1]))
@@ -90,6 +106,25 @@ ylims = ax.get_ylim()
 ylims = (min(bound_xs[2], ylims[0]), max(bound_xs[3], ylims[1]))
 ax.set_xlim(*xlims)
 ax.set_ylim(*ylims)
+plt.legend()
 plt.title("Optimization trajectory")
-plt.show()
 
+
+it_list = [1, 2, 3, 4, 5, 10, 20, 30]
+it_list = [i for i in it_list if i < results.numiters]
+for it in it_list:
+    ls_alphas = callback.storage.ls_alphas[it].copy()
+    ls_values = callback.storage.ls_values[it].copy()
+    if len(ls_alphas) == 0:
+        continue
+    soidx = np.argsort(ls_alphas)
+    ls_alphas = ls_alphas[soidx]
+    ls_values = ls_values[soidx]
+    d1 = callback.storage.d1_s[it]
+    plt.figure()
+    plt.plot(ls_alphas, ls_values)
+    plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
+    plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls='--')
+    plt.title("Iteration %d" % it)
+
+plt.show()

@@ -88,8 +88,9 @@ namespace python
 
     bp::class_<internal::FunctionWrap,
                boost::noncopyable
-               >("BaseFunction", "Base class for functions.", bp::init<int, int, int>())
-      .def("__call__", bp::pure_virtual(&Function::operator()), bp::args("self", "z"), "Call the function.")
+               >("BaseFunction", "Base class for functions.",
+                 bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
+      .def("__call__", bp::pure_virtual(&Function::operator()), bp::args("self", "x"), "Call the function.")
       .add_property("nx", &Function::nx, "Input dimension")
       .add_property("ndx",&Function::ndx,"Input tangent space dimension.")
       .add_property("nr", &Function::nr, "Function codimension.")

@@ -28,3 +28,11 @@ Building:
 cmake -S . -B build
 cmake --build build/
 ```
+
+Python dependencies:
+
+* Numpy
+* Matplotlib
+* typed-argument-parser
+* tqdm
+* meshcat-python

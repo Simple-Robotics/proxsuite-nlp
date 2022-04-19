@@ -26,6 +26,14 @@
 namespace lienlp
 {
 
+  /// Verbosity level.
+  enum VerboseLevel
+  {
+    QUIET=0,
+    VERBOSE=1,
+    VERY=2
+  };
+
   template<typename _Scalar>
   class SolverTpl
   {
@@ -49,14 +57,7 @@ namespace lienlp
 
     //// Other settings
 
-    enum VerboseLevel
-    {
-      NONE=0,
-      VERBOSE=1,
-      VERY=2
-    };
-
-    bool verbose = false;
+    bool verbose = QUIET;
     bool use_gauss_newton = false;    // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
@@ -105,7 +106,7 @@ namespace lienlp
               const Scalar tol=1e-6,
               const Scalar mu_eq_init=1e-2,
               const Scalar rho_init=0.,
-              const bool verbose=true,
+              const VerboseLevel verbose=QUIET,
               const Scalar mu_factor=0.1,
               const Scalar mu_lower=1e-9,
               const Scalar prim_alpha=0.1,
@@ -323,7 +324,7 @@ namespace lienlp
         if (rho > 0.)
           merit0 += prox_penalty.call(results.xOpt);
 
-        if (verbose)
+        if (verbose >= 0)
         {
           fmt::print("[iter {:>3d}] objective: {:g} merit: {:g}\n", results.numIters, results.value, merit0);
         }
@@ -361,8 +362,6 @@ namespace lienlp
           const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
 
-          fmt::print("Primal residuals:\n{}\n", workspace.primalResiduals[i].transpose());
-
           bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
           {
@@ -382,8 +381,6 @@ namespace lienlp
         {
           typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
           workspace.primalResiduals[i].noalias() = cstr->normalConeProjection(workspace.primalResiduals[i]);
-          fmt::print("cstr #{:d} - active set: {}\nproj: {}\n",
-                     i, results.activeSet[i].transpose(), workspace.primalResiduals[i].transpose());
         }
         results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
         // Compute inner stopping criterion
@@ -455,10 +452,10 @@ namespace lienlp
         workspace.ldlt_.solveInPlace(workspace.pdStep);
         VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
 
-        if (verbose)
+        if (verbose >= 2)
         {
-          fmt::print(" | KKT system residual: {:4.3e}", math::infty_norm(resdl));
-          fmt::print(" | conditioning:  {:.3g}\n", conditioning_);
+          fmt::print(" | KKT system residual: {:4.3e} / conditioning {:.3g}\n",
+                     math::infty_norm(resdl), conditioning_);
         }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
@@ -491,7 +488,7 @@ namespace lienlp
     /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
     inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
     {
-      if (verbose)
+      if (verbose >= 1)
         fmt::print(" | xreg: {:5.2e}\n", delta);
       const int ndx = manifold.ndx();
       workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
@@ -620,7 +617,7 @@ namespace lienlp
     {
       Scalar alpha_try = 1.;
 
-      if (verbose)
+      if (verbose >= 2)
         fmt::print(" | current M = {:.5g} | d1 = {:.3g}\n", merit0, d1);
 
 #ifndef NDEBUG
@@ -657,7 +654,7 @@ namespace lienlp
           return alpha_try;
         }
         dM = merit_trial - merit0;
-        if (verbose)
+        if (verbose >= 2)
           fmt::print(" | alpha {:5.2e}, M = {:5.5g}, dM = {:5.5g}\n", alpha_try, merit_trial, dM);
 
         if (dM <= armijo_c1 * alpha_try * d1)
