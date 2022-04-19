@@ -58,7 +58,7 @@ namespace lienlp
     //// Other settings
 
     bool verbose = QUIET;
-    bool use_gauss_newton = false;    // Use a Gauss-Newton approximation for the Lagrangian Hessian.
+    bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
 
@@ -66,36 +66,37 @@ namespace lienlp
     const Scalar prim_tol0 = 1.;
     Scalar inner_tol = inner_tol0;
     Scalar prim_tol = prim_tol0;
-    Scalar rho_init;                  // Initial primal proximal penalty parameter.
-    Scalar rho = rho_init;            // Primal proximal penalty parameter.
-    Scalar mu_eq_init;                // Initial penalty parameter.
-    Scalar mu_eq = mu_eq_init;        // Penalty parameter.
-    Scalar mu_eq_inv = 1. / mu_eq;    // Inverse penalty parameter.
-    Scalar mu_factor;                 // Penalty update multiplicative factor.
+    Scalar rho_init;                        // Initial primal proximal penalty parameter.
+    Scalar rho = rho_init;                  // Primal proximal penalty parameter.
+    Scalar mu_eq_init;                      // Initial penalty parameter.
+    Scalar mu_eq = mu_eq_init;              // Penalty parameter.
+    Scalar mu_eq_inv = 1. / mu_eq;          // Inverse penalty parameter.
+    Scalar mu_factor;                       // Penalty update multiplicative factor.
     Scalar rho_factor = mu_factor;
 
-    const Scalar inner_tol_min = 1e-9;// Lower safeguard for the subproblem tolerance.
-    Scalar mu_lower = 1e-9;           // Lower safeguard for the penalty parameter.
+    const Scalar inner_tol_min = 1e-9;      // Lower safeguard for the subproblem tolerance.
+    Scalar mu_lower = 1e-9;                 // Lower safeguard for the penalty parameter.
 
     //// Algo hyperparams
 
-    Scalar target_tol;                // Target tolerance for the problem.
-    const Scalar prim_alpha;          // BCL failure scaling (primal)
-    const Scalar prim_beta;           // BCL success scaling (primal)
-    const Scalar dual_alpha;          // BCL failure scaling (dual)
-    const Scalar dual_beta;           // BCL success scaling (dual)
+    Scalar target_tol;                      // Target tolerance for the problem.
+    const Scalar prim_alpha;                // BCL failure scaling (primal)
+    const Scalar prim_beta;                 // BCL success scaling (primal)
+    const Scalar dual_alpha;                // BCL failure scaling (dual)
+    const Scalar dual_beta;                 // BCL success scaling (dual)
 
-    const Scalar alpha_min;           // Linesearch minimum step size.
-    const Scalar armijo_c1;           // Armijo rule c1 parameter.
-    const Scalar ls_beta;             // Linesearch step size decrease factor.
+    const Scalar alpha_min;                 // Linesearch minimum step size.
+    const Scalar armijo_c1;                 // Armijo rule c1 parameter.
+    const Scalar ls_beta;                   // Linesearch step size decrease factor.
     
     const Scalar del_inc_k = 8.;
     const Scalar del_inc_big = 100.;
     const Scalar del_dec_k = 1./3.;
 
-    const Scalar DELTA_MIN = 1e-14;   // Minimum nonzero regularization strength.
-    const Scalar DELTA_MAX = 1e5;     // Maximum regularization strength.
+    const Scalar DELTA_MIN = 1e-14;         // Minimum nonzero regularization strength.
+    const Scalar DELTA_MAX = 1e5;           // Maximum regularization strength.
     const Scalar DELTA_NONZERO_INIT = 1e-4;
+    const Scalar DELTA_INIT = DELTA_MIN;
 
     /// Callbacks
     using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>; 
@@ -386,7 +387,7 @@ namespace lienlp
         // Compute inner stopping criterion
         Scalar inner_crit = math::infty_norm(workspace.kktRhs);
 
-        fmt::print(" | inner crit {:4.4g}, d={:.3g}, p={:.3g} (inner stop {:4.4g})\n",
+        fmt::print("| crit = {:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
                   inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
 
         bool outer_cond = (results.primalInfeas <= target_tol && results.dualInfeas <= target_tol);
@@ -404,7 +405,7 @@ namespace lienlp
 #endif
         // factorization
         // regularization strength : always try 0
-        delta = 0.;
+        delta = DELTA_INIT;
         InertiaFlag is_inertia_correct = BAD;
         while (not(is_inertia_correct == OK) && delta <= DELTA_MAX)
         {
@@ -414,7 +415,10 @@ namespace lienlp
           workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
 #ifndef NDEBUG
           eigsolve.compute(workspace.kktMatrix, Eigen::EigenvaluesOnly);
-          fmt::print(" | KKT Eigenvalues:\n{}\n", eigsolve.eigenvalues().transpose());
+          if (verbose >= 2)
+          {
+            fmt::print("| KKT Eigenvalues:\n{}\n", eigsolve.eigenvalues().transpose());
+          }
 #endif
           is_inertia_correct = checkInertia(workspace.signature);
 
@@ -454,9 +458,8 @@ namespace lienlp
         if (verbose >= 1)
         {
           VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
-          fmt::print(" | KKT system residual: {:4.3e} / conditioning {:.3g}\n",
-                     math::infty_norm(resdl), conditioning_);
-          fmt::print(" | xreg: {:5.2e}\n", delta);
+          fmt::print("| KKT residual: {:>5.2e} | conditioning {:>4.3g} | xreg = {:>4.3g}\n",
+                     math::infty_norm(resdl), conditioning_, delta);
         }
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
@@ -519,19 +522,20 @@ namespace lienlp
         }
       }
       InertiaFlag flag = OK;
-      fmt::print(" | Inertia ({:d}+, {:d}, {:d}-)", numpos, numzer, numneg);
+      bool print_info = verbose >= 2;
+      if (print_info) fmt::print(" | Inertia ({:d}+, {:d}, {:d}-)", numpos, numzer, numneg);
       if (numpos < ndx)
       {
-        fmt::print(" is wrong: num+ < ndx!\n");
+        if (print_info) fmt::print(" is wrong: num+ < ndx!\n");
         flag = BAD;
       } else if (numneg < numc) {
-        fmt::print(" is wrong: num- < num_cstr!\n");
+        if (print_info) fmt::print(" is wrong: num- < num_cstr!\n");
         flag = BAD;
       } else if (numzer > 0) {
-        fmt::print(" is wrong: there are null eigenvalues!\n");
+        if (print_info) fmt::print(" is wrong: there are null eigenvalues!\n");
         flag = ZEROS;
       } else {
-        fmt::print(" is OK\n");
+        if (print_info) fmt::print(" is OK\n");
       }
       return flag;
     }
@@ -617,7 +621,7 @@ namespace lienlp
       Scalar alpha_try = 1.;
 
       if (verbose >= 2)
-        fmt::print(" | current M = {:.5g} | d1 = {:.3g}\n", merit0, d1);
+        fmt::print("| M = {:>5.3e} | d1 = {:>5.3e}\n", merit0, d1);
 
 #ifndef NDEBUG
       std::vector<Scalar>& alphas_ = workspace.ls_alphas;
@@ -654,7 +658,7 @@ namespace lienlp
         }
         dM = merit_trial - merit0;
         if (verbose >= 2)
-          fmt::print(" | alpha {:5.2e}, M = {:5.5g}, dM = {:5.5g}\n", alpha_try, merit_trial, dM);
+          fmt::print("| M = {:>5.3e} | dM = {:>5.3e} | alpha = {:>5.3e}\n", merit_trial, dM, alpha_try);
 
         if (dM <= armijo_c1 * alpha_try * d1)
         {
@@ -667,6 +671,11 @@ namespace lienlp
       {
         alpha_try = alpha_min;
         tryStep(workspace, results, alpha_try);
+      }
+
+      if (verbose == 1)
+      {
+        fmt::print("| alpha_opt = {:>5.3e}\n", alpha_try);
       }
 
       return alpha_try;
