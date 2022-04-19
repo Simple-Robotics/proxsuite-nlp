@@ -7,9 +7,10 @@ namespace lienlp
   namespace python
   {
 
-    struct CallbackWrapper : helpers::callback<context::Scalar>,
-                             bp::wrapper<helpers::callback<context::Scalar>>
+    struct CallbackWrapper : helpers::base_callback<context::Scalar>,
+                             bp::wrapper<helpers::base_callback<context::Scalar>>
     {
+      CallbackWrapper() = default;
       void call(const context::Workspace& w, const context::Results& r)
       {
         this->get_override("call")(w, r);
@@ -19,11 +20,13 @@ namespace lienlp
     void exposeCallbacks()
     {
       using context::Scalar;
-      using callback_t = helpers::callback<Scalar>;
+      using callback_t = helpers::base_callback<Scalar>;
+
+      bp::register_ptr_to_python<shared_ptr<callback_t>>();
 
       bp::class_<CallbackWrapper, shared_ptr<CallbackWrapper>, boost::noncopyable>(
-        "BaseCallback", "Base callback for solvers.", bp::no_init)
-        .def("call", bp::pure_virtual(&callback_t::call), bp::args("self", "workspace", "results"))
+        "BaseCallback", "Base callback for solvers.", bp::init<>())
+        .def("call", bp::pure_virtual(&CallbackWrapper::call), bp::args("self", "workspace", "results"))
         ;
 
       {

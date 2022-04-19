@@ -77,13 +77,13 @@ struct ConstraintSetBase;
 template<typename Scalar>
 struct ProblemTpl;
 
-// fwd SResults
+// fwd ResultsTpl
 template<typename Scalar>
-struct SResults;
+struct ResultsTpl;
 
-// fwd Workspace
+// fwd WorkspaceTpl
 template<typename Scalar>
-struct SWorkspace;
+struct WorkspaceTpl;
 
 template<typename Scalar>
 class SolverTpl;

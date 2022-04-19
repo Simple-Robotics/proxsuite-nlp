@@ -130,8 +130,8 @@ int main()
   pdmerit.computeGradient(p1, lams, lams, grad);
   fmt::print("\tgradM(p1) {}\n", grad);
 
-  SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
-  SResults<double> results(space.nx(), *prob);
+  WorkspaceTpl<double> workspace(space.nx(), space.ndx(), *prob);
+  ResultsTpl<double> results(space.nx(), *prob);
 
   SolverTpl<double> solver(space, prob);
   solver.setPenalty(1. / 50);

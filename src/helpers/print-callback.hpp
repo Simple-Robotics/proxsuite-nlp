@@ -8,10 +8,10 @@ namespace lienlp
   {
 
     template<typename Scalar>
-    struct print_callback : callback<Scalar>
+    struct print_callback : base_callback<Scalar>
     {
-      void call(const SWorkspace<Scalar>& workspace,
-                const SResults<Scalar>& results)
+      void call(const WorkspaceTpl<Scalar>& workspace,
+                const ResultsTpl<Scalar>& results)
       {
 
       }

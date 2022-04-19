@@ -24,7 +24,7 @@ namespace lienlp
    *          the optimal proximal parameters \f$(\rho, \mu)\f$.
    */
   template<typename _Scalar>
-  struct SResults
+  struct ResultsTpl
   {
     using Scalar = _Scalar;
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
@@ -47,7 +47,7 @@ namespace lienlp
     Scalar mu;
     Scalar rho;
 
-    SResults(const int nx, const Problem& prob)
+    ResultsTpl(const int nx, const Problem& prob)
              : xOpt(nx)
              , lamsOpt_data(prob.getTotalConstraintDim())
              , numIters(0)
@@ -63,7 +63,7 @@ namespace lienlp
       }
     }
 
-    friend std::ostream& operator<<(std::ostream& s, const SResults<Scalar>& self)
+    friend std::ostream& operator<<(std::ostream& s, const ResultsTpl<Scalar>& self)
     {
       s << "{\n"
         << "  convergence:  " << self.converged << ",\n"

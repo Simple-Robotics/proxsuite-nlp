@@ -18,8 +18,8 @@ namespace python
     using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using Problem = ProblemTpl<Scalar>;
-    using Results = SResults<Scalar>;
-    using Workspace = SWorkspace<Scalar>;
+    using Results = ResultsTpl<Scalar>;
+    using Workspace = WorkspaceTpl<Scalar>;
     using Cost = CostFunctionBaseTpl<Scalar>;
     using Constraint = ConstraintSetBase<Scalar>;
     using Function = BaseFunctionTpl<Scalar>;

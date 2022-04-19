@@ -12,7 +12,7 @@ namespace lienlp
     /** @brief  Store the history of results.
      */
     template<typename Scalar>
-    struct history_callback : callback<Scalar>
+    struct history_callback : base_callback<Scalar>
     {
       history_callback(bool store_pd_vars=true,
                        bool store_values=true,
@@ -37,8 +37,8 @@ namespace lienlp
         std::vector<Scalar> d1_s;
       } storage;
 
-      void call(const SWorkspace<Scalar>& workspace,
-                const SResults<Scalar>& results)
+      void call(const WorkspaceTpl<Scalar>& workspace,
+                const ResultsTpl<Scalar>& results)
       {
         if (store_primal_dual_vars_)
         {

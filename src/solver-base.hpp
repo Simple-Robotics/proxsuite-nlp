@@ -34,8 +34,8 @@ namespace lienlp
     LIENLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
 
-    using Workspace = SWorkspace<Scalar>;
-    using Results = SResults<Scalar>;
+    using Workspace = WorkspaceTpl<Scalar>;
+    using Results = ResultsTpl<Scalar>;
   
     using M = ManifoldAbstractTpl<Scalar>;
 
@@ -49,8 +49,9 @@ namespace lienlp
 
     //// Other settings
 
+
     bool verbose = false;
-    bool use_gauss_newton = false;    /// Use a Gauss-Newton approximation for the Lagrangian Hessian.
+    bool use_gauss_newton = false;    // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
 
@@ -58,49 +59,49 @@ namespace lienlp
     const Scalar prim_tol0 = 1.;
     Scalar inner_tol = inner_tol0;
     Scalar prim_tol = prim_tol0;
-    Scalar rho_init;            /// Initial primal proximal penalty parameter.
-    Scalar rho = rho_init;      /// Primal proximal penalty parameter.
-    Scalar mu_eq_init;          /// Initial penalty parameter.
-    Scalar mu_eq = mu_eq_init;  /// Penalty parameter.
-    Scalar mu_eq_inv = 1. / mu_eq;
-    Scalar mu_factor;           /// Penalty update multiplicative factor.
+    Scalar rho_init;                  // Initial primal proximal penalty parameter.
+    Scalar rho = rho_init;            // Primal proximal penalty parameter.
+    Scalar mu_eq_init;                // Initial penalty parameter.
+    Scalar mu_eq = mu_eq_init;        // Penalty parameter.
+    Scalar mu_eq_inv = 1. / mu_eq;    // Inverse penalty parameter.
+    Scalar mu_factor;                 // Penalty update multiplicative factor.
     Scalar rho_factor = mu_factor;
 
-    const Scalar inner_tol_min = 1e-9;  /// Lower safeguard for the subproblem tolerance.
-    Scalar mu_lower_ = 1e-9;      /// Lower safeguard for the penalty parameter.
+    const Scalar inner_tol_min = 1e-9;// Lower safeguard for the subproblem tolerance.
+    Scalar mu_lower = 1e-9;           // Lower safeguard for the penalty parameter.
 
     //// Algo hyperparams
 
-    Scalar target_tol;        /// Target tolerance for the problem.
-    const Scalar prim_alpha;  /// BCL failure scaling (primal)
-    const Scalar prim_beta;   /// BCL success scaling (primal)
-    const Scalar dual_alpha;  /// BCL failure scaling (dual)
-    const Scalar dual_beta;   /// BCL success scaling (dual)
+    Scalar target_tol;                // Target tolerance for the problem.
+    const Scalar prim_alpha;          // BCL failure scaling (primal)
+    const Scalar prim_beta;           // BCL success scaling (primal)
+    const Scalar dual_alpha;          // BCL failure scaling (dual)
+    const Scalar dual_beta;           // BCL success scaling (dual)
 
-    const Scalar alpha_min;
-    const Scalar armijo_c1;
-    const Scalar ls_beta;
+    const Scalar alpha_min;           // Linesearch minimum step size.
+    const Scalar armijo_c1;           // Armijo rule c1 parameter.
+    const Scalar ls_beta;             // Linesearch step size decrease factor.
     
     const Scalar del_inc_k = 8.;
     const Scalar del_inc_big = 100.;
     const Scalar del_dec_k = 1./3.;
 
-    const Scalar DELTA_MIN = 1e-14;   /// Minimum nonzero regularization strength.
-    const Scalar DELTA_MAX = 1e5;    /// Maximum regularization strength.
+    const Scalar DELTA_MIN = 1e-14;   // Minimum nonzero regularization strength.
+    const Scalar DELTA_MAX = 1e5;     // Maximum regularization strength.
     const Scalar DELTA_NONZERO_INIT = 1e-4;
 
     /// Callbacks
-    using CallbackPtr = shared_ptr<helpers::callback<Scalar>>; 
+    using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>; 
     std::vector<CallbackPtr> callbacks_;
 
-    SolverTpl(const M& man,
+    SolverTpl(const M& manifold,
               shared_ptr<Problem>& prob,
               const Scalar tol=1e-6,
               const Scalar mu_eq_init=1e-2,
               const Scalar rho_init=0.,
               const bool verbose=true,
               const Scalar mu_factor=0.1,
-              const Scalar mu_lower_=1e-9,
+              const Scalar mu_lower=1e-9,
               const Scalar prim_alpha=0.1,
               const Scalar prim_beta=0.9,
               const Scalar dual_alpha=1.,
@@ -109,7 +110,7 @@ namespace lienlp
               const Scalar armijo_c1=1e-4,
               const Scalar ls_beta=0.5
               )
-      : manifold(man)
+      : manifold(manifold)
       , problem(prob)
       , merit_fun(problem, mu_eq_init)
       , prox_penalty(manifold, manifold.neutral(), rho_init * MatrixXs::Identity(manifold.ndx(), manifold.ndx()))
@@ -117,7 +118,7 @@ namespace lienlp
       , rho_init(rho_init)
       , mu_eq_init(mu_eq_init)
       , mu_factor(mu_factor)
-      , mu_lower_(mu_lower_)
+      , mu_lower(mu_lower)
       , target_tol(tol)
       , prim_alpha(prim_alpha)
       , prim_beta(prim_beta)
@@ -236,14 +237,14 @@ namespace lienlp
     /// Get solver maximum number of iterations.
     std::size_t getMaxIters() const { return MAX_ITERS; }
 
-    /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower_).
+    /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower).
     inline void updatePenalty()
     {
-      if (mu_eq == mu_lower_)
+      if (mu_eq == mu_lower)
       {
         setPenalty(mu_eq_init);
       } else {
-        setPenalty(std::max(mu_eq * mu_factor, mu_lower_));
+        setPenalty(std::max(mu_eq * mu_factor, mu_lower));
       }
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
@@ -269,7 +270,7 @@ namespace lienlp
     }
 
     /// @brief    Add a callback to the solver instance.
-    inline void registerCallback(const CallbackPtr& cb)
+    inline void registerCallback(CallbackPtr cb)
     {
       callbacks_.push_back(cb);
     }
@@ -349,14 +350,11 @@ namespace lienlp
           workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += prox_penalty.computeHessian(results.xOpt);
         }
 
-        // int cursor = ndx;  // starts after ndx (primal grad size)
         for (std::size_t i = 0; i < num_c; i++)
         {
           const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
           cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
-          MatrixRef& J_ = workspace.cstrJacobians[i];
 
-          fmt::print("Jacobian:\n{}\n", J_);
           fmt::print("Primal residuals:\n{}\n", workspace.primalResiduals[i].transpose());
 
           bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
@@ -365,9 +363,7 @@ namespace lienlp
             workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessProd[i];
           }
 
-          // cursor += nc;
         }
-        // cursor = 0;
 
         // Compute dual residual and infeasibility
         workspace.dualResidual = workspace.kktRhs.head(ndx);

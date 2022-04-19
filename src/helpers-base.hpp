@@ -10,10 +10,10 @@ namespace lienlp
   {
     
     template<typename Scalar>
-    struct callback
+    struct base_callback
     {
-      virtual void call(const SWorkspace<Scalar>&, const SResults<Scalar>&) = 0;
-      virtual ~callback() = default;
+      virtual void call(const WorkspaceTpl<Scalar>&, const ResultsTpl<Scalar>&) = 0;
+      virtual ~base_callback() = default;
     };
 
   } // namespace helpers
