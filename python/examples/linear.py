@@ -8,7 +8,7 @@ from lienlp.constraints import EqualityConstraint, NegativeOrthant
 nx = 2
 np.random.seed(42)
 space = EuclideanSpace(nx)
-nres = 1
+nres = 2
 A = np.random.randn(nres, nx)
 b = np.random.randn(nres)
 x0 = np.linalg.lstsq(A, -b)[0]
@@ -40,12 +40,9 @@ cstr1 = EqualityConstraint(resdl)
 cstr2 = NegativeOrthant(resdl)
 
 print(cstr1.projection(x0), "should be zero")
-print(cstr1.normalConeProjection(x0), "should be x0")
 
 print("proj  x0:", cstr2.projection(x0))
-print("dproj x0:", cstr2.normalConeProjection(x0))
 print("proj  x1:", cstr2.projection(x1))
-print("dproj x1:", cstr2.normalConeProjection(x1))
 
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10
@@ -109,9 +106,8 @@ plt.title("Problem cost")
 plt.show()
 
 
-# Test no verbose
-print(" TEST NO VERBOSE ")
+print(" TEST VERBOSE ")
 results = lienlp.Results(nx, problem)
 workspace = lienlp.Workspace(nx, nx, problem)
-solver2 = lienlp.Solver(space, problem, mu_init=1e-6, verbose=lienlp.QUIET)
+solver2 = lienlp.Solver(space, problem, mu_init=1e-6, verbose=lienlp.VERBOSE)
 solver2.solve(workspace, results, x_init, lams0)

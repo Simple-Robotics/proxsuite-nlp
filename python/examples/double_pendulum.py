@@ -16,6 +16,7 @@ from tap import Tap
 
 class Args(Tap):
     view: bool = False
+    num_replay: int = 3
 
 
 robot = erd.load("double_pendulum")
@@ -23,11 +24,13 @@ model = robot.model
 model.lowerPositionLimit[:] = -2 * np.pi
 model.upperPositionLimit[:] = +2 * np.pi
 
-nsteps = 30
-dt = 0.03
+Tf = 1.5
+nsteps = 60
+dt = Tf / nsteps
 Tf = nsteps * dt
 print("Time horizon: {:.3g}".format(Tf))
 print("Time step   : {:.3g}".format(dt))
+input("Enter to continue.")
 
 nq = model.nq
 nu = 1
@@ -43,9 +46,9 @@ class MyCallback(lienlp.BaseCallback):
         super().__init__()
 
     def call(self, workspace: lienlp.Workspace, results: lienlp.Results):
+        return
         with np.printoptions(precision=1, linewidth=250):
             print("JACOBIANS (callback):\n{}".format(workspace.jacobians_data))
-            print("flags:", workspace.jacobians_data.flags)
 
 args = Args().parse_args()
 print(args)
@@ -56,7 +59,7 @@ if VIEWER:
     vizer.initViewer(loadModel=True)
     vizer.display(pin.neutral(model))
     vizer.viewer.open()
-    value = (.6, 0.1, 0.)
+    value = (.6, 0.3, 0.)
     set_cam_angle(vizer, value)
 
 def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus):
@@ -74,7 +77,7 @@ def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus)
     return expression
 
 
-u_bound = 4.
+u_bound = .8
 
 class MultipleShootingProblem:
     """Multiple-shooting formulation."""
@@ -91,7 +94,7 @@ class MultipleShootingProblem:
         w_u = 1e-4
         w_x = 1e-2
         w_term = 1. * np.ones(xspace.ndx)
-        w_term[2:] = 1e-3
+        w_term[2:] = 0.
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
             0.5 * w_x * dt * cas.dot(cX_s, cX_s)
@@ -107,13 +110,14 @@ class MultipleShootingProblem:
 
         control_bounds_ = []
         for t in range(nsteps):
-            control_bounds_.append(cus[t] - u_bound)
+            control_bounds_.append( cus[t] - u_bound)
+            control_bounds_.append(-cus[t] - u_bound)
         control_expr = cas.vertcat(*control_bounds_)
         self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s)
 
 
 x0 = xspace.neutral()
-x0[0] = .99 * np.pi
+x0[0] = np.pi
 xtarget = xspace.neutral()
 
 
@@ -132,7 +136,7 @@ print("Bound: {}".format(probdef.control_bound_fun))
 
 cstrs_ = []
 cstrs_.append(dynamical_constraint)
-# cstrs_.append(bound_constraint)
+cstrs_.append(bound_constraint)
 prob = lienlp.Problem(cost_fun, cstrs_)
 
 print("No. of variables  :", pb_space.nx)
@@ -143,12 +147,12 @@ results = lienlp.Results(pb_space.nx, prob)
 callback = lienlp.HistoryCallback()
 callback2 = MyCallback()
 tol = 1e-4
-rho_init = 1e-5
-mu_init = 0.01
+rho_init = 1e-1
+mu_init = 1e-4
 solver = lienlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=lienlp.VERBOSE)
 solver.register_callback(callback)
-# solver.register_callback(callback2)
-solver.maxiters = 500
+solver.register_callback(callback2)
+solver.maxiters = 1000
 solver.use_gauss_newton = True
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
@@ -234,5 +238,5 @@ plt.show()
 
 if VIEWER:
 
-    for _ in range(5):
+    for _ in range(args.num_replay):
         display_trajectory(vizer, qs_opt, dt)
