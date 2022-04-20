@@ -2,7 +2,7 @@ import numpy as np
 import proxnlp
 
 from proxnlp.manifolds import EuclideanSpace
-from proxnlp.autodiff import FiniteDifferenceHelper
+from proxnlp.autodiff import FiniteDifferenceHelper, FiniteDifferenceHelperC2
 
 
 def test_fd_one_dim():
@@ -20,6 +20,7 @@ def test_fd_one_dim():
     eps = 1e-4
     ATOL = eps ** .5
     f1_diff = FiniteDifferenceHelper(space, f1, eps)
+    f1_c2 = FiniteDifferenceHelperC2(space, f1_diff, eps)
 
     xg = np.linspace(-1, 1, 201)
     xg = xg.reshape(-1, 1)
@@ -30,4 +31,7 @@ def test_fd_one_dim():
     print(f_vals)
     print(Jf_vals)
 
+    Hf_vals = np.concatenate([f1_c2.get_vhp(x, np.ones(nx)) for x in xg])
+
     assert np.allclose(Jf_vals, 2 * xg, atol=ATOL)
+    assert np.allclose(Hf_vals, 2 * np.ones_like(Hf_vals), atol=ATOL)
