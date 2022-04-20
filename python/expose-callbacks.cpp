@@ -1,8 +1,8 @@
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/helpers-base.hpp"
-#include "lienlp/helpers/history-callback.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/helpers-base.hpp"
+#include "proxnlp/helpers/history-callback.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
   namespace python
   {
@@ -55,5 +55,5 @@ namespace lienlp
       }
     }    
   } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 

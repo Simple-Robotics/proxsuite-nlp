@@ -13,7 +13,7 @@
 /**
  * Main namespace of the package.
  */
-namespace lienlp
+namespace proxnlp
 {
 
 /// Use the STL shared_ptr.
@@ -36,13 +36,13 @@ struct math_types
   using VectorOfRef = std::vector<VectorRef>;
 };
 
-} // namespace lienlp
+} // namespace proxnlp
 
 
-#include "lienlp/macros.hpp"
-#include "lienlp/config.hpp"
+#include "proxnlp/macros.hpp"
+#include "proxnlp/config.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
 /* Function types */
@@ -125,4 +125,4 @@ namespace math
 
 } // namespace math
 
-}  // namespace lienlp
+}  // namespace proxnlp

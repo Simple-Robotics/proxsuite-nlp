@@ -1,10 +1,10 @@
 #pragma once
 
-#include "lienlp/helpers-base.hpp"
-#include "lienlp/solver-base.hpp"
+#include "proxnlp/helpers-base.hpp"
+#include "proxnlp/solver-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   namespace helpers
   {
@@ -21,7 +21,7 @@ namespace lienlp
                        , store_residuals_(store_residuals)
       {}
 
-      LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+      PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
       struct
       {
@@ -65,5 +65,5 @@ namespace lienlp
     };
     
   } // namespace helpers
-} // namespace lienlp
+} // namespace proxnlp
 

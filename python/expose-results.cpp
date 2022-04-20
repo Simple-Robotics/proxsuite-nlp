@@ -1,8 +1,8 @@
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/results.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/results.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -36,5 +36,5 @@ namespace python
   }  
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 

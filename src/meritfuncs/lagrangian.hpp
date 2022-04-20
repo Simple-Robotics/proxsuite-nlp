@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/merit-function-base.hpp"
+#include "proxnlp/fwd.hpp"
+#include "proxnlp/merit-function-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
 
@@ -19,7 +19,7 @@ namespace lienlp
     >
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
     using Base = MeritFunctionBase<Scalar, VectorOfRef>;
     using Base::m_prob;
@@ -70,5 +70,5 @@ namespace lienlp
       }
     }
   };
-} // namespace lienlp
+} // namespace proxnlp
 

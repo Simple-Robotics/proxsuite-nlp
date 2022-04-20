@@ -1,22 +1,22 @@
 #pragma once
 
-#include "lienlp/config.hpp"
+#include "proxnlp/config.hpp"
 
 #include <string>
 #include <sstream>
 
-namespace lienlp
+namespace proxnlp
 {
   /// @brief    Pretty-print the package version number.
   /// @param    delimiter   The delimiter between the major/minor/patch version components.
   inline std::string printVersion(const std::string& delimiter = ".")
   {
     std::ostringstream oss;
-    oss << LIENLP_MAJOR_VERSION << delimiter
-        << LIENLP_MINOR_VERSION << delimiter
-        << LIENLP_PATCH_VERSION;
+    oss << PROXNLP_MAJOR_VERSION << delimiter
+        << PROXNLP_MINOR_VERSION << delimiter
+        << PROXNLP_PATCH_VERSION;
     return oss.str();
   }
   
-} // namespace lienlp
+} // namespace proxnlp
 

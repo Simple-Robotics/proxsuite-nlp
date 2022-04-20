@@ -1,4 +1,4 @@
-import lienlp
+import proxnlp
 
 import pinocchio as pin
 import pinocchio.casadi as cpin
@@ -9,7 +9,7 @@ import casadi as cas
 import example_robot_data as erd
 import matplotlib.pyplot as plt
 
-from lienlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
+from proxnlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
 from examples.utils import CasadiFunction
 
 from tap import Tap
@@ -39,7 +39,7 @@ if USE_VIEWER:
         warnings.warn("Please install pin-meshcat-utils to record or use the Meshcat viewer.")
         raise
 
-print("Package version: {}".format(lienlp.__version__))
+print("Package version: {}".format(proxnlp.__version__))
 robot = erd.load("double_pendulum")
 model = robot.model
 rdata = model.createData()
@@ -132,25 +132,25 @@ class MultipleShootingProblem:
 
 xu_init = pb_space.neutral()
 probdef = MultipleShootingProblem(x0, xtarget)
-cost_fun = lienlp.costs.CostFromFunction(probdef.cost_fun)
-dynamical_constraint = lienlp.constraints.EqualityConstraint(probdef.dynamics_fun)
-bound_constraint = lienlp.constraints.NegativeOrthant(probdef.control_bound_fun)
+cost_fun = proxnlp.costs.CostFromFunction(probdef.cost_fun)
+dynamical_constraint = proxnlp.constraints.EqualityConstraint(probdef.dynamics_fun)
+bound_constraint = proxnlp.constraints.NegativeOrthant(probdef.control_bound_fun)
 
 constraints_ = []
 constraints_.append(dynamical_constraint)
 constraints_.append(bound_constraint)
-prob = lienlp.Problem(cost_fun, constraints_)
+prob = proxnlp.Problem(cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
-workspace = lienlp.Workspace(pb_space.nx, pb_space.ndx, prob)
-results = lienlp.Results(pb_space.nx, prob)
+workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
+results = proxnlp.Results(pb_space.nx, prob)
 
-callback = lienlp.HistoryCallback()
+callback = proxnlp.HistoryCallback()
 tol = 1e-4
 rho_init = 0.
 mu_init = 0.05
-solver = lienlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=lienlp.VERBOSE)
+solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE)
 solver.register_callback(callback)
 solver.maxiters = 500
 solver.use_gauss_newton = True

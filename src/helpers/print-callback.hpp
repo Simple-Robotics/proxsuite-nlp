@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lienlp/helpers-base.hpp"
+#include "proxnlp/helpers-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
   namespace helpers
   {
@@ -19,5 +19,5 @@ namespace lienlp
     };
     
   } // namespace helpers
-} // namespace lienlp
+} // namespace proxnlp
 

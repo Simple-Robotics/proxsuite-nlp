@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -13,7 +13,7 @@ namespace python
     
     using Scalar = double;
 
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using Problem = ProblemTpl<Scalar>;
@@ -42,6 +42,6 @@ namespace python
   } // namespace context
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 
 

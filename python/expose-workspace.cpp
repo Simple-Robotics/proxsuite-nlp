@@ -1,9 +1,9 @@
-#include "lienlp/python/fwd.hpp"
+#include "proxnlp/python/fwd.hpp"
 
-#include "lienlp/workspace.hpp"
+#include "proxnlp/workspace.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   namespace python
   {
@@ -26,5 +26,5 @@ namespace lienlp
     }
     
   } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 

@@ -2,10 +2,10 @@
  */
 #pragma once
 
-#include "lienlp/fwd.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   /**
    * @brief Base function type.
@@ -19,7 +19,7 @@ namespace lienlp
     const int m_nr;
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     /// @brief      Evaluate the residual at a given point x.
     virtual ReturnType operator()(const ConstVectorRef& x) const = 0;
@@ -45,7 +45,7 @@ namespace lienlp
   public:
     using Scalar = _Scalar;
     using Base = BaseFunctionTpl<_Scalar>;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     Base& toBase()
     {
@@ -79,7 +79,7 @@ namespace lienlp
   public:
     using Scalar = _Scalar;
     using Base = C1FunctionTpl<_Scalar>;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     Base& toC1()
     {
@@ -104,5 +104,5 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

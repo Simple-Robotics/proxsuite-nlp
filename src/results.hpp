@@ -3,10 +3,10 @@
  */
 #pragma once
 
-#include "lienlp/problem-base.hpp"
+#include "proxnlp/problem-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   enum ConvergenceFlag
@@ -26,7 +26,7 @@ namespace lienlp
   struct ResultsTpl
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
@@ -85,5 +85,5 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

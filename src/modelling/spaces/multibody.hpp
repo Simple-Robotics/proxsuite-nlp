@@ -3,10 +3,10 @@
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 
-#include "lienlp/modelling/spaces/tangent-bundle.hpp"
+#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   namespace pin = pinocchio;
@@ -26,7 +26,7 @@ namespace lienlp
     using Self = MultibodyConfiguration<Scalar, Options>;
     using ModelType = pin::ModelTpl<Scalar, Options>;
     using Base = ManifoldAbstractTpl<Scalar, Options>;
-    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
+    PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
     MultibodyConfiguration(const ModelType& model)
       : m_model(model)
@@ -128,4 +128,4 @@ namespace lienlp
       {}
   };
 
-} // namespace lienlp
+} // namespace proxnlp

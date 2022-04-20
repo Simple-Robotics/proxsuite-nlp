@@ -1,6 +1,6 @@
 #pragma once
 
-namespace lienlp
+namespace proxnlp
 {
   template<typename Scalar>
   inline typename ConstraintSetBase<Scalar>::ReturnType
@@ -47,5 +47,5 @@ namespace lienlp
     }
   }
 
-} // namespace lienlp
+} // namespace proxnlp
 

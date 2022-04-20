@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   /// Helper functions and structs.
   namespace helpers
@@ -17,5 +17,5 @@ namespace lienlp
     };
 
   } // namespace helpers
-} // namespace lienlp
+} // namespace proxnlp
 

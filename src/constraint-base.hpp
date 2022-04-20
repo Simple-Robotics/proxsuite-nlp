@@ -1,10 +1,10 @@
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/function-base.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/function-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -15,7 +15,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
     using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using FunctionType = C2FunctionTpl<Scalar>;
@@ -72,4 +72,4 @@ namespace lienlp
 
 }
 
-#include "lienlp/constraint-base.hxx"
+#include "proxnlp/constraint-base.hxx"

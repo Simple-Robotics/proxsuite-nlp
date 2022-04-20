@@ -1,7 +1,7 @@
-#include "lienlp/modelling/residuals/linear.hpp"
-#include "lienlp/function-ops.hpp"
-#include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/residuals/linear.hpp"
+#include "proxnlp/function-ops.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <Eigen/Core>
 
@@ -14,7 +14,7 @@
 
 BOOST_AUTO_TEST_SUITE(residual)
 
-using namespace lienlp;
+using namespace proxnlp;
 
 BOOST_AUTO_TEST_CASE(test_linear)
 {

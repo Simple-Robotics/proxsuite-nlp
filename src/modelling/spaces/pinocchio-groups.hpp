@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/fwd.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 #include <pinocchio/multibody/liegroup/liegroup-base.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
@@ -9,7 +9,7 @@
 #include <memory>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   namespace pin = pinocchio;
@@ -28,7 +28,7 @@ namespace lienlp
       Options = LieGroup::Options
     };
     using Base = ManifoldAbstractTpl<Scalar>;
-    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
+    PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
     LieGroup m_lg;
     PinocchioLieGroup() {}

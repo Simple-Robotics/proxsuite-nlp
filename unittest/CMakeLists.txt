@@ -17,7 +17,7 @@ function(get_cpp_test_name name dir out_var)
 endfunction(get_cpp_test_name)
 
 
-macro(add_lienlp_test name)
+macro(add_proxnlp_test name)
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
   set(test_file ${name}.cpp)
 
@@ -40,12 +40,12 @@ macro(add_lienlp_test name)
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
 
   unset(test_name)
-endmacro(add_lienlp_test)
+endmacro(add_proxnlp_test)
 
 
-add_lienlp_test(constraint)
-add_lienlp_test(cost)
-add_lienlp_test(finite-diff)
-add_lienlp_test(function)
-add_lienlp_test(manifold)
+add_proxnlp_test(constraint)
+add_proxnlp_test(cost)
+add_proxnlp_test(finite-diff)
+add_proxnlp_test(function)
+add_proxnlp_test(manifold)
 

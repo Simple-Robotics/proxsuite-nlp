@@ -3,11 +3,11 @@
  */
 #pragma once
 
-#include "lienlp/problem-base.hpp"
+#include "proxnlp/problem-base.hpp"
 
 #include <Eigen/Cholesky>
 
-namespace lienlp
+namespace proxnlp
 {
 
   /** Workspace class, which holds the necessary intermediary data
@@ -20,7 +20,7 @@ namespace lienlp
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
 
     /// Newton iteration variables
@@ -159,5 +159,5 @@ namespace lienlp
   };
 
 
-} // namespace lienlp
+} // namespace proxnlp
 

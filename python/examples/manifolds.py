@@ -1,4 +1,4 @@
-from lienlp import manifolds
+from proxnlp import manifolds
 
 vs = manifolds.EuclideanSpace(2)
 

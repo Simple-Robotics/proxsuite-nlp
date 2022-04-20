@@ -4,11 +4,11 @@
  */
 #pragma once
 
-#include "lienlp/function-base.hpp"
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/function-base.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   
   /**
@@ -20,7 +20,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = C2FunctionTpl<Scalar>;
     using Base::operator();
@@ -50,5 +50,5 @@ namespace lienlp
     const M& m_manifold;
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

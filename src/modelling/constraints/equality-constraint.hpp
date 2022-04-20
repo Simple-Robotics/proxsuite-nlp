@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/constraint-base.hpp"
+#include "proxnlp/constraint-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   
   /**
@@ -17,7 +17,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
     using ActiveType = typename Base::ActiveType;
@@ -49,5 +49,5 @@ namespace lienlp
     }
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

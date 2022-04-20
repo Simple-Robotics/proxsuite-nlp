@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/cost-sum.hpp"
+#include "proxnlp/cost-sum.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<typename Scalar>
@@ -47,4 +47,4 @@ namespace lienlp
   {
     return right * left;
   }
-} // namespace lienlp
+} // namespace proxnlp

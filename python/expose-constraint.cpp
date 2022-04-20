@@ -1,15 +1,15 @@
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/constraint-base.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/constraint-base.hpp"
 
-#include "lienlp/modelling/constraints/equality-constraint.hpp"
-#include "lienlp/modelling/constraints/negative-orthant.hpp"
+#include "proxnlp/modelling/constraints/equality-constraint.hpp"
+#include "proxnlp/modelling/constraints/negative-orthant.hpp"
 
 /// TODO remove this include once functionality upstream
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -58,5 +58,5 @@ namespace python
   }
 
 }
-} // namespace lienlp
+} // namespace proxnlp
 

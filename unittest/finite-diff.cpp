@@ -1,12 +1,12 @@
-#include "lienlp/modelling/autodiff/finite-difference.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/autodiff/finite-difference.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <boost/test/unit_test.hpp>
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
-using namespace lienlp;
+using namespace proxnlp;
 
 BOOST_AUTO_TEST_SUITE(finite_diff)
 
@@ -14,7 +14,7 @@ namespace pin = pinocchio;
 
 using Vs = pin::VectorSpaceOperationTpl<-1, double>;
 
-LIENLP_FUNCTOR_TYPEDEFS(double)
+PROXNLP_FUNCTOR_TYPEDEFS(double)
 static const double fd_eps = 1e-4;
 static const double prec = std::sqrt(fd_eps);
 

@@ -1,8 +1,8 @@
-import lienlp
+import proxnlp
 import numpy as np
 
-from lienlp import manifolds
-from lienlp.costs import CostSum, QuadraticDistanceCost
+from proxnlp import manifolds
+from proxnlp.costs import CostSum, QuadraticDistanceCost
 
 
 space = manifolds.SE2()
@@ -51,10 +51,10 @@ def test_cost_sum():
 
     sum_3 = sum_2 + 0.5 * dist_fun2
     print("sum3 init:", sum_3)
-    prob = lienlp.Problem(sum_2)
-    ws = lienlp.Workspace(space.nx, space.ndx, prob)
-    rs = lienlp.Results(space.nx, prob)
-    solver = lienlp.Solver(space, prob, mu_init=0.1)
+    prob = proxnlp.Problem(sum_2)
+    ws = proxnlp.Workspace(space.nx, space.ndx, prob)
+    rs = proxnlp.Results(space.nx, prob)
+    solver = proxnlp.Solver(space, prob, mu_init=0.1)
     flag = solver.solve(ws, rs, p0, [])
     print("Flag:", flag)
     print("xopt:", rs.xopt)

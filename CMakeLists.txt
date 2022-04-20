@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-set(PROJECT_NAME lienlp)
+set(PROJECT_NAME proxnlp)
 set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
 set(PROJECT_URL "https://gitlab.inria.fr/wjallet/lie-nlp-solver")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
@@ -58,7 +58,7 @@ endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
-  add_definitions(-DLIENLP_EIGEN_CHECK_MALLOC)
+  add_definitions(-DPROXNLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
@@ -172,12 +172,12 @@ macro(EXPORT_VARIABLE var_name var_value)
 endmacro(EXPORT_VARIABLE var_name var_value)
 
 if(BUILD_WITH_CASADI_SUPPORT)
-  EXPORT_VARIABLE(LIENLP_USE_CASADI ON)
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(LIENLP_USE_CASADI \"\")")
+  EXPORT_VARIABLE(PROXNLP_USE_CASADI ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PROXNLP_USE_CASADI \"\")")
 endif()
 if(BUILD_PYTHON_INTERFACE)
-  EXPORT_VARIABLE(LIENLP_WITH_PYTHON_INTERFACE ON)
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(LIENLP_WITH_PYTHON_INTERFACE \"\")")
+  EXPORT_VARIABLE(PROXNLP_WITH_PYTHON_INTERFACE ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PROXNLP_WITH_PYTHON_INTERFACE \"\")")
 endif()
 
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})

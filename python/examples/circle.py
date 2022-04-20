@@ -1,9 +1,9 @@
 import numpy as np
-import lienlp
-from lienlp.residuals import ManifoldDifferenceToPoint
-from lienlp.costs import QuadraticDistanceCost, QuadraticResidualCost
-from lienlp.manifolds import EuclideanSpace
-from lienlp.constraints import NegativeOrthant, EqualityConstraint
+import proxnlp
+from proxnlp.residuals import ManifoldDifferenceToPoint
+from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
+from proxnlp.manifolds import EuclideanSpace
+from proxnlp.constraints import NegativeOrthant, EqualityConstraint
 
 
 nx = 2
@@ -19,7 +19,7 @@ weights = np.eye(nx)
 # A_mat = np.array([[0., 1.],
 #                   [0., 1.]])
 # b = np.array([0., -0.2])
-# reslin = lienlp.residuals.LinearFunction(A_mat, b)
+# reslin = proxnlp.residuals.LinearFunction(A_mat, b)
 
 
 cost_ = QuadraticDistanceCost(space, p0, weights)
@@ -55,16 +55,16 @@ cstrs_ = [
     NegativeOrthant(res3)
 ]
 
-prob = lienlp.Problem(cost_, cstrs_)
-results = lienlp.Results(nx, prob)
-workspace = lienlp.Workspace(nx, nx, prob)
+prob = proxnlp.Problem(cost_, cstrs_)
+results = proxnlp.Results(nx, prob)
+workspace = proxnlp.Workspace(nx, nx, prob)
 
 mu_init = 0.05
 rho_init = 0.
-solver = lienlp.Solver(space, prob, mu_init=mu_init, rho_init=rho_init,
-                       verbose=lienlp.VERBOSE)
+solver = proxnlp.Solver(space, prob, mu_init=mu_init, rho_init=rho_init,
+                       verbose=proxnlp.VERBOSE)
 solver.use_gauss_newton = True
-callback = lienlp.HistoryCallback()
+callback = proxnlp.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]

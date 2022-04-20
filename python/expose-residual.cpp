@@ -1,12 +1,12 @@
-#include "lienlp/python/fwd.hpp"
+#include "proxnlp/python/fwd.hpp"
 
-#include "lienlp/modelling/residuals/linear.hpp"
-#include "lienlp/modelling/residuals/state-residual.hpp"
+#include "proxnlp/modelling/residuals/linear.hpp"
+#include "proxnlp/modelling/residuals/state-residual.hpp"
 
 #include <boost/python/overloads.hpp>
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -48,4 +48,4 @@ namespace python
   }
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp

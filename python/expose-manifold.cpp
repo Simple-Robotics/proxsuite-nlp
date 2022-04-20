@@ -1,14 +1,14 @@
-#include "lienlp/python/manifold.hpp"
+#include "proxnlp/python/manifold.hpp"
 
 
-#include "lienlp/modelling/spaces/tangent-bundle.hpp"
+#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
 #ifdef WITH_PINOCCHIO
-  #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-  #include "lienlp/modelling/spaces/multibody.hpp"
+  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+  #include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -116,4 +116,4 @@ namespace python
   }
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp

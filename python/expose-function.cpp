@@ -1,8 +1,8 @@
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/function-base.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/function-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -11,7 +11,7 @@ namespace python
     struct FunctionWrap : context::Function, bp::wrapper<context::Function>
     {
     public:
-      LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
       FunctionWrap(const int nx, const int ndx, const int nr) : context::Function(nx, ndx, nr) {}
 
@@ -24,7 +24,7 @@ namespace python
 
     struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function>
     {
-      LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
       C1FunctionWrap(const int nx, const int ndx, const int nr) : context::C1Function(nx, ndx, nr) {}
 
@@ -43,7 +43,7 @@ namespace python
 
     struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function>
     {
-      LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
       C2FunctionWrap(const int nx, const int ndx, const int nr) : context::C2Function(nx, ndx, nr) {}
 
@@ -120,4 +120,4 @@ namespace python
   }
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp

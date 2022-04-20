@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/cost-function.hpp"
-#include "lienlp/function-base.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/function-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -18,7 +18,7 @@ namespace lienlp
   public:
     using Scalar = _Scalar;
     using FunctionType = C2FunctionTpl<Scalar>;  // base constraint func to use
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = CostFunctionBaseTpl<Scalar>;
     using Base::computeGradient;
     using Base::computeHessian;
@@ -79,4 +79,4 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp

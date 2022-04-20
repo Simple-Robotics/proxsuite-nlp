@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/manifold-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<int _Dim, typename _Scalar, int _Options = 0>
@@ -23,7 +23,7 @@ namespace lienlp
       Options = _Options
     };
     using Base = ManifoldAbstractTpl<Scalar, Options>;
-    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
+    PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
     /**
      * Geodesics on the 3D sphere are given by the great circles.

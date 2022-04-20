@@ -1,11 +1,11 @@
 #pragma once
 
-#include "lienlp/function-base.hpp"
+#include "proxnlp/function-base.hpp"
 
 #include <utility>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /** @brief Compose two functions.
@@ -19,7 +19,7 @@ namespace lienlp
     using Base::computeJacobian;
     using Base::vectorHessianProduct;
 
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     ComposeFunctionTpl(const Base& left, const Base& right)
       : Base(right.nx(), right.ndx(), left.nr())
@@ -41,5 +41,5 @@ namespace lienlp
 
   };
   
-} // namespace lienlp
+} // namespace proxnlp
 

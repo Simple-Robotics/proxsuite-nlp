@@ -1,9 +1,9 @@
-#include "lienlp/python/fwd.hpp"
+#include "proxnlp/python/fwd.hpp"
 
-#include "lienlp/solver-base.hpp"
+#include "proxnlp/solver-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   namespace python
   {
@@ -75,4 +75,4 @@ namespace lienlp
         ;
     }
   } // namespace python
-} // namespace lienlp
+} // namespace proxnlp

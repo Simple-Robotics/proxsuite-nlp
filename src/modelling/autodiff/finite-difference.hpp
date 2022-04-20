@@ -2,10 +2,10 @@
 ///         through finite differences.
 #pragma once
 
-#include "lienlp/function-base.hpp"
+#include "proxnlp/function-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   enum FDLevel
@@ -23,7 +23,7 @@ namespace lienlp
     template<typename Scalar>
     struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar>
     {
-      LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
       using FuncType = BaseFunctionTpl<Scalar>;
       using Base = C1FunctionTpl<Scalar>;
       using Base::computeJacobian;
@@ -62,7 +62,7 @@ namespace lienlp
     template<typename Scalar>
     struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar>
     {
-      LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
       using FuncType = C1FunctionTpl<Scalar>;
       using Base = C2FunctionTpl<Scalar>;
       using Base::vectorHessianProduct;
@@ -124,7 +124,7 @@ namespace lienlp
     using Base = internal::finite_difference_impl<Scalar, TOC1>;
     using Base::computeJacobian;
 
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using InputType = BaseFunctionTpl<Scalar>;
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
@@ -160,7 +160,7 @@ namespace lienlp
     using Base1::computeJacobian;
     using Base2::vectorHessianProduct;
 
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using InputType = C1FunctionTpl<Scalar>;
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
@@ -181,5 +181,5 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

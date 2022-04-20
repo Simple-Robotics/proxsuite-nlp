@@ -1,13 +1,13 @@
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/function-base.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/function-base.hpp"
 
 #include <boost/core/demangle.hpp>
 #include <ostream>
 
 
-namespace lienlp
+namespace proxnlp
 {
   template<typename Scalar>
   struct func_to_cost;
@@ -22,7 +22,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
     using Base = C2FunctionTpl<Scalar>;
 
     CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
@@ -94,7 +94,7 @@ namespace lienlp
     const C2FunctionTpl<_Scalar>& underlying_;
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     /** @brief    Constructor.
      *  @details  This defines an implicit conversion from the C2FunctionTpl type.
@@ -128,5 +128,5 @@ namespace lienlp
 
   };
 
-}  // namespace lienlp
+}  // namespace proxnlp
   

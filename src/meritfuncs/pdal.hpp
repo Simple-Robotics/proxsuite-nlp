@@ -1,12 +1,12 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/merit-function-base.hpp"
-#include "lienlp/meritfuncs/lagrangian.hpp"
+#include "proxnlp/fwd.hpp"
+#include "proxnlp/merit-function-base.hpp"
+#include "proxnlp/meritfuncs/lagrangian.hpp"
 
 #include <vector>
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -30,7 +30,7 @@ namespace lienlp
       typename math_types<_Scalar>::VectorOfRef>
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
@@ -94,4 +94,4 @@ namespace lienlp
 
 }
 
-#include "lienlp/meritfuncs/pdal.hxx"
+#include "proxnlp/meritfuncs/pdal.hxx"

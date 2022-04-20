@@ -2,14 +2,14 @@
  */
 #pragma once
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/problem-base.hpp"
-#include "lienlp/meritfuncs/pdal.hpp"
-#include "lienlp/workspace.hpp"
-#include "lienlp/results.hpp"
-#include "lienlp/helpers-base.hpp"
+#include "proxnlp/fwd.hpp"
+#include "proxnlp/problem-base.hpp"
+#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/workspace.hpp"
+#include "proxnlp/results.hpp"
+#include "proxnlp/helpers-base.hpp"
 
-#include "lienlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #ifndef NDEBUG
   #include <Eigen/Eigenvalues>
@@ -22,7 +22,7 @@
 #include <fmt/color.h>
 #include <fmt/ostream.h>
 
-namespace lienlp
+namespace proxnlp
 {
 
   /// Verbosity level.
@@ -38,7 +38,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
 
     using Workspace = WorkspaceTpl<Scalar>;
@@ -705,5 +705,5 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

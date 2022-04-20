@@ -1,17 +1,17 @@
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
 
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/python/util.hpp"
-#include "lienlp/version.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/python/util.hpp"
+#include "proxnlp/version.hpp"
 
 #include <eigenpy/eigenpy.hpp>
 
 
-using namespace lienlp::python;
+using namespace proxnlp::python;
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -31,11 +31,11 @@ namespace python
 }
 
 
-BOOST_PYTHON_MODULE(pylienlp)
+BOOST_PYTHON_MODULE(pyproxnlp)
 {
   bp::docstring_options module_docstring_options(true, true, true);
 
-  bp::scope().attr("__version__") = lienlp::printVersion();
+  bp::scope().attr("__version__") = proxnlp::printVersion();
   eigenpy::enableEigenPy();
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 

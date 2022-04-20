@@ -1,12 +1,12 @@
 #pragma once
 
 
-#include "lienlp/function-base.hpp"
-#include "lienlp/function-ops.hpp"
-#include "lienlp/modelling/residuals/state-residual.hpp"
+#include "proxnlp/function-base.hpp"
+#include "proxnlp/function-ops.hpp"
+#include "proxnlp/modelling/residuals/state-residual.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   
   /**
@@ -16,7 +16,7 @@ namespace lienlp
   struct LinearFunction : C2FunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = C2FunctionTpl<Scalar>;
     using Base::computeJacobian;
@@ -49,7 +49,7 @@ namespace lienlp
   {
     using Scalar = _Scalar;
     using Base = ComposeFunctionTpl<Scalar>;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
     using M = ManifoldAbstractTpl<Scalar>;
 
@@ -63,4 +63,4 @@ namespace lienlp
 
 
 
-} // namespace lienlp
+} // namespace proxnlp

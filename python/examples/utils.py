@@ -1,9 +1,9 @@
 import casadi
-import lienlp
+import proxnlp
 import numpy as np
 
 
-class CasadiFunction(lienlp.C2Function):
+class CasadiFunction(proxnlp.C2Function):
     def __init__(self, nx, ndx, expression: casadi.SX, cx: casadi.SX):
         nres = expression.shape[0]
         super().__init__(nx, ndx, nres)

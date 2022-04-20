@@ -1,11 +1,11 @@
 #pragma once
 
 #include <pinocchio/fwd.hpp>
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -53,4 +53,4 @@ namespace python
 } // namespace python
 
   
-} // namespace lienlp
+} // namespace proxnlp

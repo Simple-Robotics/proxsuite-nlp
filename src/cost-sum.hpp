@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/cost-function.hpp"
+#include "proxnlp/cost-function.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<typename _Scalar>
@@ -11,7 +11,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = CostFunctionBaseTpl<Scalar>;
     using BasePtr = Base const*;
 
@@ -118,6 +118,6 @@ namespace lienlp
     }
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 
-#include "lienlp/cost-sum.hxx"
+#include "proxnlp/cost-sum.hxx"

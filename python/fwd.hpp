@@ -1,12 +1,12 @@
 #pragma once
 
-#include "lienlp/python/context.hpp"
+#include "proxnlp/python/context.hpp"
 
 #include <eigenpy/eigenpy.hpp>
 #include <boost/python.hpp>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
 namespace python
@@ -27,5 +27,5 @@ namespace python
 
 } // namespace python
 
-} // namespace lienlp
+} // namespace proxnlp
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "lienlp/modelling/spaces/tangent-bundle.hpp"
+#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
 
 
 
-namespace lienlp
+namespace proxnlp
 {
 
     template<class Base>
@@ -99,4 +99,4 @@ namespace lienlp
       }
     }
 
-} // namespace lienlp
+} // namespace proxnlp

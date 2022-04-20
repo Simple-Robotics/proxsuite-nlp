@@ -2,11 +2,11 @@
  * Optimize a quadratic function on a circle, or on a disk.
  * 
  */
-#include "lienlp/cost-function.hpp"
-#include "lienlp/merit-function-base.hpp"
-#include "lienlp/meritfuncs/pdal.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/merit-function-base.hpp"
+#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"
@@ -16,7 +16,7 @@ using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 
 using fmt::format;
 
-using namespace lienlp;
+using namespace proxnlp;
 using Manifold = PinocchioLieGroup<SO2>;
 using Problem = ProblemTpl<double>;
 

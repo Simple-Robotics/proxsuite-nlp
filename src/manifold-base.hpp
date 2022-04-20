@@ -1,14 +1,14 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
-  #define LIENLP_DEFINE_MANIFOLD_TYPES(M)                     \
-    LIENLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
+  #define PROXNLP_DEFINE_MANIFOLD_TYPES(M)                     \
+    PROXNLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
     using PointType = typename M::PointType;                  \
     using TangentVectorType = typename M::TangentVectorType;  \
     using JacobianType = typename M::JacobianType;
@@ -24,7 +24,7 @@ namespace lienlp
       Options = _Options
     };
 
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 
@@ -152,4 +152,4 @@ namespace lienlp
 
   };
 
-}  // namespace lienlp
+}  // namespace proxnlp

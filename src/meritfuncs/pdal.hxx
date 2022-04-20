@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lienlp/meritfuncs/pdal.hpp"
+#include "proxnlp/meritfuncs/pdal.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   template<typename Scalar>
   Scalar PDALFunction<Scalar>::operator()(
@@ -97,4 +97,4 @@ namespace lienlp
       out[i].noalias() = cstr->normalConeProjection(2 * out[i] - lams[i]);
     }
   }
-} // namespace lienlp
+} // namespace proxnlp

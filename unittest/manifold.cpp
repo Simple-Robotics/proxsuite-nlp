@@ -1,18 +1,18 @@
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 #include <boost/test/unit_test.hpp>
 
 #ifdef WITH_PINOCCHIO
   #include <pinocchio/parsers/sample-models.hpp>
   #include <pinocchio/multibody/liegroup/vector-space.hpp>
-  #include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-  #include "lienlp/modelling/spaces/multibody.hpp"
+  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+  #include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
-using namespace lienlp;
+using namespace proxnlp;
 
 
 BOOST_AUTO_TEST_SUITE(manifold)

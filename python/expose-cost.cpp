@@ -1,14 +1,14 @@
 
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/cost-function.hpp"
-#include "lienlp/cost-sum.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/cost-sum.hpp"
 
-#include "lienlp/modelling/costs/quadratic-residual.hpp"
-#include "lienlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/costs/quadratic-residual.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "boost/python/operators.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -17,7 +17,7 @@ namespace python
     
     struct CostWrapper : context::Cost, bp::wrapper<context::Cost>
     {
-      LIENLP_FUNCTOR_TYPEDEFS(context::Scalar)
+      PROXNLP_FUNCTOR_TYPEDEFS(context::Scalar)
 
       CostWrapper(const int nx, const int ndx) : context::Cost(nx, ndx) {}
 
@@ -121,5 +121,5 @@ namespace python
   }
 
 } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/cost-function.hpp"
-#include "lienlp/constraint-base.hpp"
-#include "lienlp/modelling/constraints/equality-constraint.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/constraint-base.hpp"
+#include "proxnlp/modelling/constraints/equality-constraint.hpp"
 
 #include <vector>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<typename _Scalar>
@@ -16,7 +16,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
     /// Generic constraint type
     using ConstraintType = ConstraintSetBase<Scalar>;
@@ -137,6 +137,6 @@ namespace lienlp
   } // namespace helpers
   
 
-} // namespace lienlp
+} // namespace proxnlp
 
 

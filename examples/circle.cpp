@@ -2,20 +2,20 @@
  * Optimize a quadratic function on a circle, or on a disk.
  * 
  */
-#include "lienlp/cost-function.hpp"
-#include "lienlp/meritfuncs/pdal.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/costs/quadratic-residual.hpp"
-#include "lienlp/modelling/constraints/negative-orthant.hpp"
-#include "lienlp/solver-base.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/costs/quadratic-residual.hpp"
+#include "proxnlp/modelling/constraints/negative-orthant.hpp"
+#include "proxnlp/solver-base.hpp"
 
 #include "example-base.hpp"
 
 
 using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
 
-using namespace lienlp;
+using namespace proxnlp;
 using Manifold = PinocchioLieGroup<Vs>;
 using Problem = ProblemTpl<double>;
 
