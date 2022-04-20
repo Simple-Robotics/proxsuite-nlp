@@ -7,16 +7,19 @@ import lienlp
 
 from lienlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
 from examples.utils import CasadiFunction
-from examples.utils import display_trajectory, set_cam_angle
+
+from meshcat_utils import display_trajectory, ForceDraw, VIDEO_CONFIG_DEFAULT
 
 import example_robot_data as erd
 from tap import Tap
 
+import matplotlib.pyplot as plt
 
 
 class Args(Tap):
     view: bool = False
     num_replay: int = 3
+    record: bool = False
 
 
 robot = erd.load("double_pendulum")
@@ -25,16 +28,17 @@ model.lowerPositionLimit[:] = -2 * np.pi
 model.upperPositionLimit[:] = +2 * np.pi
 
 Tf = 1.5
-nsteps = 60
-dt = Tf / nsteps
+dt = 0.03
+nsteps = int(Tf / dt)
 Tf = nsteps * dt
 print("Time horizon: {:.3g}".format(Tf))
 print("Time step   : {:.3g}".format(dt))
-input("Enter to continue.")
 
 nq = model.nq
-nu = 1
 B = np.array([[0.], [1.]])
+nu = B.shape[1]
+
+u_bound = 2.
 
 xspace = MultibodyPhaseSpace(model)
 pb_space = EuclideanSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
@@ -50,17 +54,21 @@ class MyCallback(lienlp.BaseCallback):
         with np.printoptions(precision=1, linewidth=250):
             print("JACOBIANS (callback):\n{}".format(workspace.jacobians_data))
 
+
 args = Args().parse_args()
+rdata = model.createData()
 print(args)
 VIEWER = args.view
 
 if VIEWER:
-    vizer = pin.visualize.MeshcatVisualizer(model, robot.collision_model, robot.visual_model)
+    vizer: pin.visualize.MeshcatVisualizer = pin.visualize.MeshcatVisualizer(model, robot.collision_model, robot.visual_model)
     vizer.initViewer(loadModel=True)
     vizer.display(pin.neutral(model))
     vizer.viewer.open()
-    value = (.6, 0.3, 0.)
-    set_cam_angle(vizer, value)
+    drawer = ForceDraw(vizer)
+    drawer.set_bg()
+    drawer.set_cam_angle_preset('acrobot')
+
 
 def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus):
     resdls = [cxs[0] - x0]
@@ -77,8 +85,6 @@ def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus)
     return expression
 
 
-u_bound = .8
-
 class MultipleShootingProblem:
     """Multiple-shooting formulation."""
     def __init__(self, x0, xtarget):
@@ -91,16 +97,15 @@ class MultipleShootingProblem:
 
         cXU_s = cas.vertcat(cX_s, cU_s)
 
-        w_u = 1e-4
+        w_u = 1e-2
         w_x = 1e-2
-        w_term = 1. * np.ones(xspace.ndx)
+        w_term = 1e-1 * np.ones(xspace.ndx)
         w_term[2:] = 0.
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
-            0.5 * w_x * dt * cas.dot(cX_s, cX_s)
-            + 0.5 * w_u * dt * cas.dot(cU_s, cU_s)
-            + 0.5 * cas.dot(ferr, w_term * ferr)
-            )
+            0.5 * w_x * dt * cas.dot(cX_s, cX_s) +
+            0.5 * w_u * dt * cas.dot(cU_s, cU_s) +
+            0.5 * cas.dot(ferr, w_term * ferr))
 
         self.cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost_expression, cXU_s)
 
@@ -110,7 +115,7 @@ class MultipleShootingProblem:
 
         control_bounds_ = []
         for t in range(nsteps):
-            control_bounds_.append( cus[t] - u_bound)
+            control_bounds_.append(cus[t] - u_bound)
             control_bounds_.append(-cus[t] - u_bound)
         control_expr = cas.vertcat(*control_bounds_)
         self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s)
@@ -134,10 +139,10 @@ print("Cost : {}".format(probdef.cost_fun))
 print("Dyn  : {}".format(probdef.dynamics_fun))
 print("Bound: {}".format(probdef.control_bound_fun))
 
-cstrs_ = []
-cstrs_.append(dynamical_constraint)
-cstrs_.append(bound_constraint)
-prob = lienlp.Problem(cost_fun, cstrs_)
+constraints_ = []
+constraints_.append(dynamical_constraint)
+constraints_.append(bound_constraint)
+prob = lienlp.Problem(cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
@@ -147,15 +152,15 @@ results = lienlp.Results(pb_space.nx, prob)
 callback = lienlp.HistoryCallback()
 callback2 = MyCallback()
 tol = 1e-4
-rho_init = 1e-1
-mu_init = 1e-4
+rho_init = 0.
+mu_init = 0.05
 solver = lienlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=lienlp.VERBOSE)
 solver.register_callback(callback)
 solver.register_callback(callback2)
-solver.maxiters = 1000
+solver.maxiters = 500
 solver.use_gauss_newton = True
 
-lams0 = [np.zeros(cs.nr) for cs in cstrs_]
+lams0 = [np.zeros(cs.nr) for cs in constraints_]
 flag = solver.solve(workspace, results, xu_init, lams0)
 
 print("Results struct:\n{}".format(results))
@@ -172,9 +177,6 @@ vs_opt = xs_opt[:, model.nq:]
 print("X shape:", xs_opt.shape)
 
 
-import matplotlib.pyplot as plt
-
-
 plt.style.use("seaborn-ticks")
 plt.rcParams['lines.linewidth'] = 1.
 plt.rcParams['axes.linewidth'] = 1.
@@ -188,7 +190,7 @@ axes: list[plt.Axes]
 plt.sca(axes[0])
 hlines_style = dict(alpha=.7, ls='-', lw=2, zorder=-1)
 lines = plt.plot(times, qs_opt)
-cols_ = [l.get_color() for l in lines]
+cols_ = [li.get_color() for li in lines]
 labels_ = ["$q_{0}$".format(i) for i in range(model.nq)]
 hlines = plt.hlines(xtarget[:model.nq], *times[[0, -1]], colors=cols_, **hlines_style)
 
@@ -203,6 +205,8 @@ plt.xlabel("Time $t$")
 plt.title("Controls $u$")
 
 ax0 = axes[2]
+
+
 def plot_pd_errs():
     ax0.plot(prim_errs, c='tab:blue')
     ax0.set_xlabel("Iterations")
@@ -214,6 +218,7 @@ def plot_pd_errs():
     ax0.set_yscale("log")
     ax0.legend(["Primal error $p$", "Dual error $d$"])
     ax0.set_title("Solver primal-dual residuals")
+
 
 plot_pd_errs()
 
@@ -238,5 +243,15 @@ plt.show()
 
 if VIEWER:
 
+    drawer.set_cam_angle_preset('acrobot')
+    allimgs = []
     for _ in range(args.num_replay):
-        display_trajectory(vizer, qs_opt, dt)
+        imgs = display_trajectory(vizer, drawer, xs_opt, us_opt,
+                                  record=args.record, wait=dt)
+        if imgs is not None:
+            allimgs.extend(imgs)
+
+    if args.record:
+        import imageio
+        imageio.mimwrite("double_pendulum.mp4", ims=allimgs, fps=1. / dt,
+                         **VIDEO_CONFIG_DEFAULT)
