@@ -1,6 +1,6 @@
-#include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/cost-sum.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/cost-sum.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_SUITE(cost)
 
-using namespace lienlp;
+using namespace proxnlp;
 namespace pin = pinocchio;
 namespace utf = boost::unit_test;
 using SE2 = PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>>;

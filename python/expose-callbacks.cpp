@@ -1,16 +1,17 @@
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/helpers-base.hpp"
-#include "lienlp/helpers/history-callback.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/helpers-base.hpp"
+#include "proxnlp/helpers/history-callback.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
   namespace python
   {
 
-    struct CallbackWrapper : helpers::callback<context::Scalar>,
-                             bp::wrapper<helpers::callback<context::Scalar>>
+    struct CallbackWrapper : helpers::base_callback<context::Scalar>,
+                             bp::wrapper<helpers::base_callback<context::Scalar>>
     {
-      void call(const context::Workspace_t& w, const context::Result_t& r)
+      CallbackWrapper() = default;
+      void call(const context::Workspace& w, const context::Results& r)
       {
         this->get_override("call")(w, r);
       }
@@ -19,11 +20,13 @@ namespace lienlp
     void exposeCallbacks()
     {
       using context::Scalar;
-      using callback_t = helpers::callback<Scalar>;
+      using callback_t = helpers::base_callback<Scalar>;
+
+      bp::register_ptr_to_python<shared_ptr<callback_t>>();
 
       bp::class_<CallbackWrapper, shared_ptr<CallbackWrapper>, boost::noncopyable>(
-        "BaseCallback", "Base callback for solvers.", bp::no_init)
-        .def("call", bp::pure_virtual(&callback_t::call), bp::args("self", "workspace", "results"))
+        "BaseCallback", "Base callback for solvers.", bp::init<>())
+        .def("call", bp::pure_virtual(&CallbackWrapper::call), bp::args("self", "workspace", "results"))
         ;
 
       {
@@ -39,15 +42,18 @@ namespace lienlp
           )
           .def_readonly("storage", &helpers::history_callback<Scalar>::storage);
 
-        bp::class_<history_storage_t>("_history_storage", bp::no_init)
+        bp::class_<history_storage_t, shared_ptr<history_storage_t>>("_history_storage")
           .def_readonly("xs", &history_storage_t::xs)
           .def_readonly("lams", &history_storage_t::lams)
           .def_readonly("values", &history_storage_t::values)
           .def_readonly("prim_infeas", &history_storage_t::prim_infeas)
           .def_readonly("dual_infeas", &history_storage_t::dual_infeas)
+          .def_readonly("ls_alphas", &history_storage_t::ls_alphas)
+          .def_readonly("ls_values", &history_storage_t::ls_values)
+          .def_readonly("d1_s", &history_storage_t::d1_s)
           ;
       }
     }    
   } // namespace python
-} // namespace lienlp
+} // namespace proxnlp
 

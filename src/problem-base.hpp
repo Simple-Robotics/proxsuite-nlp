@@ -1,14 +1,14 @@
 #pragma once
 
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/cost-function.hpp"
-#include "lienlp/constraint-base.hpp"
-#include "lienlp/modelling/constraints/equality-constraint.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/constraint-base.hpp"
+#include "proxnlp/modelling/constraints/equality-constraint.hpp"
 
 #include <vector>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<typename _Scalar>
@@ -16,7 +16,7 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
     /// Generic constraint type
     using ConstraintType = ConstraintSetBase<Scalar>;
@@ -24,7 +24,7 @@ namespace lienlp
     /// Equality constraint type
     using EqualityType = EqualityConstraint<Scalar>;
     /// Cost function type
-    using CostType = CostFunctionBase<Scalar>;
+    using CostType = CostFunctionBaseTpl<Scalar>;
 
     /// The cost functional
     const CostType& m_cost;
@@ -50,6 +50,15 @@ namespace lienlp
       return m_ncs;
     }
 
+    /// Get dimension of constraint \p i.
+    int getConstraintDim(int i) const
+    {
+      return m_ncs[i];
+    }
+
+    std::size_t nx()  const { return m_cost.nx(); }
+    std::size_t ndx() const { return m_cost.ndx(); }
+
     ProblemTpl(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
 
     ProblemTpl(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
@@ -65,25 +74,40 @@ namespace lienlp
       reset_constraint_dim_vars();
     }    
 
+    std::vector<int> getIndices() const
+    {
+      return m_indices;
+    }
+
+    int getIndex(int i) const
+    {
+      return m_indices[i];
+    }
+
   protected:
     /// Vector of equality constraints.
     std::vector<ConstraintPtr> m_cstrs;
     /// Total number of constraints
-    const int m_nc_total;
-    const std::vector<int> m_ncs;
+    int m_nc_total;
+    std::vector<int> m_ncs;
+    std::vector<int> m_indices;
 
     /// Set values of const data members for constraint dimensions
     void reset_constraint_dim_vars()
     {
-      int& nc = const_cast<int&>(m_nc_total);
-      auto& ncs_ref = const_cast<std::vector<int>&>(m_ncs);
-      ncs_ref.clear();
-      for (ConstraintPtr cstr : m_cstrs)
+      m_ncs.clear();
+      m_indices.clear();
+      int cursor = 0;
+      for (std::size_t i = 0; i < m_cstrs.size(); i++)
       {
-        nc += cstr->nr();
-        ncs_ref.push_back(cstr->nr());
+        const ConstraintPtr cstr = m_cstrs[i];
+        m_ncs.push_back(cstr->nr());
+        m_indices.push_back(cursor);
+        cursor += cstr->nr();
       }
+      m_nc_total = cursor;
     }
+
   };
 
   namespace helpers
@@ -92,21 +116,27 @@ namespace lienlp
     template<typename Scalar>
     void allocateMultipliersOrResiduals(
       const ProblemTpl<Scalar>& prob,
-      typename ProblemTpl<Scalar>::VectorOfVectors& out)
+      typename math_types<Scalar>::VectorXs& data,
+      typename math_types<Scalar>::VectorOfRef& out)
     {
+      data.resize(prob.getTotalConstraintDim());
+      data.setZero();
       using Problem = ProblemTpl<Scalar>;
-      using VectorXs = typename Problem::VectorXs;
       out.reserve(prob.getNumConstraints());
+      int cursor = 0;
+      int nr = 0;
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        typename Problem::ConstraintPtr cur_cstr = prob.getConstraint(i);
-        out.push_back(VectorXs::Zero(cur_cstr->nr()));
+        typename Problem::ConstraintPtr cstr = prob.getConstraint(i);
+        nr = cstr->nr();
+        out.emplace_back(data.segment(cursor, nr));
+        cursor += nr;
       }
     }
     
   } // namespace helpers
   
 
-} // namespace lienlp
+} // namespace proxnlp
 
 

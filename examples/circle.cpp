@@ -2,20 +2,20 @@
  * Optimize a quadratic function on a circle, or on a disk.
  * 
  */
-#include "lienlp/cost-function.hpp"
-#include "lienlp/meritfuncs/pdal.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/costs/quadratic-residual.hpp"
-#include "lienlp/modelling/constraints/negative-orthant.hpp"
-#include "lienlp/solver-base.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/costs/quadratic-residual.hpp"
+#include "proxnlp/modelling/constraints/negative-orthant.hpp"
+#include "proxnlp/solver-base.hpp"
 
 #include "example-base.hpp"
 
 
 using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
 
-using namespace lienlp;
+using namespace proxnlp;
 using Manifold = PinocchioLieGroup<Vs>;
 using Problem = ProblemTpl<double>;
 
@@ -34,7 +34,10 @@ int main()
   const int ndx = space.ndx();
   Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
+  d.setZero();
   Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  J0.setZero();
+  J1.setZero();
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
   fmt::print("{} << p1 (-) p0\n", d);
@@ -67,12 +70,10 @@ int main()
   using Ineq_t = NegativeOrthant<double>;
   // Problem::EqualityType cstr1(residualCircle);
   Ineq_t cstr1(residualCircle);
-  fmt::print("  Cstr eval(p0): {}\n", cstr1(p0));
-  fmt::print("  Cstr eval(p1): {}\n", cstr1(p1));
   fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
 
   /// Cast scalar cost to func
-  const C2Function<double>& resfunc = residualCircle;
+  const C2FunctionTpl<double>& resfunc = residualCircle;
   const func_to_cost<double> recast_to_cost(resfunc);
 
 
@@ -83,6 +84,10 @@ int main()
   /// Test out merit functions
 
   Problem::VectorXs grad(space.ndx());
+  grad.setZero();
+  Problem::MatrixXs hess(space.ndx(), space.ndx());
+  hess.setZero();
+
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
   merit_fun.computeGradient(p0, grad);
@@ -93,9 +98,10 @@ int main()
   fmt::print("  LAGR FUNC TEST\n");
 
   PDALFunction<double> pdmerit(prob);
-  auto lagr = pdmerit.m_lagr;
-  Problem::VectorOfVectors lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams);
+  LagrangianFunction<double>& lagr = pdmerit.m_lagr;
+  Problem::VectorXs lams_data(prob->getTotalConstraintDim());
+  Problem::VectorOfRef lams;
+  helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
              lams.size(), lams[0]);
@@ -108,7 +114,6 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  Problem::MatrixXs hess(space.ndx(), space.ndx());
   lagr.computeHessian(p0, lams, hess);
   fmt::print("\tHLag(p0) = {}\n", hess);
   lagr.computeHessian(p1, lams, hess);
@@ -125,8 +130,8 @@ int main()
   pdmerit.computeGradient(p1, lams, lams, grad);
   fmt::print("\tgradM(p1) {}\n", grad);
 
-  SWorkspace<double> workspace(space.nx(), space.ndx(), *prob);
-  SResults<double> results(space.nx(), *prob);
+  WorkspaceTpl<double> workspace(space.nx(), space.ndx(), *prob);
+  ResultsTpl<double> results(space.nx(), *prob);
 
   SolverTpl<double> solver(space, prob);
   solver.setPenalty(1. / 50);
@@ -137,7 +142,7 @@ int main()
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.xOpt.transpose());
-  fmt::print("Constraint value {}\n", cstr1(results.xOpt).transpose());
+  fmt::print("Constraint value {}\n", cstr1.m_func(results.xOpt).transpose());
   fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;

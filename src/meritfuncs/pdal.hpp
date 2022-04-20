@@ -1,12 +1,12 @@
 #pragma once
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/merit-function-base.hpp"
-#include "lienlp/meritfuncs/lagrangian.hpp"
+#include "proxnlp/fwd.hpp"
+#include "proxnlp/merit-function-base.hpp"
+#include "proxnlp/meritfuncs/lagrangian.hpp"
 
 #include <vector>
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -26,98 +26,72 @@ namespace lienlp
   struct PDALFunction :
     public MeritFunctionBase<
       _Scalar,
-      typename math_types<_Scalar>::VectorOfVectors,
-      typename math_types<_Scalar>::VectorOfVectors>
+      typename math_types<_Scalar>::VectorOfRef,
+      typename math_types<_Scalar>::VectorOfRef>
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Base = MeritFunctionBase<Scalar, VectorOfVectors, VectorOfVectors>;
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
+    using Base::computeHessian;
     using Problem = ProblemTpl<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
     Lagrangian_t m_lagr;
 
     /// AL penalty parameter
-    Scalar m_muEq = 0.01;
+    Scalar m_mu;
+    /// Reciprocal penalty parameter
+    Scalar m_muInv = 1. / m_mu;
 
     /// Generalized pdAL dual penalty param
     const Scalar m_gamma = 1.;
 
     /// Set the merit function penalty parameter.
-    void setPenalty(const Scalar& new_mu) { m_muEq = new_mu; };
+    void setPenalty(const Scalar& new_mu)
+    {
+      m_mu = new_mu;
+      m_muInv = 1. / new_mu;
+    };
 
-    /// Get the merit function penalty parameter;
-    const Scalar& getPenalty() { return m_muEq; }
-
-    PDALFunction(shared_ptr<Problem> prob)
-      : Base(prob), m_lagr(Lagrangian_t(prob)) {}
+    PDALFunction(shared_ptr<Problem> prob, const Scalar mu = 0.01)
+      : Base(prob)
+      , m_lagr(Lagrangian_t(prob))
+      , m_mu(mu)
+      {}
 
     /**
      *  @brief Compute the first-order multiplier estimates.
      */
     void computeFirstOrderMultipliers(
       const ConstVectorRef& x,
-      const VectorOfVectors& lams_ext,
-      VectorOfVectors& out) const
-    {
-      for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        out.push_back((*cstr)(x) + lams_ext[i] / m_muEq);
-        out[i].noalias() = cstr->normalConeProjection(out[i]);
-      }
-    }
+      const VectorOfRef& lams_ext,
+      VectorOfRef& out) const;
 
     /// @brief Compute the pdAL (Gill-Robinson) multipliers
     /// @todo   fix recomputing 1st order multipliers (w/ workspace)
     void computePDALMultipliers(
       const ConstVectorRef& x,
-      const VectorOfVectors& lams,
-      const VectorOfVectors& lams_ext,
-      VectorOfVectors& out) const
-    {
-      // TODO fix calling this again; grab values from workspace
-      computeFirstOrderMultipliers(x, lams_ext, out);
-      for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
-      {
-        out[i].noalias() = 2 * out[i] - lams[i] / m_muEq;
-      }
-    }
+      const VectorOfRef& lams,
+      const VectorOfRef& lams_ext,
+      VectorOfRef& out) const;
 
     Scalar operator()(const ConstVectorRef& x,
-                      const VectorOfVectors& lams,
-                      const VectorOfVectors& lams_ext) const
-    {
-      Scalar result_ = m_prob->m_cost.call(x);
-
-      const std::size_t num_c = m_prob->getNumConstraints();
-      for (std::size_t i = 0; i < num_c; i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        VectorXs cval = (*cstr)(x) + m_muEq * lams_ext[i];
-        cval.noalias() = cstr->normalConeProjection(cval);
-        result_ += (Scalar(0.5) / m_muEq) * cval.squaredNorm();
-        // dual penalty
-        VectorXs dual_res = cval - m_muEq * lams[i];
-        result_ += (Scalar(0.5) / m_muEq) * dual_res.squaredNorm();
-      }
-
-      return result_;
-    }
+                      const VectorOfRef& lams,
+                      const VectorOfRef& lams_ext) const;
 
     void computeGradient(const ConstVectorRef& x,
-                         const VectorOfVectors& lams,
-                         const VectorOfVectors& lams_ext,
+                         const VectorOfRef& lams,
+                         const VectorOfRef& lams_ext,
                          VectorRef out) const;
 
     void computeHessian(const ConstVectorRef& x,
-                        const VectorOfVectors& lams,
-                        const VectorOfVectors& lams_ext,
+                        const VectorOfRef& lams,
+                        const VectorOfRef& lams_ext,
                         MatrixRef out) const;
   };
 
 }
 
-#include "lienlp/meritfuncs/pdal.hxx"
+#include "proxnlp/meritfuncs/pdal.hxx"

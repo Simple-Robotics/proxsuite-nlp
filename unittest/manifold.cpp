@@ -1,19 +1,23 @@
-#include "lienlp/manifold-base.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/modelling/spaces/multibody.hpp"
-
-#include <pinocchio/parsers/sample-models.hpp>
-#include <pinocchio/multibody/liegroup/vector-space.hpp>
+#include "proxnlp/manifold-base.hpp"
 
 #include <boost/test/unit_test.hpp>
+
+#ifdef WITH_PINOCCHIO
+  #include <pinocchio/parsers/sample-models.hpp>
+  #include <pinocchio/multibody/liegroup/vector-space.hpp>
+  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+  #include "proxnlp/modelling/spaces/multibody.hpp"
+#endif
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
-using namespace lienlp;
+using namespace proxnlp;
 
 
 BOOST_AUTO_TEST_SUITE(manifold)
+
+#ifdef WITH_PINOCCHIO
 
 BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 {
@@ -29,6 +33,9 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 
   auto x1 = space.integrate(x0, v0);
   BOOST_CHECK(x1.isApprox(x0));
+
+  auto mid = space.interpolate(x0, x1, 0.5);
+  BOOST_CHECK(mid.isApprox(0.5 * (x0 + x1)));
 }
 
 
@@ -56,6 +63,9 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   dx0.setZero();
   tspace.difference(x0, x1, dx0);
 
+  BOOST_TEST_MESSAGE(" testing interpolate ");
+  auto mid = tspace.interpolate(x0, x1, 0.5);
+
   BOOST_TEST_MESSAGE(" diff Jacobians");
   TSO2::JacobianType J0(ndx, ndx), J1(ndx, ndx);
   J0.setZero();
@@ -64,8 +74,6 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   tspace.Jdifference(x0, x1, J0, 0);
   tspace.Jdifference(x0, x1, J1, 1);
 
-  fmt::print("J0 {}\n", J0);
-  fmt::print("J1 {}\n", J1);
   TSO2::JacobianType id(2, 2);
   id.setIdentity();
   BOOST_CHECK(J0.isApprox(-id));
@@ -84,7 +92,6 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
 }
 
 
-// #ifdef WITH_PINOCCHIO_SUPPORT
 BOOST_AUTO_TEST_CASE(test_pinmodel)
 {
   BOOST_TEST_MESSAGE("Starting");
@@ -111,6 +118,10 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   space.difference(x0, x0, d);
   BOOST_CHECK(d.isZero());
 
+  BOOST_TEST_MESSAGE(" testing interpolate ");
+  auto mid = space.interpolate(x0, x1, 0.5);
+  BOOST_CHECK(mid.isApprox(pinocchio::interpolate(model, x0, x1, 0.5)));
+
   space.difference(x0, x1, d);
   BOOST_CHECK(d.isApprox(pinocchio::difference(model, x0, x1)));
 }
@@ -122,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
-  using Man = StateMultibody<double>;
+  using Man = MultibodyPhaseSpace<double>;
 
   // MultibodyConfiguration<double> config_space(model);
   Man space(model);
@@ -131,10 +142,9 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   auto x1 = space.rand();
   auto dx0 = space.difference(x0, x1);
   auto x1_exp = space.integrate(x0, dx0);
-  fmt::print("x1    : {}", x1);
-  fmt::print("x1_exp: {}", x1_exp);
 
 }
+#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()

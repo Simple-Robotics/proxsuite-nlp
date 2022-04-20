@@ -9,7 +9,7 @@ file(GLOB EXAMPLES_CPP
 message(STATUS "CPP EXAMPLES: ${EXAMPLES_CPP}")
 
 
-function(add_lienlp_example exfile)
+function(add_proxnlp_example exfile)
   get_filename_component(example_name ${exfile} NAME_WE)
   set(example_name "example-${example_name}")
   get_filename_component(exfile ${exfile} NAME)
@@ -24,6 +24,6 @@ function(add_lienlp_example exfile)
 endfunction()
 
 foreach(exfile ${EXAMPLES_CPP})
-  add_lienlp_example(${exfile})
+  add_proxnlp_example(${exfile})
 endforeach()
 

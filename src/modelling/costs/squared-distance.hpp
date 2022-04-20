@@ -1,11 +1,10 @@
 #pragma once
 
 
-#include "lienlp/macros.hpp"
-#include "lienlp/modelling/costs/quadratic-residual.hpp"
-#include "lienlp/modelling/residuals/state-residual.hpp"
+#include "proxnlp/modelling/costs/quadratic-residual.hpp"
+#include "proxnlp/modelling/residuals/state-residual.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
   /** @brief    Weighted quadratic distance \f$\frac{1}{2}\|x\ominus \bar{x}\|^2_W\f$ on a manifold.
@@ -19,7 +18,7 @@ namespace lienlp
   struct QuadraticDistanceCost : QuadraticResidualCost<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using FunctionType = ManifoldDifferenceToPoint<Scalar>;
     using M = ManifoldAbstractTpl<Scalar>;
     using Base = QuadraticResidualCost<Scalar>;
@@ -42,4 +41,4 @@ namespace lienlp
     }
   };
 
-} // namespace lienlp
+} // namespace proxnlp

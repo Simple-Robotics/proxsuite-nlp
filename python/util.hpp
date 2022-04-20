@@ -2,7 +2,7 @@
 
 #include <boost/python.hpp>
 
-namespace lienlp
+namespace proxnlp
 {
 namespace python
 {
@@ -29,5 +29,5 @@ namespace python
 
 } // namespace python
   
-} // namespace lienlp
+} // namespace proxnlp
 

@@ -1,17 +1,14 @@
 #pragma once
 
-#include <Eigen/Core>
-
-#include "lienlp/fwd.hpp"
-#include "lienlp/macros.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
-  #define LIENLP_DEFINE_MANIFOLD_TYPES(M)                     \
-    LIENLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
+  #define PROXNLP_DEFINE_MANIFOLD_TYPES(M)                     \
+    PROXNLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
     using PointType = typename M::PointType;                  \
     using TangentVectorType = typename M::TangentVectorType;  \
     using JacobianType = typename M::JacobianType;
@@ -27,7 +24,7 @@ namespace lienlp
       Options = _Options
     };
 
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 
@@ -94,15 +91,29 @@ namespace lienlp
                                   MatrixRef Jout,
                                   int arg) const = 0;
 
-    void Jdifference(const ConstVectorRef& x,
-                     const ConstVectorRef& v,
+    void Jdifference(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
                      MatrixRef Jout,
                      int arg) const
     {
-      Jdifference_impl(x, v, Jout, arg);
+      Jdifference_impl(x0, x1, Jout, arg);
     }
 
-    /// \name Out-of-place (allocated) variants.
+    /// @brief    Interpolation operation.
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                                  const ConstVectorRef& x1,
+                                  const Scalar& u,
+                                  VectorRef out) const = 0;
+
+    void interpolate(const ConstVectorRef& x0,
+                     const ConstVectorRef& x1,
+                     const Scalar& u,
+                     VectorRef out) const
+    {
+      interpolate_impl(x0, x1, u, out);
+    }
+
+    /// \name Out-of-place (allocated) overloads.
     /// \{
 
     /// @copybrief integrate()
@@ -127,8 +138,18 @@ namespace lienlp
       return out;
     }
 
+    /// @copybrief interpolate_impl()
+    PointType interpolate(const ConstVectorRef& x0,
+                          const ConstVectorRef& x1,
+                          const Scalar& u) const
+    {
+      PointType out(nx());
+      interpolate_impl(x0, x1, u, out);
+      return out;
+    }
+
     /// \}
 
   };
 
-}  // namespace lienlp
+}  // namespace proxnlp

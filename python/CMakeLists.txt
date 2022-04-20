@@ -12,33 +12,43 @@ file(GLOB_RECURSE ${PY_NAME}_HEADERS
 set(PY_HEADERS ${${PY_NAME}_HEADERS})
 set(PY_SOURCES ${${PY_NAME}_SOURCES})
 
-add_library(${PY_NAME} SHARED ${${PY_NAME}_SOURCES})
-
-target_include_directories(${PY_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
-set_target_properties(${PY_NAME}
-  PROPERTIES
-  INSTALL_RPATH "\$ORIGIN/../../.."
-  LIBRARY_OUTPUT_DIRECTORY ${PROJECT_NAME}
-  PREFIX ""
-  SUFFIX ${PYTHON_EXT_SUFFIX}
-  VERSION ${PROJECT_VERSION}
-  )
-
-# link solver, eigenpy, Boost.Python
-target_link_libraries(${PY_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
-target_link_libraries(${PY_NAME} PRIVATE fmt::fmt)
-target_link_boost_python(${PY_NAME} PUBLIC)
-install(TARGETS ${PY_NAME} DESTINATION ${${PY_NAME}_INSTALL_DIR})
-
-# copy headers to build/include/ directory
 message(STATUS "Python headers: ${PY_HEADERS}")
 message(STATUS "Python sources: ${PY_SOURCES}")
+
+function(MAKE_BINDINGS)
+  add_library(${PY_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
+
+  target_include_directories(${PY_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
+  set_target_properties(${PY_NAME}
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_NAME}
+    PREFIX ""
+    SUFFIX ${PYTHON_EXT_SUFFIX}
+    VERSION ${PROJECT_VERSION}
+    )
+  if(UNIX AND NOT APPLE)
+    set_target_properties(${PY_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
+  endif()
+
+  target_compile_options(${PY_NAME} PRIVATE -Wno-conversion -Wno-comment)
+
+  # link solver, eigenpy, Boost.Python
+  target_link_libraries(${PY_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
+  target_link_libraries(${PY_NAME} PRIVATE fmt::fmt)
+  target_link_boost_python(${PY_NAME} PUBLIC)
+  install(TARGETS ${PY_NAME}
+          EXPORT ${TARGETS_EXPORT_NAME}
+          DESTINATION ${${PY_NAME}_INSTALL_DIR})
+endfunction()
+
+MAKE_BINDINGS()
 
 file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
      ${CMAKE_CURRENT_BINARY_DIR}/examples
-     )
+)
 
+# copy headers to build/include/ directory
 foreach(pyheader ${PY_HEADERS})
   message(STATUS "Processing Python header ${pyheader}")
   string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
@@ -59,6 +69,12 @@ message(STATUS "Python examples: ${PY_EXAMPLES}")
 foreach(pyfile ${${PY_NAME}_PYFILES})
 	python_install_on_site(${PROJECT_NAME} ${pyfile})
 endforeach()
+
+# Generate stubs
+if(GENERATE_PYTHON_STUBS)
+  load_stubgen()
+  # generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${PYTHON_SITELIB})
+endif(GENERATE_PYTHON_STUBS)
 
 foreach(pyfile ${PY_EXAMPLES})
 	get_filename_component(pyfile_name ${pyfile} NAME)

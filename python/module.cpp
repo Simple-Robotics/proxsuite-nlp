@@ -1,38 +1,48 @@
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
 
-#include "lienlp/python/fwd.hpp"
-#include "lienlp/python/util.hpp"
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/python/util.hpp"
+#include "proxnlp/version.hpp"
 
 #include <eigenpy/eigenpy.hpp>
 
 
-using namespace lienlp::python;
+using namespace proxnlp::python;
 
 
-/// Expose some useful container types
-void exposeContainerTypes()
+namespace proxnlp
 {
-  namespace pp = pinocchio::python;
+namespace python
+{
+  /// Expose some useful container types
+  void exposeContainerTypes()
+  {
+    namespace pp = pinocchio::python;
 
-  pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
-  pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
-  pp::StdVectorPythonVisitor<context::VectorOfVectors, false>::expose("StdVec_Vector");
-  pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
+    pp::StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
+    pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
+    pp::StdVectorPythonVisitor<context::VectorOfVectors, true>::expose("StdVec_Vector");
+    pp::StdVectorPythonVisitor<context::VectorOfRef, true>::expose("StdVec_VecRef");
+    pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
+  }
+
+}
 }
 
 
-BOOST_PYTHON_MODULE(pylienlp)
+BOOST_PYTHON_MODULE(pyproxnlp)
 {
   bp::docstring_options module_docstring_options(true, true, true);
 
+  bp::scope().attr("__version__") = proxnlp::printVersion();
   eigenpy::enableEigenPy();
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 
   bp::import("warnings");
 
-  exposeFunctionTypes();
   exposeContainerTypes();
+  exposeFunctionTypes();
   {
     bp::scope man_scope = get_namespace("manifolds");
     exposeManifold();
@@ -53,5 +63,12 @@ BOOST_PYTHON_MODULE(pylienlp)
   exposeResults();
   exposeWorkspace();
   exposeSolver();
-  exposeCallbacks();
+  {
+    bp::scope in_scope = get_namespace("helpers");
+    exposeCallbacks();
+  }
+  {
+    bp::scope autodiff_scope = get_namespace("autodiff");
+    exposeAutodiff();
+  }
 }

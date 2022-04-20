@@ -1,28 +1,28 @@
 #pragma once
 
-#include "lienlp/function-base.hpp"
+#include "proxnlp/function-base.hpp"
 
 #include <utility>
 
 
-namespace lienlp
+namespace proxnlp
 {
 
-  /** @brief Compose two functions.
+  /** @brief Composition of two functions \f$f \circ g\f$.
    */
   template<typename _Scalar>
-  struct ComposeFunction : C2Function<_Scalar>
+  struct ComposeFunctionTpl : C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
     using Base::computeJacobian;
     using Base::vectorHessianProduct;
 
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    ComposeFunction(const Base& left, const Base& right) :
-        C2Function<Scalar>(right.nx(), right.ndx(), left.nr())
+    ComposeFunctionTpl(const Base& left, const Base& right)
+      : Base(right.nx(), right.ndx(), left.nr())
       , left(left), right(right) {}
 
     ReturnType operator()(const ConstVectorRef& x) const
@@ -41,5 +41,5 @@ namespace lienlp
 
   };
   
-} // namespace lienlp
+} // namespace proxnlp
 

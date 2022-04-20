@@ -1,10 +1,9 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/constraint-base.hpp"
+#include "proxnlp/constraint-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -19,11 +18,10 @@ namespace lienlp
   struct L1Penalty : ConstraintSetBase<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
-    using Base::operator();
-    using Active_t = typename Base::Active_t;
+    using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
 
     Scalar m_mu = 0.01;
@@ -36,7 +34,7 @@ namespace lienlp
     }
 
     void computeActiveSet(const ConstVectorRef& z,
-                          Eigen::Ref<Active_t> out) const
+                          Eigen::Ref<ActiveType> out) const
     {
       out = (z.abs().array() - m_mu) <= Scalar(0.);
     }

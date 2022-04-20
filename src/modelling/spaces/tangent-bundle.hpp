@@ -1,9 +1,8 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/manifold-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -21,7 +20,7 @@ namespace lienlp
       Options = Base::Options
     };
 
-    LIENLP_DEFINE_MANIFOLD_TYPES(Base)
+    PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
     /// Constructor using base space instance.
     TangentBundleTpl(Base base) : m_base(base) {}; 
@@ -59,6 +58,15 @@ namespace lienlp
                      MatrixRef Jout,
                      int arg) const;
 
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                             const ConstVectorRef& x1,
+                             const Scalar& u,
+                             VectorRef out) const
+    {
+      m_base.interpolate(getBasePoint(x0), getBasePoint(x1), u, getBasePointWrite(out));
+      out.tail(m_base.ndx()) = (Scalar(1.) - u) * getBaseTangent(x0) + u * getBaseTangent(x1);
+    }
+
     /// Get base point of an element of the tangent bundle.
     /// This map is exactly the natural projection.
     template<typename Point>
@@ -72,7 +80,7 @@ namespace lienlp
     typename Point::SegmentReturnType
     getBasePointWrite(const Point& x) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Point, x).head(m_base.nx());
+      return PROXNLP_EIGEN_CONST_CAST(Point, x).head(m_base.nx());
     }
 
     template<typename Tangent>
@@ -86,18 +94,18 @@ namespace lienlp
     typename Tangent::SegmentReturnType
     getTangentHeadWrite(const Tangent& v) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Tangent, v).head(m_base.ndx());
+      return PROXNLP_EIGEN_CONST_CAST(Tangent, v).head(m_base.ndx());
     }
 
     template<typename Jac>
     Eigen::Block<Jac, Eigen::Dynamic, Eigen::Dynamic>
     getBaseJacobian(const Jac& J) const
     {
-      return LIENLP_EIGEN_CONST_CAST(Jac, J).topLeftCorner(m_base.ndx(), m_base.ndx());
+      return PROXNLP_EIGEN_CONST_CAST(Jac, J).topLeftCorner(m_base.ndx(), m_base.ndx());
     }
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 
-#include "lienlp/modelling/spaces/tangent-bundle.hxx"
+#include "proxnlp/modelling/spaces/tangent-bundle.hxx"

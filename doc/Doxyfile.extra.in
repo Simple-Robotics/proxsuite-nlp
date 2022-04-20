@@ -15,8 +15,8 @@ ENABLE_PREPROCESSING    = YES
 MACRO_EXPANSION         = YES
 EXPAND_ONLY_PREDEF      = YES
 PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
-                           LIENLP_FUNCTOR_TYPEDEFS \
-                           LIENLP_DYNAMIC_TYPEDEFS
+                           PROXNLP_FUNCTOR_TYPEDEFS \
+                           PROXNLP_DYNAMIC_TYPEDEFS
 
 INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/src
 

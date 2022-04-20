@@ -1,24 +1,24 @@
 #pragma once
 
 
-#include "lienlp/function-base.hpp"
-#include "lienlp/function-ops.hpp"
-#include "lienlp/modelling/residuals/state-residual.hpp"
+#include "proxnlp/function-base.hpp"
+#include "proxnlp/function-ops.hpp"
+#include "proxnlp/modelling/residuals/state-residual.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   
   /**
    * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
-  struct LinearFunction : C2Function<_Scalar>
+  struct LinearFunction : C2FunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using Base = C2Function<Scalar>;
+    using Base = C2FunctionTpl<Scalar>;
     using Base::computeJacobian;
 
     const MatrixXs mat;
@@ -45,11 +45,11 @@ namespace lienlp
    *            \f$ r(x) = A(x \ominus \bar{x}) + b \f$.
    */
   template<typename _Scalar>
-  struct LinearFunctionDifferenceToPoint : ComposeFunction<_Scalar>
+  struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
-    using Base = ComposeFunction<Scalar>;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    using Base = ComposeFunctionTpl<Scalar>;
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
     using M = ManifoldAbstractTpl<Scalar>;
 
@@ -63,4 +63,4 @@ namespace lienlp
 
 
 
-} // namespace lienlp
+} // namespace proxnlp

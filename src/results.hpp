@@ -3,11 +3,10 @@
  */
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/problem-base.hpp"
+#include "proxnlp/problem-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   enum ConvergenceFlag
@@ -24,32 +23,38 @@ namespace lienlp
    *          the optimal proximal parameters \f$(\rho, \mu)\f$.
    */
   template<typename _Scalar>
-  struct SResults
+  struct ResultsTpl
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     ConvergenceFlag converged = ConvergenceFlag::UNINIT;
 
+    Scalar merit;
     Scalar value;
     VectorXs xOpt;
-    VectorOfVectors lamsOpt;
+    VectorXs lamsOpt_data;
+    VectorOfRef lamsOpt;
     std::vector<VecBool> activeSet;
+    Scalar dualInfeas = 0.;
+    Scalar primalInfeas = 0.;
 
     /// Final solver parameters
     std::size_t numIters = 0;
     Scalar mu;
     Scalar rho;
 
-    SResults(const int nx, const Problem& prob)
-             : xOpt(nx),
-               numIters(0),
-               mu(0.),
-               rho(0.)
+    ResultsTpl(const int nx, const Problem& prob)
+             : xOpt(nx)
+             , lamsOpt_data(prob.getTotalConstraintDim())
+             , numIters(0)
+             , mu(0.)
+             , rho(0.)
     {
-      helpers::allocateMultipliersOrResiduals(prob, lamsOpt);
+      xOpt.setZero();
+      helpers::allocateMultipliersOrResiduals(prob, lamsOpt_data, lamsOpt);
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
@@ -57,14 +62,17 @@ namespace lienlp
       }
     }
 
-    friend std::ostream& operator<<(std::ostream& s, const SResults<Scalar>& self)
+    friend std::ostream& operator<<(std::ostream& s, const ResultsTpl<Scalar>& self)
     {
       s << "{\n"
         << "  convergence:  " << self.converged << ",\n"
+        << "  merit:        " << self.merit << ",\n"
         << "  value:        " << self.value << ",\n"
         << "  numIters:     " << self.numIters << ",\n"
         << "  mu:           " << self.mu << ",\n"
-        << "  rho:          " << self.rho << ",\n";
+        << "  rho:          " << self.rho << ",\n"
+        << "  dual_infeas   " << self.dualInfeas << ",\n"
+        << "  primal_infeas " << self.primalInfeas << ",\n";
       for (std::size_t i = 0; i < self.activeSet.size(); i++)
       {
         s << "  activeSet[" << i << "]: "
@@ -77,5 +85,5 @@ namespace lienlp
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

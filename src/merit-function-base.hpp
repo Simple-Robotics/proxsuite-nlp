@@ -1,20 +1,19 @@
 // Basis for merit functions.
 #pragma once
 
-#include "lienlp/problem-base.hpp"
+#include "proxnlp/problem-base.hpp"
 
-#include "lienlp/fwd.hpp"
-#include "lienlp/macros.hpp"
+#include "proxnlp/fwd.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   template<typename _Scalar, typename... Args>
   struct MeritFunctionBase
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
 
     shared_ptr<Problem> m_prob;
@@ -28,14 +27,6 @@ namespace lienlp
     /// Compute the merit function Hessian matrix.
     virtual void computeHessian(const ConstVectorRef& x, const Args&... args, MatrixRef out) const = 0;
 
-    /// @copybrief computeGradient()
-    VectorXs computeGradient(const ConstVectorRef& x, const Args&... args) const
-    {
-      VectorXs out;
-      computeGradient(x, args..., out);
-      return out;
-    }
-
   };
 
 
@@ -44,7 +35,7 @@ namespace lienlp
   struct EvalObjective : public MeritFunctionBase<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Problem = ProblemTpl<Scalar>;
     using Base = MeritFunctionBase<Scalar>;
     using Base::m_prob;
@@ -71,4 +62,4 @@ namespace lienlp
 
 
 
-}  // namespace lienlp
+}  // namespace proxnlp

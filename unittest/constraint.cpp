@@ -1,9 +1,9 @@
-#include "lienlp/constraint-base.hpp"
-#include "lienlp/modelling/constraints/equality-constraint.hpp"
-#include "lienlp/modelling/constraints/negative-orthant.hpp"
-// #include "lienlp/modelling/constraints/l1-penalty.hpp"
+#include "proxnlp/constraint-base.hpp"
+#include "proxnlp/modelling/constraints/equality-constraint.hpp"
+#include "proxnlp/modelling/constraints/negative-orthant.hpp"
+// #include "proxnlp/modelling/constraints/l1-penalty.hpp"
 
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -13,7 +13,7 @@
 
 BOOST_AUTO_TEST_SUITE(constraint)
 
-using namespace lienlp;
+using namespace proxnlp;
 
 const int N = 20;
 using Vs_ = pinocchio::VectorSpaceOperationTpl<N, double>;

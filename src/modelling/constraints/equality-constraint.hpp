@@ -1,10 +1,9 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/constraint-base.hpp"
+#include "proxnlp/constraint-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
   
   /**
@@ -18,12 +17,13 @@ namespace lienlp
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
-    using Base::operator();
-    using Active_t = typename Base::Active_t;
+    using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
+
+    bool disableGaussNewton() const { return true; }
 
     explicit EqualityConstraint(const FunctionType& func)
       : Base(func) {}
@@ -43,11 +43,11 @@ namespace lienlp
       return;  // do nothing
     }
 
-    inline void computeActiveSet(const ConstVectorRef&, Eigen::Ref<Active_t> out) const
+    inline void computeActiveSet(const ConstVectorRef&, Eigen::Ref<ActiveType> out) const
     {
       out.array() = true;
     }
   };
 
-} // namespace lienlp
+} // namespace proxnlp
 

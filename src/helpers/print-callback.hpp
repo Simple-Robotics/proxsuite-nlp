@@ -1,17 +1,17 @@
 #pragma once
 
-#include "lienlp/helpers-base.hpp"
+#include "proxnlp/helpers-base.hpp"
 
-namespace lienlp
+namespace proxnlp
 {
   namespace helpers
   {
 
     template<typename Scalar>
-    struct print_callback : callback<Scalar>
+    struct print_callback : base_callback<Scalar>
     {
-      void call(const SWorkspace<Scalar>& workspace,
-                const SResults<Scalar>& results)
+      void call(const WorkspaceTpl<Scalar>& workspace,
+                const ResultsTpl<Scalar>& results)
       {
 
       }
@@ -19,5 +19,5 @@ namespace lienlp
     };
     
   } // namespace helpers
-} // namespace lienlp
+} // namespace proxnlp
 

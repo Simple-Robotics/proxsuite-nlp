@@ -1,31 +1,32 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/manifold-base.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/function-base.hpp"
 
-#include "lienlp/function-base.hpp"
+#include <boost/core/demangle.hpp>
+#include <ostream>
 
 
-namespace lienlp
+namespace proxnlp
 {
   template<typename Scalar>
   struct func_to_cost;
 
   /** @brief    Base class for differentiable cost functions.
    *  @remark   Cost functions derive from differentiable functions,
-   *            and implement the C2Function<Scalar> API.
+   *            and implement the C2FunctionTpl<Scalar> API.
    *            As such, they can be used as constraints and composed.
    */
   template<typename _Scalar>
-  struct CostFunctionBase : public C2Function<_Scalar>
+  struct CostFunctionBaseTpl : public C2FunctionTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
-    using Base = C2Function<Scalar>;
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+    using Base = C2FunctionTpl<Scalar>;
 
-    CostFunctionBase(const int nx, const int ndx) : Base(nx, ndx, 1) {}
-    CostFunctionBase(const CostFunctionBase<Scalar>&) = default;
+    CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
+    CostFunctionBaseTpl(const CostFunctionBaseTpl<Scalar>&) = default;
 
     /* Define cost function-specific API */
 
@@ -50,7 +51,7 @@ namespace lienlp
       return out;
     }
 
-    /* Implement C2Function interface. */
+    /* Implement C2FunctionTpl interface. */
 
     ReturnType operator()(const ConstVectorRef& x) const
     {
@@ -61,41 +62,51 @@ namespace lienlp
 
     void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
     {
-      computeGradient(x, Jout.transpose());
+      MatrixXs gout = Jout.transpose();
+      computeGradient(x, gout);
+      Jout = gout.transpose();
     }
 
-    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef&, Eigen::Ref<JacobianType> Hout) const
+    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
     {
       computeHessian(x, Hout);
+      Hout *= v(0);
     }
 
-    virtual ~CostFunctionBase<Scalar>() = default;
+    virtual ~CostFunctionBaseTpl<Scalar>() = default;
 
-    /// @brief    Conversion from C2Function.
-    CostFunctionBase(const C2Function<Scalar>& func)
-      : CostFunctionBase<Scalar>(func_to_cost<Scalar>(func)) {}
+    /// @brief    Conversion from C2FunctionTpl.
+    CostFunctionBaseTpl(const C2FunctionTpl<Scalar>& func)
+      : CostFunctionBaseTpl<Scalar>(func_to_cost<Scalar>(func)) {}
+
+    friend std::ostream& operator<<(std::ostream& ostr, const CostFunctionBaseTpl<Scalar>& cost)
+    {
+      const std::string name = boost::core::demangle(typeid(cost).name());
+      ostr << name;
+      return ostr;
+    }
   };
 
   template<typename _Scalar>
-  struct func_to_cost : CostFunctionBase<_Scalar>
+  struct func_to_cost : CostFunctionBaseTpl<_Scalar>
   {
   private:
-    const C2Function<_Scalar>& underlying_;
+    const C2FunctionTpl<_Scalar>& underlying_;
   public:
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     /** @brief    Constructor.
-     *  @details  This defines an implicit conversion from the C2Function type.
+     *  @details  This defines an implicit conversion from the C2FunctionTpl type.
      */
-    func_to_cost(const C2Function<Scalar>& func)
-      : CostFunctionBase<Scalar>(func.nx(), func.ndx())
+    func_to_cost(const C2FunctionTpl<Scalar>& func)
+      : CostFunctionBaseTpl<Scalar>(func.nx(), func.ndx())
       , underlying_(func)
       {
         assert(func.nr() == 1);
       }
 
-    const C2Function<Scalar>& underlying() const
+    const C2FunctionTpl<Scalar>& underlying() const
     { return underlying_; }
 
 
@@ -117,5 +128,5 @@ namespace lienlp
 
   };
 
-}  // namespace lienlp
+}  // namespace proxnlp
   

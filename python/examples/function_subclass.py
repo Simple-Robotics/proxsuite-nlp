@@ -1,20 +1,20 @@
 """
 Copyright (C) LAAS-CNRS / INRIA
 
-@file   In this file, we show how to overload function objects from lienlp.
+@file   In this file, we show how to overload function objects from proxnlp.
 """
-import lienlp
+import proxnlp
 import numpy as np
 import casadi as cas
 
-from lienlp.residuals import LinearFunction
-from lienlp.constraints import EqualityConstraint, NegativeOrthant
-from lienlp.manifolds import EuclideanSpace
+from proxnlp.residuals import LinearFunction
+from proxnlp.constraints import EqualityConstraint, NegativeOrthant
+from proxnlp.manifolds import EuclideanSpace
 
 
 # 1: Overload a base function (not differentiable)
 
-class MyFunction(lienlp.BaseFunction):
+class MyFunction(proxnlp.BaseFunction):
     def __init__(self, nx, ndx, nr):
         super().__init__(nx, ndx, nr)
 
@@ -37,7 +37,7 @@ assert np.allclose(fun1(x0), np.log(np.abs(x0 - 1.)))
 # 2: Overload a twice-differentiable function
 
 
-class NegEntropyFunc(lienlp.C2Function):
+class NegEntropyFunc(proxnlp.C2Function):
     def __init__(self, nx, ndx):
         x = cas.SX.sym("x", nx)
         dx = cas.SX.sym("dx", ndx)
@@ -90,7 +90,7 @@ fun2.vectorHessianProduct(x0, v0, H_)
 print(f"Hessian: \n{H_}")
 print(fun2.nx, fun2.ndx, fun2.nr)
 
-cs = lienlp.costs.CostFromFunction(fun2)
+cs = proxnlp.costs.CostFromFunction(fun2)
 grad = np.zeros(nx)
 cH = np.zeros((nx, nx))
 
@@ -120,15 +120,16 @@ def plot_fun():
 
 plot_fun()
 
-# prob = lienlp.Problem(cs)
-prob = lienlp.Problem(cs, [cstr])
-ws = lienlp.Workspace(nx, nx, prob)
-rs = lienlp.Results(nx, prob)
+# prob = proxnlp.Problem(cs)
+prob = proxnlp.Problem(cs, [cstr])
+ws = proxnlp.Workspace(nx, nx, prob)
+rs = proxnlp.Results(nx, prob)
 
-solver = lienlp.Solver(space, prob)
+solver = proxnlp.Solver(space, prob)
 x0 = np.array([2., 2.])
 flag = solver.solve(ws, rs, x0, rs.lamsopt)
 
-print("Flag:", flag)
+print("Flag:   ", flag)
 
 print("xopt:   ", rs.xopt)
+print("lamsopt:", rs.lamsopt.tolist())

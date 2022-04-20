@@ -1,10 +1,9 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
-#include "lienlp/constraint-base.hpp"
+#include "proxnlp/constraint-base.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
   /**
@@ -20,11 +19,10 @@ namespace lienlp
   struct NegativeOrthant : ConstraintSetBase<_Scalar>
   {
     using Scalar = _Scalar;
-    LIENLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
-    using Base::operator();
-    using Active_t = typename Base::Active_t;
+    using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
 
     explicit NegativeOrthant(const FunctionType& func) : Base(func) {}
@@ -34,12 +32,13 @@ namespace lienlp
       return z.cwiseMin(Scalar(0.));
     }
 
+    /// The elements of the active set are the components such that \f$z_i > 0\f$.
     void computeActiveSet(const ConstVectorRef& z,
-                          Eigen::Ref<Active_t> out) const
+                          Eigen::Ref<ActiveType> out) const
     {
       out.array() = (z.array() > Scalar(0.));
     }
 
   };
 
-} // namespace lienlp
+} // namespace proxnlp

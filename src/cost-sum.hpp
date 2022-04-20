@@ -1,35 +1,36 @@
 #pragma once
 
-
-#include "lienlp/macros.hpp"
-#include "lienlp/cost-function.hpp"
+#include "proxnlp/cost-function.hpp"
 
 
-namespace lienlp
+namespace proxnlp
 {
 
+  /// @brief    Defines the sum of one or more cost functions \f$c_1 + c_2 + \cdots\f$
   template<typename _Scalar>
-  struct CostSum : CostFunctionBase<_Scalar>
+  struct CostSum : CostFunctionBaseTpl<_Scalar>
   {
   public:
     using Scalar = _Scalar;
-    LIENLP_DYNAMIC_TYPEDEFS(Scalar)
-    using Base = CostFunctionBase<Scalar>;
-    using BaseRef = std::reference_wrapper<Base>;
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    using Base = CostFunctionBaseTpl<Scalar>;
+    using BasePtr = Base const*;
 
-    std::vector<BaseRef> m_components; /// component sub-costs
+    std::vector<BasePtr> m_components; /// component sub-costs
     std::vector<Scalar> m_weights; /// cost component weights
 
     CostSum(int nx, int ndx) : Base(nx, ndx) {}
 
     /// Constructor with a predefined vector of components.
     CostSum(int nx, int ndx,
-            const std::vector<BaseRef>& comps,
+            const std::vector<BasePtr>& comps,
             const std::vector<Scalar>& weights)
             : Base(nx, ndx)
             , m_components(comps)
             , m_weights(weights)
-    {}
+    {
+      assert(m_components.size() == m_weights.size());
+    }
 
     std::size_t numComponents() const
     {
@@ -41,7 +42,7 @@ namespace lienlp
       Scalar result_ = 0.;
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        result_ += m_weights[i] * m_components[i].get().call(x);
+        result_ += m_weights[i] * m_components[i]->call(x);
       }
       return result_;
     }
@@ -51,7 +52,7 @@ namespace lienlp
       out.setZero();
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        out.noalias() = out + m_weights[i] * m_components[i].get().computeGradient(x);
+        out.noalias() = out + m_weights[i] * m_components[i]->computeGradient(x);
       }
     }
 
@@ -60,23 +61,25 @@ namespace lienlp
       out.setZero();
       for (std::size_t i = 0; i < numComponents(); i++)
       {
-        out.noalias() = out + m_weights[i] * m_components[i].get().computeHessian(x);
+        out.noalias() = out + m_weights[i] * m_components[i]->computeHessian(x);
       }
     }
 
-    void addComponent(Base& comp, const Scalar w = 1.)
+    /* CostSum API definition */
+
+    void addComponent(const Base& comp, const Scalar w = 1.)
     {
-      m_components.push_back(std::ref(comp));
+      m_components.push_back(&comp);
       m_weights.push_back(w);
     }
 
-    CostSum<Scalar>& operator+=(Base& other)
+    CostSum<Scalar>& operator+=(const Base& other)
     {
       addComponent(other);
       return *this;
     }
 
-    CostSum<Scalar>& operator+=(CostSum<Scalar>& other)
+    CostSum<Scalar>& operator+=(const CostSum<Scalar>& other)
     {
       m_components.insert(m_components.end(), other.m_components.begin(), other.m_components.end());
       m_weights.insert(m_weights.end(), other.m_weights.begin(), other.m_weights.end());
@@ -99,42 +102,23 @@ namespace lienlp
       return *this;
     }
 
+    // printing
+    friend std::ostream& operator<<(std::ostream& ostr, const CostSum<Scalar>& cost)
+    {
+      const std::size_t nc = cost.numComponents();
+      ostr << "CostSum(num_components=" << nc;
+      ostr << ", weights=(";
+      for (std::size_t i = 0; i < nc; i++)
+      {
+        ostr << cost.m_weights[i];
+        if (i < nc - 1) ostr << ", ";
+      }
+      ostr << ")";
+      ostr << ")";
+      return ostr;
+    }
   };
 
-  template<typename Scalar>
-  CostSum<Scalar> operator+(CostFunctionBase<Scalar>& left, CostFunctionBase<Scalar>& right)
-  {
-    assert((left.nx() == right.nx()) && (left.ndx() == right.ndx()) &&
-           "Left and right should have the same input spaces.");
-    CostSum<Scalar> out(left.nx(), left.ndx());
-    out += left;
-    out += right;
-    return out;
-  }
+} // namespace proxnlp
 
-  // left is rvalue reference, so we modify it, return a move of the left after adding right
-  template<typename Scalar>
-  CostSum<Scalar>&& operator+(CostSum<Scalar>&& left, CostFunctionBase<Scalar>& right)
-  {
-    left += right;
-    return std::move(left);
-  }
-
-  // create a CostSum object with the desired weight
-  template<typename Scalar>
-  CostSum<Scalar> operator*(const Scalar left, CostFunctionBase<Scalar>& right)
-  {
-    CostSum<Scalar> out(right.nx(), right.ndx());
-    out.addComponent(right, left);
-    return out;
-  }
-
-  template<typename Scalar>
-  CostSum<Scalar>&& operator*(const Scalar left, CostSum<Scalar>&& right)
-  {
-    right *= left;
-    return std::move(right);
-  }
-
-} // namespace lienlp
-
+#include "proxnlp/cost-sum.hxx"

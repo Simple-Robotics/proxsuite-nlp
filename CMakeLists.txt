@@ -2,9 +2,9 @@
 # Copyright (C) 2022 CNRS INRIA
 #
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
-set(PROJECT_NAME lienlp)
+set(PROJECT_NAME proxnlp)
 set(PROJECT_DESCRIPTION "An augmented Lagrangian solver for nonlinear programming on Lie groups.")
 set(PROJECT_URL "https://gitlab.inria.fr/wjallet/lie-nlp-solver")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
@@ -12,10 +12,7 @@ set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 # Disable -Werror on Unix for now.
 set(CXX_DISABLE_WERROR True)
-set(CMAKE_VERBOSE_MAKEFILE True)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
@@ -61,7 +58,7 @@ endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
-  add_definitions(-DLIENLP_EIGEN_CHECK_MALLOC)
+  add_definitions(-DPROXNLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
@@ -72,7 +69,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # ----------------------------------------------------
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
-ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
+ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.4.0")
 ADD_PROJECT_DEPENDENCY(fmt)
 
 # Variable containing all the cflags definition relative to optional dependencies
@@ -83,7 +80,9 @@ if(BUILD_WITH_CASADI_SUPPORT)
 endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED)
+  message(STATUS "Building with Pinocchio support.")
+  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.2")
+  add_definitions(-DWITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
@@ -99,9 +98,9 @@ ADD_PROJECT_DEPENDENCY(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 if(BUILD_PYTHON_INTERFACE)
   FINDPYTHON(REQUIRED)
   set(PY_NAME "py${PROJECT_NAME}")
-  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
+  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
   SEARCH_FOR_BOOST_PYTHON(REQUIRED)
-  ADD_PROJECT_DEPENDENCY(eigenpy 2.6.7 REQUIRED)
+  ADD_PROJECT_DEPENDENCY(eigenpy 2.7.1 REQUIRED)
 
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value
@@ -173,12 +172,12 @@ macro(EXPORT_VARIABLE var_name var_value)
 endmacro(EXPORT_VARIABLE var_name var_value)
 
 if(BUILD_WITH_CASADI_SUPPORT)
-  EXPORT_VARIABLE(LIENLP_USE_CASADI ON)
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(LIENLP_USE_CASADI \"\")")
+  EXPORT_VARIABLE(PROXNLP_USE_CASADI ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PROXNLP_USE_CASADI \"\")")
 endif()
 if(BUILD_PYTHON_INTERFACE)
-  EXPORT_VARIABLE(LIENLP_WITH_PYTHON_INTERFACE ON)
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(LIENLP_WITH_PYTHON_INTERFACE \"\")")
+  EXPORT_VARIABLE(PROXNLP_WITH_PYTHON_INTERFACE ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PROXNLP_WITH_PYTHON_INTERFACE \"\")")
 endif()
 
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})

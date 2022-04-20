@@ -1,10 +1,10 @@
 /** Copyright (C) 2022 LAAS-CNRS, INRIA
  */
-#include "lienlp/modelling/costs/squared-distance.hpp"
-#include "lienlp/modelling/residuals/linear.hpp"
-#include "lienlp/modelling/constraints/equality-constraint.hpp"
-#include "lienlp/modelling/spaces/pinocchio-groups.hpp"
-#include "lienlp/solver-base.hpp"
+#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/modelling/residuals/linear.hpp"
+#include "proxnlp/modelling/constraints/equality-constraint.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/solver-base.hpp"
 
 #include "example-base.hpp"
 
@@ -25,7 +25,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
 }
 
 
-using namespace lienlp;
+using namespace proxnlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraint<double>;
 
