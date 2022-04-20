@@ -47,6 +47,7 @@ struct MyFuncType : C1FunctionTpl<double>
   }
 };
 
+using autodiff::finite_difference_helper;
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -54,6 +55,8 @@ BOOST_AUTO_TEST_CASE(test1)
   PinocchioLieGroup<Vs> space(nx);
 
   MyFuncType fun(space);
+  using autodiff::TOC1;
+  using autodiff::TOC2;
   using fd_type = finite_difference_helper<double, TOC1>;
   fd_type fdfun1(space, fun, fd_eps);
   VectorXs x0    = space.rand();

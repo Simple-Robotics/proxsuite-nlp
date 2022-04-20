@@ -7,6 +7,8 @@
 
 namespace proxnlp
 {
+namespace autodiff
+{
 
   enum FDLevel
   {
@@ -120,13 +122,13 @@ namespace proxnlp
   {
     using Scalar = _Scalar;
 
+    using InputType = BaseFunctionTpl<Scalar>;
     using OutType = C1FunctionTpl<Scalar>;
     using Base = internal::finite_difference_impl<Scalar, TOC1>;
     using Base::computeJacobian;
 
     PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using InputType = BaseFunctionTpl<Scalar>;
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,
                              const Scalar fd_eps)
@@ -152,17 +154,16 @@ namespace proxnlp
   {
     using Scalar = _Scalar;
 
+    using InputType = C1FunctionTpl<Scalar>;
     using OutType = C2FunctionTpl<Scalar>;
 
     using Base1 = internal::finite_difference_impl<Scalar, TOC1>;
-    // using Base1 = finite_difference_helper<Scalar, TOC1>;
     using Base2 = internal::finite_difference_impl<Scalar, TOC2>;
     using Base1::computeJacobian;
     using Base2::vectorHessianProduct;
 
     PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
 
-    using InputType = C1FunctionTpl<Scalar>;
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,
                              const Scalar fd_eps)
@@ -181,5 +182,5 @@ namespace proxnlp
 
   };
 
+} // namespace autodiff
 } // namespace proxnlp
-

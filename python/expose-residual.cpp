@@ -3,8 +3,6 @@
 #include "proxnlp/modelling/residuals/linear.hpp"
 #include "proxnlp/modelling/residuals/state-residual.hpp"
 
-#include <boost/python/overloads.hpp>
-
 
 namespace proxnlp
 {

@@ -63,5 +63,12 @@ BOOST_PYTHON_MODULE(pyproxnlp)
   exposeResults();
   exposeWorkspace();
   exposeSolver();
-  exposeCallbacks();
+  {
+    bp::scope in_scope = get_namespace("helpers");
+    exposeCallbacks();
+  }
+  {
+    bp::scope autodiff_scope = get_namespace("autodiff");
+    exposeAutodiff();
+  }
 }

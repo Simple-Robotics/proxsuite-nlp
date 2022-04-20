@@ -24,6 +24,7 @@ namespace python
   void exposeWorkspace();
   void exposeSolver();
   void exposeCallbacks();
+  void exposeAutodiff();
 
 } // namespace python
 
