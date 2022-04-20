@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>lienlp</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
+  <description>
+    A a primal-dual augmented Lagrangian-type algorithm
+    for nonlinear optimization on manifolds.
+  </description>
+  <maintainer email="wilson.jallet@laas.fr">Wilson Jallet</maintainer>
 </package>

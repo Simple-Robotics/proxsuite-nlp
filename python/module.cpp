@@ -3,6 +3,7 @@
 
 #include "lienlp/python/fwd.hpp"
 #include "lienlp/python/util.hpp"
+#include "lienlp/version.hpp"
 
 #include <eigenpy/eigenpy.hpp>
 
@@ -34,6 +35,7 @@ BOOST_PYTHON_MODULE(pylienlp)
 {
   bp::docstring_options module_docstring_options(true, true, true);
 
+  bp::scope().attr("__version__") = lienlp::printVersion();
   eigenpy::enableEigenPy();
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 
