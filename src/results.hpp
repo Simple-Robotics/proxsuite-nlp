@@ -3,7 +3,6 @@
  */
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/problem-base.hpp"
 
 

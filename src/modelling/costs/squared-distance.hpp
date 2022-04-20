@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "lienlp/macros.hpp"
 #include "lienlp/modelling/costs/quadratic-residual.hpp"
 #include "lienlp/modelling/residuals/state-residual.hpp"
 

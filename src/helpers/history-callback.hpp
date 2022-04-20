@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/helpers-base.hpp"
 #include "lienlp/solver-base.hpp"
 

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "lienlp/fwd.hpp"
-#include "lienlp/macros.hpp"
 #include "lienlp/problem-base.hpp"
 #include "lienlp/meritfuncs/pdal.hpp"
 #include "lienlp/workspace.hpp"

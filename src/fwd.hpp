@@ -36,6 +36,15 @@ struct math_types
   using VectorOfRef = std::vector<VectorRef>;
 };
 
+} // namespace lienlp
+
+
+#include "lienlp/macros.hpp"
+#include "lienlp/config.hpp"
+
+namespace lienlp
+{
+
 /* Function types */
 
 // fwd BaseFunction

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/manifold-base.hpp"
 
 namespace lienlp

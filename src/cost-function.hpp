@@ -1,8 +1,6 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/manifold-base.hpp"
-
 #include "lienlp/function-base.hpp"
 
 #include <boost/core/demangle.hpp>

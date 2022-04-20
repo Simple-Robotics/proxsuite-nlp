@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lienlp/macros.hpp"
 #include "lienlp/cost-function.hpp"
 
 

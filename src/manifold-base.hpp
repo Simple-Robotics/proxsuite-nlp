@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lienlp/fwd.hpp"
-#include "lienlp/macros.hpp"
 
 
 namespace lienlp
