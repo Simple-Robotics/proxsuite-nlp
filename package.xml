@@ -7,4 +7,18 @@
     for nonlinear optimization on manifolds.
   </description>
   <maintainer email="wilson.jallet@laas.fr">Wilson Jallet</maintainer>
+
+  <build_depend>git</build_depend>
+  <build_depend>doxygen</build_depend>
+  <doc_depend>doxyden</doc_depend>
+
+  <depend>python3</depend>
+  <depend>python3-numpy</depend>
+  <depend>boost</depend>
+  <depend>eigenpy</depend>
+  <depend>fmtlib</depend>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  <export>
+    <build_type>cmake</build_type>
 </package>
