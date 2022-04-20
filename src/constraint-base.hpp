@@ -8,7 +8,9 @@ namespace proxnlp
 {
 
   /**
-   * @brief   Constraint format: negative/positive orthant, cones, etc...
+   * @brief   Base constraint set type.
+   * 
+   * @details Constraint sets can be the negative or positive orthant, the \f$\{0\}\f$ singleton, cones, etc...
    */
   template<typename _Scalar>
   struct ConstraintSetBase

@@ -12,14 +12,24 @@ namespace autodiff
 
   enum FDLevel
   {
-    TOC1=0,
-    TOC2=1
+    TOC1=0,   ///< Cast to a \f$C^1\f$ function.
+    TOC2=1    ///< Cast to a \f$C^2\f$ function.
+  };
+
+  /// Type of finite differences: forward, central, or forward.
+  ///
+  enum FDType
+  {
+    BACKWARD,   ///< Backward finite differences\f$\frac{f_{i} - f_{i-1}}h\f$
+    CENTRAL,    ///< Central finite differences\f$\frac{f_{i+1} - f_{i-1}}h\f$
+    FORWARD     ///< Forward finite differences\f$\frac{f_{i+1} - f_i}h\f$
   };
 
   namespace internal
   {
 
-    template<typename Scalar, FDLevel n>
+    // fwd declare the implementation of finite difference algorithms.
+    template<typename Scalar, FDLevel n, FDType = CENTRAL>
     struct finite_difference_impl;
 
     template<typename Scalar>
@@ -141,8 +151,7 @@ namespace autodiff
   };
 
 
-  /**
-   * 
+  /** @brief    Approximate the second derivatives of a given function using finite differences.
    * 
    *  @details  This class inherits from the C1 finite_difference_helper<_Scalar, TOC1>,
    *            and the C2 implementation.

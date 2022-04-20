@@ -71,7 +71,7 @@ namespace proxnlp
 
   };
 
-  /** @brief  Twice-differentiable function, with methods to compute both Jacobians and vector-hessian products.
+  /** @brief  Twice-differentiable function, with method Jacobian and vector-hessian product evaluation.
    */
   template<typename _Scalar>
   struct C2FunctionTpl : public C1FunctionTpl<_Scalar>

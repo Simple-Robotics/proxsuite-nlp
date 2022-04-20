@@ -6,6 +6,7 @@
 namespace proxnlp
 {
 
+  /// @brief    Defines the sum of one or more cost functions \f$c_1 + c_2 + \cdots\f$
   template<typename _Scalar>
   struct CostSum : CostFunctionBaseTpl<_Scalar>
   {

@@ -10,11 +10,22 @@
 #include <vector>
 #include <memory>
 
-/**
- * Main namespace of the package.
- */
+
+/// @brief  Main package namespace.
+///
+/// A primal-dual augmented Lagrangian-type solver and its utilities
+/// (e.g. modelling, memory management, helpers...)
+namespace proxnlp {}
+
 namespace proxnlp
 {
+
+/// Automatic differentiation utilities.
+namespace autodiff {}
+
+/// Helper functions and structs.
+namespace helpers {}
+
 
 /// Use the STL shared_ptr.
 using std::shared_ptr;
@@ -97,7 +108,7 @@ struct WorkspaceTpl;
 template<typename Scalar>
 class SolverTpl;
 
-/// Math utils
+/// Math utilities
 namespace math
 {
   template<typename MatType>

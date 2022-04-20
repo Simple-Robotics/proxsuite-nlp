@@ -5,7 +5,6 @@
 
 namespace proxnlp
 {
-  /// Helper functions and structs.
   namespace helpers
   {
     

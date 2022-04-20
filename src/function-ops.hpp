@@ -8,7 +8,7 @@
 namespace proxnlp
 {
 
-  /** @brief Compose two functions.
+  /** @brief Composition of two functions \f$f \circ g\f$.
    */
   template<typename _Scalar>
   struct ComposeFunctionTpl : C2FunctionTpl<_Scalar>
