@@ -8,20 +8,24 @@ class CasadiFunction(proxnlp.C2Function):
         nres = expression.shape[0]
         super().__init__(nx, ndx, nres)
         assert nx == cx.shape[0]
+        dx = casadi.SX.sym("dx", ndx)
+        # TODO: replace this using manifold operation
+        xplus = cx + dx
         self.clam = casadi.SX.sym("lam", nres)
-        self.expr = expression
-        self.Jexpr = casadi.jacobian(expression, cx)
-        self.Hexpr = casadi.jacobian(self.clam.T @ self.Jexpr, cx)
+        self.expr = casadi.substitute(expression, cx, xplus)
+        self.Jexpr = casadi.jacobian(self.expr, dx)
+        self.Hexpr = casadi.jacobian(self.clam.T @ self.Jexpr, dx)
 
-        self.fun = casadi.Function("f", [cx], [expression])
-        self.Jfun = casadi.Function("Jf", [cx], [self.Jexpr])
-        self.Hfun = casadi.Function("Hf", [cx, self.clam], [self.Hexpr])
+        self.fun = casadi.Function("f", [cx, dx], [self.expr])
+        self.Jfun = casadi.Function("Jf", [cx, dx], [self.Jexpr])
+        self.Hfun = casadi.Function("Hf", [cx, dx, self.clam], [self.Hexpr])
+        self._zero = np.zeros(ndx)
 
     def __call__(self, x):
-        return np.asarray(self.fun(x)).flatten()
+        return np.asarray(self.fun(x, self._zero)).flatten()
 
     def computeJacobian(self, x, J):
-        J[:] = np.asarray(self.Jfun(x))
+        J[:] = np.asarray(self.Jfun(x, self._zero))
 
     def vectorHessianProduct(self, x, v, H):
-        H[:, :] = np.asarray(self.Hfun(x, v))
+        H[:, :] = np.asarray(self.Hfun(x, self._zero, v))
