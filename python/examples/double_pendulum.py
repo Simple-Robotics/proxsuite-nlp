@@ -1,19 +1,19 @@
+import lienlp
+
 import pinocchio as pin
 import pinocchio.casadi as cpin
 
 import numpy as np
 import casadi as cas
-import lienlp
+
+import example_robot_data as erd
+import matplotlib.pyplot as plt
 
 from lienlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
 from examples.utils import CasadiFunction
 
-from meshcat_utils import display_trajectory, ForceDraw, VIDEO_CONFIG_DEFAULT
-
-import example_robot_data as erd
 from tap import Tap
-
-import matplotlib.pyplot as plt
+from typing import List
 
 
 class Args(Tap):
@@ -21,9 +21,29 @@ class Args(Tap):
     num_replay: int = 3
     record: bool = False
 
+    def process_args(self):
+        if self.record:
+            self.view = True
 
+
+args = Args().parse_args()
+print(args)
+
+
+USE_VIEWER = args.view
+if USE_VIEWER:
+    try:
+        from meshcat_utils import display_trajectory, ForceDraw, VIDEO_CONFIG_DEFAULT
+    except ImportError:
+        import warnings
+        warnings.warn("Please install pin-meshcat-utils to record or use the Meshcat viewer.")
+        raise
+
+print("Package version: {}".format(lienlp.__version__))
 robot = erd.load("double_pendulum")
 model = robot.model
+rdata = model.createData()
+
 model.lowerPositionLimit[:] = -2 * np.pi
 model.upperPositionLimit[:] = +2 * np.pi
 
@@ -38,32 +58,21 @@ nq = model.nq
 B = np.array([[0.], [1.]])
 nu = B.shape[1]
 
-u_bound = 2.
-
 xspace = MultibodyPhaseSpace(model)
 pb_space = EuclideanSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
 
+u_bound = 2.
+x0 = xspace.neutral()
+x0[0] = np.pi
+xtarget = xspace.neutral()
 
-class MyCallback(lienlp.BaseCallback):
+print("Initial:", x0)
+print("Final  :", xtarget)
 
-    def __init__(self):
-        super().__init__()
-
-    def call(self, workspace: lienlp.Workspace, results: lienlp.Results):
-        return
-        with np.printoptions(precision=1, linewidth=250):
-            print("JACOBIANS (callback):\n{}".format(workspace.jacobians_data))
-
-
-args = Args().parse_args()
-rdata = model.createData()
-print(args)
-VIEWER = args.view
-
-if VIEWER:
+if USE_VIEWER:
     vizer: pin.visualize.MeshcatVisualizer = pin.visualize.MeshcatVisualizer(model, robot.collision_model, robot.visual_model)
     vizer.initViewer(loadModel=True)
-    vizer.display(pin.neutral(model))
+    vizer.display(x0[:model.nq])
     vizer.viewer.open()
     drawer = ForceDraw(vizer)
     drawer.set_bg()
@@ -121,23 +130,11 @@ class MultipleShootingProblem:
         self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s)
 
 
-x0 = xspace.neutral()
-x0[0] = np.pi
-xtarget = xspace.neutral()
-
-
-print("Initial:", x0)
-print("Final  :", xtarget)
-
 xu_init = pb_space.neutral()
 probdef = MultipleShootingProblem(x0, xtarget)
 cost_fun = lienlp.costs.CostFromFunction(probdef.cost_fun)
 dynamical_constraint = lienlp.constraints.EqualityConstraint(probdef.dynamics_fun)
 bound_constraint = lienlp.constraints.NegativeOrthant(probdef.control_bound_fun)
-
-print("Cost : {}".format(probdef.cost_fun))
-print("Dyn  : {}".format(probdef.dynamics_fun))
-print("Bound: {}".format(probdef.control_bound_fun))
 
 constraints_ = []
 constraints_.append(dynamical_constraint)
@@ -150,13 +147,11 @@ workspace = lienlp.Workspace(pb_space.nx, pb_space.ndx, prob)
 results = lienlp.Results(pb_space.nx, prob)
 
 callback = lienlp.HistoryCallback()
-callback2 = MyCallback()
 tol = 1e-4
 rho_init = 0.
 mu_init = 0.05
 solver = lienlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=lienlp.VERBOSE)
 solver.register_callback(callback)
-solver.register_callback(callback2)
 solver.maxiters = 500
 solver.use_gauss_newton = True
 
@@ -174,8 +169,8 @@ us_opt = us_opt_flat.reshape(nsteps, -1)
 xs_opt = xs_opt_flat.reshape(nsteps + 1, -1)
 qs_opt = xs_opt[:, :model.nq]
 vs_opt = xs_opt[:, model.nq:]
-print("X shape:", xs_opt.shape)
 
+# Plotting
 
 plt.style.use("seaborn-ticks")
 plt.rcParams['lines.linewidth'] = 1.
@@ -185,7 +180,7 @@ times = np.linspace(0., Tf, nsteps + 1)
 labels_ = ["$x_{%i}$" % i for i in range(model.nq)]
 
 fig, axes = plt.subplots(1, 3, figsize=(10.8, 4.8))
-axes: list[plt.Axes]
+axes: List[plt.Axes]
 
 plt.sca(axes[0])
 hlines_style = dict(alpha=.7, ls='-', lw=2, zorder=-1)
@@ -241,8 +236,7 @@ for it in it_list:
 plt.show()
 
 
-if VIEWER:
-
+if USE_VIEWER:
     drawer.set_cam_angle_preset('acrobot')
     allimgs = []
     for _ in range(args.num_replay):

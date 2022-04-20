@@ -1,6 +1,8 @@
 from .pylienlp import *
+from .pylienlp import __version__
 
-import sys, inspect
+import sys
+import inspect
 
 lib_name = 'lienlp'
 
