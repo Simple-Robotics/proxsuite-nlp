@@ -3,8 +3,9 @@ import proxnlp
 from proxnlp.residuals import ManifoldDifferenceToPoint
 from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
 from proxnlp.manifolds import EuclideanSpace
-from proxnlp.constraints import NegativeOrthant, EqualityConstraint
+from proxnlp.constraints import NegativeOrthant
 
+import matplotlib.pyplot as plt
 
 nx = 2
 p0 = np.array([.7, .2])
@@ -62,9 +63,9 @@ workspace = proxnlp.Workspace(nx, nx, prob)
 mu_init = 0.05
 rho_init = 0.
 solver = proxnlp.Solver(space, prob, mu_init=mu_init, rho_init=rho_init,
-                       verbose=proxnlp.VERBOSE)
+                        verbose=proxnlp.VERBOSE)
 solver.use_gauss_newton = True
-callback = proxnlp.HistoryCallback()
+callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
@@ -73,9 +74,6 @@ solver.solve(workspace, results, p1, lams0)
 
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
-
-
-import matplotlib.pyplot as plt
 
 
 plt.rcParams["lines.linewidth"] = 1.
@@ -87,18 +85,20 @@ bound_xs = (np.min(xs_[:, 0]), np.max(xs_[:, 0]),
 # left,right,bottom,up
 
 ax: plt.Axes = plt.axes()
-ax.plot(*xs_.T, marker='.', markersize=3, alpha=.7)
-ax.plot(*xs_[-1], marker='o', markersize=3, color='r')
-ar_c1 = plt.Circle(center1, radius, facecolor='r', alpha=.4, edgecolor='k')
-ar_c2 = plt.Circle(center2, radius, facecolor='b', alpha=.4, edgecolor='k')
-ar_c3 = plt.Circle(center3, radius, facecolor='g', alpha=.4, edgecolor='k')
+ax.plot(*xs_.T, marker='.', markersize=2, alpha=.7, color='b')
+ax.scatter(*xs_[-1], s=12, c='tab:red', marker='o', label="$x^*$", zorder=2)
+circ_alpha = 0.3
+ar_c1 = plt.Circle(center1, radius, facecolor='r', alpha=circ_alpha, edgecolor='k')
+ar_c2 = plt.Circle(center2, radius, facecolor='b', alpha=circ_alpha, edgecolor='k')
+ar_c3 = plt.Circle(center3, radius, facecolor='g', alpha=circ_alpha, edgecolor='k')
 
 ax.add_patch(ar_c1)
 ax.add_patch(ar_c2)
 ax.add_patch(ar_c3)
 ax.set_aspect('equal')
 
-plt.scatter(*p0, c='green', marker='o', label='$p_0$')
+ax.scatter(*p0, c='green', marker='o')
+ax.text(*p0, "$p_0$")
 
 xlims = ax.get_xlim()
 xlims = (min(bound_xs[0], xlims[0]), max(bound_xs[1], xlims[1]))

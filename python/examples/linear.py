@@ -66,7 +66,7 @@ class DumbCallback(proxnlp.BaseCallback):
         print("Calling dumb callback!")
 
 
-cb = proxnlp.HistoryCallback()
+cb = proxnlp.helpers.HistoryCallback()
 cb2 = DumbCallback()
 
 solver = proxnlp.Solver(space, problem)

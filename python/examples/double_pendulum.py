@@ -146,7 +146,7 @@ print("No. of constraints:", prob.total_constraint_dim)
 workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
 results = proxnlp.Results(pb_space.nx, prob)
 
-callback = proxnlp.HistoryCallback()
+callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
 rho_init = 0.
 mu_init = 0.05
