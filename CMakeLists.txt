@@ -37,7 +37,6 @@ else(WIN32)
 endif(WIN32)
 
 # --- OPTIONS ----------------------------------------
-option(BUILD_UTILS "Build the utils" OFF)
 option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 
@@ -109,10 +108,6 @@ if(BUILD_PYTHON_INTERFACE)
   message(STATUS "Python compiler: ${_python_implementation_value}")
 
 endif(BUILD_PYTHON_INTERFACE)
-
-
-# Path to boost headers
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 # ----------------------------------------------------
 # --- INCLUDE ----------------------------------------
