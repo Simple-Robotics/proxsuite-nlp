@@ -14,6 +14,7 @@ set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 set(CXX_DISABLE_WERROR True)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(PROJECT_USE_CMAKE_EXPORT True)
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
