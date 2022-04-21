@@ -84,6 +84,9 @@ struct CostFunctionBaseTpl;
 template<typename Scalar, int Options=0>
 struct ManifoldAbstractTpl;
 
+template<typename Scalar, int Dim=Eigen::Dynamic, int Options=0>
+struct VectorSpaceTpl;
+
 template<typename Base>
 struct TangentBundleTpl;
 

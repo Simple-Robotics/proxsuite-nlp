@@ -1,6 +1,7 @@
 #include "proxnlp/python/manifold.hpp"
 
 
+#include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/spaces/tangent-bundle.hpp"
 #ifdef WITH_PINOCCHIO
   #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
@@ -58,11 +59,19 @@ namespace python
 
     internal::exposeBaseManifold();
 
+    /* Basic vector space */
+    bp::class_<VectorSpaceTpl<Scalar>, bp::bases<Manifold>>(
+      "VectorSpace",
+      "Basic Euclidean vector space.",
+      bp::init<const int>(bp::args("self", "dim"))
+    );
+
+
 #ifdef WITH_PINOCCHIO
     namespace pin = pinocchio;
     using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
     bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<Manifold>>(
-      "EuclideanSpace", "n-dimensional Euclidean vector space.",
+      "EuclideanSpace", "Pinocchio's n-dimensional Euclidean vector space.",
       bp::init<int>(bp::args("dim"))
     );
 

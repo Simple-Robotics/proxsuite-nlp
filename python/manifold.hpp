@@ -19,6 +19,7 @@ namespace python
       using context::Scalar;
       using context::VectorRef;
       using context::ConstVectorRef;
+      using context::MatrixRef;
       using context::Manifold;
       using PointType = typename Manifold::PointType;
       using VecType = typename Manifold::TangentVectorType;
@@ -40,10 +41,20 @@ namespace python
         .def("integrate", static_cast<IntegrateFun_t>    (&Manifold::integrate),  bp::args("x", "v", "out"))
         .def("difference", static_cast<DifferenceRetType>(&Manifold::difference), bp::args("x0", "x1"))
         .def("difference", static_cast<DifferenceFun_t>  (&Manifold::difference), bp::args("x0", "x1", "out"))
-        .def("interpolate", (void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&,const Scalar&, VectorRef) const)(&Manifold::interpolate),
+        .def("interpolate",
+             (void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&,const Scalar&, VectorRef) const)(&Manifold::interpolate),
              bp::args("self", "x0", "x1", "u", "out"))
         .def("interpolate", (PointType(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&,const Scalar&) const)(&Manifold::interpolate),
-             bp::args("self", "x0", "x1", "u"))
+             bp::args("self", "x0", "x1", "u"),
+             "Interpolate between two points on the manifold. Allocated version.")
+        .def("Jintegrate",
+             (void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, MatrixRef, int) const)&Manifold::Jintegrate,
+             bp::args("self", "x", "v", "Jout", "arg"),
+             "Compute the Jacobian of the integration operator.")
+        .def("Jdifference",
+             (void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, MatrixRef, int) const)&Manifold::Jdifference,
+             bp::args("self", "x0", "x1", "Jout", "arg"),
+             "Compute the Jacobian of the difference operator.")
         ;
 
     }

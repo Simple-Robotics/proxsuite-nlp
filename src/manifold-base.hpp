@@ -39,7 +39,7 @@ namespace proxnlp
     /// @brief    Get the neutral element \f$e \in M\f$ from the manifold (if this makes sense).
     virtual PointType neutral() const { return PointType::Zero(nx()); }
     /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
-    virtual PointType rand() const { return PointType::Zero(nx()); }
+    virtual PointType rand() const { return PointType::Random(nx()); }
 
     /// @name     Operations
 
@@ -53,10 +53,7 @@ namespace proxnlp
 
     void integrate(const ConstVectorRef& x,
                    const ConstVectorRef& v,
-                   VectorRef out) const
-    {
-      integrate_impl(x, v, out);
-    }
+                   VectorRef out) const;
 
     /** @brief   Jacobian of the integation operation.
      */
@@ -68,10 +65,7 @@ namespace proxnlp
     void Jintegrate(const ConstVectorRef& x,
                     const ConstVectorRef& v,
                     MatrixRef Jout,
-                    int arg) const
-    {
-      Jintegrate_impl(x, v, Jout, arg);
-    }
+                    int arg) const;
 
     /// @brief Perform the manifold retraction operation.
     virtual void difference_impl(const ConstVectorRef& x0,
@@ -80,10 +74,7 @@ namespace proxnlp
 
     void difference(const ConstVectorRef& x0,
                     const ConstVectorRef& x1,
-                    VectorRef out) const
-    {
-      difference_impl(x0, x1, out);
-    }
+                    VectorRef out) const;
 
     /// @brief    Jacobian of the retraction operation.
     virtual void Jdifference_impl(const ConstVectorRef& x0,
@@ -94,24 +85,22 @@ namespace proxnlp
     void Jdifference(const ConstVectorRef& x0,
                      const ConstVectorRef& x1,
                      MatrixRef Jout,
-                     int arg) const
-    {
-      Jdifference_impl(x0, x1, Jout, arg);
-    }
+                     int arg) const;
 
     /// @brief    Interpolation operation.
     virtual void interpolate_impl(const ConstVectorRef& x0,
                                   const ConstVectorRef& x1,
                                   const Scalar& u,
-                                  VectorRef out) const = 0;
+                                  VectorRef out) const
+    {
+      // default implementation
+      integrate(x0, u * difference(x0, x1), out);
+    }
 
     void interpolate(const ConstVectorRef& x0,
                      const ConstVectorRef& x1,
                      const Scalar& u,
-                     VectorRef out) const
-    {
-      interpolate_impl(x0, x1, u, out);
-    }
+                     VectorRef out) const;
 
     /// \name Out-of-place (allocated) overloads.
     /// \{
@@ -153,3 +142,5 @@ namespace proxnlp
   };
 
 }  // namespace proxnlp
+
+#include "proxnlp/manifold-base.hxx"

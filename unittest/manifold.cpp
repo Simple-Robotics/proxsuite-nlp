@@ -1,5 +1,7 @@
 #include "proxnlp/manifold-base.hpp"
 
+#include "proxnlp/modelling/spaces/vector-space.hpp"
+
 #include <boost/test/unit_test.hpp>
 
 #ifdef WITH_PINOCCHIO
@@ -16,6 +18,31 @@ using namespace proxnlp;
 
 
 BOOST_AUTO_TEST_SUITE(manifold)
+
+BOOST_AUTO_TEST_CASE(test_vectorspace)
+{
+  PROXNLP_DYNAMIC_TYPEDEFS(double)
+  constexpr int N = 3;
+  VectorSpaceTpl<double, N> space1;
+
+  auto x0 = space1.neutral();
+  auto x1 = space1.rand();
+
+  BOOST_CHECK_EQUAL(N, x0.size());
+  BOOST_CHECK_EQUAL(N, x1.size());
+
+  BOOST_CHECK((x0 + x1).isApprox(x1));
+
+  constexpr int N2 = 35;
+
+  VectorSpaceTpl<double> space2(N2);
+  x0 = space2.neutral();
+  x1 = space2.rand();
+
+  BOOST_CHECK(x0.isApprox(VectorXs::Zero(35)));
+
+}
+
 
 #ifdef WITH_PINOCCHIO
 

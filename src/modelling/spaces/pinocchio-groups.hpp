@@ -1,12 +1,9 @@
 #pragma once
 
-#include "proxnlp/fwd.hpp"
 #include "proxnlp/manifold-base.hpp"
 
 #include <pinocchio/multibody/liegroup/liegroup-base.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
-
-#include <memory>
 
 
 namespace proxnlp
@@ -18,16 +15,15 @@ namespace proxnlp
    * Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
    */
   template<typename _LieGroup>
-  struct PinocchioLieGroup : public ManifoldAbstractTpl<typename _LieGroup::Scalar>
+  struct PinocchioLieGroup : public ManifoldAbstractTpl<typename _LieGroup::Scalar, _LieGroup::Options>
   {
   public:
     using LieGroup = _LieGroup;
-    using Self = PinocchioLieGroup<LieGroup>;
     using Scalar = typename LieGroup::Scalar;
     enum {
       Options = LieGroup::Options
     };
-    using Base = ManifoldAbstractTpl<Scalar>;
+    using Base = ManifoldAbstractTpl<Scalar, Options>;
     PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
     LieGroup m_lg;
@@ -43,23 +39,23 @@ namespace proxnlp
     /// \name Implementations
 
     void integrate_impl(const ConstVectorRef& x,
-                   const ConstVectorRef& v,
-                   VectorRef out) const
+                        const ConstVectorRef& v,
+                        VectorRef out) const
     {
       m_lg.integrate(x, v, out);
     }
 
     void difference_impl(const ConstVectorRef& x0,
-                    const ConstVectorRef& x1,
-                    VectorRef vout) const
+                         const ConstVectorRef& x1,
+                         VectorRef vout) const
     {
       m_lg.difference(x0, x1, vout);
     }
 
     void Jintegrate_impl(const ConstVectorRef& x,
-                    const ConstVectorRef& v,
-                    MatrixRef Jout,
-                    int arg) const
+                         const ConstVectorRef& v,
+                         MatrixRef Jout,
+                         int arg) const
     {
       switch (arg) {
         case 0:
@@ -106,4 +102,4 @@ namespace proxnlp
 
   };
 
-}
+} // namespace proxnlp
