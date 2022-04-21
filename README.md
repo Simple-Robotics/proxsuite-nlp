@@ -1,4 +1,4 @@
-# A nonlinear programming solver on Lie groups
+# A nonlinear programming solver on manifolds
 
 This package is a C++ implementation of a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds.
 
