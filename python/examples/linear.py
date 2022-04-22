@@ -5,6 +5,8 @@ from proxnlp.costs import QuadraticDistanceCost
 from proxnlp.manifolds import EuclideanSpace
 from proxnlp.constraints import EqualityConstraint, NegativeOrthant
 
+import matplotlib.pyplot as plt
+
 nx = 2
 np.random.seed(42)
 space = EuclideanSpace(nx)
@@ -57,7 +59,7 @@ results = proxnlp.Results(nx, problem)
 workspace = proxnlp.Workspace(nx, nx, problem)
 
 
-class DumbCallback(proxnlp.BaseCallback):
+class DumbCallback(proxnlp.helpers.BaseCallback):
 
     def __init__(self):
         pass
@@ -80,8 +82,6 @@ solver.clear_callbacks()
 
 print(" values:\n", cb.storage.values.tolist())
 
-import matplotlib.pyplot as plt
-
 plt.rcParams['lines.linewidth'] = 1.
 
 xs_ = np.stack(cb.storage.xs.tolist())
@@ -91,7 +91,7 @@ plt.plot(*xs_.T, ls='--', marker='.', markersize=5)
 for i, x in enumerate(xs_):
     plt.annotate("$x_{{{}}}$".format(i), x, color='b',
                  xytext=(10, 10), textcoords='offset pixels')
-plt.scatter(*x_target, label='target $\\bar{x}$', facecolor=(.8,0,0,.5),
+plt.scatter(*x_target, label='target $\\bar{x}$', facecolor=(.8, 0, 0, .5),
             edgecolors='k', zorder=2)
 plt.legend()
 plt.title("Trajectory of optimization")

@@ -41,7 +41,7 @@ if USE_VIEWER:
         raise
 
 print("Package version: {}".format(proxnlp.__version__))
-robot = erd.load("double_pendulum")
+robot = erd.load("double_pendulum_simple")
 model = robot.model
 rdata = model.createData()
 toolid = model.getFrameId("link2")
@@ -57,7 +57,7 @@ print("Time horizon: {:.3g}".format(Tf))
 print("Time step   : {:.3g}".format(dt))
 
 nq = model.nq
-B = np.array([[0.], [1.]])
+B = np.array([[1.], [1.]])
 nu = B.shape[1]
 
 xspace = MultibodyPhaseSpace(model)
@@ -65,7 +65,8 @@ pb_space = EuclideanSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
 
 u_bound = .4
 x0 = xspace.neutral()
-x0[0] = np.pi
+theta0 = np.pi
+x0[0] = theta0
 xtarget = xspace.neutral()
 
 print("Initial:", x0)
@@ -108,9 +109,9 @@ class MultipleShootingProblem:
 
         cXU_s = cas.vertcat(cX_s, cU_s)
 
-        w_u = 4e-3
+        w_u = 1e-2
         w_x = 1e-2
-        w_term = 3e-1 * np.ones(xspace.ndx)
+        w_term = 2e-1 * np.ones(xspace.ndx)
         w_term[2:] = 0.
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
@@ -132,7 +133,6 @@ class MultipleShootingProblem:
         self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s, use_hessian=False)
 
 
-xu_init = pb_space.neutral()
 probdef = MultipleShootingProblem(x0, xtarget)
 cost_fun = proxnlp.costs.CostFromFunction(probdef.cost_fun)
 dynamical_constraint = proxnlp.constraints.EqualityConstraint(probdef.dynamics_fun)
@@ -150,13 +150,16 @@ results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
-rho_init = 0.
-mu_init = 0.05
+rho_init = 1e-8
+mu_init = 0.1
 solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE)
 solver.register_callback(callback)
 solver.maxiters = 500
 solver.use_gauss_newton = True
 
+xu_init = pb_space.neutral()
+for t in range(nsteps + 1):
+    xu_init[t * xspace.nx] = theta0
 lams0 = [np.zeros(cs.nr) for cs in constraints_]
 flag = solver.solve(workspace, results, xu_init, lams0)
 
