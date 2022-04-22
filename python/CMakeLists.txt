@@ -59,7 +59,8 @@ endforeach(pyheader)
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PY_NAME}_PYFILES
-    __init__.py)
+    __init__.py
+    utils.py)
 
 file(GLOB_RECURSE PY_EXAMPLES
      ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.py)
