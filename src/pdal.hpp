@@ -2,7 +2,7 @@
 
 #include "proxnlp/fwd.hpp"
 #include "proxnlp/merit-function-base.hpp"
-#include "proxnlp/meritfuncs/lagrangian.hpp"
+#include "proxnlp/lagrangian.hpp"
 
 #include <vector>
 
@@ -33,8 +33,6 @@ namespace proxnlp
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
-    using Base::computeGradient;
-    using Base::computeHessian;
     using Problem = ProblemTpl<Scalar>;
     using Lagrangian_t = LagrangianFunction<Scalar>;
 
@@ -85,13 +83,8 @@ namespace proxnlp
                          const VectorOfRef& lams,
                          const VectorOfRef& lams_ext,
                          VectorRef out) const;
-
-    void computeHessian(const ConstVectorRef& x,
-                        const VectorOfRef& lams,
-                        const VectorOfRef& lams_ext,
-                        MatrixRef out) const;
   };
 
 }
 
-#include "proxnlp/meritfuncs/pdal.hxx"
+#include "proxnlp/pdal.hxx"

@@ -4,7 +4,7 @@
 
 #include "proxnlp/fwd.hpp"
 #include "proxnlp/problem-base.hpp"
-#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/pdal.hpp"
 #include "proxnlp/workspace.hpp"
 #include "proxnlp/results.hpp"
 #include "proxnlp/helpers-base.hpp"
@@ -56,7 +56,7 @@ namespace proxnlp
 
     //// Other settings
 
-    bool verbose = QUIET;
+    bool verbose = QUIET;                   // Level of verbosity of the solver.
     bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
@@ -365,7 +365,7 @@ namespace proxnlp
           bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
           {
-            workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessProd[i];
+            workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessianProd[i];
           }
 
         }
@@ -603,7 +603,12 @@ namespace proxnlp
 
         cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
         cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
-        cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessProd[i]);
+
+        bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
+        if (use_vhp)
+        {
+          cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessianProd[i]);
+        }
       }
     } 
 

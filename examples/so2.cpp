@@ -4,7 +4,7 @@
  */
 #include "proxnlp/cost-function.hpp"
 #include "proxnlp/merit-function-base.hpp"
-#include "proxnlp/meritfuncs/pdal.hpp"
+#include "proxnlp/pdal.hpp"
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
@@ -105,19 +105,10 @@ int main()
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
 
-  lagr.computeHessian(p0, lams, hess);
-  fmt::print("\tHLag(p0) = {}\n", hess);
-  lagr.computeHessian(p1, lams, hess);
-  fmt::print("\tHLag(p1) = {}\n", hess);
-
   // merit function
   fmt::print("  PDAL FUNC TEST\n");
   fmt::print("\tpdmerit(p0) = {}\n", pdmerit(p0, lams, lams));
   fmt::print("\tpdmerit(p1) = {}\n", pdmerit(p1, lams, lams));
-  pdmerit.computeHessian(p0, lams, lams, hess);
-  fmt::print("\tHmerit(p0) = {}\n", hess);
-  pdmerit.computeHessian(p1, lams, lams, hess);
-  fmt::print("\tHmerit (p1) = {}\n", hess);
 
   // gradient of merit fun
   pdmerit.computeGradient(p0, lams, lams, grad);

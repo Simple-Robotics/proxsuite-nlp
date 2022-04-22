@@ -24,8 +24,6 @@ namespace proxnlp
     virtual Scalar operator()(const ConstVectorRef& x, const Args&... args) const = 0;
     /// Evaluate the merit function gradient.
     virtual void computeGradient(const ConstVectorRef& x, const Args&... args, VectorRef out) const = 0;
-    /// Compute the merit function Hessian matrix.
-    virtual void computeHessian(const ConstVectorRef& x, const Args&... args, MatrixRef out) const = 0;
 
   };
 
@@ -39,7 +37,6 @@ namespace proxnlp
     using Problem = ProblemTpl<Scalar>;
     using Base = MeritFunctionBase<Scalar>;
     using Base::m_prob;
-    using Base::computeGradient;
 
     EvalObjective(shared_ptr<Problem> prob)
       : Base(prob) {}
@@ -52,11 +49,6 @@ namespace proxnlp
     void computeGradient(const ConstVectorRef& x, VectorRef out) const
     {
       m_prob->m_cost.computeGradient(x, out);
-    }
-
-    void computeHessian(const ConstVectorRef& x , MatrixRef out) const
-    {
-      m_prob->m_cost.computeHessian(x, out);
     }
   };
 

@@ -10,7 +10,7 @@ import example_robot_data as erd
 import matplotlib.pyplot as plt
 
 from proxnlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
-from examples.utils import CasadiFunction
+from proxnlp.utils import CasadiFunction
 
 from tap import Tap
 from typing import List
@@ -116,11 +116,11 @@ class MultipleShootingProblem:
             0.5 * w_u * dt * cas.dot(cU_s, cU_s) +
             0.5 * cas.dot(ferr, w_term * ferr))
 
-        self.cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost_expression, cXU_s)
+        self.cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost_expression, cXU_s, use_hessian=True)
 
         x0 = cas.SX(x0)
         expression = make_dynamics_expression(self.cmodel, self.cdata, x0, cxs, cus)
-        self.dynamics_fun = CasadiFunction(pb_space.nx, pb_space.ndx, expression, cXU_s)
+        self.dynamics_fun = CasadiFunction(pb_space.nx, pb_space.ndx, expression, cXU_s, use_hessian=False)
 
         control_bounds_ = []
         for t in range(nsteps):

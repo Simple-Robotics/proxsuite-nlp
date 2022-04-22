@@ -53,22 +53,6 @@ namespace proxnlp
         out += (cstr->m_func.computeJacobian(x)).transpose() * lams[i];
       }
     }
-
-    void computeHessian(const ConstVectorRef& x,
-                        const VectorOfRef& lams,
-                        MatrixRef out) const
-    {
-      m_prob->m_cost.computeHessian(x, out);
-      const auto num_c = m_prob->getNumConstraints();
-      const int ndx = m_prob->m_cost.ndx();
-      MatrixXs vhp_buffer(ndx, ndx);
-      for (std::size_t i = 0; i < num_c; i++)
-      {
-        auto cstr = m_prob->getConstraint(i);
-        cstr->m_func.vectorHessianProduct(x, lams[i], vhp_buffer);
-        out += vhp_buffer;
-      }
-    }
   };
 } // namespace proxnlp
 

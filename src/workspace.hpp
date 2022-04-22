@@ -66,7 +66,7 @@ namespace proxnlp
     MatrixXs jacobians_data;
     MatrixXs hessians_data;
     std::vector<MatrixRef> cstrJacobians;
-    std::vector<MatrixRef> cstrVectorHessProd;
+    std::vector<MatrixRef> cstrVectorHessianProd;
 
     VectorXs lamsPlusPre_data;
     VectorXs lamsPlus_data;
@@ -142,7 +142,7 @@ namespace proxnlp
       helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr_data, subproblemDualErr);
 
       cstrJacobians.reserve(numblocks);
-      cstrVectorHessProd.reserve(numblocks);
+      cstrVectorHessianProd.reserve(numblocks);
 
       int cursor = 0;
       int nr = 0;
@@ -151,7 +151,7 @@ namespace proxnlp
         cursor = prob.getIndex(i);
         nr = prob.getConstraintDim(i);
         cstrJacobians.emplace_back(jacobians_data.middleRows(cursor, nr));
-        cstrVectorHessProd.emplace_back(hessians_data.middleRows(i * ndx, ndx));
+        cstrVectorHessianProd.emplace_back(hessians_data.middleRows(i * ndx, ndx));
       }
 
     }

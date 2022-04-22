@@ -4,7 +4,7 @@ import numpy as np
 
 
 class CasadiFunction(proxnlp.C2Function):
-    def __init__(self, nx, ndx, expression: casadi.SX, cx: casadi.SX):
+    def __init__(self, nx: int, ndx: int, expression: casadi.SX, cx: casadi.SX, use_hessian: bool = True):
         nres = expression.shape[0]
         super().__init__(nx, ndx, nres)
         assert nx == cx.shape[0]
@@ -14,7 +14,11 @@ class CasadiFunction(proxnlp.C2Function):
         self.clam = casadi.SX.sym("lam", nres)
         self.expr = casadi.substitute(expression, cx, xplus)
         self.Jexpr = casadi.jacobian(self.expr, dx)
-        self.Hexpr = casadi.jacobian(self.clam.T @ self.Jexpr, dx)
+        self.use_hessian = use_hessian
+        if use_hessian:
+            self.Hexpr = casadi.jacobian(self.clam.T @ self.Jexpr, dx)
+        else:
+            self.Hexpr = casadi.SX.zeros(ndx, ndx)
 
         self.fun = casadi.Function("f", [cx, dx], [self.expr])
         self.Jfun = casadi.Function("Jf", [cx, dx], [self.Jexpr])
