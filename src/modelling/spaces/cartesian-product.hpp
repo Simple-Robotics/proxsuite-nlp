@@ -26,7 +26,7 @@ namespace proxnlp
     inline int nx()  const { return left.nx() + right.nx(); }
     inline int ndx() const { return left.ndx() + right.ndx(); }
 
-    PointType neutral() const override
+    PointType neutral() const
     {
       PointType out(this->nx());
       out.setZero();
@@ -35,7 +35,7 @@ namespace proxnlp
       return out;
     }
 
-    PointType rand() const override
+    PointType rand() const
     {
       PointType out(this->nx());
       out.setZero();
