@@ -12,6 +12,8 @@ file(GLOB_RECURSE ${PY_NAME}_HEADERS
 set(PY_HEADERS ${${PY_NAME}_HEADERS})
 set(PY_SOURCES ${${PY_NAME}_SOURCES})
 
+ADD_HEADER_GROUP(PY_HEADERS)
+
 message(STATUS "Python headers: ${PY_HEADERS}")
 message(STATUS "Python sources: ${PY_SOURCES}")
 
@@ -56,6 +58,10 @@ foreach(pyheader ${PY_HEADERS})
                   ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
                   ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
 endforeach(pyheader)
+
+install(FILES ${PY_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/python
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PY_NAME}_PYFILES
