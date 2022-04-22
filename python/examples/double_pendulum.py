@@ -20,6 +20,7 @@ class Args(Tap):
     view: bool = False
     num_replay: int = 3
     record: bool = False
+    video_file: str = "double_pendulum.mp4"
 
     def process_args(self):
         if self.record:
@@ -43,6 +44,7 @@ print("Package version: {}".format(proxnlp.__version__))
 robot = erd.load("double_pendulum")
 model = robot.model
 rdata = model.createData()
+toolid = model.getFrameId("link2")
 
 model.lowerPositionLimit[:] = -2 * np.pi
 model.upperPositionLimit[:] = +2 * np.pi
@@ -61,7 +63,7 @@ nu = B.shape[1]
 xspace = MultibodyPhaseSpace(model)
 pb_space = EuclideanSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
 
-u_bound = 2.
+u_bound = .4
 x0 = xspace.neutral()
 x0[0] = np.pi
 xtarget = xspace.neutral()
@@ -106,9 +108,9 @@ class MultipleShootingProblem:
 
         cXU_s = cas.vertcat(cX_s, cU_s)
 
-        w_u = 1e-2
+        w_u = 4e-3
         w_x = 1e-2
-        w_term = 1e-1 * np.ones(xspace.ndx)
+        w_term = 3e-1 * np.ones(xspace.ndx)
         w_term[2:] = 0.
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
@@ -127,7 +129,7 @@ class MultipleShootingProblem:
             control_bounds_.append(cus[t] - u_bound)
             control_bounds_.append(-cus[t] - u_bound)
         control_expr = cas.vertcat(*control_bounds_)
-        self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s)
+        self.control_bound_fun = CasadiFunction(pb_space.nx, pb_space.ndx, control_expr, cXU_s, use_hessian=False)
 
 
 xu_init = pb_space.neutral()
@@ -241,11 +243,14 @@ if USE_VIEWER:
     allimgs = []
     for _ in range(args.num_replay):
         imgs = display_trajectory(vizer, drawer, xs_opt, us_opt,
-                                  record=args.record, wait=dt)
+                                  frame_ids=[toolid],
+                                  show_vel=True,
+                                  wait=dt,
+                                  record=args.record)
         if imgs is not None:
             allimgs.extend(imgs)
 
     if args.record:
         import imageio
-        imageio.mimwrite("double_pendulum.mp4", ims=allimgs, fps=1. / dt,
+        imageio.mimwrite(args.video_file, ims=allimgs, fps=1. / dt,
                          **VIDEO_CONFIG_DEFAULT)
