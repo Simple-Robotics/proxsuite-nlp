@@ -3,6 +3,7 @@
 
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/spaces/tangent-bundle.hpp"
+#include "proxnlp/modelling/spaces/cartesian-product.hpp"
 #ifdef WITH_PINOCCHIO
   #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
   #include "proxnlp/modelling/spaces/multibody.hpp"
@@ -65,6 +66,13 @@ namespace python
       "Basic Euclidean vector space.",
       bp::init<const int>(bp::args("self", "dim"))
     );
+
+    bp::class_<CartesianProductTpl<Scalar>, bp::bases<Manifold>>(
+      "CartesianProduct",
+      "Cartesian product of two manifolds.",
+      bp::init<const Manifold&, const Manifold&>(bp::args("self", "left", "right"))
+    )
+      ;
 
 
 #ifdef WITH_PINOCCHIO

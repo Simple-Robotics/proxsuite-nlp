@@ -11,8 +11,7 @@ namespace proxnlp
     typename TangentBundleTpl<Base>::PointType
     TangentBundleTpl<Base>::neutral() const
     {
-      PointType out;
-      out.resize(nx());
+      PointType out(nx());
       out.setZero();
       out.head(m_base.nx()) = m_base.neutral();
       return out;
@@ -22,8 +21,7 @@ namespace proxnlp
     typename TangentBundleTpl<Base>::PointType
     TangentBundleTpl<Base>::rand() const
     {
-      PointType out;
-      out.resize(nx());
+      PointType out(nx());
       out.head(m_base.nx()) = m_base.rand();
       using BTanVec_t = typename Base::TangentVectorType;
       out.tail(m_base.ndx()) = BTanVec_t::Random(m_base.ndx());
@@ -71,7 +69,8 @@ namespace proxnlp
       J_.resize(ndx(), ndx());
       J_.setZero();
       m_base.Jintegrate(
-        getBasePoint(x), getBaseTangent(dx),
+        getBasePoint(x),
+        getBaseTangent(dx),
         getBaseJacobian(J_),
         arg);
       J_.bottomRightCorner(ndxbase, ndxbase).setIdentity();
@@ -88,7 +87,8 @@ namespace proxnlp
       J_.resize(ndx(), ndx());
       J_.setZero();
       m_base.Jdifference(
-        getBasePoint(x0), getBasePoint(x1),
+        getBasePoint(x0),
+        getBasePoint(x1),
         getBaseJacobian(J_),
         arg);
       if (arg == 0)

@@ -55,6 +55,8 @@ namespace python
              (void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, MatrixRef, int) const)&Manifold::Jdifference,
              bp::args("self", "x0", "x1", "Jout", "arg"),
              "Compute the Jacobian of the difference operator.")
+        .def("tangent_space", &Manifold::tangentSpace, bp::args("self"), "Returns an object representing the tangent space to this manifold.")
+        .def(bp::self * bp::self)  // multiplication operator
         ;
 
     }

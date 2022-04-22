@@ -41,6 +41,16 @@ namespace proxnlp
     /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
     virtual PointType rand() const { return PointType::Random(nx()); }
 
+    /// Typedef for the tangent space, as a manifold.
+    using TangentSpaceType = VectorSpaceTpl<Scalar, Eigen::Dynamic, Options>;
+
+    /// @brief    Return an object representing the tangent space as a manifold.
+    const TangentSpaceType tangentSpace() const
+    {
+      return TangentSpaceType(this->ndx());
+    }
+
+
     /// @name     Operations
 
     /** Perform the manifold integration operation.

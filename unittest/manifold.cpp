@@ -1,6 +1,7 @@
 #include "proxnlp/manifold-base.hpp"
 
 #include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxnlp/modelling/spaces/cartesian-product.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -22,14 +23,14 @@ BOOST_AUTO_TEST_SUITE(manifold)
 BOOST_AUTO_TEST_CASE(test_vectorspace)
 {
   PROXNLP_DYNAMIC_TYPEDEFS(double)
-  constexpr int N = 3;
-  VectorSpaceTpl<double, N> space1;
+  constexpr int N1 = 3;
+  VectorSpaceTpl<double, N1> space1;
 
   auto x0 = space1.neutral();
   auto x1 = space1.rand();
 
-  BOOST_CHECK_EQUAL(N, x0.size());
-  BOOST_CHECK_EQUAL(N, x1.size());
+  BOOST_CHECK_EQUAL(N1, x0.size());
+  BOOST_CHECK_EQUAL(N1, x1.size());
 
   BOOST_CHECK((x0 + x1).isApprox(x1));
 
@@ -40,6 +41,11 @@ BOOST_AUTO_TEST_CASE(test_vectorspace)
   x1 = space2.rand();
 
   BOOST_CHECK(x0.isApprox(VectorXs::Zero(35)));
+
+  auto space3 = space1 * space2;
+  BOOST_CHECK_EQUAL(space3.nx(), N1 + N2);
+  x0 = space3.neutral();
+  BOOST_CHECK_EQUAL(x0.size(), N1 + N2);
 
 }
 
