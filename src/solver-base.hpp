@@ -56,7 +56,7 @@ namespace proxnlp
 
     //// Other settings
 
-    bool verbose = QUIET;                   // Level of verbosity of the solver.
+    VerboseLevel verbose = QUIET;                   // Level of verbosity of the solver.
     bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
@@ -499,7 +499,7 @@ namespace proxnlp
     /// Check the matrix has the desired inertia.
     /// @param    kktMatrix The KKT matrix.
     /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
-    const InertiaFlag checkInertia(const Eigen::VectorXi& signature) const
+    InertiaFlag checkInertia(const Eigen::VectorXi& signature) const
     {
       const int ndx = manifold.ndx();
       const int numc = problem->getTotalConstraintDim();
