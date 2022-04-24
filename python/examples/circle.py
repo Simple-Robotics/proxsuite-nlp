@@ -2,7 +2,7 @@ import numpy as np
 import proxnlp
 from proxnlp.residuals import ManifoldDifferenceToPoint
 from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
-from proxnlp.manifolds import EuclideanSpace
+from proxnlp.manifolds import VectorSpace
 from proxnlp.constraints import NegativeOrthant
 
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 nx = 2
 p0 = np.array([.7, .2])
 p1 = np.array([1., .5])
-space = EuclideanSpace(nx)
+space = VectorSpace(nx)
 
 radius = .6
 radius_sq = radius ** 2

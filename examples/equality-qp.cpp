@@ -3,7 +3,7 @@
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 #include "proxnlp/modelling/residuals/linear.hpp"
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/solver-base.hpp"
 
 #include "example-base.hpp"
@@ -32,8 +32,7 @@ using EqualityType = EqualityConstraint<double>;
 template<int N, int M = 1>
 int submain()
 {
-  using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
-  using Manifold = PinocchioLieGroup<Vs>;
+  using Manifold = VectorSpaceTpl<double>;
   Manifold space;
   typename Manifold::PointType p1 = space.rand();
 

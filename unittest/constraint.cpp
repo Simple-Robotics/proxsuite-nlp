@@ -3,7 +3,7 @@
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 // #include "proxnlp/modelling/constraints/l1-penalty.hpp"
 
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/vector-space.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -16,8 +16,7 @@ BOOST_AUTO_TEST_SUITE(constraint)
 using namespace proxnlp;
 
 const int N = 20;
-using Vs_ = pinocchio::VectorSpaceOperationTpl<N, double>;
-PinocchioLieGroup<Vs_> space;
+VectorSpaceTpl<double> space;
 
 BOOST_AUTO_TEST_CASE(test_equality)
 {

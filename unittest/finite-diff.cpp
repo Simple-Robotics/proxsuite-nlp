@@ -1,5 +1,6 @@
 #include "proxnlp/modelling/autodiff/finite-difference.hpp"
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/vector-space.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -9,10 +10,6 @@
 using namespace proxnlp;
 
 BOOST_AUTO_TEST_SUITE(finite_diff)
-
-namespace pin = pinocchio;
-
-using Vs = pin::VectorSpaceOperationTpl<-1, double>;
 
 PROXNLP_FUNCTOR_TYPEDEFS(double)
 static const double fd_eps = 1e-4;
@@ -52,7 +49,7 @@ using autodiff::finite_difference_helper;
 BOOST_AUTO_TEST_CASE(test1)
 {
   int nx = 4;
-  PinocchioLieGroup<Vs> space(nx);
+  VectorSpaceTpl<double> space(nx);
 
   MyFuncType fun(space);
   using autodiff::TOC1;

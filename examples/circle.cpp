@@ -4,7 +4,7 @@
  */
 #include "proxnlp/cost-function.hpp"
 #include "proxnlp/pdal.hpp"
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 #include "proxnlp/modelling/costs/quadratic-residual.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
@@ -13,10 +13,8 @@
 #include "example-base.hpp"
 
 
-using Vs = pinocchio::VectorSpaceOperationTpl<2, double>;
-
 using namespace proxnlp;
-using Manifold = PinocchioLieGroup<Vs>;
+using Manifold = VectorSpaceTpl<double>;
 using Problem = ProblemTpl<double>;
 
 int main()

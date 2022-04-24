@@ -21,17 +21,11 @@ namespace proxnlp
 
     const int dim_;
 
-    using MatType = Eigen::Matrix<Scalar, Dim, 1, Options>;
-
-    MatType EYE_ = MatType::Ones(dim_);
-    MatType NEG_EYE_;
-
-
     template<int N = Dim,
              typename = typename std::enable_if<N == Eigen::Dynamic>::type>
-    VectorSpaceTpl(const int dim) : dim_(dim), NEG_EYE_(-EYE_) {}
+    VectorSpaceTpl(const int dim) : dim_(dim) {}
 
-    VectorSpaceTpl() : dim_(Dim), NEG_EYE_(-EYE_) {}
+    VectorSpaceTpl() : dim_(Dim) {}
 
     inline int nx()  const { return dim_; }
     inline int ndx() const { return dim_; }
@@ -52,7 +46,7 @@ namespace proxnlp
                          MatrixRef Jout,
                          int) const
     {
-      Jout = EYE_;
+      Jout.setIdentity();
     }
 
     /* Difference */
@@ -71,8 +65,8 @@ namespace proxnlp
     {
       switch (arg)
       {
-      case 0:   Jout = NEG_EYE_;
-      case 1:   Jout = EYE_;
+      case 0:   Jout = -MatrixXs::Identity(ndx(), ndx()); break;
+      case 1:   Jout.setIdentity(); break;
       default:  throw std::runtime_error("Wrong arg value.");
       }
     }
