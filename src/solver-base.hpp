@@ -56,7 +56,7 @@ namespace proxnlp
 
     //// Other settings
 
-    VerboseLevel verbose = QUIET;                   // Level of verbosity of the solver.
+    VerboseLevel verbose = QUIET;           // Level of verbosity of the solver.
     bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
 
     //// Algo params which evolve
@@ -95,7 +95,7 @@ namespace proxnlp
     const Scalar DELTA_MIN = 1e-14;         // Minimum nonzero regularization strength.
     const Scalar DELTA_MAX = 1e5;           // Maximum regularization strength.
     const Scalar DELTA_NONZERO_INIT = 1e-4;
-    const Scalar DELTA_INIT = DELTA_MIN;
+    const Scalar DELTA_INIT = 0.;
 
     /// Callbacks
     using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>; 
