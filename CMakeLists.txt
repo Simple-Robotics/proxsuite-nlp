@@ -10,6 +10,7 @@ set(PROJECT_URL "https://github.com/Simple-Robotics/proxnlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
+set(CMAKE_CXX_STANDARD 11)
 # Disable -Werror on Unix for now.
 set(CXX_DISABLE_WERROR True)
 
@@ -70,7 +71,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
 ADD_PROJECT_DEPENDENCY(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.4.0")
-ADD_PROJECT_DEPENDENCY(fmt REQUIRED PKG_CONFIG_REQUIRES "fmt >= 8.0.0")
+ADD_PROJECT_DEPENDENCY(fmt 8.0.0 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 8.0.0")
 
 # Variable containing all the cflags definition relative to optional dependencies
 set(CFLAGS_DEPENDENCIES)
