@@ -90,6 +90,7 @@ namespace python
       // expose operator overloads 
       .def(bp::self + bp::self)
       .def(context::Scalar() * bp::self)
+      .def(bp::self + internal::CostWrapper(0, 0))
       // printing
       .def(bp::self_ns::str(bp::self))
       ;

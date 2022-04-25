@@ -2,6 +2,8 @@ import casadi
 import proxnlp
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 
 class CasadiFunction(proxnlp.C2Function):
     def __init__(self, nx: int, ndx: int, expression: casadi.SX, cx: casadi.SX, use_hessian: bool = True):
@@ -33,3 +35,19 @@ class CasadiFunction(proxnlp.C2Function):
 
     def vectorHessianProduct(self, x, v, H):
         H[:, :] = np.asarray(self.Hfun(x, self._zero, v))
+
+
+def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
+    ax0.plot(prim_errs, c='tab:blue')
+    ax0.set_xlabel("Iterations")
+    col2 = "tab:orange"
+    ax0.plot(dual_errs, c=col2)
+    ax0.spines['top'].set_visible(False)
+    ax0.spines['right'].set_color(col2)
+    ax0.yaxis.label.set_color(col2)
+    ax0.set_yscale("log")
+    yhigh = ax0.get_ylim()[1]
+    ylim = min(prim_errs[-1], dual_errs[-1])
+    ax0.set_ylim(ylim ** .5, yhigh)
+    ax0.legend(["Primal error $p$", "Dual error $d$"])
+    ax0.set_title("Solver primal-dual residuals")
