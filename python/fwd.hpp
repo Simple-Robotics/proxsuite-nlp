@@ -1,9 +1,12 @@
 #pragma once
 
-#include "proxnlp/python/context.hpp"
-
 #include <eigenpy/eigenpy.hpp>
 #include <boost/python.hpp>
+
+#ifdef byte
+  #undef byte
+#endif
+#include "proxnlp/python/context.hpp"
 
 
 namespace proxnlp
