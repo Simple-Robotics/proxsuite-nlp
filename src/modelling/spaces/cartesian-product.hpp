@@ -48,7 +48,7 @@ namespace proxnlp
                         const ConstVectorRef& v,
                         VectorRef out) const
     {
-      left .integrate(x.head(left .nx()), v.head(left.ndx()), out.head(left.nx()));
+      left.integrate(x.head(left.nx()), v.head(left.ndx()), out.head(left.nx()));
       right.integrate(x.head(right.nx()), v.head(right.ndx()), out.head(right.nx()));
     }
 
@@ -56,7 +56,7 @@ namespace proxnlp
                          const ConstVectorRef& x1,
                          VectorRef out) const
     {
-      left .difference(x0.head(left .nx()), x1.head(left.nx()), out.head(left.ndx()));
+      left.difference(x0.head(left.nx()), x1.head(left.nx()), out.head(left.ndx()));
       right.difference(x0.head(right.nx()), x1.head(right.nx()), out.head(right.ndx()));
     }
     
@@ -66,18 +66,18 @@ namespace proxnlp
       MatrixRef Jout,
       int arg) const
     {
-      const int nx1 = left .nx();
+      const int nx1 = left.nx();
       const int nx2 = right.nx();
-      const int ndx1 = left .ndx();
+      const int ndx1 = left.ndx();
       const int ndx2 = right.ndx();
-      left .Jintegrate(x.head(nx1),
-                        v.head(ndx1),
-                        Jout.topLeftCorner(ndx1, ndx1),
-                        arg);
+      left.Jintegrate(x.head(nx1),
+                      v.head(ndx1),
+                      Jout.topLeftCorner(ndx1, ndx1),
+                      arg);
       right.Jintegrate(x.tail(nx2),
-                        v.tail(ndx2),
-                        Jout.bottomRightCorner(ndx2, ndx2),
-                        arg);
+                       v.tail(ndx2),
+                       Jout.bottomRightCorner(ndx2, ndx2),
+                       arg);
 
     }
 
@@ -87,18 +87,18 @@ namespace proxnlp
       MatrixRef Jout,
       int arg) const
     {
-      const int nx1 = left .nx();
+      const int nx1 = left.nx();
       const int nx2 = right.nx();
-      const int ndx1 = left .ndx();
+      const int ndx1 = left.ndx();
       const int ndx2 = right.ndx();
-      left .Jdifference(x0.head(nx1),
-                         x1.head(nx1),
-                         Jout.topLeftCorner(ndx1, ndx1),
-                         arg);
+      left.Jdifference(x0.head(nx1),
+                       x1.head(nx1),
+                       Jout.topLeftCorner(ndx1, ndx1),
+                       arg);
       right.Jdifference(x0.tail(nx2),
-                         x1.tail(nx2),
-                         Jout.bottomRightCorner(ndx2, ndx2),
-                         arg);
+                        x1.tail(nx2),
+                        Jout.bottomRightCorner(ndx2, ndx2),
+                        arg);
 
     }
 

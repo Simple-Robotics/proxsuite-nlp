@@ -29,6 +29,8 @@ namespace python
       using DifferenceRetType = VecType  (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
       using DifferenceFun_t   = void     (Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
 
+      bp::register_ptr_to_python<shared_ptr<Manifold>>();
+
       bp::class_<Manifold, shared_ptr<Manifold>, boost::noncopyable>(
         "ManifoldAbstract", "Manifold abstract class.",
         bp::no_init
