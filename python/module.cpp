@@ -5,11 +5,6 @@
 #include "proxnlp/python/util.hpp"
 #include "proxnlp/version.hpp"
 
-#include <eigenpy/eigenpy.hpp>
-
-
-using namespace proxnlp::python;
-
 
 namespace proxnlp
 {
@@ -33,6 +28,8 @@ namespace python
 
 BOOST_PYTHON_MODULE(pyproxnlp)
 {
+  using namespace proxnlp::python;
+
   bp::docstring_options module_docstring_options(true, true, true);
 
   bp::scope().attr("__version__") = proxnlp::printVersion();

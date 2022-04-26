@@ -10,7 +10,6 @@ set(PROJECT_URL "https://github.com/Simple-Robotics/proxnlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
-set(CMAKE_CXX_STANDARD 11)
 # Disable -Werror on Unix for now.
 set(CXX_DISABLE_WERROR True)
 

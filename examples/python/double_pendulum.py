@@ -9,8 +9,8 @@ import casadi as cas
 import example_robot_data as erd
 import matplotlib.pyplot as plt
 
-from proxnlp.manifolds import MultibodyPhaseSpace, EuclideanSpace
-from proxnlp.utils import CasadiFunction
+from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
+from proxnlp.utils import CasadiFunction, plot_pd_errs
 
 from tap import Tap
 from typing import List
@@ -42,15 +42,13 @@ if USE_VIEWER:
 
 print("Package version: {}".format(proxnlp.__version__))
 robot = erd.load("double_pendulum_simple")
+# robot = erd.load("double_pendulum")
 model = robot.model
 rdata = model.createData()
 toolid = model.getFrameId("link2")
 
-model.lowerPositionLimit[:] = -2 * np.pi
-model.upperPositionLimit[:] = +2 * np.pi
-
-Tf = 1.5
-dt = 0.03
+Tf = 1.2
+dt = 1. / 30
 nsteps = int(Tf / dt)
 Tf = nsteps * dt
 print("Time horizon: {:.3g}".format(Tf))
@@ -61,7 +59,7 @@ B = np.array([[1.], [1.]])
 nu = B.shape[1]
 
 xspace = MultibodyPhaseSpace(model)
-pb_space = EuclideanSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
+pb_space = VectorSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
 
 u_bound = .4
 x0 = xspace.neutral()
@@ -111,8 +109,8 @@ class MultipleShootingProblem:
 
         w_u = 1e-2
         w_x = 1e-2
-        w_term = 2e-1 * np.ones(xspace.ndx)
-        w_term[2:] = 0.
+        w_term = 1. * np.ones(xspace.ndx)
+        w_term[2:] = 1e-3
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
             0.5 * w_x * dt * cas.dot(cX_s, cX_s) +
@@ -150,11 +148,11 @@ results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
-rho_init = 1e-8
+rho_init = 1e-7
 mu_init = 0.1
 solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE)
 solver.register_callback(callback)
-solver.maxiters = 500
+solver.maxiters = 600
 solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
@@ -206,21 +204,7 @@ plt.title("Controls $u$")
 
 ax0 = axes[2]
 
-
-def plot_pd_errs():
-    ax0.plot(prim_errs, c='tab:blue')
-    ax0.set_xlabel("Iterations")
-    col2 = "tab:orange"
-    ax0.plot(dual_errs, c=col2)
-    ax0.spines['top'].set_visible(False)
-    ax0.spines['right'].set_color(col2)
-    ax0.yaxis.label.set_color(col2)
-    ax0.set_yscale("log")
-    ax0.legend(["Primal error $p$", "Dual error $d$"])
-    ax0.set_title("Solver primal-dual residuals")
-
-
-plot_pd_errs()
+plot_pd_errs(ax0, prim_errs, dual_errs)
 
 it_list = [1, 10, 20, 30]
 it_list = [i for i in it_list if i < results.numiters]
@@ -238,6 +222,7 @@ for it in it_list:
     plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
     plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls='--')
     plt.title("Iteration %d" % it)
+plt.tight_layout()
 plt.show()
 
 

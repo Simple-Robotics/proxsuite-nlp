@@ -4,7 +4,6 @@
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 
-/// TODO remove this include once functionality upstream
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
 

@@ -47,8 +47,7 @@ MAKE_BINDINGS()
 
 file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
-     ${CMAKE_CURRENT_BINARY_DIR}/examples
-)
+     )
 
 # copy headers to build/include/ directory
 foreach(pyheader ${PY_HEADERS})
@@ -68,11 +67,6 @@ set(${PY_NAME}_PYFILES
     __init__.py
     utils.py)
 
-file(GLOB_RECURSE PY_EXAMPLES
-     ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.py)
-
-message(STATUS "Python examples: ${PY_EXAMPLES}")
-
 foreach(pyfile ${${PY_NAME}_PYFILES})
 	python_install_on_site(${PROJECT_NAME} ${pyfile})
 endforeach()
@@ -82,12 +76,3 @@ if(GENERATE_PYTHON_STUBS)
   load_stubgen()
   # generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${PYTHON_SITELIB})
 endif(GENERATE_PYTHON_STUBS)
-
-foreach(pyfile ${PY_EXAMPLES})
-	get_filename_component(pyfile_name ${pyfile} NAME)
-     execute_process(
-          COMMAND ${CMAKE_COMMAND} -E create_symlink
-          ${pyfile}
-          ${CMAKE_CURRENT_BINARY_DIR}/examples/${pyfile_name}
-     )
-endforeach()
