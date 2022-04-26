@@ -15,7 +15,6 @@ set(PY_SOURCES ${${PY_NAME}_SOURCES})
 ADD_HEADER_GROUP(PY_HEADERS)
 
 message(STATUS "Python headers: ${PY_HEADERS}")
-message(STATUS "Python sources: ${PY_SOURCES}")
 
 function(MAKE_BINDINGS)
   add_library(${PY_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
@@ -51,7 +50,6 @@ file(MAKE_DIRECTORY
 
 # copy headers to build/include/ directory
 foreach(pyheader ${PY_HEADERS})
-  message(STATUS "Processing Python header ${pyheader}")
   string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
                   ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
