@@ -23,12 +23,12 @@ namespace proxnlp
     CartesianProductTpl(const Base& left, const Base& right)
       : left(left), right(right) {}
 
-    inline int nx()  const { return left.nx() + right.nx(); }
-    inline int ndx() const { return left.ndx() + right.ndx(); }
+    inline int nx()  const { return m_nx; }
+    inline int ndx() const { return m_ndx; }
 
     PointType neutral() const
     {
-      PointType out(this->nx());
+      PointType out(m_nx);
       out.setZero();
       out.head(left.nx()) = left.neutral();
       out.tail(right.nx()) = right.neutral();
@@ -37,7 +37,7 @@ namespace proxnlp
 
     PointType rand() const
     {
-      PointType out(this->nx());
+      PointType out(m_ndx);
       out.setZero();
       out.head(left.nx()) = left.rand();
       out.tail(right.nx()) = right.rand();
@@ -102,6 +102,14 @@ namespace proxnlp
 
     }
 
+    CartesianProductTpl<Scalar> operator*(const Base& right)
+    {
+      return CartesianProductTpl(*this, right);
+    }
+
+  private:
+    const int m_nx = left.nx() + right.nx();
+    const int m_ndx = left.ndx() + right.ndx();
   };
 
 

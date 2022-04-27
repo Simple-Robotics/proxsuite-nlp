@@ -16,12 +16,15 @@ BOOST_AUTO_TEST_SUITE(constraint)
 using namespace proxnlp;
 
 const int N = 20;
-VectorSpaceTpl<double> space;
+VectorSpaceTpl<double> space(N);
+PROXNLP_DYNAMIC_TYPEDEFS(double)
 
 BOOST_AUTO_TEST_CASE(test_equality)
 {
-  auto x0 = space.neutral();
-  auto x1 = space.rand();
+  VectorXs x0 = space.neutral();
+  VectorXs x1 = space.rand();
+
+
 }
 
 

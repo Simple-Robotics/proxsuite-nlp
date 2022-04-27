@@ -3,17 +3,16 @@
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/spaces/cartesian-product.hpp"
 
-#include <boost/test/unit_test.hpp>
-
 #ifdef WITH_PINOCCHIO
   #include <pinocchio/parsers/sample-models.hpp>
-  #include <pinocchio/multibody/liegroup/vector-space.hpp>
   #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
   #include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
+
+#include <boost/test/unit_test.hpp>
 
 using namespace proxnlp;
 
@@ -42,11 +41,14 @@ BOOST_AUTO_TEST_CASE(test_vectorspace)
 
   BOOST_CHECK(x0.isApprox(VectorXs::Zero(35)));
 
-  auto space3 = space1 * space2;
+  CartesianProductTpl<double> space3 = space1 * space2;
   BOOST_CHECK_EQUAL(space3.nx(), N1 + N2);
   x0 = space3.neutral();
   BOOST_CHECK_EQUAL(x0.size(), N1 + N2);
 
+  // CartesianProductTpl<double> space4 = space1 * space1 * space1;
+  // BOOST_CHECK_EQUAL(space4.nx(), N1 * 3);
+  // x0 = space4.neutral();
 }
 
 
