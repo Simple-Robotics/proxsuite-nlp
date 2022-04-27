@@ -18,6 +18,8 @@ PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
                            PROXNLP_FUNCTION_TYPEDEFS \
                            PROXNLP_DYNAMIC_TYPEDEFS
 
+EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
+
 INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/src
 
 EXAMPLE_PATH            = @PROJECT_SOURCE_DIR@/examples

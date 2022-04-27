@@ -68,7 +68,7 @@ namespace proxnlp
       VectorOfRef& out) const;
 
     /// @brief Compute the pdAL (Gill-Robinson) multipliers
-    /// @todo   fix recomputing 1st order multipliers (w/ workspace)
+    /// @todo  Use this at some point in the algorithm
     void computePDALMultipliers(
       const ConstVectorRef& x,
       const VectorOfRef& lams,

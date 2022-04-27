@@ -59,7 +59,9 @@ namespace proxnlp
   };
 
 
-  /// @brief    Packs a ConstraintSetBase and C2FunctionTpl.
+  /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
+   * 
+   */
   template<typename _Scalar>
   struct ConstraintObject
   {

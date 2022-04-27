@@ -7,10 +7,13 @@ namespace proxnlp
 {
 
   /**
-   * @brief Weighted quadratic residual \f$\frac{1}{2}\| r(x) \|_W \f$ of a residual \f$r(x)\f$.
+   * @brief Quadratic function \f$\frac{1}{2} r^\top Qr + b^\top r + c\f$ of a residual.
    * 
-   * Cost function which is the weighted squares \f$\frac12 \|r(x)\|_W \f$ of some
-   * residual function \f$r :\calX\to \RR^p\f$.
+   * Cost function which is a quadratic function
+   * \f[
+   *    \frac12 r(x)^\top Q r(x) + b^\top r(x) + c
+   * \f]
+   * of a residual function \f$r :\calX\to \RR^p\f$.
    */
   template<typename _Scalar>
   struct QuadraticResidualCost : public CostFunctionBaseTpl<_Scalar>
@@ -23,9 +26,13 @@ namespace proxnlp
     using Base::computeGradient;
     using Base::computeHessian;
 
+    /// Residual function \f$r(x)\f$ the composite cost is constructed over.
     shared_ptr<FunctionType> m_residual;
+    /// Weights \f$Q\f$
     MatrixXs m_weights;
+    /// Slope \f$b\f$
     VectorXs m_slope;
+    /// Constant term \f$c\f$
     Scalar m_constant;
 
     QuadraticResidualCost(const shared_ptr<FunctionType>& residual,

@@ -99,19 +99,29 @@ namespace python
 
     bp::class_<QuadraticResidualCost<context::Scalar>, bp::bases<Cost>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
-      bp::init<shared_ptr<context::C2Function>,
+      bp::init<const shared_ptr<context::C2Function>&,
                const ConstMatrixRef&,
                const ConstVectorRef&,
                context::Scalar>(
-                 (bp::arg("residual"),
+                 (bp::arg("self"),
+                  bp::arg("residual"),
                   bp::arg("weights"),
                   bp::arg("slope"),
                   bp::arg("constant") = 0.)
                )
-    );
+    )
+      .def(bp::init<const shared_ptr<context::C2Function>&,
+                    const ConstMatrixRef&,
+                    context::Scalar>(
+           (bp::arg("self"),
+            bp::arg("residual"),
+            bp::arg("weights"),
+            bp::arg("constant") = 0.))
+            )
+    ;
 
     bp::class_<QuadraticDistanceCost<context::Scalar>, bp::bases<Cost>>(
-      "QuadraticDistanceCost", "Quadratic distance cost on the manifold.",
+      "QuadraticDistanceCost", "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the manifold.",
       bp::init<const Manifold&, const VectorXs&, const MatrixXs&>(
         bp::args("space", "target", "weights"))
     )
