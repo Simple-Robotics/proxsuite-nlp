@@ -40,6 +40,17 @@ namespace proxnlp
     const Base& right;
 
   };
+
+
+  /// @brief    Compose two function objects.
+  ///
+  /// @return   ComposeFunctionTpl object representing the composition of @p left and @p right.
+  template<typename Scalar>
+  ComposeFunctionTpl<Scalar> compose(const C2FunctionTpl<Scalar>& left, const C2FunctionTpl<Scalar>& right)
+  {
+    return ComposeFunctionTpl<Scalar>(left, right);
+  }
+
   
 } // namespace proxnlp
 

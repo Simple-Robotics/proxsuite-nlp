@@ -1,5 +1,6 @@
 #include "proxnlp/python/fwd.hpp"
 #include "proxnlp/function-base.hpp"
+#include "proxnlp/function-ops.hpp"
 
 
 namespace proxnlp
@@ -117,6 +118,16 @@ namespace python
       .def("vectorHessianProduct", compHess1, &internal::C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))
       .def("get_vhp", compHess2, bp::args("self", "x", "v"), "Compute and return the vector-Hessian product.")
       ;
+
+
+    bp::class_<ComposeFunctionTpl<context::Scalar>, bp::bases<C2Function>>(
+      "ComposeFunction", "Composition of two functions.",
+      bp::init<const C2Function&, const C2Function&>(bp::args("self", "left", "right"))
+    );
+
+    bp::def("compose", &::proxnlp::compose<context::Scalar>,
+            "Returns the composition of two C2Function objects.");
+
   }
 
 } // namespace python
