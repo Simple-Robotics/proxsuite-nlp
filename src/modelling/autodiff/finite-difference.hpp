@@ -35,7 +35,7 @@ namespace autodiff
     template<typename Scalar>
     struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar>
     {
-      PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+      PROXNLP_FUNCTION_TYPEDEFS(Scalar)
       using FuncType = BaseFunctionTpl<Scalar>;
       using Base = C1FunctionTpl<Scalar>;
       using Base::computeJacobian;
@@ -74,7 +74,7 @@ namespace autodiff
     template<typename Scalar>
     struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar>
     {
-      PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+      PROXNLP_FUNCTION_TYPEDEFS(Scalar)
       using FuncType = C1FunctionTpl<Scalar>;
       using Base = C2FunctionTpl<Scalar>;
       using Base::vectorHessianProduct;
@@ -137,7 +137,7 @@ namespace autodiff
     using Base = internal::finite_difference_impl<Scalar, TOC1>;
     using Base::computeJacobian;
 
-    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
 
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,
@@ -171,7 +171,7 @@ namespace autodiff
     using Base1::computeJacobian;
     using Base2::vectorHessianProduct;
 
-    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
 
     finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,

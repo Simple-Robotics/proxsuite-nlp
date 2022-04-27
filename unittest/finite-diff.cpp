@@ -11,7 +11,7 @@ using namespace proxnlp;
 
 BOOST_AUTO_TEST_SUITE(finite_diff)
 
-PROXNLP_FUNCTOR_TYPEDEFS(double)
+PROXNLP_FUNCTION_TYPEDEFS(double)
 static const double fd_eps = 1e-4;
 static const double prec = std::sqrt(fd_eps);
 

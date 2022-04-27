@@ -17,7 +17,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
     using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using FunctionType = C2FunctionTpl<Scalar>;

@@ -19,7 +19,7 @@ namespace proxnlp
   struct NegativeOrthant : ConstraintSetBase<_Scalar>
   {
     using Scalar = _Scalar;
-    PROXNLP_FUNCTOR_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
 
     using Base = ConstraintSetBase<Scalar>;
     using ActiveType = typename Base::ActiveType;
