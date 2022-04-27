@@ -90,9 +90,13 @@ struct VectorSpaceTpl;
 template<typename Base>
 struct TangentBundleTpl;
 
-// fwd ConstraintSetBase
+// fwd ConstraintObject
 template<typename Scalar>
 struct ConstraintSetBase;
+
+// fwd ConstraintObject
+template<typename Scalar>
+struct ConstraintObject;
 
 /* Solver structs */
 

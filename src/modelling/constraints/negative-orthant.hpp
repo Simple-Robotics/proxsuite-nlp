@@ -23,9 +23,6 @@ namespace proxnlp
 
     using Base = ConstraintSetBase<Scalar>;
     using ActiveType = typename Base::ActiveType;
-    using FunctionType = typename Base::FunctionType;
-
-    explicit NegativeOrthant(const FunctionType& func) : Base(func) {}
 
     ReturnType projection(const ConstVectorRef& z) const
     {

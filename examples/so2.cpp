@@ -66,9 +66,9 @@ int main()
 
   /// DEFINE A PROBLEM
 
-  Problem::ConstraintPtr cstr1(new Problem::EqualityType(residual));
+  auto set1 = std::make_shared<Problem::EqualityType>();
   std::vector<Problem::ConstraintPtr> cstrs;
-  cstrs.push_back(cstr1);
+  cstrs.push_back(std::make_shared<Problem::ConstraintType>(residual, set1));
   shared_ptr<Problem> prob(new Problem(cf, cstrs));
   fmt::print("\tConstraint dimension: {:d}\n", prob->getConstraint(0)->nr());
 

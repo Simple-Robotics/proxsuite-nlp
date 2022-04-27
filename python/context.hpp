@@ -20,7 +20,8 @@ namespace python
     using Results = ResultsTpl<Scalar>;
     using Workspace = WorkspaceTpl<Scalar>;
     using Cost = CostFunctionBaseTpl<Scalar>;
-    using Constraint = ConstraintSetBase<Scalar>;
+    using Constraint = ConstraintObject<Scalar>;
+    using ConstraintSet = ConstraintSetBase<Scalar>;
     using Function = BaseFunctionTpl<Scalar>;
     using C1Function = C1FunctionTpl<Scalar>;
     using C2Function = C2FunctionTpl<Scalar>;

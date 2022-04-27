@@ -8,7 +8,7 @@ import numpy as np
 import casadi as cas
 
 from proxnlp.residuals import LinearFunction
-from proxnlp.constraints import EqualityConstraint, NegativeOrthant
+from proxnlp.constraints import create_equality_constraint
 from proxnlp.manifolds import EuclideanSpace
 
 
@@ -74,7 +74,7 @@ space = EuclideanSpace(nx)
 x1 = space.rand()
 
 sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.]))
-cstr = EqualityConstraint(sum_to_one_res)
+cstr = create_equality_constraint(sum_to_one_res)
 
 x0 = np.array([1., 2.])
 print("Diff func:")
@@ -111,7 +111,6 @@ def plot_fun():
 
     zv2 = np.stack([sum_to_one_res(u) for u in grid.swapaxes(0, -1).reshape(-1, 2)])
     zv2 = zv2.reshape(Ngx, Ngx)
-    cs2_ = plt.contour(grid[0], grid[1], zv2, levels=[0.], colors='white')
     plt.title("Constrained problem")
     plt.xlim(left=dx)
     plt.ylim(bottom=dx)

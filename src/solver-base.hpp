@@ -256,7 +256,7 @@ namespace proxnlp
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
         typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-        cstr->updateProxParameters(mu_eq);
+        cstr->m_set->updateProxParameters(mu_eq);
       }
     }
 
@@ -360,9 +360,9 @@ namespace proxnlp
         for (std::size_t i = 0; i < num_c; i++)
         {
           const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-          cstr->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
+          cstr->m_set->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
 
-          bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
+          bool use_vhp = (use_gauss_newton && not cstr->m_set->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
           {
             workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessianProd[i];
@@ -380,7 +380,7 @@ namespace proxnlp
         for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
         {
           typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-          workspace.primalResiduals[i].noalias() = cstr->normalConeProjection(workspace.primalResiduals[i]);
+          workspace.primalResiduals[i].noalias() = cstr->m_set->normalConeProjection(workspace.primalResiduals[i]);
         }
         results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
         // Compute inner stopping criterion
@@ -583,7 +583,7 @@ namespace proxnlp
 
         // multiplier
         workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
-        workspace.lamsPlus[i] = cstr->normalConeProjection(workspace.lamsPlusPre[i]);
+        workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
       }
       workspace.subproblemDualErr_data = mu_eq * (workspace.lamsPlus_data - lams_data);
       workspace.lamsPDAL_data = 2 * workspace.lamsPlus_data - lams_data;
@@ -602,9 +602,9 @@ namespace proxnlp
         const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
 
         cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
-        cstr->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
+        cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
 
-        bool use_vhp = (use_gauss_newton && not cstr->disableGaussNewton()) || not use_gauss_newton; 
+        bool use_vhp = (use_gauss_newton && not cstr->m_set->disableGaussNewton()) || not use_gauss_newton; 
         if (use_vhp)
         {
           cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessianProd[i]);

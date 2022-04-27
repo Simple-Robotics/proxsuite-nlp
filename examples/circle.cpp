@@ -19,7 +19,8 @@ using Problem = ProblemTpl<double>;
 
 int main()
 {
-  Manifold space;
+  constexpr int dim = 2;
+  Manifold space(dim);
   const int nx = space.nx();
   Manifold::PointType p0(nx);  // target
   p0 << -.4, .7;
@@ -65,18 +66,10 @@ int main()
   w2 *= 2;
 
   const QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
+
   using Ineq_t = NegativeOrthant<double>;
-  // Problem::EqualityType cstr1(residualCircle);
-  Ineq_t cstr1(residualCircle);
-  fmt::print("  Constraint dimension: {:d}\n", cstr1.nr());
-
-  /// Cast scalar cost to func
-  const C2FunctionTpl<double>& resfunc = residualCircle;
-  const func_to_cost<double> recast_to_cost(resfunc);
-
-
-  std::vector<Problem::ConstraintPtr> cstrs;
-  cstrs.push_back(std::make_shared<Ineq_t>(cstr1));
+  auto cstr1 = std::make_shared<ConstraintObject<double>>(residualCircle, std::make_shared<Ineq_t>());
+  std::vector<Problem::ConstraintPtr> cstrs { cstr1 };
   auto prob = std::make_shared<Problem>(cf, cstrs);
 
   /// Test out merit functions
@@ -135,7 +128,6 @@ int main()
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.xOpt.transpose());
-  fmt::print("Constraint value {}\n", cstr1.m_func(results.xOpt).transpose());
   fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;

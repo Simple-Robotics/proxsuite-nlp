@@ -14,46 +14,66 @@ namespace python
 {
 
   template<typename T>
-  void exposeSpecificConstraint(const char* name, const char* docstring)
+  void exposeSpecificConstraintSet(const char* name, const char* docstring)
   {
-    bp::class_<T, shared_ptr<T>, bp::bases<context::Constraint>>(
+    bp::class_<T, shared_ptr<T>, bp::bases<context::ConstraintSet>>(
       name, docstring,
-      bp::init<const context::C2Function&>()
+      bp::init<>()
     );
+  }
+
+  template<typename T>
+  context::Constraint make_constraint(const context::C2Function& f)
+  {
+    shared_ptr<context::ConstraintSet> s(new T());
+    return context::Constraint(f, s);
   }
 
   /// @todo Expose properly using pure_virtual, to allow overriding from Python
   void exposeConstraints()
   {
     using context::Scalar;
+    using context::ConstraintSet;
+    using ConstraintSetPtr = shared_ptr<ConstraintSet>;
     using context::Constraint;
-    using ConstraintPtr = shared_ptr<Constraint>;
-    bp::class_<Constraint, ConstraintPtr, boost::noncopyable>(
+    bp::class_<ConstraintSet, ConstraintSetPtr, boost::noncopyable>(
       "ConstraintSetBase", "Base class for constraint sets or nonsmooth penalties.",
       bp::no_init
     )
-      .def("projection", &Constraint::projection, bp::args("self", "z"))
-      .def("normal_cone_proj", &Constraint::normalConeProjection, bp::args("self", "z"))
-      .def("apply_jacobian", &Constraint::applyProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
-      .def("apply_normal_jacobian", &Constraint::applyNormalConeProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the normal cone projection Jacobian.")
-      .def("compute_active_set", &Constraint::computeActiveSet, bp::args("self", "z", "out"))
-      .add_property("nx",  &Constraint::nx)
-      .add_property("ndx", &Constraint::ndx)
-      .add_property("nr",  &Constraint::nr)
+      .def("projection", &ConstraintSet::projection, bp::args("self", "z"))
+      .def("normal_cone_proj", &ConstraintSet::normalConeProjection, bp::args("self", "z"))
+      .def("apply_jacobian", &ConstraintSet::applyProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
+      .def("apply_normal_jacobian", &ConstraintSet::applyNormalConeProjectionJacobian, bp::args("self", "z", "Jout"), "Apply the normal cone projection Jacobian.")
+      .def("compute_active_set", &ConstraintSet::computeActiveSet, bp::args("self", "z", "out"))
       .def(bp::self == bp::self)
+      ;
+
+    bp::class_<Constraint, shared_ptr<Constraint>>(
+      "ConstraintObject", "Packs a constraint set together with a function.",
+      bp::init<const context::C2Function&, ConstraintSetPtr>(bp::args("self", "func", "set"))
+    )
+      .add_property("nr",  &Constraint::nr, "Constraint dimension.")
+      .def_readonly("set", &Constraint::m_set, "Constraint set.")
       ;
 
     /* Expose constraint stack */
     namespace pp = pinocchio::python;
-    pp::StdVectorPythonVisitor<std::vector<ConstraintPtr>, true>::expose("ConstraintVector");
+    pp::StdVectorPythonVisitor<std::vector<shared_ptr<Constraint>>, true>::expose("ConstraintVector");
 
-    exposeSpecificConstraint<EqualityConstraint<Scalar>>(
-      "EqualityConstraint",
+    exposeSpecificConstraintSet<EqualityConstraint<Scalar>>(
+      "EqualityConstraintSet",
       "Cast a function into an equality constraint");
 
-    exposeSpecificConstraint<NegativeOrthant<Scalar>>(
+    exposeSpecificConstraintSet<NegativeOrthant<Scalar>>(
       "NegativeOrthant",
       "Cast a function into a negative inequality constraint h(x) \\leq 0");
+
+    bp::def("create_equality_constraint", &make_constraint<EqualityConstraint<Scalar>>,
+            "Convenience function to create an equality constraint from a C2Function.");
+    bp::def("create_inequality_constraint", &make_constraint<NegativeOrthant<Scalar>>,
+            "Convenience function to create an inequality constraint from a C2Function.");
+
+
   }
 
 }

@@ -3,7 +3,7 @@ import proxnlp
 from proxnlp.residuals import LinearFunction
 from proxnlp.costs import QuadraticDistanceCost
 from proxnlp.manifolds import EuclideanSpace
-from proxnlp.constraints import EqualityConstraint, NegativeOrthant
+from proxnlp.constraints import create_equality_constraint, create_inequality_constraint
 
 import matplotlib.pyplot as plt
 
@@ -38,13 +38,8 @@ print("Residual ndx:", resdl.ndx)
 print("Residual nr :", resdl.nr)
 
 
-cstr1 = EqualityConstraint(resdl)
-cstr2 = NegativeOrthant(resdl)
-
-print(cstr1.projection(x0), "should be zero")
-
-print("proj  x0:", cstr2.projection(x0))
-print("proj  x1:", cstr2.projection(x1))
+cstr1 = create_equality_constraint(resdl)
+cstr2 = create_inequality_constraint(resdl)
 
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10

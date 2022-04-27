@@ -20,23 +20,9 @@ namespace proxnlp
     PROXNLP_FUNCTION_TYPEDEFS(Scalar)
     using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-    using FunctionType = C2FunctionTpl<Scalar>;
-    const FunctionType& m_func;
-
-    explicit ConstraintSetBase<Scalar>(const FunctionType& func)
-      : m_func(func)
-      {}
-
     /// Do not use the vector-Hessian product in the Hessian
     /// for Gauss Newton.
     virtual bool disableGaussNewton() const { return true; }
-
-    /// Get dimension of manifold element representation.
-    int nx()  const { return m_func.nx(); }
-    /// Get dimension of constraint representation.
-    int nr()  const { return m_func.nr(); }
-    /// Get tangent space dimension (no. of columns of Jacobian)
-    int ndx() const { return m_func.ndx(); }
 
     /// Compute projection of variable @p z onto the constraint set.
     virtual ReturnType projection(const ConstVectorRef& z) const = 0;
@@ -70,6 +56,33 @@ namespace proxnlp
     {
       return this == &rhs;
     }
+  };
+
+
+  /// @brief    Packs a ConstraintSetBase and C2FunctionTpl.
+  template<typename _Scalar>
+  struct ConstraintObject
+  {
+    using Scalar = _Scalar;
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+
+    using FunctionType = C2FunctionTpl<Scalar>;
+    const FunctionType& m_func;
+
+    shared_ptr<ConstraintSetBase<Scalar>> m_set;
+
+    explicit ConstraintObject(const FunctionType& func, const shared_ptr<ConstraintSetBase<Scalar>>& set)
+      : m_func(func)
+      , m_set(set)
+      {}
+
+    explicit ConstraintObject(const FunctionType& func, ConstraintSetBase<Scalar>* set)
+      : m_func(func)
+      , m_set(set)
+      {}
+
+    /// Get dimension of constraint representation.
+    int nr()  const { return m_func.nr(); }
   };
 
 }

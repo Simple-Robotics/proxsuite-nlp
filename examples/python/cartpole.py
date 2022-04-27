@@ -8,7 +8,7 @@ import casadi as cas
 from meshcat_utils import display_trajectory, ForceDraw
 
 from proxnlp import manifolds
-from proxnlp.constraints import EqualityConstraint
+from proxnlp.constraints import create_equality_constraint, create_inequality_constraint
 from proxnlp.utils import CasadiFunction
 
 from .cartpole_utils import make_cartpole

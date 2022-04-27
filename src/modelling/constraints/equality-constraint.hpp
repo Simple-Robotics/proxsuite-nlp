@@ -21,12 +21,8 @@ namespace proxnlp
 
     using Base = ConstraintSetBase<Scalar>;
     using ActiveType = typename Base::ActiveType;
-    using FunctionType = typename Base::FunctionType;
 
     bool disableGaussNewton() const { return true; }
-
-    explicit EqualityConstraint(const FunctionType& func)
-      : Base(func) {}
 
     inline ReturnType projection(const ConstVectorRef& z) const
     {

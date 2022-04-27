@@ -17,7 +17,7 @@ namespace proxnlp
     for (std::size_t i = 0; i < nc; i++)
     {
       const auto cstr = m_prob->getConstraint(i);
-      VectorXs cval = cstr->normalConeProjection(cstr->m_func(x) + m_mu * lams_ext[i]);
+      VectorXs cval = cstr->m_set->normalConeProjection(cstr->m_func(x) + m_mu * lams_ext[i]);
       result_ += Scalar(0.5) * (m_muInv * cval.squaredNorm() - m_mu * lams_ext[i].squaredNorm());
       result_ += Scalar(0.5) * m_muInv * (cval - m_mu * lams[i]).squaredNorm();
     }
@@ -48,7 +48,7 @@ namespace proxnlp
     for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
     {
       auto cstr = m_prob->getConstraint(i);
-      out[i].noalias() = cstr->normalConeProjection(lams_ext[i] + m_muInv * cstr->m_func(x));
+      out[i].noalias() = cstr->m_set->normalConeProjection(lams_ext[i] + m_muInv * cstr->m_func(x));
     }
   }
 
@@ -64,7 +64,7 @@ namespace proxnlp
     for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++)
     {
       auto cstr = m_prob->getConstraint(i);
-      out[i].noalias() = cstr->normalConeProjection(2 * out[i] - lams[i]);
+      out[i].noalias() = cstr->m_set->normalConeProjection(2 * out[i] - lams[i]);
     }
   }
 } // namespace proxnlp

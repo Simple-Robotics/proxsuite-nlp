@@ -19,7 +19,7 @@ namespace proxnlp
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
 
     /// Generic constraint type
-    using ConstraintType = ConstraintSetBase<Scalar>;
+    using ConstraintType = ConstraintObject<Scalar>;
     using ConstraintPtr = shared_ptr<ConstraintType>;
     /// Equality constraint type
     using EqualityType = EqualityConstraint<Scalar>;
