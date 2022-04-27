@@ -6,7 +6,7 @@ namespace proxnlp
 {
 
   /**
-   * @brief     Tangent bundle of a base manifold M. This construction is recursive.
+   * @brief     Tangent bundle of a base manifold M.
    */
   template<class Base>
   struct TangentBundleTpl : public ManifoldAbstractTpl<typename Base::Scalar>

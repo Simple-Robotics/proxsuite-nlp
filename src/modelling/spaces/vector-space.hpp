@@ -7,6 +7,8 @@
 
 namespace proxnlp
 {
+
+  /// @brief    Standard Euclidean vector space.
   template<typename _Scalar, int _Dim, int _Options>
   struct VectorSpaceTpl : public ManifoldAbstractTpl<_Scalar, _Options>
   {
