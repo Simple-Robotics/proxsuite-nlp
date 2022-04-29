@@ -2,7 +2,7 @@
 
 This package is a C++ implementation of a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds.
 
-Copyright (C) 2022 LAAS-CNRS / Inria
+Copyright (C) 2022 LAAS-CNRS, INRIA
 
 ## Building from source
 
