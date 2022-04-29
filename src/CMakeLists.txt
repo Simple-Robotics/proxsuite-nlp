@@ -1,3 +1,6 @@
+#
+# Copyright (C) 2022 LAAS-CNRS, INRIA
+#
 
 function(create_library)
   # get the compile defs

@@ -1,4 +1,6 @@
+#
 # Copyright (C) 2022 LAAS-CNRS, INRIA
+#
 
 set(EXAMPLES_HEADER
     "example-base.hpp")

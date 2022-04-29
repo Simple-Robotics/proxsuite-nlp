@@ -1,3 +1,7 @@
+#
+# Copyright (C) 2022 LAAS-CNRS, INRIA
+#
+
 include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
 
 # identify bindings C++ source files
