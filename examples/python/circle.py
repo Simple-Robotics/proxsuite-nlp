@@ -3,7 +3,7 @@ import proxnlp
 from proxnlp.residuals import ManifoldDifferenceToPoint
 from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
 from proxnlp.manifolds import VectorSpace
-from proxnlp.constraints import NegativeOrthant
+from proxnlp.constraints import create_inequality_constraint
 
 import matplotlib.pyplot as plt
 
@@ -49,11 +49,9 @@ center3 = np.array([1., .2])
 res3 = QuadraticResidualCost(ManifoldDifferenceToPoint(space, center3), w2, slope_, -radius_sq)
 
 cstrs_ = [
-    # NegativeOrthant(reslin),
-    NegativeOrthant(res1),
-    # NegativeOrthant(res2),
-    NegativeOrthant(res2),
-    NegativeOrthant(res3)
+    create_inequality_constraint(res1),
+    create_inequality_constraint(res2),
+    create_inequality_constraint(res3)
 ]
 
 prob = proxnlp.Problem(cost_, cstrs_)
