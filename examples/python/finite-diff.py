@@ -1,3 +1,6 @@
+"""
+Copyright (C) 2022 LAAS-CNRS, INRIA
+"""
 import numpy as np
 import proxnlp
 

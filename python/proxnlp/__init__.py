@@ -1,3 +1,6 @@
+"""
+Copyright (C) 2022 LAAS-CNRS, INRIA
+"""
 from .pyproxnlp import *
 from .pyproxnlp import __version__
 

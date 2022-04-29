@@ -1,3 +1,6 @@
+"""
+Copyright (C) 2022 LAAS-CNRS, INRIA
+"""
 # from crocoddyl source code
 from math import cos, sin
 

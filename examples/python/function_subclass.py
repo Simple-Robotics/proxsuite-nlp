@@ -1,5 +1,5 @@
 """
-Copyright (C) LAAS-CNRS / INRIA
+Copyright (C) 2022 LAAS-CNRS, INRIA
 
 @file   In this file, we show how to overload function objects from proxnlp.
 """

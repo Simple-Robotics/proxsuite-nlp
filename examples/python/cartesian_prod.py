@@ -1,3 +1,6 @@
+"""
+Copyright (C) 2022 LAAS-CNRS, INRIA
+"""
 from proxnlp.manifolds import SO2, SO3, SE2, CartesianProduct
 
 space1 = SO2()

@@ -1,3 +1,6 @@
+"""
+Copyright (C) 2022 LAAS-CNRS, INRIA
+"""
 from proxnlp import manifolds
 import numpy as np
 import pinocchio as pin
