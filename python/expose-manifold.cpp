@@ -41,13 +41,13 @@ namespace python
   }
 
 #ifdef WITH_PINOCCHIO
-  /// Expose a Pinocchio Lie group with a specified name and docstring,
-  /// but a no-arg default constructor.
+  /// Expose a Pinocchio Lie group with a specified name, docstring,
+  /// and no-arg default constructor.
   template<typename LieGroup>
   void exposeLieGroup(const char* name, const char* docstring)
   {
-    using Manifold = PinocchioLieGroup<LieGroup>;
-    bp::class_<Manifold, bp::bases<context::Manifold>>(
+    using BoundType = PinocchioLieGroup<LieGroup>;
+    bp::class_<BoundType, bp::bases<context::Manifold>>(
       name, docstring, bp::init<>()
     );
   }
@@ -73,7 +73,6 @@ namespace python
       bp::init<const Manifold&, const Manifold&>(bp::args("self", "left", "right"))
     )
       ;
-
 
 #ifdef WITH_PINOCCHIO
     namespace pin = pinocchio;
@@ -106,27 +105,27 @@ namespace python
 
 
     /* Groups associated w/ Pinocchio models */
-    using Multibody_t = MultibodyConfiguration<Scalar>;
-    using Model_t = pin::ModelTpl<Scalar>;
-    bp::class_<Multibody_t, bp::bases<Manifold>>(
+    using Multibody = MultibodyConfiguration<Scalar>;
+    using Model = pin::ModelTpl<Scalar>;
+    bp::class_<Multibody, bp::bases<Manifold>>(
       "MultibodyConfiguration", "Configuration group of a multibody",
-      bp::init<const Model_t&>(bp::args("self", "model"))
+      bp::init<const Model&>(bp::args("self", "model"))
     )
       .add_property("model",
-                    bp::make_function(&MultibodyPhaseSpace<Scalar>::getModel,
+                    bp::make_function(&Multibody::getModel,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "Return the Pinocchio model instance.");
 
-    bp::class_<MultibodyPhaseSpace<Scalar>, bp::bases< Manifold >>(
+    bp::class_<MultibodyPhaseSpace<Scalar>, bp::bases<Manifold>>(
       "MultibodyPhaseSpace", "Tangent space of the multibody configuration group.",
-      bp::init<const Model_t&>(bp::args("model"))
+      bp::init<const Model&>(bp::args("model"))
     )
       .add_property("model",
                     bp::make_function(&MultibodyPhaseSpace<Scalar>::getModel,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "Return the Pinocchio model instance.")
       .add_property("base",
-                    +[](const MultibodyPhaseSpace<Scalar>& m) { return m.getBaseSpace(); },
+                    +[](const MultibodyPhaseSpace<Scalar>& m) { return m.getBaseSpace(); },  // decay lambda to function ptr
                     "Get the base space.");
 #endif
 
