@@ -1,4 +1,4 @@
-/** Copyright (C) 2022 LAAS-CNRS, INRIA
+/* Copyright (C) 2022 LAAS-CNRS, INRIA
  */
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 #include "proxnlp/modelling/residuals/linear.hpp"

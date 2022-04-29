@@ -27,7 +27,7 @@ namespace proxnlp
     /// Compute projection of variable @p z onto the constraint set.
     virtual ReturnType projection(const ConstVectorRef& z) const = 0;
 
-    /** Compute projection of @p z onto the normal cone to the set.
+    /* Compute projection of @p z onto the normal cone to the set.
      * The default implementation is just $\f\mathrm{id} - P\f$.
      */
     inline ReturnType normalConeProjection(const ConstVectorRef& z) const;
