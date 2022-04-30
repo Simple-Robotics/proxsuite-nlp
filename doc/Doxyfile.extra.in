@@ -27,6 +27,9 @@ EXAMPLE_PATH            = @PROJECT_SOURCE_DIR@/examples
 FORMULA_MACROFILE       = @CMAKE_SOURCE_DIR@/doc/macros.inc
 
 GENERATE_TREEVIEW       = YES
+
+HTML_HEADER             = @PROJECT_SOURCE_DIR@/doc/header.html
 HTML_EXTRA_STYLESHEET   = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome.css
+HTML_EXTRA_FILES        = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome-darkmode-toggle.js
 
 MATHJAX_FORMAT          = SVG
