@@ -28,7 +28,6 @@ namespace python
       using BinaryFunTypeRet = VectorXs(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
       using BinaryFunType    = void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
       using JacobianFunType    = void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&, MatrixRef, int) const;
-      using JacobianFunTypeRet = MatrixXs(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&, int) const;
 
       bp::register_ptr_to_python<shared_ptr<Manifold>>();
 

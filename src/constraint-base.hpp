@@ -73,12 +73,12 @@ namespace proxnlp
 
     shared_ptr<ConstraintSetBase<Scalar>> m_set;
 
-    explicit ConstraintObject(const FunctionType& func, const shared_ptr<ConstraintSetBase<Scalar>>& set)
+    ConstraintObject(const FunctionType& func, const shared_ptr<ConstraintSetBase<Scalar>>& set)
       : m_func(func)
       , m_set(set)
       {}
 
-    explicit ConstraintObject(const FunctionType& func, ConstraintSetBase<Scalar>* set)
+    ConstraintObject(const FunctionType& func, ConstraintSetBase<Scalar>* set)
       : m_func(func)
       , m_set(set)
       {}
