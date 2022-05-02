@@ -60,14 +60,14 @@ namespace proxnlp
       return out;
     }
 
-    void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+    void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
     {
-      MatrixXs gout = Jout.transpose();
+      VectorRef gout = Jout.transpose();
       computeGradient(x, gout);
       Jout = gout.transpose();
     }
 
-    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+    void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, MatrixRef Hout) const
     {
       computeHessian(x, Hout);
       Hout *= v(0);
