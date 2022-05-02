@@ -14,7 +14,7 @@ namespace proxnlp
     const ConstVectorRef& z,
     MatrixRef Jout) const
   {
-    const int nr = z.size();
+    const int nr = (int)z.size();
     assert(nr == Jout.rows());
     ActiveType active_set(nr);
     computeActiveSet(z, active_set);
@@ -33,7 +33,7 @@ namespace proxnlp
     const ConstVectorRef& z,
     MatrixRef Jout) const
   {
-    const int nr = z.size();
+    const int nr = (int)z.size();
     assert(nr == Jout.rows());
     ActiveType active_set(nr);
     computeActiveSet(z, active_set);

@@ -51,7 +51,7 @@ namespace proxnlp
     }
 
     /// Get dimension of constraint \p i.
-    int getConstraintDim(int i) const
+    int getConstraintDim(std::size_t i) const
     {
       return m_ncs[i];
     }
@@ -79,7 +79,7 @@ namespace proxnlp
       return m_indices;
     }
 
-    int getIndex(int i) const
+    int getIndex(std::size_t i) const
     {
       return m_indices[i];
     }

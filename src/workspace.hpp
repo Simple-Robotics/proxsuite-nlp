@@ -146,12 +146,12 @@ namespace proxnlp
 
       int cursor = 0;
       int nr = 0;
-      for (int i = 0; i < (int)numblocks; i++)
+      for (std::size_t i = 0; i < numblocks; i++)
       {
         cursor = prob.getIndex(i);
         nr = prob.getConstraintDim(i);
         cstrJacobians.emplace_back(jacobians_data.middleRows(cursor, nr));
-        cstrVectorHessianProd.emplace_back(hessians_data.middleRows(i * ndx, ndx));
+        cstrVectorHessianProd.emplace_back(hessians_data.middleRows((int)i * ndx, ndx));
       }
 
     }

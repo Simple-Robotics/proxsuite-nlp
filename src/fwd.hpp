@@ -3,6 +3,9 @@
  */
 #pragma once
 
+#ifdef EIGEN_DEFAULT_IO_FORMAT
+#undef EIGEN_DEFAULT_IO_FORMAT
+#endif
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(2, 0, ",")
 
 #include <Eigen/Core>

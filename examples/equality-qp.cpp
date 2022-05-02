@@ -21,7 +21,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
   MatrixXs out = MatrixXs::Random(N, N);
   Eigen::FullPivHouseholderQR<Eigen::Ref<MatrixXs>> qr(out);
   Eigen::Matrix<Scalar, -1, -1> Q(qr.matrixQ());
-  return Q.template topLeftCorner(M, N);
+  return Q.template topLeftCorner<-1,-1>(M, N);
 }
 
 
