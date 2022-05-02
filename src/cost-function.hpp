@@ -62,9 +62,13 @@ namespace proxnlp
 
     void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
     {
-      VectorRef gout = Jout.transpose();
-      computeGradient(x, gout);
-      Jout = gout.transpose();
+#if EIGEN_VERSION_AT_LEAST(3,3,8)
+      computeGradient(x, Jout.transpose());
+#else
+      Eigen::Matrix<Scalar, 1, -1> gT = Jout.template topRows<1>();
+      computeGradient(x, gT.transpose());
+      Jout.row(0) = gT;
+#endif
     }
 
     void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, MatrixRef Hout) const
