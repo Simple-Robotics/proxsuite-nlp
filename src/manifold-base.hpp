@@ -53,66 +53,35 @@ namespace proxnlp
 
     /// @name     Operations
 
-    /** Perform the manifold integration operation.
-     * 
-     * @details This is an interface. Specific implementations should be in the derived classes.
-     */
-    virtual void integrate_impl(const ConstVectorRef& x,
-                                const ConstVectorRef& v,
-                                VectorRef out) const = 0;
 
+    /// @brief Manifold integration operation \f$x \oplus v\f$
     void integrate(const ConstVectorRef& x,
                    const ConstVectorRef& v,
                    VectorRef out) const;
 
-    /** @brief   Jacobian of the integation operation.
-     */
-    virtual void Jintegrate_impl(const ConstVectorRef& x,
-                                 const ConstVectorRef& v,
-                                 MatrixRef Jout,
-                                 int arg) const = 0;
-
+    /// @brief   Jacobian of the integation operation.
     void Jintegrate(const ConstVectorRef& x,
                     const ConstVectorRef& v,
                     MatrixRef Jout,
                     int arg) const;
 
-    /// @brief Perform the manifold retraction operation.
-    virtual void difference_impl(const ConstVectorRef& x0,
-                                 const ConstVectorRef& x1,
-                                 VectorRef out) const = 0;
-
+    /// @brief Manifold difference/retraction operation \f$x_1 \ominus x_0\f$
     void difference(const ConstVectorRef& x0,
                     const ConstVectorRef& x1,
                     VectorRef out) const;
 
     /// @brief    Jacobian of the retraction operation.
-    virtual void Jdifference_impl(const ConstVectorRef& x0,
-                                  const ConstVectorRef& x1,
-                                  MatrixRef Jout,
-                                  int arg) const = 0;
-
     void Jdifference(const ConstVectorRef& x0,
                      const ConstVectorRef& x1,
                      MatrixRef Jout,
                      int arg) const;
-
-    /// @brief    Interpolation operation.
-    virtual void interpolate_impl(const ConstVectorRef& x0,
-                                  const ConstVectorRef& x1,
-                                  const Scalar& u,
-                                  VectorRef out) const
-    {
-      // default implementation
-      integrate(x0, u * difference(x0, x1), out);
-    }
 
     void interpolate(const ConstVectorRef& x0,
                      const ConstVectorRef& x1,
                      const Scalar& u,
                      VectorRef out) const;
 
-    /// \name Out-of-place (allocated) overloads.
+    /// \name Allocated overloads.
     /// \{
 
     /// @copybrief integrate()
@@ -148,6 +117,37 @@ namespace proxnlp
     }
 
     /// \}
+
+  protected:
+    /// Perform the manifold integration operation.
+    virtual void integrate_impl(const ConstVectorRef& x,
+                                const ConstVectorRef& v,
+                                VectorRef out) const = 0;
+
+    virtual void Jintegrate_impl(const ConstVectorRef& x,
+                                 const ConstVectorRef& v,
+                                 MatrixRef Jout,
+                                 int arg) const = 0;
+
+    /// Implementation of the manifold retraction operation.
+    virtual void difference_impl(const ConstVectorRef& x0,
+                                 const ConstVectorRef& x1,
+                                 VectorRef out) const = 0;
+
+    virtual void Jdifference_impl(const ConstVectorRef& x0,
+                                  const ConstVectorRef& x1,
+                                  MatrixRef Jout,
+                                  int arg) const = 0;
+
+    /// @brief    Interpolation operation.
+    virtual void interpolate_impl(const ConstVectorRef& x0,
+                                  const ConstVectorRef& x1,
+                                  const Scalar& u,
+                                  VectorRef out) const
+    {
+      // default implementation
+      integrate(x0, u * difference(x0, x1), out);
+    }
 
   };
 

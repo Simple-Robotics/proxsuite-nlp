@@ -21,7 +21,6 @@ BOOST_AUTO_TEST_SUITE(manifold)
 
 BOOST_AUTO_TEST_CASE(test_vectorspace)
 {
-  PROXNLP_DYNAMIC_TYPEDEFS(double)
   constexpr int N1 = 3;
   VectorSpaceTpl<double, N1> space1;
 
@@ -39,12 +38,16 @@ BOOST_AUTO_TEST_CASE(test_vectorspace)
   x0 = space2.neutral();
   x1 = space2.rand();
 
-  BOOST_CHECK(x0.isApprox(VectorXs::Zero(35)));
+  BOOST_CHECK(x0.isApprox(Eigen::VectorXd::Zero(35)));
 
   CartesianProductTpl<double> space3 = space1 * space2;
   BOOST_CHECK_EQUAL(space3.nx(), N1 + N2);
   x0 = space3.neutral();
   BOOST_CHECK_EQUAL(x0.size(), N1 + N2);
+
+  // test copy constructor
+  VectorSpaceTpl<double, N1> space1_copy(space1);
+  VectorSpaceTpl<double> space2_copy(space2);
 
   // CartesianProductTpl<double> space4 = space1 * space1 * space1;
   // BOOST_CHECK_EQUAL(space4.nx(), N1 * 3);
@@ -71,6 +74,10 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 
   auto mid = space.interpolate(x0, x1, 0.5);
   BOOST_CHECK(mid.isApprox(0.5 * (x0 + x1)));
+
+  // test copy ctor
+  PinocchioLieGroup<Vs> space_copy(space);
+
 }
 
 
