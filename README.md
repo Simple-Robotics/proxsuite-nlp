@@ -29,6 +29,8 @@ cmake --build build/ --config Release --target install
 * [fmtlib](https://github.com/fmtlib/fmt) version 8.1.1
 * Boost>=1.71
 
+For easy dependency management, I suggest using the [conda](https://github.com/conda/conda) package manager.
+
 **Python dependencies:**
 
 * numpy
@@ -40,7 +42,7 @@ cmake --build build/ --config Release --target install
 
 ### Notes
 
-* To build against a Conda environment, don't forget to activate the environment and add `export CMAKE_PREFIX_PATH=$CONDA_PREFIX`
+* If you want to use Python and develop, I really advise managing your dependencies and environment using [conda](https://github.com/conda/conda). To build against a Conda environment, activate the environment and add `export CMAKE_PREFIX_PATH=$CONDA_PREFIX` before running CMake.
 * To build the documentation:
 
     ```bash
