@@ -44,7 +44,7 @@ struct MyFuncType : C1FunctionTpl<double>
   }
 };
 
-using autodiff::finite_difference_helper;
+using autodiff::finite_difference_wrapper;
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test1)
   MyFuncType fun(space);
   using autodiff::TOC1;
   using autodiff::TOC2;
-  using fd_type = finite_difference_helper<double, TOC1>;
+  using fd_type = finite_difference_wrapper<double, TOC1>;
   fd_type fdfun1(space, fun, fd_eps);
   VectorXs x0    = space.rand();
   MatrixXs J0_fd = fdfun1.computeJacobian(x0);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test1)
   VectorXs v0(fun.nr());
   v0.setOnes();
 
-  finite_difference_helper<double, TOC2> fdfun2(space, fun, fd_eps);
+  finite_difference_wrapper<double, TOC2> fdfun2(space, fun, fd_eps);
   fmt::print("Hessian:\n{}\n", fdfun2.vectorHessianProduct(x0, v0));
 
 }
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test2)
   PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>> space;
 
   MyFuncType fun(space);
-  finite_difference_helper<double> fdfun1(space, fun, fd_eps);
+  finite_difference_wrapper<double> fdfun1(space, fun, fd_eps);
 
   auto x0    = space.rand();
   auto J0_fd = fdfun1.computeJacobian(x0);

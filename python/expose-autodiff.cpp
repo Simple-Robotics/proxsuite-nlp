@@ -24,7 +24,7 @@ namespace python
       .value("ToC2", FDLevel::TOC2)
       ;
 
-    bp::class_<finite_difference_helper<Scalar, FDLevel::TOC1>,
+    bp::class_<finite_difference_wrapper<Scalar, FDLevel::TOC1>,
                bp::bases<C1Function>>(
       "FiniteDifferenceHelper",
       "Make a function into a differentiable function using"
@@ -35,7 +35,7 @@ namespace python
       )
       ;
 
-    bp::class_<finite_difference_helper<Scalar, TOC2>,
+    bp::class_<finite_difference_wrapper<Scalar, TOC2>,
                bp::bases<C2Function>>(
       "FiniteDifferenceHelperC2",
       "Make a differentiable function into a twice-differentiable function using"

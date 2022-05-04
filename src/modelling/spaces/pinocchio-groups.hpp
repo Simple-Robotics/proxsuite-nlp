@@ -11,8 +11,9 @@ namespace proxnlp
 
   namespace pin = pinocchio;
 
-  /**
-   * Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
+  /** @brief  Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
+   * 
+   * 
    */
   template<typename _LieGroup>
   struct PinocchioLieGroup : public ManifoldAbstractTpl<typename _LieGroup::Scalar, _LieGroup::Options>

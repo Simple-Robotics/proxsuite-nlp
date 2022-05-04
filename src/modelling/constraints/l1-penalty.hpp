@@ -7,7 +7,7 @@ namespace proxnlp
 {
 
   /**
-   * @brief   Composite \f$\ell_1\f$-penalty function.
+   * @brief   Composite \f$\ell_1\f$-penalty function \f$ \|c(x)\|_1 \f$.
    * 
    * @details The composite \f$\ell_1\f$-penalty penalizes the norm
    *          \f$ \| r(x) \|_1\f$ of a residual function.
@@ -24,9 +24,7 @@ namespace proxnlp
     using ActiveType = typename Base::ActiveType;
     using FunctionType = typename Base::FunctionType;
 
-    Scalar m_mu = 0.01;
-
-    explicit L1Penalty(const FunctionType& func) : Base(func) {}
+    Scalar m_mu;
 
     ReturnType projection(const ConstVectorRef& z) const
     {

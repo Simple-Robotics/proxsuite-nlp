@@ -121,13 +121,13 @@ namespace autodiff
   } // namespace internal
 
   template<typename Scalar, FDLevel n = TOC1>
-  struct finite_difference_helper;
+  struct finite_difference_wrapper;
 
   /** @brief    Approximate the derivatives of a given function 
    *            using finite differences, to downcast the function to a C1FunctionTpl.
    */
   template<typename _Scalar>
-  struct finite_difference_helper<_Scalar, TOC1>
+  struct finite_difference_wrapper<_Scalar, TOC1>
     : internal::finite_difference_impl<_Scalar, TOC1>
   {
     using Scalar = _Scalar;
@@ -139,7 +139,7 @@ namespace autodiff
 
     PROXNLP_FUNCTION_TYPEDEFS(Scalar)
 
-    finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
+    finite_difference_wrapper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,
                              const Scalar fd_eps)
       : OutType(func.nx(), func.ndx(), func.nr())
@@ -153,11 +153,11 @@ namespace autodiff
 
   /** @brief    Approximate the second derivatives of a given function using finite differences.
    * 
-   *  @details  This class inherits from the C1 finite_difference_helper<_Scalar, TOC1>,
+   *  @details  This class inherits from the C1 finite_difference_wrapper<_Scalar, TOC1>,
    *            and the C2 implementation.
    */
   template<typename _Scalar>
-  struct finite_difference_helper<_Scalar, TOC2>
+  struct finite_difference_wrapper<_Scalar, TOC2>
     : internal::finite_difference_impl<_Scalar, TOC1>
     , internal::finite_difference_impl<_Scalar, TOC2>
   {
@@ -173,7 +173,7 @@ namespace autodiff
 
     PROXNLP_FUNCTION_TYPEDEFS(Scalar)
 
-    finite_difference_helper(const ManifoldAbstractTpl<Scalar>& space,
+    finite_difference_wrapper(const ManifoldAbstractTpl<Scalar>& space,
                              const InputType& func,
                              const Scalar fd_eps)
       : C1FunctionTpl<Scalar>(func.nx(), func.ndx(), func.nr())
