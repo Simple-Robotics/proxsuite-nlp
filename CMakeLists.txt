@@ -70,7 +70,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
 ADD_PROJECT_DEPENDENCY(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
-ADD_PROJECT_DEPENDENCY(fmt 8.0.0 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 8.0.0")
+ADD_PROJECT_DEPENDENCY(fmt 6.1.2 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 6.1.2")
 
 # Variable containing all the cflags definition relative to optional dependencies
 set(CFLAGS_DEPENDENCIES)
