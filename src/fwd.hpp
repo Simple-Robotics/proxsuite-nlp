@@ -6,7 +6,7 @@
 #ifdef EIGEN_DEFAULT_IO_FORMAT
 #undef EIGEN_DEFAULT_IO_FORMAT
 #endif
-#define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(2, 0, ",")
+#define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include <Eigen/Core>
 
@@ -28,7 +28,6 @@ namespace autodiff {}
 
 /// Helper functions and structs.
 namespace helpers {}
-
 
 /// Use the STL shared_ptr.
 using std::shared_ptr;
