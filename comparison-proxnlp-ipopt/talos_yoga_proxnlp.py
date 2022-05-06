@@ -131,16 +131,17 @@ assert pb_space.nx == model.nv * 2
 # q = q + Dq, where the plus sign is intended as an integrator (because nq is different from nv)
 # It is also possible to optimize directly in q, but in that case a constraint must be added in order to have 
 # the norm squared of the quaternions = 1
-dxs = casadi.SX.sym("x_opt_0", xspace.ndx)
-dqs = dxs[: nv]
-qs = integrate(cq0, dqs)
+Dxs = casadi.SX.sym("x_opt_0", xspace.ndx)
+Dqs = Dxs[: nv]
+qs = cpin.integrate(cmodel, cq0, Dqs)
 
 
 # Cost
-cost = (cpin.squaredDistance(cmodel, qs, cq0))[0]
-#cost = casadi.sumsqr(qs - q0)
-cost += casadi.sumsqr(com_position(qs)[0] - 0.1)
-cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost, dxs)
+cost = 0
+cost += casadi.sumsqr(cpin.difference(cmodel, qs, cq0))
+#cost += casadi.sumsqr(qs - q0)
+cost += casadi.sumsqr(com_position(qs)[0] - 0.5)
+cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost, Dxs)
 
 """ # Distance between the hands
 cost += distance_cost * casadi.sumsqr(lg_position(qs) - rg_position(qs) 
@@ -161,12 +162,11 @@ cost +=  elbow_distance_cost *casadi.sumsqr(le_translation(qs)[1] - 2) \
 
 # Standing foot
 eq_constr = []
-for t in range(nsteps):
-    eq_constr.append(rf_position(qs) - rf_position(q0))
-    eq_constr.append(rf_rotation(qs) - rf_rotation(q0))
-eq_constr.append(qs[3:7].T @ qs[3:7] -1 )
+eq_constr.append(rf_position(qs) - rf_position(q0))
+eq_constr.append(log(rf_position(qs), rf_position(q0)))
+
 eq_expr = casadi.vertcat(*eq_constr)
-eq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, dxs, use_hessian=False)
+eq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hessian=False)
 
 
 # Free foot
@@ -191,6 +191,9 @@ constraints = []
 constraints.append(eq_constr_)
 
 prob = proxnlp.Problem(cost_fun_, constraints)
+
+print("No. of variables  :", pb_space.nx)
+print("No. of constraints:", prob.total_constraint_dim)
 workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
 results = proxnlp.Results(pb_space.nx, prob)
 
