@@ -139,8 +139,8 @@ cq_int_ = cpin.integrate(cmodel, cq0, Dqs)
 
 # Cost
 cost = 0
-cost += casadi.sumsqr(cpin.difference(cmodel, cq_int_, cq0)) * 0.1
-cost += casadi.sumsqr(com_position(cq_int_)[0] - 0.5) * 0.1
+cost += casadi.sumsqr(cpin.difference(cmodel, cq_int_, cq0)) * 0.5
+cost += casadi.sumsqr(com_position(cq_int_)[0] - 0.5) * 1.
 cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost, Dxs)
 
 """ # Distance between the hands
@@ -232,7 +232,12 @@ dvs_opt = dxs_opt[:, model.nv :]
 qs_opt = integrate(q0, dqs_opt).full()
 
 
-input("Press enter")
+input("(ref) Press enter to see")
+
+viz.display(q0)
+
+input("(opt) Press enter")
 ### VISUALIZATION
 
 viz.display(qs_opt)
+
