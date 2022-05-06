@@ -119,7 +119,7 @@ log = casadi.Function("log", [R, R_ref], [cpin.log3(R.T @ R_ref)])
 
 # Defining weights
 parallel_cost = 1e3
-distance_cost = 1e3
+distance_cost = 2.5
 straightness_body_cost = 1e3
 elbow_distance_cost = 1e1
 distance_btw_hands = 0.3
@@ -139,14 +139,14 @@ cq_int_ = cpin.integrate(cmodel, cq0, Dqs)
 
 # Cost
 cost = 0
-cost += casadi.sumsqr(cpin.difference(cmodel, cq_int_, cq0)) * 0.5
+cost += casadi.sumsqr(cpin.difference(cmodel, cq_int_, cq0)) * 0.1
 cost += casadi.sumsqr(com_position(cq_int_)[0] - 0.5) * 1.
+
+# Distance between the hands: make it close to (0, distance_btw_hands, 0)
+cost += distance_cost * casadi.sumsqr(lg_position(cq_int_) - rg_position(cq_int_) 
+                                     - np.array([0, distance_btw_hands, 0]))
+
 cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost, Dxs)
-
-""" # Distance between the hands
-cost += distance_cost * casadi.sumsqr(lg_position(qs) - rg_position(qs) 
-                                     - np.array([0, distance_btw_hands, 0]))   """
-
 """ # Cost on parallelism of the two hands
 r_ref = pin.utils.rotate('x', 3.14 / 2) # orientation target
 cost += parallel_cost * casadi.sumsqr(log(rg_rotation(qs), r_ref))
@@ -202,13 +202,13 @@ results = proxnlp.Results(pb_space.nx, prob)
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
 rho_init = 1e-7
-mu_init = 0.1
+mu_init = 0.5
 
 solver = proxnlp.Solver(
     pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.register_callback(callback)
-solver.maxiters = 3000
+solver.maxiters = 1000
 solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
