@@ -40,6 +40,8 @@ namespace proxnlp
     std::vector<VecBool> activeSet;
     Scalar dualInfeas = 0.;
     Scalar primalInfeas = 0.;
+    /// Violations for each constraint
+    VectorXs constraint_violations_;
 
     /// Final solver parameters
     std::size_t numIters = 0;
@@ -49,12 +51,14 @@ namespace proxnlp
     ResultsTpl(const int nx, const Problem& prob)
              : xOpt(nx)
              , lamsOpt_data(prob.getTotalConstraintDim())
+             , constraint_violations_(prob.getNumConstraints())
              , numIters(0)
              , mu(0.)
              , rho(0.)
     {
       xOpt.setZero();
       helpers::allocateMultipliersOrResiduals(prob, lamsOpt_data, lamsOpt);
+      constraint_violations_.setZero();
       activeSet.reserve(prob.getNumConstraints());
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
@@ -72,7 +76,9 @@ namespace proxnlp
         << "  mu:           " << self.mu << ",\n"
         << "  rho:          " << self.rho << ",\n"
         << "  dual_infeas   " << self.dualInfeas << ",\n"
-        << "  primal_infeas " << self.primalInfeas << ",\n";
+        << "  primal_infeas " << self.primalInfeas << ",\n"
+        << "  cstr_values   " << self.constraint_violations_.transpose() << ",\n"
+        ;
       for (std::size_t i = 0; i < self.activeSet.size(); i++)
       {
         s << "  activeSet[" << i << "]: "

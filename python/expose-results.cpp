@@ -31,6 +31,7 @@ namespace python
       .def_readonly("rho", &Results::rho)
       .def_readonly("dual_infeas", &Results::dualInfeas)
       .def_readonly("primal_infeas", &Results::primalInfeas)
+      .def_readonly("constraint_errs", &Results::constraint_violations_, "Constraint violations.")
       .def(bp::self_ns::str(bp::self))
       ;
   }  

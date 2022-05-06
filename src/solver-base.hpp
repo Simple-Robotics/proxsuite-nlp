@@ -381,6 +381,7 @@ namespace proxnlp
         {
           typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
           workspace.primalResiduals[i].noalias() = cstr->m_set->normalConeProjection(workspace.primalResiduals[i]);
+          results.constraint_violations_(i) = math::infty_norm(workspace.primalResiduals[i]);
         }
         results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
         // Compute inner stopping criterion
