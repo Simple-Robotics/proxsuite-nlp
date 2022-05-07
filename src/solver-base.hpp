@@ -523,19 +523,17 @@ namespace proxnlp
       }
       InertiaFlag flag = OK;
       bool print_info = verbose >= 2;
-      if (print_info) fmt::print(" | Inertia ({:d}+, {:d}, {:d}-)", numpos, numzer, numneg);
-      if (numpos < ndx)
+      if (print_info) fmt::print(" | Inertia: {:d}+, {:d}, {:d}-", numpos, numzer, numneg);
+      bool pos_ok = numpos == ndx;
+      bool neg_ok = numneg == numc;
+      bool zer_ok = numzer == 0;
+      if (!(pos_ok && neg_ok && zer_ok))
       {
-        if (print_info) fmt::print(" is wrong: num+ < ndx!\n");
-        flag = BAD;
-      } else if (numneg < numc) {
-        if (print_info) fmt::print(" is wrong: num- < num_cstr!\n");
-        flag = BAD;
-      } else if (numzer > 0) {
-        if (print_info) fmt::print(" is wrong: there are null eigenvalues!\n");
-        flag = ZEROS;
+        if (print_info) fmt::print(" is incorrect\n");
+        if (!zer_ok) flag = ZEROS;
+        else flag = BAD;
       } else {
-        if (print_info) fmt::print(" is OK\n");
+        if (print_info) fmt::print(fmt::fg(fmt::color::pale_green), " OK\n");
       }
       return flag;
     }
