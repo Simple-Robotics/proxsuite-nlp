@@ -18,17 +18,18 @@ So the robot should reach a yoga position
 
 '''
 import pinocchio as pin
-from pinocchio import casadi as cpin
+import pinocchio.casadi as cpin
 import casadi
 import numpy as np
 import example_robot_data as robex
-#import matplotlib.pyplot as plt; plt.ion()
-from pinocchio.visualize import GepettoVisualizer
 import time
 
 import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
 from proxnlp.utils import CasadiFunction, plot_pd_errs
+
+import matplotlib.pyplot as plt
+import meshcat
 
 # Load the model both in pinocchio and pinocchio casadi
 robot = robex.load('talos')
@@ -50,13 +51,14 @@ nsteps = 0
 xspace = MultibodyPhaseSpace(model)
 pb_space = xspace.tangent_space()
 
-try:
-    viz = pin.visualize.GepettoVisualizer(robot.model,robot.collision_model,robot.visual_model)
-    viz.initViewer()
-    viz.loadViewerModel()
-    viz.display(robot.q0)
-except:
-    viz=None
+viz = pin.visualize.MeshcatVisualizer(robot.model,robot.collision_model,robot.visual_model)
+
+viz.initViewer()
+viz.loadViewerModel()
+viz.display(robot.q0)
+viz.viewer.open()
+
+viewer: meshcat.Visualizer = viz.viewer
 
 cq = casadi.SX.sym('cq', nq, 1)
 cDq = casadi.SX.sym('cx', nDq, 1)
@@ -117,6 +119,9 @@ distance_cost = 2.5
 straightness_body_cost = 1
 elbow_distance_cost = 1
 distance_btw_hands = 0.3
+left_foot_cost = 0
+
+left_foot_target_z = 0.35
 
 assert xspace.nx == model.nq + model.nv
 assert xspace.ndx == model.nv * 2
@@ -132,13 +137,16 @@ qs = cpin.integrate(cmodel, cq0, Dqs)
 
 
 # Cost
-cost = 0
+cost = 0.
 cost += casadi.sumsqr(cpin.difference(cmodel, qs, cq0)) * 0.1
 
 
 # Distance between the hands
 cost += distance_cost * casadi.sumsqr(lg_position(qs) - rg_position(qs) 
                                      - np.array([0, distance_btw_hands, 0]))  
+
+if left_foot_cost > 0:
+    cost += casadi.sumsqr(lf_position(qs)[2] - left_foot_target_z) * left_foot_cost
 
 # Cost on parallelism of the two hands
 """ r_ref = pin.utils.rotate('x', 3.14 / 2) # orientation target
@@ -167,7 +175,7 @@ eq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hess
 
 # Free foot
 ineq_fun_expr = []
-ineq_fun_expr.append(-lf_position(qs)[2] + 0.12)
+ineq_fun_expr.append(-lf_position(qs)[2] + left_foot_target_z)
 ineq_expr = casadi.vertcat(*ineq_fun_expr)
 ineq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, ineq_expr, Dxs, use_hessian=False)
 
@@ -187,7 +195,8 @@ opti.subject_to(opti.bounded(-distance_btw_hands/2, rg_position(qs)[1], 0)) """
 
 cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
 eq_constr_ = proxnlp.constraints.create_equality_constraint(eq_constr_fun)
-ineq_constr_ = proxnlp.constraints.create_inequality_constraint(ineq_constr_fun)
+# ineq_constr_ = proxnlp.constraints.create_inequality_constraint(ineq_constr_fun)
+ineq_constr_ = proxnlp.constraints.create_equality_constraint(ineq_constr_fun)
 
 constraints = []
 constraints.append(eq_constr_)
@@ -198,22 +207,49 @@ prob = proxnlp.Problem(cost_fun_, constraints)
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
 workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
+J = workspace.jacobians_data
+J[:] = np.arange(J.size).reshape(J.shape)
+import ipdb; ipdb.set_trace()
 results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
-tol = 1e-2
+tol = 1e-4
 rho_init = 1e-7
-mu_init = 0.9
+mu_init = 0.005
 
-solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE)
+solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERYVERBOSE)
 solver.register_callback(callback)
-solver.maxiters = 1000
+solver.maxiters = 50
 solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
 lams0 = [np.zeros(cs.nr) for cs in constraints]
 
-flag = solver.solve(workspace, results, xu_init, lams0)
+try:
+    flag = solver.solve(workspace, results, xu_init, lams0)
+except KeyboardInterrupt as e:
+    pass
+
+def plot():
+    from proxnlp.utils import plot_pd_errs
+    fig, (ax0, ax1) = plt.subplots(1, 2)
+    fig: plt.Figure
+    ax0: plt.Axes
+    fig.set_size_inches(8.4, 4.8)
+    prim_errs = callback.storage.prim_infeas
+    dual_errs = callback.storage.dual_infeas
+    plot_pd_errs(ax0, prim_errs, dual_errs)
+    ax0.autoscale_view()
+
+    ax1: plt.Axes
+    for i in range(results.numiters):
+        if len(callback.storage.ls_alphas[i]) == 0:
+            continue
+        ax1.plot(callback.storage.ls_alphas[i], callback.storage.ls_values[i])
+        print("plotted for it %d" % i)
+        break
+    plt.tight_layout()
+    plt.show()
 
 ### -------------------------------------------------------------- ###
 # Get results
@@ -230,8 +266,20 @@ dvs_opt = dxs_opt[:, model.nv:]
 
 qs_opt = integrate(q0, dqs_opt).full()
 
+print("Left foot pos :", lf_position(qs_opt).full().flatten())
+print("Right foot pos:", rf_position(qs_opt).full().flatten())
+
+
+plot()
 
 ### VISUALIZATION
 
-if viz is not None:
-    viz.display(qs_opt)
+viewer.set_cam_target([0., 0.9, 0.])
+
+viz.display(qs_opt)
+arr = viewer.get_image()
+plt.subplots_adjust(0, 0, 1, 1)
+plt.imshow(arr)
+plt.axis("off")
+plt.show()
+
