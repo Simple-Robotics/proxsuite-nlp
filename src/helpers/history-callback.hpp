@@ -53,8 +53,8 @@ namespace proxnlp
           storage.dual_infeas.push_back(results.dualInfeas);
         }
         const std::size_t asize = workspace.ls_alphas.size();
-        storage.ls_alphas.push_back(Eigen::Map<const VectorXs>(&workspace.ls_alphas[0], asize));
-        storage.ls_values.push_back(Eigen::Map<const VectorXs>(&workspace.ls_values[0], asize));
+        storage.ls_alphas.emplace_back(Eigen::Map<const VectorXs>(&workspace.ls_alphas[0], asize));
+        storage.ls_values.emplace_back(Eigen::Map<const VectorXs>(&workspace.ls_values[0], asize));
         storage.d1_s.push_back(workspace.d1);
       }
 
