@@ -94,7 +94,7 @@ namespace proxnlp
     const Scalar del_dec_k = 1./3.;
 
     const Scalar DELTA_MIN = 1e-14;         // Minimum nonzero regularization strength.
-    const Scalar DELTA_MAX = 1e5;           // Maximum regularization strength.
+    const Scalar DELTA_MAX = 1e6;           // Maximum regularization strength.
     const Scalar DELTA_NONZERO_INIT = 1e-4;
     const Scalar DELTA_INIT = 0.;
 
