@@ -211,9 +211,6 @@ prob = proxnlp.Problem(cost_fun_, constraints)
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
 workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
-J = workspace.jacobians_data
-J[:] = np.arange(J.size).reshape(J.shape)
-import ipdb; ipdb.set_trace()
 results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
