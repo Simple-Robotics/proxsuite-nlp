@@ -58,6 +58,7 @@ namespace proxnlp
 
     VerboseLevel verbose = QUIET;           // Level of verbosity of the solver.
     bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
+    bool record_linesearch_process = false;
 
     //// Algo params which evolve
 
@@ -627,25 +628,23 @@ namespace proxnlp
     {
       Scalar alpha_try = 1.;
 
-      if (verbose >= 2)
-        fmt::print("| M = {:>5.3e} | d1 = {:>5.3e}\n", merit0, d1);
-
-#ifndef NDEBUG
       std::vector<Scalar>& alphas_ = workspace.ls_alphas;
       std::vector<Scalar>& values_ = workspace.ls_values;
-      alphas_.clear();
-      values_.clear();
-      VectorXs alphplot = VectorXs::LinSpaced(400, 0., 1.);
-      for (long i = 0; i < alphplot.size(); i++)
+      if (record_linesearch_process)
       {
-        tryStep(workspace, results, alphplot(i));
-        alphas_.push_back(alphplot(i));
-        values_.push_back(
-          merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev)
-          + prox_penalty.call(workspace.xTrial)
-        );
+        alphas_.clear();
+        values_.clear();
+        VectorXs alphplot = VectorXs::LinSpaced(100, 0., 1.);
+        for (long i = 0; i < alphplot.size(); i++)
+        {
+          tryStep(workspace, results, alphplot(i));
+          alphas_.push_back(alphplot(i));
+          values_.push_back(
+            merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev)
+            + prox_penalty.call(workspace.xTrial)
+          );
+        }
       }
-#endif
 
       Scalar merit_trial = 0., dM = 0.;
       while (alpha_try > alpha_min)
@@ -655,17 +654,18 @@ namespace proxnlp
         if (rho > 0.) {
           merit_trial += prox_penalty.call(workspace.xTrial);
         }
-#ifndef NDEBUG
-        alphas_.push_back(alpha_try);
-        values_.push_back(merit_trial);
-#endif
+        dM = merit_trial - merit0;
+
+        if (record_linesearch_process)
+        {
+          alphas_.push_back(alpha_try);
+          values_.push_back(merit_trial);
+        }
+
         if (std::abs(d1) < 1e-13)
         {
           return alpha_try;
         }
-        dM = merit_trial - merit0;
-        if (verbose >= 2)
-          fmt::print("| M = {:>5.3e} | dM = {:>5.3e} | alpha = {:>5.3e}\n", merit_trial, dM, alpha_try);
 
         if (dM <= armijo_c1 * alpha_try * d1)
         {

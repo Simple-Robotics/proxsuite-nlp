@@ -56,6 +56,7 @@ namespace proxnlp
                     ))
       )
         .def_readwrite("use_gauss_newton", &Solver::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
+        .def_readwrite("record_linesearch_process", &Solver::record_linesearch_process)
         .def("register_callback", &Solver::registerCallback, bp::args("self", "cb"), "Add a callback to the solver.")
         .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
         .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
