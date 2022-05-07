@@ -680,9 +680,9 @@ namespace proxnlp
         tryStep(workspace, results, alpha_try);
       }
 
-      if (verbose == 1)
+      if (verbose >= 1)
       {
-        fmt::print("| alpha_opt = {:>5.3e}\n", alpha_try);
+        fmt::print(" | alpha_opt={:>5.3e}\n", alpha_try);
       }
 
       return alpha_try;
