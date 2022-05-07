@@ -23,7 +23,8 @@ namespace proxnlp
         .add_property("constraint_dims", &Problem::getConstraintDims, "Get the dimensions of the constraint blocks.")
         .add_property("nx",  &Problem::nx,  "Get the problem tangent space dim.")
         .add_property("ndx", &Problem::ndx, "Get the problem tangent space dim.")
-        .def("add_constraint", &Problem::addConstraint, bp::args("self", "cstr"),
+        .def("add_constraint", &Problem::addConstraint<const ConstraintPtr&>,
+             bp::args("self", "cstr"),
              "Add a constraint to the problem.")
         ;
 

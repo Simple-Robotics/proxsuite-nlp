@@ -28,8 +28,9 @@ namespace proxnlp
 
     /// The cost functional
     const CostType& m_cost;
+
     /// Get a pointer to the \f$i\f$-th constraint pointer
-    const ConstraintPtr getConstraint(const std::size_t& i) const
+    const ConstraintPtr& getConstraint(const std::size_t& i) const
     {
       return m_cstrs[i];
     }
@@ -59,7 +60,10 @@ namespace proxnlp
     std::size_t nx()  const { return m_cost.nx(); }
     std::size_t ndx() const { return m_cost.ndx(); }
 
-    ProblemTpl(const CostType& cost) : m_cost(cost), m_nc_total(0) {}
+    ProblemTpl(const CostType& cost) : m_cost(cost), m_nc_total(0)
+    {
+      reset_constraint_dim_vars();
+    }
 
     ProblemTpl(const CostType& cost, const std::vector<ConstraintPtr>& constraints)
             : m_cost(cost), m_cstrs(constraints), m_nc_total(0)
@@ -67,12 +71,13 @@ namespace proxnlp
       reset_constraint_dim_vars();
     }
 
-    /// Add a constraint to the problem, after initialization.
-    void addConstraint(const ConstraintPtr& cstr)
+    /// @brief Add a constraint to the problem, after initialization.
+    template<typename T>
+    void addConstraint(T&& cstr)
     {
-      m_cstrs.push_back(cstr);
+      m_cstrs.push_back(std::forward<T>(cstr));
       reset_constraint_dim_vars();
-    }    
+    }
 
     std::vector<int> getIndices() const
     {
@@ -119,15 +124,15 @@ namespace proxnlp
       typename math_types<Scalar>::VectorXs& data,
       typename math_types<Scalar>::VectorOfRef& out)
     {
+      using Problem = ProblemTpl<Scalar>;
       data.resize(prob.getTotalConstraintDim());
       data.setZero();
-      using Problem = ProblemTpl<Scalar>;
       out.reserve(prob.getNumConstraints());
       int cursor = 0;
       int nr = 0;
       for (std::size_t i = 0; i < prob.getNumConstraints(); i++)
       {
-        typename Problem::ConstraintPtr cstr = prob.getConstraint(i);
+        const typename Problem::ConstraintPtr& cstr = prob.getConstraint(i);
         nr = cstr->nr();
         out.emplace_back(data.segment(cursor, nr));
         cursor += nr;
