@@ -41,6 +41,8 @@ class CasadiFunction(proxnlp.C2Function):
 
 
 def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
+    prim_errs = np.asarray(prim_errs)
+    dual_errs = np.asarray(dual_errs)
     ax0.plot(prim_errs, c='tab:blue')
     ax0.set_xlabel("Iterations")
     col2 = "tab:orange"
@@ -50,7 +52,7 @@ def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     ax0.yaxis.label.set_color(col2)
     ax0.set_yscale("log")
     yhigh = ax0.get_ylim()[1]
-    ylim = min(prim_errs[-1], dual_errs[-1])
+    ylim = min(np.min(prim_errs[prim_errs > 0]), np.min(dual_errs[dual_errs > 0]))
     ax0.set_ylim(ylim ** .5, yhigh)
     ax0.legend(["Primal error $p$", "Dual error $d$"])
     ax0.set_title("Solver primal-dual residuals")
