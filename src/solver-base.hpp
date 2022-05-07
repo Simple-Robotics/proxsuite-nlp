@@ -278,7 +278,7 @@ namespace proxnlp
     }
 
     /// @brief    Add a callback to the solver instance.
-    inline void registerCallback(CallbackPtr cb)
+    inline void registerCallback(const CallbackPtr& cb)
     {
       callbacks_.push_back(cb);
     }
