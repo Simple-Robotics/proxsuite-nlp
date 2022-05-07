@@ -577,13 +577,17 @@ namespace proxnlp
       const ConstVectorRef& lams_data,
       Workspace& workspace) const
     {
-      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
+      std::size_t i;
+      for (i = 0; i < problem->getNumConstraints(); i++)
+      {
+        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
+        workspace.cstrValues[i] = cstr->m_func(x);
+      }
+      workspace.lamsPlusPre_data = workspace.lamsPrev_data + mu_eq_inv * workspace.cstr_values_data;
+      // project multiplier estimate
+      for (i = 0; i < problem->getNumConstraints(); i++)
       {
         typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-        workspace.primalResiduals[i] = cstr->m_func(x);
-
-        // multiplier
-        workspace.lamsPlusPre[i] = workspace.lamsPrev[i] + mu_eq_inv * workspace.primalResiduals[i];
         workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
       }
       workspace.subproblemDualErr_data = mu_eq * (workspace.lamsPlus_data - lams_data);
