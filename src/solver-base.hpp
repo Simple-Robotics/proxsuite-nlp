@@ -256,7 +256,7 @@ namespace proxnlp
       }
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
+        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
         cstr->m_set->updateProxParameters(mu_eq);
       }
     }
@@ -360,15 +360,14 @@ namespace proxnlp
 
         for (std::size_t i = 0; i < num_c; i++)
         {
-          const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-          cstr->m_set->computeActiveSet(workspace.primalResiduals[i], results.activeSet[i]);
+          const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
+          cstr->m_set->computeActiveSet(workspace.cstrValues[i], results.activeSet[i]);
 
           bool use_vhp = (use_gauss_newton && not cstr->m_set->disableGaussNewton()) || not use_gauss_newton; 
           if (use_vhp)
           {
             workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessianProd[i];
           }
-
         }
 
         // Compute dual residual and infeasibility
@@ -377,12 +376,9 @@ namespace proxnlp
           workspace.dualResidual.noalias() -= prox_grad;
 
         results.dualInfeas = math::infty_norm(workspace.dualResidual);
-        results.primalInfeas = 0.;
         for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
         {
-          typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
-          workspace.primalResiduals[i].noalias() = cstr->m_set->normalConeProjection(workspace.primalResiduals[i]);
-          results.constraint_violations_(i) = math::infty_norm(workspace.primalResiduals[i]);
+          const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
         }
         results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
         // Compute inner stopping criterion
@@ -586,7 +582,7 @@ namespace proxnlp
       // project multiplier estimate
       for (i = 0; i < problem->getNumConstraints(); i++)
       {
-        typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
+        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
         workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
       }
       workspace.subproblemDualErr_data = mu_eq * (workspace.lamsPlus_data - lams_data);
@@ -603,7 +599,7 @@ namespace proxnlp
     {
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
-        const typename Problem::ConstraintPtr cstr = problem->getConstraint(i);
+        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
 
         cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
         cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
