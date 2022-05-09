@@ -403,20 +403,18 @@ namespace proxnlp
         // regularization strength : always try 0
         delta = DELTA_INIT;
         InertiaFlag is_inertia_correct = BAD;
-        while (not(is_inertia_correct == OK) && delta <= DELTA_MAX)
+        while (!(is_inertia_correct == OK) && delta <= DELTA_MAX)
         {
-          correctInertia(workspace, delta, old_delta);
+          if (delta > 0.)
+          {
+            workspace.kktMatrix.diagonal().head(ndx).array() += delta;
+          }
           workspace.ldlt_.compute(workspace.kktMatrix);
           conditioning_ = 1. / workspace.ldlt_.rcond();
           workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
-#ifndef NDEBUG
-          eigsolve.compute(workspace.kktMatrix, Eigen::EigenvaluesOnly);
-          if (verbose >= 2)
-          {
-            fmt::print("| KKT Eigenvalues:\n{}\n", eigsolve.eigenvalues().transpose());
-          }
-#endif
-          is_inertia_correct = checkInertia(workspace.signature);
+          workspace.kktMatrix.diagonal().head(ndx).array() -= delta;
+          is_inertia_correct = checkInertia(workspace.signature, delta);
+          old_delta = delta;
 
           if (is_inertia_correct == OK)
           {
@@ -445,29 +443,27 @@ namespace proxnlp
               delta *= del_inc_k;
             }
           }
-          old_delta = delta;
         }
 
         workspace.pdStep = -workspace.kktRhs;
         workspace.ldlt_.solveInPlace(workspace.pdStep);
-
-        if (verbose >= 1)
-        {
-          VectorXs resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
-          fmt::print("| KKT residual: {:>5.2e} | conditioning {:>4.3g} | xreg = {:>4.3g}\n",
-                     math::infty_norm(resdl), conditioning_, delta);
-        }
+        resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
 
         //// Take the step
 
-        Scalar total_directional_derivative = \
+        workspace.d1 = \
                   workspace.meritGradient.dot(workspace.pdStep.head(ndx)) \
                   - workspace.subproblemDualErr_data.dot(workspace.pdStep.tail(ntot - ndx));
-        workspace.d1 = total_directional_derivative;
 
-        doLinesearch(workspace, results, merit0, total_directional_derivative);
+        if (verbose >= 1)
+        {
+          fmt::print(" | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
+                     math::infty_norm(resdl), workspace.d1, conditioning_, delta);
+        }
+
+        doLinesearch(workspace, results, results.merit, workspace.d1);
         results.xOpt = workspace.xTrial;
         results.lamsOpt_data = workspace.lamsTrial_data;
 
@@ -485,18 +481,10 @@ namespace proxnlp
       return;
     }
 
-    /// @brief    Correct the primal Hessian block of the KKT matrix to get the correct inertia.
-    inline void correctInertia(Workspace& workspace, Scalar delta, Scalar old_delta) const
-    {
-      const int ndx = manifold.ndx();
-      workspace.kktMatrix.diagonal().head(ndx).array() -= old_delta;
-      workspace.kktMatrix.diagonal().head(ndx).array() += delta;
-    }
-
     /// Check the matrix has the desired inertia.
     /// @param    kktMatrix The KKT matrix.
     /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
-    InertiaFlag checkInertia(const Eigen::VectorXi& signature) const
+    InertiaFlag checkInertia(const Eigen::VectorXi& signature, const Scalar delta) const
     {
       const int ndx = manifold.ndx();
       const int numc = problem->getTotalConstraintDim();
@@ -525,12 +513,14 @@ namespace proxnlp
       bool zer_ok = numzer == 0;
       if (!(pos_ok && neg_ok && zer_ok))
       {
-        if (print_info) fmt::print(" is incorrect\n");
+        if (print_info) fmt::print(" is incorrect");
         if (!zer_ok) flag = ZEROS;
         else flag = BAD;
       } else {
-        if (print_info) fmt::print(fmt::fg(fmt::color::pale_green), " OK\n");
+        if (print_info) fmt::print(fmt::fg(fmt::color::pale_green), " OK");
       }
+      if (print_info)
+        fmt::print(" (reg={:>.3g})\n", delta);
       return flag;
     }
 
