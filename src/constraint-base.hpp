@@ -17,7 +17,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
     using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     /// Do not use the vector-Hessian product in the Hessian
@@ -66,7 +66,7 @@ namespace proxnlp
   struct ConstraintObject
   {
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     using FunctionType = C2FunctionTpl<Scalar>;
     const FunctionType& m_func;

@@ -19,7 +19,7 @@ namespace proxnlp
     const int m_nr;
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     /// @brief      Evaluate the residual at a given point x.
     virtual ReturnType operator()(const ConstVectorRef& x) const = 0;
@@ -45,7 +45,7 @@ namespace proxnlp
   public:
     using Scalar = _Scalar;
     using Base = BaseFunctionTpl<_Scalar>;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     Base& toBase()
     {
@@ -79,7 +79,7 @@ namespace proxnlp
   public:
     using Scalar = _Scalar;
     using Base = C1FunctionTpl<_Scalar>;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     Base& toC1()
     {

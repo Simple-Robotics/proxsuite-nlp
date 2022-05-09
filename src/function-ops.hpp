@@ -19,7 +19,7 @@ namespace proxnlp
     using Base::computeJacobian;
     using Base::vectorHessianProduct;
 
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     ComposeFunctionTpl(const Base& left, const Base& right)
       : Base(right.nx(), right.ndx(), left.nr())

@@ -19,4 +19,4 @@
 
 #define PROXNLP_FUNCTION_TYPEDEFS(Scalar)          \
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);                \
-  using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+  using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>

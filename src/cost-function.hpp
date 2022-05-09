@@ -22,7 +22,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
     using Base = C2FunctionTpl<Scalar>;
 
     CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
@@ -94,7 +94,7 @@ namespace proxnlp
     const C2FunctionTpl<_Scalar>& underlying_;
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     /** @brief    Constructor.
      *  @details  This defines an implicit conversion from the C2FunctionTpl type.

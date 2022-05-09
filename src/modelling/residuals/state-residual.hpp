@@ -20,7 +20,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_FUNCTION_TYPEDEFS(Scalar)
+    PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
     using Base = C2FunctionTpl<Scalar>;
     using Base::operator();
