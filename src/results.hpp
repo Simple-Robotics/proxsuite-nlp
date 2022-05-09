@@ -69,22 +69,22 @@ namespace proxnlp
     friend std::ostream& operator<<(std::ostream& s, const ResultsTpl<Scalar>& self)
     {
       s << "{\n"
-        << "  convergence:  " << self.converged << ",\n"
-        << "  merit:        " << self.merit << ",\n"
-        << "  value:        " << self.value << ",\n"
-        << "  numIters:     " << self.numIters << ",\n"
-        << "  mu:           " << self.mu << ",\n"
-        << "  rho:          " << self.rho << ",\n"
-        << "  dual_infeas   " << self.dualInfeas << ",\n"
-        << "  primal_infeas " << self.primalInfeas << ",\n"
-        << "  cstr_values   " << self.constraint_violations_.transpose() << ",\n"
+        << "  convergence:   " << self.converged << ",\n"
+        << "  merit:         " << self.merit << ",\n"
+        << "  value:         " << self.value << ",\n"
+        << "  numIters:      " << self.numIters << ",\n"
+        << "  mu:            " << self.mu << ",\n"
+        << "  rho:           " << self.rho << ",\n"
+        << "  dual_infeas:   " << self.dualInfeas << ",\n"
+        << "  primal_infeas: " << self.primalInfeas << ",\n"
+        << "  cstr_values:   " << self.constraint_violations_.transpose()
         ;
       for (std::size_t i = 0; i < self.activeSet.size(); i++)
       {
-        s << "  activeSet[" << i << "]: "
-          << self.activeSet[i].transpose() << ",\n";
+        s << ",\n  activeSet[" << i << "]:  "
+          << self.activeSet[i].transpose();
       }
-      s << "}";
+      s << "\n}";
       return s;
     }
 
