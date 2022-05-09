@@ -12,7 +12,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Base = CostFunctionBaseTpl<Scalar>;
     using BasePtr = Base const*;
 

@@ -19,7 +19,7 @@ namespace proxnlp
     >
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
     using Base = MeritFunctionBase<Scalar, VectorOfRef>;
     using Base::m_prob;

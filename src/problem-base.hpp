@@ -16,7 +16,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
     /// Generic constraint type
     using ConstraintType = ConstraintObject<Scalar>;

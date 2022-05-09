@@ -26,7 +26,7 @@ namespace proxnlp
   struct ResultsTpl
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
     using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 

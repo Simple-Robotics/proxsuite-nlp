@@ -8,7 +8,7 @@ namespace proxnlp
 
   /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
   #define PROXNLP_DEFINE_MANIFOLD_TYPES(M)                     \
-    PROXNLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
+    PROXNLP_DYNAMIC_TYPEDEFS(typename M::Scalar);           \
     using PointType = typename M::PointType;                  \
     using TangentVectorType = typename M::TangentVectorType;
 
@@ -23,7 +23,7 @@ namespace proxnlp
       Options = _Options
     };
 
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
 

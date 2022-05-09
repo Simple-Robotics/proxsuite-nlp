@@ -21,7 +21,7 @@ namespace proxnlp
                        , store_residuals_(store_residuals)
       {}
 
-      PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+      PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
       struct
       {

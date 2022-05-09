@@ -30,7 +30,7 @@ namespace proxnlp
       typename math_types<_Scalar>::VectorOfRef>
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Base = MeritFunctionBase<Scalar, VectorOfRef, VectorOfRef>;
     using Base::m_prob;
     using Problem = ProblemTpl<Scalar>;

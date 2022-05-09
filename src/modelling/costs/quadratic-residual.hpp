@@ -21,7 +21,7 @@ namespace proxnlp
   public:
     using Scalar = _Scalar;
     using FunctionType = C2FunctionTpl<Scalar>;  // base constraint func to use
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Base = CostFunctionBaseTpl<Scalar>;
     using Base::computeGradient;
     using Base::computeHessian;

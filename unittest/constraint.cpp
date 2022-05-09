@@ -17,7 +17,7 @@ using namespace proxnlp;
 
 const int N = 20;
 VectorSpaceTpl<double> space(N);
-PROXNLP_DYNAMIC_TYPEDEFS(double)
+PROXNLP_DYNAMIC_TYPEDEFS(double);
 
 BOOST_AUTO_TEST_CASE(test_equality)
 {

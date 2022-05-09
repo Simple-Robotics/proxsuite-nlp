@@ -34,7 +34,7 @@ namespace proxnlp
   {
   public:
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
 
     using Workspace = WorkspaceTpl<Scalar>;

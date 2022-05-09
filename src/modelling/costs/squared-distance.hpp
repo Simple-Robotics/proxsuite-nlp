@@ -18,7 +18,7 @@ namespace proxnlp
   struct QuadraticDistanceCost : QuadraticResidualCost<_Scalar>
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using FunctionType = ManifoldDifferenceToPoint<Scalar>;
     using M = ManifoldAbstractTpl<Scalar>;
     using Base = QuadraticResidualCost<Scalar>;

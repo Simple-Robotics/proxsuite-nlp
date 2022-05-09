@@ -13,7 +13,7 @@ namespace proxnlp
   struct MeritFunctionBase
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
 
     shared_ptr<Problem> m_prob;
@@ -33,7 +33,7 @@ namespace proxnlp
   struct EvalObjective : public MeritFunctionBase<_Scalar>
   {
     using Scalar = _Scalar;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
     using Base = MeritFunctionBase<Scalar>;
     using Base::m_prob;

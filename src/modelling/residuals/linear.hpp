@@ -49,7 +49,7 @@ namespace proxnlp
   {
     using Scalar = _Scalar;
     using Base = ComposeFunctionTpl<Scalar>;
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
     using M = ManifoldAbstractTpl<Scalar>;
 

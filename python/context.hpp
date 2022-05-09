@@ -13,7 +13,7 @@ namespace python
     
     using Scalar = double;
 
-    PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
+    PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
     using Problem = ProblemTpl<Scalar>;
