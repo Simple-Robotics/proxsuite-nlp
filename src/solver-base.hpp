@@ -11,10 +11,6 @@
 
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
-#ifndef NDEBUG
-  #include <Eigen/Eigenvalues>
-#endif
-
 #include <cassert>
 #include <stdexcept>
 
@@ -305,7 +301,9 @@ namespace proxnlp
       Scalar old_delta = 0.;
       Scalar conditioning_ = 0;
 
-      Scalar& merit0 = results.merit;
+      VectorXs resdl(workspace.ndx + workspace.numdual);
+      resdl.setZero();
+
       merit_fun.setPenalty(mu_eq);
 
       std::size_t k;
@@ -321,13 +319,13 @@ namespace proxnlp
         computeResidualsAndMultipliers(results.xOpt, results.lamsOpt_data, workspace);
         computeResidualDerivatives(results.xOpt, workspace);
 
-        merit0 = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+        results.merit = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
         if (rho > 0.)
-          merit0 += prox_penalty.call(results.xOpt);
+          results.merit += prox_penalty.call(results.xOpt);
 
         if (verbose >= 0)
         {
-          fmt::print("[iter {:>3d}] objective: {:g} merit: {:g}\n", results.numIters, results.value, merit0);
+          fmt::print("[iter {:>3d}] objective: {:g} merit: {:g}\n", results.numIters, results.value, results.merit);
         }
 
         //// fill in LHS/RHS
@@ -350,12 +348,13 @@ namespace proxnlp
         workspace.kktRhs.head(ndx).noalias() += workspace.jacobians_data.transpose() * results.lamsOpt_data;
 
         // add proximal penalty terms
-        VectorXs prox_grad = prox_penalty.computeGradient(results.xOpt);
         if (rho > 0.)
         {
-          workspace.meritGradient.noalias() += prox_grad;
-          workspace.kktRhs.head(ndx).noalias() += prox_grad;
-          workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += prox_penalty.computeHessian(results.xOpt);
+          prox_penalty.computeGradient(results.xOpt, workspace.prox_grad);
+          prox_penalty.computeHessian(results.xOpt, workspace.prox_hess);
+          workspace.meritGradient.noalias() += workspace.prox_grad;
+          workspace.kktRhs.head(ndx).noalias() += workspace.prox_grad;
+          workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.prox_hess;
         }
 
         for (std::size_t i = 0; i < num_c; i++)
@@ -373,19 +372,22 @@ namespace proxnlp
         // Compute dual residual and infeasibility
         workspace.dualResidual = workspace.kktRhs.head(ndx);
         if (rho > 0.)
-          workspace.dualResidual.noalias() -= prox_grad;
+          workspace.dualResidual.noalias() -= workspace.prox_grad;
 
         results.dualInfeas = math::infty_norm(workspace.dualResidual);
         for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
         {
           const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
+          auto set = cstr->m_set;
+          results.constraint_violations_((long)i) = math::infty_norm(
+            set->normalConeProjection(workspace.cstrValues[i]));
         }
-        results.primalInfeas = math::infty_norm(workspace.primalResiduals_data);
+        results.primalInfeas = math::infty_norm(results.constraint_violations_);
         // Compute inner stopping criterion
         Scalar inner_crit = math::infty_norm(workspace.kktRhs);
 
-        fmt::print("| crit = {:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
-                  inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
+        fmt::print(" | crit={:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
+                   inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
 
         bool outer_cond = (results.primalInfeas <= target_tol && results.dualInfeas <= target_tol);
         if ((inner_crit <= inner_tol) || outer_cond)
@@ -397,9 +399,6 @@ namespace proxnlp
 
         /* Compute the step */
 
-#ifndef NDEBUG
-        Eigen::SelfAdjointEigenSolver<MatrixXs> eigsolve(workspace.kktRhs.size());
-#endif
         // factorization
         // regularization strength : always try 0
         delta = DELTA_INIT;

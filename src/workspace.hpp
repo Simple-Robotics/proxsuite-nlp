@@ -41,7 +41,7 @@ namespace proxnlp
     /// LDLT storage
     Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
 
-    //// Proximal parameters
+    //// Data for proximal algorithm
 
     VectorXs xPrev;
     VectorXs xTrial;
@@ -50,11 +50,16 @@ namespace proxnlp
     VectorOfRef lamsPrev;
     VectorOfRef lamsTrial;
 
+    VectorXs prox_grad;
+    MatrixXs prox_hess;
+
     /// Residuals
 
+    /// Dual residual: gradient of the Lagrangian function
     VectorXs dualResidual;
-    VectorXs primalResiduals_data;
-    VectorOfRef primalResiduals;
+    VectorXs cstr_values_data;
+    /// Values of each constraint
+    VectorOfRef cstrValues;
 
     /// Objective function gradient.
     VectorXs objectiveGradient;
@@ -101,8 +106,10 @@ namespace proxnlp
       , xTrial(nx)
       , lamsPrev_data(numdual)
       , lamsTrial_data(numdual)
+      , prox_grad(ndx)
+      , prox_hess(ndx, ndx)
       , dualResidual(ndx)
-      , primalResiduals_data(numdual)
+      , cstr_values_data(numdual)
       , objectiveGradient(ndx)
       , objectiveHessian(ndx, ndx)
       , meritGradient(ndx)
@@ -126,9 +133,11 @@ namespace proxnlp
       xTrial.setZero();
       helpers::allocateMultipliersOrResiduals(prob, lamsPrev_data, lamsPrev);
       helpers::allocateMultipliersOrResiduals(prob, lamsTrial_data, lamsTrial);
+      prox_grad.setZero();
+      prox_hess.setZero();
 
       dualResidual.setZero();
-      helpers::allocateMultipliersOrResiduals(prob, primalResiduals_data, primalResiduals);  // not multipliers but same dims
+      helpers::allocateMultipliersOrResiduals(prob, cstr_values_data, cstrValues);  // not multipliers but same dims
 
       objectiveGradient.setZero();
       objectiveHessian.setZero();
