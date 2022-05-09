@@ -50,7 +50,6 @@ cq0 = casadi.SX(q0)
 nq = cmodel.nq
 nv = robot.nv
 nDq = cmodel.nv
-nu = robot.nv - 6
 
 nsteps = 0
 
