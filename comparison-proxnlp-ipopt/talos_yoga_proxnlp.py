@@ -35,6 +35,8 @@ from proxnlp.utils import CasadiFunction, plot_pd_errs
 import matplotlib.pyplot as plt
 import meshcat
 
+plt.style.use("seaborn")
+
 # Load the model both in pinocchio and pinocchio casadi
 robot = robex.load("talos")
 cmodel = cpin.Model(robot.model)
@@ -256,7 +258,7 @@ results = proxnlp.Results(pb_space.nx, prob)
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
 rho_init = 1e-7
-mu_init = 0.9
+mu_init = 0.001
 
 solver = proxnlp.Solver(
     pb_space,
@@ -313,15 +315,18 @@ print("Left foot pos :", lf_position(qs_opt).full().flatten())
 print("Right foot pos:", rf_position(qs_opt).full().flatten())
 
 
-plot()
-
 ### VISUALIZATION
 
 # viewer.set_cam_target([0., 0.9, 0.])
 
 viz.display(qs_opt)
-arr = viewer.get_image()
-plt.subplots_adjust(0, 0, 1, 1)
-plt.imshow(arr)
-plt.axis("off")
+
+
+plt.figure(figsize=(12, 6), dpi = 90)
+plt.title('PROXNLP Residuals')
+plt.semilogy(dual_errs)
+plt.semilogy(prim_errs)
+plt.legend(['dual', 'primal'])
+plt.draw()
+
 plt.show()
