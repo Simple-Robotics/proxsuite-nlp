@@ -1,5 +1,8 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
+
+Author:
+    Wilson Jallet
 """
 import proxnlp
 
@@ -111,7 +114,7 @@ class MultipleShootingProblem:
         cXU_s = cas.vertcat(cX_s, cU_s)
 
         w_u = 1e-2
-        w_x = 1e-2
+        w_x = 1e-3
         w_term = 1. * np.ones(xspace.ndx)
         w_term[2:] = 1e-3
         ferr = cxs[nsteps] - xtarget
