@@ -593,7 +593,7 @@ namespace proxnlp
         cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
         cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
 
-        bool use_vhp = (use_gauss_newton && not cstr->m_set->disableGaussNewton()) || not use_gauss_newton; 
+        bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) || !(use_gauss_newton); 
         if (use_vhp)
         {
           cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessianProd[i]);
