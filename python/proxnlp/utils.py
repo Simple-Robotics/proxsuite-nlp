@@ -40,6 +40,9 @@ class CasadiFunction(proxnlp.C2Function):
         H[:, :] = np.asarray(self.Hfun(x, self._zero, v))
 
 
+_ROOT_10 = 10. ** .5
+
+
 def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     prim_errs = np.asarray(prim_errs)
     dual_errs = np.asarray(dual_errs)
@@ -53,6 +56,6 @@ def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     ax0.set_yscale("log")
     yhigh = ax0.get_ylim()[1]
     ylim = min(np.min(prim_errs[prim_errs > 0]), np.min(dual_errs[dual_errs > 0]))
-    ax0.set_ylim(ylim ** .5, yhigh)
+    ax0.set_ylim(ylim / _ROOT_10, yhigh)
     ax0.legend(["Primal error $p$", "Dual error $d$"])
     ax0.set_title("Solver primal-dual residuals")
