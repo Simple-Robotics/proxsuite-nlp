@@ -118,14 +118,14 @@ log = casadi.Function('log', [R, R_ref], [cpin.log3(R.T @ R_ref)])
 ### OPTIMIZATION PROBLEM
 
 # Defining weights
-parallel_cost = 0.1
+parallel_cost = 1
 distance_cost = 2.5
 straightness_body_cost = 1
 elbow_distance_cost = 1
-distance_btw_hands = 0.3
+distance_btw_hands = 0.02
 left_foot_cost = 0
 
-left_foot_target_z = 0.35
+left_foot_target_z = 0.5
 
 assert xspace.nx == model.nq + model.nv
 assert xspace.ndx == model.nv * 2
@@ -149,22 +149,19 @@ cost += casadi.sumsqr(cpin.difference(cmodel, qs, cq0)) * 0.1
 cost += distance_cost * casadi.sumsqr(lg_position(qs) - rg_position(qs) 
                                      - np.array([0, distance_btw_hands, 0]))  
 
+cost += straightness_body_cost * casadi.sumsqr(log(base_rotation(qs), base_rotation(q0)))
+cost +=  elbow_distance_cost *casadi.sumsqr(le_translation(qs)[1] - 2) \
+        + elbow_distance_cost *casadi.sumsqr(re_translation(qs)[1] + 2)
+
 if left_foot_cost > 0:
     cost += casadi.sumsqr(lf_position(qs)[2] - left_foot_target_z) * left_foot_cost
 
 # Cost on parallelism of the two hands
 """ r_ref = pin.utils.rotate('x', 3.14 / 2) # orientation target
 cost += parallel_cost * casadi.sumsqr(log(rg_rotation(qs), r_ref))
- """
-""" r_ref = pin.utils.rotate('x', -3.14 / 2) # orientation target
+
+r_ref = pin.utils.rotate('x', -3.14 / 2) # orientation target
 cost += parallel_cost * casadi.sumsqr(log(lg_rotation(qs), r_ref)) """
-
-""" # Body in a straight position
-cost += straightness_body_cost * casadi.sumsqr(log(base_rotation(qs), base_rotation(q0)))
-
-cost +=  elbow_distance_cost *casadi.sumsqr(le_translation(qs)[1] - 2) \
-        + elbow_distance_cost *casadi.sumsqr(re_translation(qs)[1] + 2)
- """
 
 cost_fun = CasadiFunction(pb_space.nx, pb_space.ndx, cost, Dxs)
 
@@ -174,14 +171,32 @@ eq_fun_expr.append(rf_position(qs) - rf_position(q0))
 eq_fun_expr.append(log(rf_rotation(qs), rf_rotation(q0)))
 
 eq_expr = casadi.vertcat(*eq_fun_expr)
-eq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hessian=False)
+eq_st_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hessian=False)
 
 
 # Free foot
+r_ref = pin.utils.rotate('z', 3.14 / 2) @ pin.utils.rotate('y', 3.14 / 2) # orientation target
+t_ref = pin.SE3(r_ref, np.zeros(3))
 ineq_fun_expr = []
 ineq_fun_expr.append(-lf_position(qs)[2] + left_foot_target_z)
+ineq_fun_expr.append(lf_position(qs)[0:2] - 0.1)
+ineq_fun_expr.append(-lf_position(qs)[0:2] + 0.05)
 ineq_expr = casadi.vertcat(*ineq_fun_expr)
 ineq_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, ineq_expr, Dxs, use_hessian=False)
+
+eq_fun_expr = []
+r_ref = pin.utils.rotate('z', 3.14 / 2) @ pin.utils.rotate('y', 3.14 / 2) # orientation target
+eq_fun_expr.append(log(lf_rotation(qs), r_ref))
+eq_fun_expr.append(log(lf_rotation(qs), r_ref))
+eq_expr = casadi.vertcat(*eq_fun_expr)
+eq_sw_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hessian=False)
+
+
+eq_fun_expr = []
+eq_fun_expr.append(rg_position(qs)[2]-1.2)
+eq_fun_expr.append(rg_position(qs)[2] + 1.1)
+eq_expr = casadi.vertcat(*eq_fun_expr)
+eq_rg_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_hessian=False)
 
 """opti.subject_to(lf_position(qs)[2] >= 0.4)
 opti.subject_to(opti.bounded(0.05, lf_position(qs)[0:2], 0.1))
@@ -198,12 +213,15 @@ opti.subject_to(opti.bounded(-distance_btw_hands/2, rg_position(qs)[1], 0)) """
 # Solver Setup
 
 cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
-eq_constr_ = proxnlp.constraints.create_equality_constraint(eq_constr_fun)
+eq_constr1_ = proxnlp.constraints.create_equality_constraint(eq_st_constr_fun)
+eq_constr2_ = proxnlp.constraints.create_equality_constraint(eq_sw_constr_fun)
+eq_constr3_ = proxnlp.constraints.create_equality_constraint(eq_rg_constr_fun)
 # ineq_constr_ = proxnlp.constraints.create_inequality_constraint(ineq_constr_fun)
 ineq_constr_ = proxnlp.constraints.create_equality_constraint(ineq_constr_fun)
 
 constraints = []
-constraints.append(eq_constr_)
+constraints.append(eq_constr1_)
+constraints.append(eq_constr2_)
 constraints.append(ineq_constr_)
 
 prob = proxnlp.Problem(cost_fun_, constraints)
@@ -216,11 +234,11 @@ results = proxnlp.Results(pb_space.nx, prob)
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-4
 rho_init = 1e-7
-mu_init = 0.005
+mu_init = 0.9
 
 solver = proxnlp.Solver(pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERYVERBOSE)
 solver.register_callback(callback)
-solver.maxiters = 50
+solver.maxiters = 1000
 solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
@@ -275,7 +293,7 @@ plot()
 
 ### VISUALIZATION
 
-viewer.set_cam_target([0., 0.9, 0.])
+#viewer.set_cam_target([0., 0.9, 0.])
 
 viz.display(qs_opt)
 arr = viewer.get_image()
@@ -283,4 +301,3 @@ plt.subplots_adjust(0, 0, 1, 1)
 plt.imshow(arr)
 plt.axis("off")
 plt.show()
-
