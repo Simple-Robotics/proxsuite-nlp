@@ -56,15 +56,15 @@ namespace proxnlp
       : Base(nx, ndx, nr) {}
   
     /// @brief      Jacobian matrix of the constraint function.
-    virtual void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const = 0;
+    virtual void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const = 0;
 
     /** @copybrief computeJacobian()
      * 
      * Allocated version of the computeJacobian() method.
      */
-    JacobianType computeJacobian(const ConstVectorRef& x) const
+    MatrixXs computeJacobian(const ConstVectorRef& x) const
     {
-      JacobianType Jout(this->nr(), this->ndx());
+      MatrixXs Jout(this->nr(), this->ndx());
       computeJacobian(x, Jout);
       return Jout;
     }
@@ -90,14 +90,14 @@ namespace proxnlp
       : Base(nx, ndx, nr) {}
 
     /// @brief      Vector-hessian product.
-    virtual void vectorHessianProduct(const ConstVectorRef&, const ConstVectorRef&, Eigen::Ref<JacobianType> Hout) const
+    virtual void vectorHessianProduct(const ConstVectorRef&, const ConstVectorRef&, MatrixRef Hout) const
     {
       Hout.setZero();
     }
 
-    JacobianType vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v) const
+    MatrixXs vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v) const
     {
-      JacobianType J(this->ndx(), this->ndx());
+      MatrixXs J(this->ndx(), this->ndx());
       vectorHessianProduct(x, v, J);
       return J;
     }

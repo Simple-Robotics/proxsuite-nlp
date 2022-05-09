@@ -34,7 +34,7 @@ namespace proxnlp
       return mat * x + b;
     }
 
-    void computeJacobian(const ConstVectorRef&, Eigen::Ref<JacobianType> Jout) const
+    void computeJacobian(const ConstVectorRef&, MatrixRef Jout) const
     {
       Jout = mat;
     }

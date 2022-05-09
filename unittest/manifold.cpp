@@ -109,14 +109,14 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   auto mid = tspace.interpolate(x0, x1, 0.5);
 
   BOOST_TEST_MESSAGE(" diff Jacobians");
-  TSO2::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  TSO2::MatrixXs J0(ndx, ndx), J1(ndx, ndx);
   J0.setZero();
   J1.setZero();
 
   tspace.Jdifference(x0, x1, J0, 0);
   tspace.Jdifference(x0, x1, J1, 1);
 
-  TSO2::JacobianType id(2, 2);
+  TSO2::MatrixXs id(2, 2);
   id.setIdentity();
   BOOST_CHECK(J0.isApprox(-id));
   BOOST_CHECK(J1.isApprox( id));

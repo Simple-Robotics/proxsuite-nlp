@@ -54,7 +54,7 @@ namespace autodiff
          {}
 
       void computeJacobian(const ConstVectorRef& x,
-                           Eigen::Ref<JacobianType> Jout) const override
+                           MatrixRef Jout) const override
       {
         VectorXs ei(func.ndx());
         VectorXs xplus  = space.neutral();
@@ -184,7 +184,7 @@ namespace autodiff
 
     ReturnType operator()(const ConstVectorRef& x) const override { return static_cast<const Base1&>(*this).func(x); }
     void computeJacobian(const ConstVectorRef& x,
-                         Eigen::Ref<JacobianType> Jout) const override
+                         MatrixRef Jout) const override
     {
       Base1::computeJacobian(x, Jout);
     }

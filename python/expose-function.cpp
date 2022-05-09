@@ -35,7 +35,7 @@ namespace python
         return f(x);
       }
 
-      void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+      void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
       {
         Jout.resize(this->nr(), this->ndx());
         get_override("computeJacobian")(x, Jout);
@@ -54,13 +54,13 @@ namespace python
         return f(x);
       }
 
-      void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+      void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
       {
         Jout.resize(this->nr(), this->ndx());
         get_override("computeJacobian")(x, Jout);
       }
 
-      void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+      void vectorHessianProduct(const ConstVectorRef& x, const ConstVectorRef& v, MatrixRef Hout) const
       {
         Hout.resize(this->ndx(), this->ndx());
         if (bp::override f = this->get_override("vectorHessianProduct"))
@@ -72,7 +72,7 @@ namespace python
         }
       }
 
-      void default_vhp(const ConstVectorRef& x, const ConstVectorRef& v, Eigen::Ref<JacobianType> Hout) const
+      void default_vhp(const ConstVectorRef& x, const ConstVectorRef& v, MatrixRef Hout) const
       {
         return context::C2Function::vectorHessianProduct(x, v, Hout);
       }

@@ -30,7 +30,7 @@ namespace proxnlp
       return left(right(x));
     }
 
-    void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+    void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
     {
       left.computeJacobian(right(x), Jout);
       Jout = Jout * right.computeJacobian(x);

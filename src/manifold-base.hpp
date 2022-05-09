@@ -10,8 +10,7 @@ namespace proxnlp
   #define PROXNLP_DEFINE_MANIFOLD_TYPES(M)                     \
     PROXNLP_DYNAMIC_TYPEDEFS(typename M::Scalar)           \
     using PointType = typename M::PointType;                  \
-    using TangentVectorType = typename M::TangentVectorType;  \
-    using JacobianType = typename M::JacobianType;
+    using TangentVectorType = typename M::TangentVectorType;
 
   /**
    * Base class for manifolds, to use in cost funcs, solvers...
@@ -27,7 +26,6 @@ namespace proxnlp
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar)
     using PointType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
     using TangentVectorType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options>;
-    using JacobianType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>; 
 
     virtual ~ManifoldAbstractTpl() = default;
 

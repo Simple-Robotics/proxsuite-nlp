@@ -41,7 +41,7 @@ namespace proxnlp
       return m_manifold.difference(m_target, x);
     }
 
-    void computeJacobian(const ConstVectorRef& x, Eigen::Ref<JacobianType> Jout) const
+    void computeJacobian(const ConstVectorRef& x, MatrixRef Jout) const
     {
       m_manifold.Jdifference(m_target, x, Jout, 1);
     }

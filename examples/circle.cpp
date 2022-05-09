@@ -34,7 +34,7 @@ int main()
   Manifold::TangentVectorType d(ndx);
   space.difference(p0, p1, d);
   d.setZero();
-  Manifold::JacobianType J0(ndx, ndx), J1(ndx, ndx);
+  Manifold::MatrixXs J0(ndx, ndx), J1(ndx, ndx);
   J0.setZero();
   J1.setZero();
   space.Jdifference(p0, p1, J0, 0);
@@ -43,7 +43,7 @@ int main()
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
-  Manifold::JacobianType weights(ndx, ndx);
+  Manifold::MatrixXs weights(ndx, ndx);
   weights.setIdentity();
 
   QuadraticDistanceCost<double> cf(space, p0, weights);

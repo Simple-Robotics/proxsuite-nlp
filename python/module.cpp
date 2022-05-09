@@ -19,8 +19,9 @@ namespace python
     pp::StdVectorPythonVisitor<std::vector<context::Scalar>, true>::expose("StdVec_Scalar");
     pp::StdVectorPythonVisitor<context::VectorOfVectors, true>::expose("StdVec_Vector");
     pp::StdVectorPythonVisitor<std::vector<context::MatrixXs>, true>::expose("StdVec_Matrix");
-    pp::StdVectorPythonVisitor<context::VectorOfRef, true>::expose("StdVec_VecRef");
     pp::StdVectorPythonVisitor<std::vector<context::VectorXBool>, false>::expose("StdVec_VecBool");
+    pp::StdVectorPythonVisitor<context::VectorOfRef, true>::expose("StdVec_VecRef");
+    pp::StdVectorPythonVisitor<std::vector<context::MatrixRef>, true>::expose("StdVec_MatRef");
   }
 
 }
