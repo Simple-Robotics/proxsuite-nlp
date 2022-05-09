@@ -125,7 +125,7 @@ elbow_distance_cost = 2
 distance_btw_hands = np.array([0, 0.03, 0])
 left_foot_cost = 0
 
-left_foot_target_z = 0.5
+left_foot_target_z = 0.4
 
 assert xspace.nx == model.nq + model.nv
 assert xspace.ndx == model.nv * 2
@@ -144,12 +144,10 @@ qs = cpin.integrate(cmodel, cq0, Dqs)
 cost = 0.
 cost += casadi.sumsqr(cpin.difference(cmodel, qs, cq0)) * 0.1
 
-
 # Distance between the hands
 cost += distance_cost * casadi.sumsqr(lg_position(qs) - rg_position(qs) 
                                      - distance_btw_hands)  
 
-cost += straightness_body_cost * casadi.sumsqr(log(base_rotation(qs), base_rotation(q0)))
 cost +=  elbow_distance_cost *casadi.sumsqr(le_translation(qs)[1] - 2) \
         + elbow_distance_cost *casadi.sumsqr(re_translation(qs)[1] + 2)
 
@@ -159,6 +157,10 @@ cost += parallel_cost * casadi.sumsqr(log(rg_rotation(qs), r_ref))
 
 r_ref = pin.utils.rotate('x', -3.14 / 2) # orientation target
 cost += parallel_cost * casadi.sumsqr(log(lg_rotation(qs), r_ref))
+
+#straightness of the body
+cost += straightness_body_cost * casadi.sumsqr(log(base_rotation(qs), base_rotation(q0)))
+
 
 
 # Cost function
@@ -187,8 +189,6 @@ eq_st_constr_fun = CasadiFunction(pb_space.nx, pb_space.ndx, eq_expr, Dxs, use_h
 
 
 # Free foot
-r_ref = pin.utils.rotate('z', 3.14 / 2) @ pin.utils.rotate('y', 3.14 / 2) # orientation target
-t_ref = pin.SE3(r_ref, np.zeros(3))
 ineq_fun_expr = []
 ineq_fun_expr.append(-lf_position(qs)[2] + left_foot_target_z)
 ineq_fun_expr.append(lf_position(qs)[0:2] - 0.1)
