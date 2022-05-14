@@ -55,7 +55,9 @@ def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     ax0.yaxis.label.set_color(col2)
     ax0.set_yscale("log")
     yhigh = ax0.get_ylim()[1]
-    ylim = min(np.min(prim_errs[prim_errs > 0]), np.min(dual_errs[dual_errs > 0]))
-    ax0.set_ylim(ylim / _ROOT_10, yhigh)
+    ymin = np.min(dual_errs[dual_errs > 0])
+    if sum(prim_errs > 0) > 0:
+        ymin = min(np.min(prim_errs[prim_errs > 0]), ymin)
+    ax0.set_ylim(ymin / _ROOT_10, yhigh)
     ax0.legend(["Primal error $p$", "Dual error $d$"])
     ax0.set_title("Solver primal-dual residuals")
