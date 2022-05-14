@@ -26,14 +26,13 @@ import pinocchio.casadi as cpin
 import casadi
 import numpy as np
 import example_robot_data as robex
-import time
 
 import proxnlp
-from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
+from proxnlp.manifolds import MultibodyPhaseSpace
 from proxnlp.utils import CasadiFunction, plot_pd_errs
+from meshcat_utils import ForceDraw
 
 import matplotlib.pyplot as plt
-import meshcat
 
 plt.style.use("seaborn")
 
@@ -64,8 +63,7 @@ viz.initViewer()
 viz.loadViewerModel()
 viz.display(robot.q0)
 viz.viewer.open()
-
-viewer: meshcat.Visualizer = viz.viewer
+drawer = ForceDraw(viz)
 
 cq = casadi.SX.sym("cq", nq, 1)
 cDq = casadi.SX.sym("cx", nDq, 1)
@@ -276,23 +274,8 @@ lams0 = [np.zeros(cs.nr) for cs in constraints]
 
 try:
     flag = solver.solve(workspace, results, xu_init, lams0)
-except KeyboardInterrupt as e:
+except KeyboardInterrupt:
     pass
-
-
-def plot():
-    from proxnlp.utils import plot_pd_errs
-
-    fig, ax0 = plt.subplots(1, 1)
-    fig: plt.Figure
-    ax0: plt.Axes
-    fig.set_size_inches(7.2, 4.8)
-    prim_errs = callback.storage.prim_infeas
-    dual_errs = callback.storage.dual_infeas
-    plot_pd_errs(ax0, prim_errs, dual_errs)
-    ax0.autoscale_view()
-    plt.tight_layout()
-    plt.show()
 
 
 ### -------------------------------------------------------------- ###
@@ -314,23 +297,20 @@ print("Left foot pos :", lf_position(qs_opt).full().flatten())
 print("Right foot pos:", rf_position(qs_opt).full().flatten())
 
 
-### VISUALIZATION
+# VISUALIZATION
 
-# viewer.set_cam_target([0., 0.9, 0.])
-
+input("Enter to continue")
 viz.display(qs_opt)
+viz.viewer.set_cam_target([0.0, 1.1, 0.0])
+drawer.set_cam_pos([1.7, 1.0, 0.0])
 
-
-plt.figure(figsize=(12, 6), dpi = 90)
-plt.title('PROXNLP Residuals')
-plt.semilogy(dual_errs)
-plt.semilogy(prim_errs)
-plt.legend(['dual', 'primal'])
+fig, ax0 = plt.subplots(figsize=(6.4, 6.4))
+plot_pd_errs(ax0, prim_errs, dual_errs)
 plt.draw()
-
 plt.show()
 
-arr = viewer.get_image()
+plt.figure()
+arr = viz.captureImage()
 plt.subplots_adjust(0, 0, 1, 1)
 plt.imshow(arr)
 plt.axis("off")
