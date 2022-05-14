@@ -63,7 +63,7 @@ prob = proxnlp.Problem(cost_, cstrs_)
 results = proxnlp.Results(nx, prob)
 workspace = proxnlp.Workspace(nx, nx, prob)
 
-mu_init = 0.05
+mu_init = 0.01
 rho_init = 0.0
 solver = proxnlp.Solver(
     space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
@@ -79,7 +79,7 @@ solver.solve(workspace, results, p1, lams0)
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
 
-assert results.numiters == 17  # numiters as of ef27e38
+assert results.numiters == 15  # numiters as of ef27e38
 
 
 if __name__ == "__main__":
