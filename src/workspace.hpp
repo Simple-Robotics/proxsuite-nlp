@@ -61,6 +61,8 @@ namespace proxnlp
     /// Values of each constraint
     VectorOfRef cstrValues;
 
+    /// Objective value
+    Scalar objectiveValue;
     /// Objective function gradient.
     VectorXs objectiveGradient;
     /// Objective function Hessian.
