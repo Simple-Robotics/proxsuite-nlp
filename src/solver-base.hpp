@@ -40,10 +40,10 @@ namespace proxnlp
     using Workspace = WorkspaceTpl<Scalar>;
     using Results = ResultsTpl<Scalar>;
   
-    using M = ManifoldAbstractTpl<Scalar>;
+    using Manifold = ManifoldAbstractTpl<Scalar>;
 
     /// Manifold on which to optimize.
-    const M& manifold;
+    const Manifold& manifold;
     shared_ptr<Problem> problem;
     /// Merit function.
     PDALFunction<Scalar> merit_fun;
@@ -83,7 +83,7 @@ namespace proxnlp
 
     const Scalar alpha_min;                 // Linesearch minimum step size.
     const Scalar armijo_c1;                 // Armijo rule c1 parameter.
-    const Scalar ls_beta;                   // Linesearch step size decrease factor.
+    Scalar ls_beta;                         // Linesearch step size decrease factor.
     
     const Scalar del_inc_k = 8.;
     const Scalar del_inc_big = 100.;
@@ -98,7 +98,7 @@ namespace proxnlp
     using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>; 
     std::vector<CallbackPtr> callbacks_;
 
-    SolverTpl(const M& manifold,
+    SolverTpl(const Manifold& manifold,
               shared_ptr<Problem>& prob,
               const Scalar tol=1e-6,
               const Scalar mu_eq_init=1e-2,
@@ -292,6 +292,7 @@ namespace proxnlp
     {
       const int ndx = manifold.ndx();
       const long ntot = workspace.kktRhs.size();
+      const int ndual = ntot - ndx;
       const std::size_t num_c = problem->getNumConstraints();
 
       results.lamsOpt_data = workspace.lamsPrev_data;
@@ -332,18 +333,15 @@ namespace proxnlp
         workspace.kktRhs.setZero();
         workspace.kktMatrix.setZero();
 
-        workspace.meritGradient = workspace.objectiveGradient;
-        workspace.kktRhs.head(ndx) = workspace.objectiveGradient;
-        workspace.kktRhs.tail(ntot - ndx) = workspace.subproblemDualErr_data;
-
         workspace.kktMatrix.topLeftCorner(ndx, ndx)           = workspace.objectiveHessian;
-        workspace.kktMatrix.topRightCorner(ndx, ntot - ndx)   = workspace.jacobians_data.transpose();
-        workspace.kktMatrix.bottomLeftCorner(ntot - ndx, ndx) = workspace.jacobians_data;
-        workspace.kktMatrix.bottomRightCorner(ntot - ndx, ntot - ndx).diagonal().setConstant(-mu_eq);
+        workspace.kktMatrix.topRightCorner(ndx, ndual)   = workspace.jacobians_data.transpose();
+        workspace.kktMatrix.bottomLeftCorner(ndual, ndx) = workspace.jacobians_data;
+        workspace.kktMatrix.bottomRightCorner(ndual, ndual).diagonal().setConstant(-mu_eq);
 
         // add jacobian-vector products to gradients
-        workspace.meritGradient.noalias()    += workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
-        workspace.kktRhs.head(ndx).noalias() += workspace.jacobians_data.transpose() * results.lamsOpt_data;
+        workspace.meritGradient    = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+        workspace.kktRhs.head(ndx) = workspace.objectiveGradient + workspace.jacobians_data.transpose() * results.lamsOpt_data;
+        workspace.kktRhs.tail(ndual) = workspace.subproblemDualErr_data;
 
         // add proximal penalty terms
         if (rho > 0.)
@@ -360,7 +358,7 @@ namespace proxnlp
           const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
           cstr->m_set->computeActiveSet(workspace.cstrValues[i], results.activeSet[i]);
 
-          bool use_vhp = (use_gauss_newton && not cstr->m_set->disableGaussNewton()) || not use_gauss_newton; 
+          bool use_vhp = (use_gauss_newton && !cstr->m_set->disableGaussNewton()) || !use_gauss_newton; 
           if (use_vhp)
           {
             workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.cstrVectorHessianProd[i];
@@ -453,7 +451,7 @@ namespace proxnlp
 
         workspace.d1 = \
                   workspace.meritGradient.dot(workspace.pdStep.head(ndx)) \
-                  - workspace.subproblemDualErr_data.dot(workspace.pdStep.tail(ntot - ndx));
+                  - workspace.subproblemDualErr_data.dot(workspace.pdStep.tail(ndual));
 
         if (verbose >= 1)
         {
