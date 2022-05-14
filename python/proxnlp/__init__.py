@@ -10,7 +10,7 @@ def __process():
     import inspect
     from . import pyproxnlp
 
-    lib_name = 'proxnlp'
+    lib_name = "proxnlp"
 
     submodules = inspect.getmembers(pyproxnlp, inspect.ismodule)
     for mod_info in submodules:

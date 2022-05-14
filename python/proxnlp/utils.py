@@ -40,18 +40,18 @@ class CasadiFunction(proxnlp.C2Function):
         H[:, :] = np.asarray(self.Hfun(x, self._zero, v))
 
 
-_ROOT_10 = 10. ** .5
+_ROOT_10 = 10.0**0.5
 
 
 def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     prim_errs = np.asarray(prim_errs)
     dual_errs = np.asarray(dual_errs)
-    ax0.plot(prim_errs, c='tab:blue')
+    ax0.plot(prim_errs, c="tab:blue")
     ax0.set_xlabel("Iterations")
     col2 = "tab:orange"
     ax0.plot(dual_errs, c=col2)
-    ax0.spines['top'].set_visible(False)
-    ax0.spines['right'].set_color(col2)
+    ax0.spines["top"].set_visible(False)
+    ax0.spines["right"].set_color(col2)
     ax0.yaxis.label.set_color(col2)
     ax0.set_yscale("log")
     yhigh = ax0.get_ylim()[1]
