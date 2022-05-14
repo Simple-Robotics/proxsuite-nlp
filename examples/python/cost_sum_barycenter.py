@@ -54,8 +54,12 @@ def test_cost_sum():
     print("after *= :", sum_2)
     Hs_2 = sum_2.computeHessian(p0)
 
-    assert np.allclose(Hs_1, .5 * (Hg0 + Hg1)), "Should be\n{}".format(0.5 * (Hg0 + Hg1))
-    assert np.allclose(Hs_2, .5 * (Hg0 + Hg1)), "Should be\n{}".format(0.5 * (Hg0 + Hg1))
+    assert np.allclose(Hs_1, 0.5 * (Hg0 + Hg1)), "Should be\n{}".format(
+        0.5 * (Hg0 + Hg1)
+    )
+    assert np.allclose(Hs_2, 0.5 * (Hg0 + Hg1)), "Should be\n{}".format(
+        0.5 * (Hg0 + Hg1)
+    )
 
     sum_3 = sum_2 + dist_to_p2
     print("sum3 init:", sum_3)
@@ -80,12 +84,14 @@ def test_cost_sum():
     plot_pose(p1, ax, "green", "$p_1$")
     plot_pose(p2, ax, "red", "$p_2$")
 
-    plot_pose(results.xopt, ax, "orange", lab=r'$\bar{p} = \mathrm{Bary}(p_0, p_1, p_2)$')
+    plot_pose(
+        results.xopt, ax, "orange", lab=r"$\bar{p} = \mathrm{Bary}(p_0, p_1, p_2)$"
+    )
 
     ax.legend(fontsize=8, ncol=2)
     plt.xlim(-2, 2)
     plt.ylim(-2, 2)
-    plt.axis('equal')
+    plt.axis("equal")
     plt.tight_layout()
     plt.show()
 
@@ -93,12 +99,13 @@ def test_cost_sum():
 def plot_pose(p: np.ndarray, ax: plt.Axes, col, lab=None):
     """Plot a given element p€SE(2)."""
     from matplotlib.transforms import Affine2D
+
     x, y, cs, ss = p
     theta = np.arctan2(ss, cs)
     deg = np.rad2deg(theta)
-    width, height = 1., 0.4
-    plt.scatter(x, y, c=col, marker='o', label=lab)
-    recmid = (x - .5 * width, y - .5 * height)
+    width, height = 1.0, 0.4
+    plt.scatter(x, y, c=col, marker="o", label=lab)
+    recmid = (x - 0.5 * width, y - 0.5 * height)
     trsf = Affine2D().rotate_deg_around(*(x, y), -deg) + ax.transData
     rect = plt.Rectangle(recmid, width, height, color=col, alpha=0.5)
     rect.set_transform(trsf)
@@ -106,5 +113,5 @@ def plot_pose(p: np.ndarray, ax: plt.Axes, col, lab=None):
     return rect
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_cost_sum()

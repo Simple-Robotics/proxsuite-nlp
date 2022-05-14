@@ -33,7 +33,7 @@ resdl.computeJacobian(x0, J1)
 print(A)
 print(J1)
 assert np.allclose(J1, A)
-assert np.allclose(resdl(x0), 0.)
+assert np.allclose(resdl(x0), 0.0)
 assert np.allclose(resdl(np.zeros_like(x0)), b)
 
 print("Residual nx :", resdl.nx)
@@ -58,7 +58,6 @@ workspace = proxnlp.Workspace(nx, nx, problem)
 
 
 class DumbCallback(proxnlp.helpers.BaseCallback):
-
     def __init__(self):
         pass
 
@@ -80,17 +79,27 @@ solver.clear_callbacks()
 
 print(" values:\n", cb.storage.values.tolist())
 
-plt.rcParams['lines.linewidth'] = 1.
+plt.rcParams["lines.linewidth"] = 1.0
 
 xs_ = np.stack(cb.storage.xs.tolist())
 
 plt.subplot(121)
-plt.plot(*xs_.T, ls='--', marker='.', markersize=5)
+plt.plot(*xs_.T, ls="--", marker=".", markersize=5)
 for i, x in enumerate(xs_):
-    plt.annotate("$x_{{{}}}$".format(i), x, color='b',
-                 xytext=(10, 10), textcoords='offset pixels')
-plt.scatter(*x_target, label='target $\\bar{x}$', facecolor=(.8, 0, 0, .5),
-            edgecolors='k', zorder=2)
+    plt.annotate(
+        "$x_{{{}}}$".format(i),
+        x,
+        color="b",
+        xytext=(10, 10),
+        textcoords="offset pixels",
+    )
+plt.scatter(
+    *x_target,
+    label="target $\\bar{x}$",
+    facecolor=(0.8, 0, 0, 0.5),
+    edgecolors="k",
+    zorder=2
+)
 plt.legend()
 plt.title("Trajectory of optimization")
 

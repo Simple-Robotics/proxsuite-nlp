@@ -11,12 +11,12 @@ from proxnlp.constraints import create_inequality_constraint
 import matplotlib.pyplot as plt
 
 nx = 2
-p0 = np.array([.7, .2])
-p1 = np.array([1., .5])
+p0 = np.array([0.7, 0.2])
+p1 = np.array([1.0, 0.5])
 space = VectorSpace(nx)
 
-radius = .6
-radius_sq = radius ** 2
+radius = 0.6
+radius_sq = radius**2
 weights = np.eye(nx)
 
 
@@ -48,13 +48,15 @@ center2 = np.random.randn(2)
 res2_in = ManifoldDifferenceToPoint(space, center2)
 res2 = QuadraticResidualCost(res2_in, w2, slope_, -radius_sq)
 
-center3 = np.array([1., .2])
-res3 = QuadraticResidualCost(ManifoldDifferenceToPoint(space, center3), w2, slope_, -radius_sq)
+center3 = np.array([1.0, 0.2])
+res3 = QuadraticResidualCost(
+    ManifoldDifferenceToPoint(space, center3), w2, slope_, -radius_sq
+)
 
 cstrs_ = [
     create_inequality_constraint(res1),
     create_inequality_constraint(res2),
-    create_inequality_constraint(res3)
+    create_inequality_constraint(res3),
 ]
 
 prob = proxnlp.Problem(cost_, cstrs_)
@@ -62,9 +64,10 @@ results = proxnlp.Results(nx, prob)
 workspace = proxnlp.Workspace(nx, nx, prob)
 
 mu_init = 0.05
-rho_init = 0.
-solver = proxnlp.Solver(space, prob, mu_init=mu_init, rho_init=rho_init,
-                        verbose=proxnlp.VERBOSE)
+rho_init = 0.0
+solver = proxnlp.Solver(
+    space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
+)
 solver.use_gauss_newton = True
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
@@ -79,29 +82,33 @@ print("Target was:", p0)
 assert results.numiters == 17  # numiters as of ef27e38
 
 
-if __name__ == '__main__':
-    plt.rcParams["lines.linewidth"] = 1.
+if __name__ == "__main__":
+    plt.rcParams["lines.linewidth"] = 1.0
 
     xs_ = np.stack(callback.storage.xs.tolist())
 
-    bound_xs = (np.min(xs_[:, 0]), np.max(xs_[:, 0]),
-                np.min(xs_[:, 1]), np.max(xs_[:, 1]))
+    bound_xs = (
+        np.min(xs_[:, 0]),
+        np.max(xs_[:, 0]),
+        np.min(xs_[:, 1]),
+        np.max(xs_[:, 1]),
+    )
     # left,right,bottom,up
 
     ax: plt.Axes = plt.axes()
-    ax.plot(*xs_.T, marker='.', markersize=2, alpha=.7, color='b')
-    ax.scatter(*xs_[-1], s=12, c='tab:red', marker='o', label="$x^*$", zorder=2)
+    ax.plot(*xs_.T, marker=".", markersize=2, alpha=0.7, color="b")
+    ax.scatter(*xs_[-1], s=12, c="tab:red", marker="o", label="$x^*$", zorder=2)
     circ_alpha = 0.3
-    ar_c1 = plt.Circle(center1, radius, facecolor='r', alpha=circ_alpha, edgecolor='k')
-    ar_c2 = plt.Circle(center2, radius, facecolor='b', alpha=circ_alpha, edgecolor='k')
-    ar_c3 = plt.Circle(center3, radius, facecolor='g', alpha=circ_alpha, edgecolor='k')
+    ar_c1 = plt.Circle(center1, radius, facecolor="r", alpha=circ_alpha, edgecolor="k")
+    ar_c2 = plt.Circle(center2, radius, facecolor="b", alpha=circ_alpha, edgecolor="k")
+    ar_c3 = plt.Circle(center3, radius, facecolor="g", alpha=circ_alpha, edgecolor="k")
 
     ax.add_patch(ar_c1)
     ax.add_patch(ar_c2)
     ax.add_patch(ar_c3)
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
 
-    ax.scatter(*p0, c='green', marker='o')
+    ax.scatter(*p0, c="green", marker="o")
     ax.text(*p0, "$p_0$")
 
     xlims = ax.get_xlim()
@@ -127,7 +134,7 @@ if __name__ == '__main__':
         plt.figure()
         plt.plot(ls_alphas, ls_values)
         plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
-        plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls='--')
+        plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls="--")
         plt.title("Iteration %d" % it)
 
     plt.show()

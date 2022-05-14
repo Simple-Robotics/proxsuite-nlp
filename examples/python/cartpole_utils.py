@@ -21,14 +21,14 @@ def make_npendulum(N, ub=True, lengths=None):
     base_radius = 0.08
     shape_base = fcl.Sphere(base_radius)
     geom_base = pin.GeometryObject("base", 0, shape_base, pin.SE3.Identity())
-    geom_base.meshColor = np.array([1., 0.1, 0.1, 1.])
+    geom_base.meshColor = np.array([1.0, 0.1, 0.1, 1.0])
     geom_model.addGeometryObject(geom_base)
 
     joint_placement = pin.SE3.Identity()
-    body_mass = 1.
+    body_mass = 1.0
     body_radius = 0.06
     if lengths is None:
-        lengths = [1. for _ in range(N)]
+        lengths = [1.0 for _ in range(N)]
 
     for k in range(N):
         joint_name = "joint_" + str(k + 1)
@@ -52,10 +52,10 @@ def make_npendulum(N, ub=True, lengths=None):
         geom2_name = "bar_" + str(k + 1)
         shape2 = fcl.Cylinder(body_radius / 4, body_placement.translation[2])
         shape2_placement = body_placement.copy()
-        shape2_placement.translation[2] /= 2.
+        shape2_placement.translation[2] /= 2.0
 
         geom2_obj = pin.GeometryObject(geom2_name, joint_id, shape2, shape2_placement)
-        geom2_obj.meshColor = np.array([0., 0., 0., 1.])
+        geom2_obj.meshColor = np.array([0.0, 0.0, 0.0, 1.0])
         geom_model.addGeometryObject(geom2_obj)
 
         parent_id = joint_id
@@ -69,10 +69,10 @@ def make_cartpole(ub=True):
     model = pin.Model()
     model.name = "Cartpole"
 
-    m1 = 1.
-    m2 = .1
-    length = .5
-    base_sizes = (.4, .2, .05)
+    m1 = 1.0
+    m2 = 0.1
+    length = 0.5
+    base_sizes = (0.4, 0.2, 0.05)
 
     base = pin.JointModelPX()
     max_x = np.array([30])
@@ -80,22 +80,24 @@ def make_cartpole(ub=True):
     max_float = np.finfo(float).max
     maxEff = np.array([max_float])
     maxVel = np.array([max_float])
-    base_id = model.addJoint(0, base, pin.SE3.Identity(), "base", maxEff, maxVel, min_x, max_x)
+    base_id = model.addJoint(
+        0, base, pin.SE3.Identity(), "base", maxEff, maxVel, min_x, max_x
+    )
 
     if ub:
         pole = pin.JointModelRUBY()
     else:
         pole = pin.JointModelRY()
     pole_id = model.addJoint(1, pole, pin.SE3.Identity(), "pole")
-    model.lowerPositionLimit[:] = -4.
-    model.upperPositionLimit[:] = 4.
+    model.lowerPositionLimit[:] = -4.0
+    model.upperPositionLimit[:] = 4.0
 
     base_inertia = pin.Inertia.FromBox(m1, *base_sizes)
     pole_inertia = pin.Inertia.FromEllipsoid(m2, *[1e-2, length, 1e-2])
 
     base_body_pl = pin.SE3.Identity()
     pole_body_pl = pin.SE3.Identity()
-    pole_body_pl.translation = np.array([0., 0., length / 2])
+    pole_body_pl.translation = np.array([0.0, 0.0, length / 2])
 
     model.appendBodyToJoint(base_id, base_inertia, base_body_pl)
     model.appendBodyToJoint(pole_id, pole_inertia, pole_body_pl)
@@ -105,13 +107,11 @@ def make_cartpole(ub=True):
     shape_base = fcl.Box(*base_sizes)
     radius = 0.01
     shape_pole = fcl.Capsule(radius, length)
-    RED_COLOR = np.array([1, 0., 0., 1.])
-    WHITE_COLOR = np.array([1, 1., 1., 1.])
-    geom_base = pin.GeometryObject("link_base", base_id, shape_base,
-                                   base_body_pl)
+    RED_COLOR = np.array([1, 0.0, 0.0, 1.0])
+    WHITE_COLOR = np.array([1, 1.0, 1.0, 1.0])
+    geom_base = pin.GeometryObject("link_base", base_id, shape_base, base_body_pl)
     geom_base.meshColor = WHITE_COLOR
-    geom_pole = pin.GeometryObject("link_pole", pole_id, shape_pole,
-                                   pole_body_pl)
+    geom_pole = pin.GeometryObject("link_pole", pole_id, shape_pole, pole_body_pl)
     geom_pole.meshColor = RED_COLOR
 
     collision_model.addGeometryObject(geom_base)
@@ -122,32 +122,34 @@ def make_cartpole(ub=True):
 
 def animateCartpole(xs, sleep=50):
     print("processing the animation ... ")
-    cart_size = 1.
-    pole_length = 5.
+    cart_size = 1.0
+    pole_length = 5.0
     fig = plt.figure()
     ax = plt.axes(xlim=(-8, 8), ylim=(-6, 6))
-    patch = plt.Rectangle((0., 0.), cart_size, cart_size, fc='b')
-    line, = ax.plot([], [], 'k-', lw=2)
-    time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+    patch = plt.Rectangle((0.0, 0.0), cart_size, cart_size, fc="b")
+    (line,) = ax.plot([], [], "k-", lw=2)
+    time_text = ax.text(0.02, 0.95, "", transform=ax.transAxes)
 
     def init():
         ax.add_patch(patch)
         line.set_data([], [])
-        time_text.set_text('')
+        time_text.set_text("")
         return patch, line, time_text
 
     def animate(i):
         x_cart = xs[i][0]
-        y_cart = 0.
+        y_cart = 0.0
         theta = xs[i][1]
         patch.set_xy((x_cart - cart_size / 2, y_cart - cart_size / 2))
         x_pole = np.cumsum([x_cart, -pole_length * sin(theta)])
         y_pole = np.cumsum([y_cart, pole_length * cos(theta)])
         line.set_data(x_pole, y_pole)
-        time = i * sleep / 1000.
-        time_text.set_text('time = %.1f sec' % time)
+        time = i * sleep / 1000.0
+        time_text.set_text("time = %.1f sec" % time)
         return patch, line, time_text
 
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=len(xs), interval=sleep, blit=True)
+    anim = animation.FuncAnimation(
+        fig, animate, init_func=init, frames=len(xs), interval=sleep, blit=True
+    )
     print("... processing done")
     return anim

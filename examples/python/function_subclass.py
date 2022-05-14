@@ -14,12 +14,13 @@ from proxnlp.manifolds import EuclideanSpace
 
 # 1: Overload a base function (not differentiable)
 
+
 class MyFunction(proxnlp.BaseFunction):
     def __init__(self, nx, ndx, nr):
         super().__init__(nx, ndx, nr)
 
     def __call__(self, x):
-        return np.log(np.abs(x - 1.))
+        return np.log(np.abs(x - 1.0))
 
 
 nx = 2
@@ -31,7 +32,7 @@ assert fun1.nr == nr
 
 x0 = np.random.randn(nx)
 print(fun1(x0))
-assert np.allclose(fun1(x0), np.log(np.abs(x0 - 1.)))
+assert np.allclose(fun1(x0), np.log(np.abs(x0 - 1.0)))
 
 
 # 2: Overload a twice-differentiable function
@@ -73,10 +74,10 @@ nr = 1
 space = EuclideanSpace(nx)
 x1 = space.rand()
 
-sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.]))
+sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.0]))
 cstr = create_equality_constraint(sum_to_one_res)
 
-x0 = np.array([1., 2.])
+x0 = np.array([1.0, 2.0])
 print("Diff func:")
 print("x0:  ", x0)
 print("eval:", fun2(x0))
@@ -99,7 +100,7 @@ def plot_fun():
     import matplotlib.pyplot as plt
 
     Ngx = 31
-    xg = np.linspace(0., 1., Ngx)
+    xg = np.linspace(0.0, 1.0, Ngx)
     dx = xg[1] - xg[0]
     grid = np.stack(np.meshgrid(xg, xg))
 
@@ -125,7 +126,7 @@ ws = proxnlp.Workspace(nx, nx, prob)
 rs = proxnlp.Results(nx, prob)
 
 solver = proxnlp.Solver(space, prob)
-x0 = np.array([2., 2.])
+x0 = np.array([2.0, 2.0])
 flag = solver.solve(ws, rs, x0, rs.lamsopt)
 
 print("Flag:   ", flag)

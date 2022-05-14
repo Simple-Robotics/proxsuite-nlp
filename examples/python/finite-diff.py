@@ -14,14 +14,14 @@ def test_fd_one_dim():
             super().__init__(nx, nx, nx)
 
         def __call__(self, x):
-            return x ** 2 - 1
+            return x**2 - 1
 
     nx = 1
     space = EuclideanSpace(nx)
     f1 = MyFunction(nx)
 
     eps = 1e-4
-    ATOL = eps ** .5
+    ATOL = eps**0.5
     f1_diff = FiniteDifferenceHelper(space, f1, eps)
     f1_c2 = FiniteDifferenceHelperC2(space, f1_diff, eps)
 
