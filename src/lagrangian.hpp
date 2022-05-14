@@ -14,14 +14,14 @@ namespace proxnlp
    */
   template<typename _Scalar>
   struct LagrangianFunction :
-  public MeritFunctionBase<
+  public MeritFunctionBaseTpl<
     _Scalar, typename math_types<_Scalar>::VectorOfRef
     >
   {
     using Scalar = _Scalar;
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
-    using Base = MeritFunctionBase<Scalar, VectorOfRef>;
+    using Base = MeritFunctionBaseTpl<Scalar, VectorOfRef>;
     using Base::m_prob;
     using Base::computeGradient;
 

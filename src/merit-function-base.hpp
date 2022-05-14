@@ -10,7 +10,7 @@ namespace proxnlp
 {
 
   template<typename _Scalar, typename... Args>
-  struct MeritFunctionBase
+  struct MeritFunctionBaseTpl
   {
     using Scalar = _Scalar;
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
@@ -18,7 +18,7 @@ namespace proxnlp
 
     shared_ptr<Problem> m_prob;
 
-    MeritFunctionBase(shared_ptr<Problem> prob) : m_prob(prob) {}
+    MeritFunctionBaseTpl(shared_ptr<Problem> prob) : m_prob(prob) {}
 
     /// Evaluate the merit function.
     virtual Scalar operator()(const ConstVectorRef& x, const Args&... args) const = 0;
@@ -30,12 +30,12 @@ namespace proxnlp
 
   /// Simply evaluate the objective function.
   template<typename _Scalar>
-  struct EvalObjective : public MeritFunctionBase<_Scalar>
+  struct EvalObjective : public MeritFunctionBaseTpl<_Scalar>
   {
     using Scalar = _Scalar;
     PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
     using Problem = ProblemTpl<Scalar>;
-    using Base = MeritFunctionBase<Scalar>;
+    using Base = MeritFunctionBaseTpl<Scalar>;
     using Base::m_prob;
 
     EvalObjective(shared_ptr<Problem> prob)

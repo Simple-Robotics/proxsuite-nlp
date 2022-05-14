@@ -68,7 +68,7 @@ namespace proxnlp
     Scalar mu_eq = mu_eq_init;              // Penalty parameter.
     Scalar mu_eq_inv = 1. / mu_eq;          // Inverse penalty parameter.
     Scalar mu_factor;                       // Penalty update multiplicative factor.
-    Scalar rho_factor = mu_factor;
+    Scalar rho_factor = mu_factor;          // Primal penalty update factor.
 
     const Scalar inner_tol_min = 1e-9;      // Lower safeguard for the subproblem tolerance.
     Scalar mu_lower = 1e-9;                 // Lower safeguard for the penalty parameter.
@@ -313,8 +313,6 @@ namespace proxnlp
         //// precompute temp data
 
         results.value = problem->m_cost.call(results.xOpt);
-        problem->m_cost.computeGradient(results.xOpt, workspace.objectiveGradient);
-        problem->m_cost.computeHessian(results.xOpt, workspace.objectiveHessian);
 
         computeResidualsAndMultipliers(results.xOpt, results.lamsOpt_data, workspace);
         computeResidualDerivatives(results.xOpt, workspace);
@@ -561,15 +559,10 @@ namespace proxnlp
       const ConstVectorRef& lams_data,
       Workspace& workspace) const
     {
-      std::size_t i;
-      for (i = 0; i < problem->getNumConstraints(); i++)
-      {
-        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
-        workspace.cstrValues[i] = cstr->m_func(x);
-      }
+      problem->evaluate(x, workspace);
       workspace.lamsPlusPre_data = workspace.lamsPrev_data + mu_eq_inv * workspace.cstr_values_data;
       // project multiplier estimate
-      for (i = 0; i < problem->getNumConstraints(); i++)
+      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
         const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
         workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
@@ -586,11 +579,11 @@ namespace proxnlp
       const ConstVectorRef& x,
       Workspace& workspace) const
     {
+      problem->computeDerivatives(x, workspace);
+      problem->m_cost.computeHessian(x, workspace.objectiveHessian);
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
         const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
-
-        cstr->m_func.computeJacobian(x, workspace.cstrJacobians[i]);
         cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
 
         bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) || !(use_gauss_newton); 
