@@ -69,7 +69,6 @@ def ground(xy):
 
 
 def vizGround(viz, elevation, space, name="ground", color=[1.0, 1.0, 0.6, 1.0]):
-    import meshcat.geometry as g
     from meshcat_utils import ForceDraw
 
     drawer = ForceDraw(viz)
