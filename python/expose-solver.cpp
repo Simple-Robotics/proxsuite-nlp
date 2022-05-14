@@ -38,6 +38,7 @@ namespace proxnlp
                  Scalar,
                  Scalar,
                  Scalar,
+                 Scalar,
                  Scalar
                  >((  bp::arg("self")
                     , bp::arg("space")
@@ -53,6 +54,7 @@ namespace proxnlp
                     , bp::arg("dual_alpha") = 1.
                     , bp::arg("dual_beta") = 1.
                     , bp::arg("alpha_min") = 1e-7
+                    , bp::arg("armijo_c1") = 1e-4
                     ))
       )
         .def_readwrite("use_gauss_newton", &Solver::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
@@ -71,8 +73,14 @@ namespace proxnlp
                       &Solver::getMaxIters,
                       &Solver::setMaxIters,
                       "Maximum number of iterations.")
+        .def_readonly("prim_alpha", &Solver::prim_alpha)
+        .def_readonly("prim_beta", &Solver::prim_beta)
+        .def_readonly("dual_alpha", &Solver::dual_alpha)
+        .def_readonly("dual_beta", &Solver::dual_beta)
+        .def_readonly("mu_min", &Solver::mu_lower)
         .def_readonly("alpha_min", &Solver::alpha_min)
         .def_readonly("armijo_c1", &Solver::armijo_c1)
+        .def_readwrite("ls_beta", &Solver::ls_beta)
         ;
     }
   } // namespace python
