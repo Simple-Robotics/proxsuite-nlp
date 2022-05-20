@@ -1,4 +1,5 @@
-/* Copyright (C) 2022 LAAS-CNRS, INRIA
+/** @file solver-base.hpp
+ * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
  */
 #pragma once
 
@@ -333,14 +334,14 @@ namespace proxnlp
         workspace.kktRhs.setZero();
         workspace.kktMatrix.setZero();
 
-        workspace.kktMatrix.topLeftCorner(ndx, ndx)           = workspace.objectiveHessian;
+        workspace.kktMatrix.topLeftCorner(ndx, ndx)      = workspace.objectiveHessian;
         workspace.kktMatrix.topRightCorner(ndx, ndual)   = workspace.jacobians_data.transpose();
         workspace.kktMatrix.bottomLeftCorner(ndual, ndx) = workspace.jacobians_data;
         workspace.kktMatrix.bottomRightCorner(ndual, ndual).diagonal().setConstant(-mu_eq);
 
         // add jacobian-vector products to gradients
-        workspace.meritGradient    = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
-        workspace.kktRhs.head(ndx) = workspace.objectiveGradient + workspace.jacobians_data.transpose() * results.lamsOpt_data;
+        workspace.meritGradient      = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+        workspace.kktRhs.head(ndx)   = workspace.objectiveGradient + workspace.jacobians_data.transpose() * results.lamsOpt_data;
         workspace.kktRhs.tail(ndual) = workspace.subproblemDualErr_data;
 
         // add proximal penalty terms
