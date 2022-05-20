@@ -1,6 +1,6 @@
 
-INPUT                   = @CMAKE_SOURCE_DIR@/doc \
-                          @CMAKE_SOURCE_DIR@/src
+INPUT                   = @PROJECT_SOURCE_DIR@/doc \
+                          @PROJECT_SOURCE_DIR@/src
 
 RECURSIVE               = YES
 
@@ -26,14 +26,29 @@ EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
 
 INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/src
 
+EXCLUDE_SYMLINKS        = YES
+
 EXAMPLE_PATH            = @PROJECT_SOURCE_DIR@/examples
 
-FORMULA_MACROFILE       = @CMAKE_SOURCE_DIR@/doc/macros.inc
+FORMULA_MACROFILE       = @PROJECT_SOURCE_DIR@/doc/macros.inc
 
 GENERATE_TREEVIEW       = YES
+
+VERBATIM_HEADERS        = YES
+
 
 HTML_HEADER             = @PROJECT_SOURCE_DIR@/doc/header.html
 HTML_EXTRA_STYLESHEET   = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome.css
 HTML_EXTRA_FILES        = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome-darkmode-toggle.js
 
+
+TAGFILES                = 
+
+SHOW_FILES              = YES
+SHOW_NAMESPACES         = YES
+
 MATHJAX_FORMAT          = SVG
+
+SOURCE_BROWSER          = YES
+
+ALPHABETICAL_INDEX      = YES
