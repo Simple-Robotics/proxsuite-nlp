@@ -4,7 +4,7 @@ INPUT                   = @PROJECT_SOURCE_DIR@/doc \
 
 RECURSIVE               = YES
 
-FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.hh *.dox *.md *.py
+FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.dox *.md *.py
 
 # Document members in declaration order
 SORT_MEMBER_DOCS        = NO
@@ -22,9 +22,11 @@ PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
                            PROXNLP_FUNCTION_TYPEDEFS \
                            PROXNLP_DYNAMIC_TYPEDEFS
 
+FULL_PATH_NAMES         = YES
 EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
+EXCLUDE_PATTERNS        = *.hxx
 
-INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/src
+INCLUDE_PATH            = @PROJECT_BINARY_DIR@/include
 
 EXCLUDE_SYMLINKS        = YES
 
