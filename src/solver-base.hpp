@@ -12,6 +12,8 @@
 
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
+#include "proxnlp/linesearch-base.hpp"
+
 #include <cassert>
 #include <stdexcept>
 
@@ -21,14 +23,6 @@
 
 namespace proxnlp
 {
-
-  /// Verbosity level.
-  enum VerboseLevel
-  {
-    QUIET=0,
-    VERBOSE=1,
-    VERY=2
-  };
 
   template<typename _Scalar>
   class SolverTpl
@@ -286,14 +280,13 @@ namespace proxnlp
       callbacks_.clear();
     }
 
-  protected:
     std::size_t MAX_ITERS = 100;
 
     void solveInner(Workspace& workspace, Results& results)
     {
       const int ndx = manifold.ndx();
       const long ntot = workspace.kktRhs.size();
-      const int ndual = ntot - ndx;
+      const long ndual = ntot - ndx;
       const std::size_t num_c = problem->getNumConstraints();
 
       results.lamsOpt_data = workspace.lamsPrev_data;
@@ -460,7 +453,8 @@ namespace proxnlp
                      math::infty_norm(resdl), workspace.d1, conditioning_, delta);
         }
 
-        doLinesearch(workspace, results, results.merit, workspace.d1);
+        Scalar alpha_opt;
+        ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.d1, this->verbose, alpha_opt);
         results.xOpt = workspace.xTrial;
         results.lamsOpt_data = workspace.lamsTrial_data;
 
@@ -594,85 +588,13 @@ namespace proxnlp
     } 
 
     /**
-     * Perform the inexact backtracking line-search procedure.
-     * 
-     * @param workspace Workspace.
-     * @param results   Results struct.
-     * @param merit0    Value of the merit function at the previous point.
-     * @param d1        Directional derivative of the merit function in the search direction.
-     */
-    Scalar doLinesearch(Workspace& workspace, const Results& results, const Scalar merit0, const Scalar d1) const
-    {
-      Scalar alpha_try = 1.;
-
-      std::vector<Scalar>& alphas_ = workspace.ls_alphas;
-      std::vector<Scalar>& values_ = workspace.ls_values;
-      if (record_linesearch_process)
-      {
-        alphas_.clear();
-        values_.clear();
-        VectorXs alphplot = VectorXs::LinSpaced(100, 0., 1.);
-        for (long i = 0; i < alphplot.size(); i++)
-        {
-          tryStep(workspace, results, alphplot(i));
-          alphas_.push_back(alphplot(i));
-          values_.push_back(
-            merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev)
-            + prox_penalty.call(workspace.xTrial)
-          );
-        }
-      }
-
-      Scalar merit_trial = 0., dM = 0.;
-      while (alpha_try > alpha_min)
-      {
-        tryStep(workspace, results, alpha_try);
-        merit_trial = merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
-        if (rho > 0.) {
-          merit_trial += prox_penalty.call(workspace.xTrial);
-        }
-        dM = merit_trial - merit0;
-
-        if (record_linesearch_process)
-        {
-          alphas_.push_back(alpha_try);
-          values_.push_back(merit_trial);
-        }
-
-        if (std::abs(d1) < 1e-13)
-        {
-          return alpha_try;
-        }
-
-        if (dM <= armijo_c1 * alpha_try * d1)
-        {
-          break;
-        }
-        alpha_try *= ls_beta;
-      }
-
-      if (alpha_try < alpha_min)
-      {
-        alpha_try = alpha_min;
-        tryStep(workspace, results, alpha_try);
-      }
-
-      if (verbose >= 1)
-      {
-        fmt::print(" | alpha_opt={:>5.3e}\n", alpha_try);
-      }
-
-      return alpha_try;
-    }
-
-    /**
      * Take a trial step.
      * 
      * @param workspace Workspace
      * @param results   Contains the previous primal-dual point
      * @param alpha     Step size
      */
-    void tryStep(Workspace& workspace, const Results& results, Scalar alpha) const
+    static void tryStep(const Manifold& manifold, Workspace& workspace, const Results& results, Scalar alpha)
     {
       const int ndx = manifold.ndx();
       const long ntot = workspace.kktRhs.rows();
