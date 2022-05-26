@@ -76,6 +76,7 @@ BENCHMARK(bm_blocked);
 auto main(int argc, char** argv) -> int {
 	using block_chol::backend::ref;
 
+	std::cout << "Input matrix pattern:\n";
 	mat.dump();
 
 	isize best_perm[n];
@@ -117,9 +118,10 @@ auto main(int argc, char** argv) -> int {
 		l1.template triangularView<Eigen::StrictlyUpper>().setZero();
 	}
 
-	std::cout << (l0 - l1).norm() << '\n';
+	std::cout << "Err:" << (l0 - l1).norm() << '\n';
 
 	mat.llt_in_place();
+	mat.dump();
 
 	benchmark::Initialize(&argc, argv);
 	if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
