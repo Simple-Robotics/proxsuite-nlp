@@ -2,6 +2,8 @@
 
 #include <benchmark/benchmark.h>
 
+#include <fmt/core.h>
+
 using block_chol::isize;
 using block_chol::BlockKind;
 using block_chol::SymbolicBlockMatrix;
@@ -76,7 +78,7 @@ BENCHMARK(bm_blocked);
 auto main(int argc, char** argv) -> int {
 	using block_chol::backend::ref;
 
-	std::cout << "Input matrix pattern:\n";
+	fmt::print("Input matrix pattern:\n");
 	mat.dump();
 
 	isize best_perm[n];
@@ -118,7 +120,7 @@ auto main(int argc, char** argv) -> int {
 		l1.template triangularView<Eigen::StrictlyUpper>().setZero();
 	}
 
-	std::cout << "Err:" << (l0 - l1).norm() << '\n';
+	fmt::print("Err: {:g}\n", (l0 - l1).norm());
 
 	mat.llt_in_place();
 	mat.dump();
