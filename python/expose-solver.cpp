@@ -23,6 +23,10 @@ namespace proxnlp
         .export_values()
         ;
 
+      bp::enum_<LinesearchStrategy>("LinesearchStrategy")
+        .value("ARMIJO", LinesearchStrategy::ARMIJO)
+        .value("QUAD", LinesearchStrategy::QUADRATIC);
+
       bp::class_<Solver>(
         "Solver",
         "The numerical solver.",
@@ -81,6 +85,7 @@ namespace proxnlp
         .def_readonly("alpha_min", &Solver::alpha_min)
         .def_readonly("armijo_c1", &Solver::armijo_c1)
         .def_readwrite("ls_beta", &Solver::ls_beta)
+        .def_readwrite("ls_strat", &Solver::ls_strat)
         ;
     }
   } // namespace python

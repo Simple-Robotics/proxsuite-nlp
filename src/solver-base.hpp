@@ -23,6 +23,7 @@
 namespace proxnlp
 {
 
+  enum LinesearchStrategy
   template<typename _Scalar>
   class SolverTpl
   {
@@ -49,6 +50,8 @@ namespace proxnlp
     VerboseLevel verbose = QUIET;           // Level of verbosity of the solver.
     bool use_gauss_newton = false;          // Use a Gauss-Newton approximation for the Lagrangian Hessian.
     bool record_linesearch_process = false;
+
+    LinesearchStrategy ls_strat = ARMIJO;
 
     //// Algo params which evolve
 
