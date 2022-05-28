@@ -17,7 +17,24 @@ namespace proxnlp
     return ret + solver.prox_penalty.call(workspace.xTrial);
   }
 
-  /// @brief  Basic backtracking Armijo linesearch.
+  /// Recompute the line-search directional derivative at the current trial point.
+  ///
+  /// @param solver Solver instance; tied to the merit function and derivatives evaluation.
+  /// @param workspace Problem workspace; the trial point is a data member.
+  template<typename S>
+  S recompute_merit_derivative_at_trial_point(const SolverTpl<S>& solver, WorkspaceTpl<S>& workspace)
+  {
+    solver.computeResidualsAndMultipliers(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
+    solver.computeResidualDerivatives(workspace.xTrial, workspace, false);
+
+    workspace.meritGradient = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+    workspace.meritGradient.noalias() += workspace.prox_grad;
+    S d1_new = workspace.meritGradient.dot(workspace.prim_step) \
+      - workspace.dual_prox_err_data.dot(workspace.dual_step);
+    return d1_new;
+  }
+
+  /// @brief  Basic backtracking Armijo line-search strategy.
   template<typename _Scalar>
   struct ArmijoLinesearch
   {

@@ -80,7 +80,7 @@ namespace proxnlp
     VectorXs lamsPlusPre_data;
     VectorXs lamsPlus_data;
     VectorXs lamsPDAL_data;
-    VectorXs subproblemDualErr_data;
+    VectorXs dual_prox_err_data;
 
     /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
     VectorOfRef lamsPlus;
@@ -125,7 +125,7 @@ namespace proxnlp
       , hessians_data((int)numblocks * ndx, ndx)
       , lamsPlus_data(numdual)
       , lamsPDAL_data(numdual)
-      , subproblemDualErr_data(numdual)
+      , dual_prox_err_data(numdual)
     {
       init(prob);
     }
@@ -156,7 +156,7 @@ namespace proxnlp
       helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_data, lamsPlusPre);
       helpers::allocateMultipliersOrResiduals(prob, lamsPlus_data, lamsPlus);
       helpers::allocateMultipliersOrResiduals(prob, lamsPDAL_data, lamsPDAL);
-      helpers::allocateMultipliersOrResiduals(prob, subproblemDualErr_data, subproblemDualErr);
+      helpers::allocateMultipliersOrResiduals(prob, dual_prox_err_data, subproblemDualErr);
 
       cstrJacobians.reserve(numblocks);
       cstrVectorHessianProd.reserve(numblocks);
