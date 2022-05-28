@@ -19,7 +19,6 @@ from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
 from proxnlp.utils import CasadiFunction, plot_pd_errs
 
 from tap import Tap
-from typing import List
 
 
 class Args(Tap):
@@ -170,7 +169,7 @@ workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
 results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
-tol = 1e-4
+tol = 1e-5
 rho_init = 1e-7
 mu_init = 0.1
 solver = proxnlp.Solver(
@@ -207,10 +206,10 @@ plt.rcParams["axes.linewidth"] = 1.0
 times = np.linspace(0.0, Tf, nsteps + 1)
 labels_ = ["$x_{%i}$" % i for i in range(model.nq)]
 
-fig, axes = plt.subplots(1, 3, figsize=(10.8, 4.8))
-axes: List[plt.Axes]
+fig: plt.Figure = plt.figure(figsize=(10.8, 4.8))
+gs0 = fig.add_gridspec(1, 3)
 
-plt.sca(axes[0])
+plt.subplot(gs0[0])
 hlines_style = dict(alpha=0.7, ls="-", lw=2, zorder=-1)
 lines = plt.plot(times, qs_opt)
 cols_ = [li.get_color() for li in lines]
@@ -221,32 +220,19 @@ plt.legend(labels_)
 plt.xlabel("Time $t$")
 plt.title("Configuration $q$")
 
-plt.sca(axes[1])
+plt.subplot(gs0[1])
 plt.plot(times[:-1], us_opt)
 plt.hlines((-u_bound, u_bound), *times[[0, -2]], colors="k", **hlines_style)
 plt.xlabel("Time $t$")
 plt.title("Controls $u$")
 
-ax0 = axes[2]
-
+gss = gs0[2].subgridspec(2, 1)
+ax0 = plt.subplot(gss[0])
 plot_pd_errs(ax0, prim_errs, dual_errs)
 
-it_list = [1, 10, 20, 30]
-it_list = [i for i in it_list if i < results.numiters]
-for it in it_list:
-    ls_alphas = callback.storage.ls_alphas[it].copy()
-    ls_values = callback.storage.ls_values[it].copy()
-    if len(ls_alphas) == 0:
-        continue
-    soidx = np.argsort(ls_alphas)
-    ls_alphas = ls_alphas[soidx]
-    ls_values = ls_values[soidx]
-    plt.figure()
-    plt.plot(ls_alphas, ls_values)
-    d1 = callback.storage.d1_s[it]
-    plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
-    plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls="--")
-    plt.title("Iteration %d" % it)
+plt.subplot(gss[1])
+plt.plot(callback.storage.alphas, c='gray', alpha=.8, marker='.', markersize=2)
+
 plt.tight_layout()
 plt.show()
 
