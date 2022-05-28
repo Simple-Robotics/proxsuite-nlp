@@ -33,7 +33,7 @@ namespace proxnlp
   }
 
   template<typename Scalar>
-  typename SolverTpl<Scalar>::InertiaFlag SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi& signature, const Scalar delta) const
+  typename SolverTpl<Scalar>::InertiaFlag SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi& signature) const
   {
     const int ndx = manifold.ndx();
     const int numc = problem->getTotalConstraintDim();
@@ -68,8 +68,6 @@ namespace proxnlp
     } else {
       if (print_info) fmt::print(fmt::fg(fmt::color::pale_green), " OK");
     }
-    if (print_info)
-      fmt::print(" (reg={:>.3g})\n", delta);
     return flag;
   }
 

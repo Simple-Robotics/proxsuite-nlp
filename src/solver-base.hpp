@@ -386,7 +386,9 @@ namespace proxnlp
           conditioning_ = 1. / workspace.ldlt_.rcond();
           workspace.signature.array() = workspace.ldlt_.vectorD().array().sign().template cast<int>();
           workspace.kktMatrix.diagonal().head(ndx).array() -= delta;
-          is_inertia_correct = checkInertia(workspace.signature, delta);
+          is_inertia_correct = checkInertia(workspace.signature);
+          if (verbose >= 2)
+            fmt::print(" (reg={:>.3g})\n", delta);
           old_delta = delta;
 
           if (is_inertia_correct == OK)
@@ -520,9 +522,9 @@ namespace proxnlp
 
   protected:
     /// Check the matrix has the desired inertia.
-    /// @param    kktMatrix The KKT matrix.
     /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
-    InertiaFlag checkInertia(const Eigen::VectorXi& signature, const Scalar delta) const;
+    /// @param    delta     Scale factor for the identity matrix to add
+    InertiaFlag checkInertia(const Eigen::VectorXi& signature) const;
 
   };
 
