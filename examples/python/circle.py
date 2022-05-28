@@ -95,7 +95,9 @@ if __name__ == "__main__":
     )
     # left,right,bottom,up
 
-    ax: plt.Axes = plt.axes()
+    fig, axes = plt.subplots(2, 1, gridspec_kw={"height_ratios": [3, 1]})
+    fig.set_size_inches(6.4, 6.4)
+    ax = axes[0]
     ax.plot(*xs_.T, marker=".", markersize=2, alpha=0.7, color="b")
     ax.scatter(*xs_[-1], s=12, c="tab:red", marker="o", label="$x^*$", zorder=2)
     circ_alpha = 0.3
@@ -117,8 +119,12 @@ if __name__ == "__main__":
     ylims = (min(bound_xs[2], ylims[0]), max(bound_xs[3], ylims[1]))
     ax.set_xlim(*xlims)
     ax.set_ylim(*ylims)
-    plt.legend()
-    plt.title("Optimization trajectory")
+    ax.set_title("Optimization trajectory")
+    ax.legend()
+
+    axes[1].plot(callback.storage.alphas, marker='.')
+    axes[1].set_title("Step lengths $\\alpha_k$")
+    plt.tight_layout()
 
     it_list = [1, 2, 3, 4, 5, 10, 20, 30]
     it_list = [i for i in it_list if i < results.numiters]
@@ -130,7 +136,7 @@ if __name__ == "__main__":
         soidx = np.argsort(ls_alphas)
         ls_alphas = ls_alphas[soidx]
         ls_values = ls_values[soidx]
-        d1 = callback.storage.d1_s[it]
+        d1 = callback.storage.dmerit_dir[it]
         plt.figure()
         plt.plot(ls_alphas, ls_values)
         plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
