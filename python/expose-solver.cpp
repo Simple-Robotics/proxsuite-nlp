@@ -25,7 +25,7 @@ namespace proxnlp
 
       bp::enum_<LinesearchStrategy>("LinesearchStrategy")
         .value("ARMIJO", LinesearchStrategy::ARMIJO)
-        .value("QUAD", LinesearchStrategy::QUADRATIC);
+        .value("CUBIC_INTERP", LinesearchStrategy::CUBIC_INTERP);
 
       bp::class_<Solver>(
         "Solver",

@@ -13,6 +13,7 @@
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "proxnlp/linesearch-base.hpp"
+#include "proxnlp/linesearch-cubic-interp.hpp"
 
 #include <cassert>
 
@@ -24,6 +25,11 @@ namespace proxnlp
 {
 
   enum LinesearchStrategy
+  {
+    ARMIJO,
+    CUBIC_INTERP
+  };
+
   template<typename _Scalar>
   class SolverTpl
   {
@@ -323,18 +329,15 @@ namespace proxnlp
         // add jacobian-vector products to gradients
         workspace.kktRhs.head(ndx)   = workspace.objectiveGradient + workspace.jacobians_data.transpose() * results.lamsOpt_data;
         workspace.kktRhs.tail(ndual) = workspace.dual_prox_err_data;
+        workspace.meritGradient = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
 
         // add proximal penalty terms
         if (rho_ > 0.)
         {
           workspace.kktRhs.head(ndx).noalias() += workspace.prox_grad;
           workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.prox_hess;
+          workspace.meritGradient.noalias() += workspace.prox_grad;
         }
-
-        workspace.meritGradient = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
-        workspace.meritGradient.noalias() += workspace.prox_grad;
-        workspace.dmerit_dir = workspace.meritGradient.dot(workspace.prim_step) \
-          - workspace.dual_prox_err_data.dot(workspace.dual_step);
 
         for (std::size_t i = 0; i < num_c; i++)
         {
@@ -432,6 +435,8 @@ namespace proxnlp
 
         //// Take the step
 
+        workspace.dmerit_dir = workspace.meritGradient.dot(workspace.prim_step) - workspace.dual_prox_err_data.dot(workspace.dual_step);
+
         if (verbose >= 1)
         {
           fmt::print(" | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
@@ -439,7 +444,17 @@ namespace proxnlp
         }
 
         Scalar& alpha_opt = workspace.alpha_opt;
-        ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, this->verbose, alpha_opt);
+
+        switch (ls_strat)
+        {
+        case ARMIJO: ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, verbose, alpha_opt);
+                     break;
+        case CUBIC_INTERP: CubicInterpLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, verbose, alpha_opt);
+                        break;
+        default: break;
+        }
+        fmt::print(" | alph_opt={:4.3e}\n", alpha_opt);
+
         results.xOpt = workspace.xTrial;
         results.lamsOpt_data = workspace.lamsTrial_data;
 
