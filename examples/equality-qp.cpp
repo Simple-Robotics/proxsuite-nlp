@@ -68,7 +68,7 @@ int submain()
 
   Solver_t solver(space, prob);
   solver.setPenalty(1e-4);
-  solver.rho = 1e-8;
+  solver.setProxParameter(1e-8);
   solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lamsPrev);
