@@ -15,7 +15,6 @@
 #include "proxnlp/linesearch-base.hpp"
 
 #include <cassert>
-#include <stdexcept>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -60,13 +59,13 @@ namespace proxnlp
     Scalar rho_init;                        // Initial primal proximal penalty parameter.
     Scalar rho = rho_init;                  // Primal proximal penalty parameter.
     Scalar mu_eq_init;                      // Initial penalty parameter.
-    Scalar mu_eq = mu_eq_init;              // Penalty parameter.
-    Scalar mu_eq_inv = 1. / mu_eq;          // Inverse penalty parameter.
-    Scalar mu_factor;                       // Penalty update multiplicative factor.
-    Scalar rho_factor = mu_factor;          // Primal penalty update factor.
+    Scalar mu_eq_ = mu_eq_init;             // Penalty parameter.
+    Scalar mu_eq_inv_ = 1. / mu_eq_;        // Inverse penalty parameter.
+    Scalar mu_factor_;                      // Penalty update multiplicative factor.
+    Scalar rho_factor_ = mu_factor_;        // Primal penalty update factor.
 
     const Scalar inner_tol_min = 1e-9;      // Lower safeguard for the subproblem tolerance.
-    Scalar mu_lower = 1e-9;                 // Lower safeguard for the penalty parameter.
+    Scalar mu_lower_ = 1e-9;                // Lower safeguard for the penalty parameter.
 
     //// Algo hyperparams
 
@@ -116,8 +115,8 @@ namespace proxnlp
       , verbose(verbose)
       , rho_init(rho_init)
       , mu_eq_init(mu_eq_init)
-      , mu_factor(mu_factor)
-      , mu_lower(mu_lower)
+      , mu_factor_(mu_factor)
+      , mu_lower_(mu_lower)
       , target_tol(tol)
       , prim_alpha(prim_alpha)
       , prim_beta(prim_beta)
@@ -135,30 +134,15 @@ namespace proxnlp
       ZEROS = 2
     };
 
+    /// @copybrief solve().
+    ///
+    /// @param lams0 Initial Lagrange multipliers given separately for each constraint.
     ConvergenceFlag solve(Workspace& workspace,
                           Results& results,
                           const ConstVectorRef& x0,
-                          const std::vector<VectorRef>& lams0)
-    {
-      VectorXs new_lam(problem->getTotalConstraintDim());
-      new_lam.setZero();
-      int cursor = 0;
-      int nr = 0;
-      const std::size_t numc = problem->getNumConstraints();
-      if (numc != lams0.size())
-      {
-        throw std::runtime_error("Specified number of constraints is not the same "
-                                 "as the provided number of multipliers!");
-      }
-      for (std::size_t i = 0; i < numc; i++)
-      {
-        nr = problem->getConstraintDims()[i];
-        new_lam.segment(cursor, nr) = lams0[i];
-        cursor += nr;
-      }
-      return solve(workspace, results, x0, new_lam);
-    }
+                          const std::vector<VectorRef>& lams0);
 
+    /// @brief Solve the problem.
     ConvergenceFlag solve(Workspace& workspace,
                           Results& results,
                           const ConstVectorRef& x0,
@@ -177,11 +161,11 @@ namespace proxnlp
       std::size_t i = 0;
       while (results.numIters < MAX_ITERS)
       {
-        results.mu = mu_eq;
+        results.mu = mu_eq_;
         results.rho = rho;
         fmt::print(fmt::fg(fmt::color::yellow),
                    "[Outer iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n",
-                   i, inner_tol, prim_tol, mu_eq);
+                   i, inner_tol, prim_tol, mu_eq_);
         solveInner(workspace, results);
 
         // accept new primal iterate
@@ -239,29 +223,30 @@ namespace proxnlp
     /// Update penalty parameter using the provided factor (with a safeguard SolverTpl::mu_lower).
     inline void updatePenalty()
     {
-      if (mu_eq == mu_lower)
+      if (mu_eq_ == mu_lower_)
       {
         setPenalty(mu_eq_init);
       } else {
-        setPenalty(std::max(mu_eq * mu_factor, mu_lower));
+        setPenalty(std::max(mu_eq_ * mu_factor_, mu_lower_));
       }
       for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
       {
         const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
-        cstr->m_set->updateProxParameters(mu_eq);
+        cstr->m_set->updateProxParameters(mu_eq_);
       }
     }
 
-    /// Set penalty parameter, its inverse and propagate to merit function.
+    /// @brief Set penalty parameter, its inverse and update the merit function.
+    /// @param new_mu The new penalty parameter.
     void setPenalty(const Scalar& new_mu)
     {
-      mu_eq = new_mu;
-      mu_eq_inv = 1. / mu_eq;
-      merit_fun.setPenalty(mu_eq);
+      mu_eq_ = new_mu;
+      mu_eq_inv_ = 1. / mu_eq_;
+      merit_fun.setPenalty(mu_eq_);
     }
 
     /// Set proximal penalty parameter.
-    void setProxParam(const Scalar& new_rho)
+    void setProxParameter(const Scalar& new_rho)
     {
       rho = new_rho;
       prox_penalty.m_weights.setZero();
@@ -299,7 +284,7 @@ namespace proxnlp
       VectorXs resdl(workspace.ndx + workspace.numdual);
       resdl.setZero();
 
-      merit_fun.setPenalty(mu_eq);
+      merit_fun.setPenalty(mu_eq_);
 
       std::size_t k;
       for (k = 0; k < MAX_ITERS; k++)
@@ -330,7 +315,7 @@ namespace proxnlp
         workspace.kktMatrix.topLeftCorner(ndx, ndx)      = workspace.objectiveHessian;
         workspace.kktMatrix.topRightCorner(ndx, ndual)   = workspace.jacobians_data.transpose();
         workspace.kktMatrix.bottomLeftCorner(ndual, ndx) = workspace.jacobians_data;
-        workspace.kktMatrix.bottomRightCorner(ndual, ndual).diagonal().setConstant(-mu_eq);
+        workspace.kktMatrix.bottomRightCorner(ndual, ndual).diagonal().setConstant(-mu_eq_);
 
         // add jacobian-vector products to gradients
         workspace.meritGradient      = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
@@ -385,8 +370,6 @@ namespace proxnlp
           return;
         }
 
-        invokeCallbacks(workspace, results);
-
         /* Compute the step */
 
         // factorization
@@ -435,28 +418,30 @@ namespace proxnlp
           }
         }
 
-        workspace.pdStep = -workspace.kktRhs;
-        workspace.ldlt_.solveInPlace(workspace.pdStep);
-        resdl = workspace.kktMatrix * workspace.pdStep + workspace.kktRhs;
+        workspace.pd_step = -workspace.kktRhs;
+        workspace.ldlt_.solveInPlace(workspace.pd_step);
+        resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
 
         assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
 
         //// Take the step
 
-        workspace.d1 = \
-                  workspace.meritGradient.dot(workspace.pdStep.head(ndx)) \
-                  - workspace.subproblemDualErr_data.dot(workspace.pdStep.tail(ndual));
+        workspace.dmerit_dir = \
+                  workspace.meritGradient.dot(workspace.pd_step.head(ndx)) \
+                  - workspace.subproblemDualErr_data.dot(workspace.pd_step.tail(ndual));
 
         if (verbose >= 1)
         {
           fmt::print(" | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
-                     math::infty_norm(resdl), workspace.d1, conditioning_, delta);
+                     math::infty_norm(resdl), workspace.dmerit_dir, conditioning_, delta);
         }
 
-        Scalar alpha_opt;
-        ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.d1, this->verbose, alpha_opt);
+        Scalar& alpha_opt = workspace.alpha_opt;
+        ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, this->verbose, alpha_opt);
         results.xOpt = workspace.xTrial;
         results.lamsOpt_data = workspace.lamsTrial_data;
+
+        invokeCallbacks(workspace, results);
 
         results.numIters++;
         if (results.numIters >= MAX_ITERS)
@@ -472,49 +457,6 @@ namespace proxnlp
       return;
     }
 
-    /// Check the matrix has the desired inertia.
-    /// @param    kktMatrix The KKT matrix.
-    /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
-    InertiaFlag checkInertia(const Eigen::VectorXi& signature, const Scalar delta) const
-    {
-      const int ndx = manifold.ndx();
-      const int numc = problem->getTotalConstraintDim();
-      const long n = signature.size();
-      int numpos = 0;
-      int numneg = 0;
-      int numzer = 0;
-      for (long i = 0; i < n; i++)
-      {
-        switch (signature(i))
-        {
-        case 1 : numpos++;
-                 break;
-        case 0 : numzer++;
-                 break;
-        case -1: numneg++;
-                 break;
-        default: throw std::runtime_error("Matrix signature should only have Os, 1s, and -1s.");
-        }
-      }
-      InertiaFlag flag = OK;
-      bool print_info = verbose >= 2;
-      if (print_info) fmt::print(" | Inertia: {:d}+, {:d}, {:d}-", numpos, numzer, numneg);
-      bool pos_ok = numpos == ndx;
-      bool neg_ok = numneg == numc;
-      bool zer_ok = numzer == 0;
-      if (!(pos_ok && neg_ok && zer_ok))
-      {
-        if (print_info) fmt::print(" is incorrect");
-        if (!zer_ok) flag = ZEROS;
-        else flag = BAD;
-      } else {
-        if (print_info) fmt::print(fmt::fg(fmt::color::pale_green), " OK");
-      }
-      if (print_info)
-        fmt::print(" (reg={:>.3g})\n", delta);
-      return flag;
-    }
-
     /**
      * Update primal-dual subproblem tolerances upon
      * failure (insufficient primal feasibility)
@@ -523,8 +465,8 @@ namespace proxnlp
      */
     void updateToleranceFailure()
     {
-      prim_tol = prim_tol0 * std::pow(mu_eq, prim_alpha);
-      inner_tol = inner_tol0 * std::pow(mu_eq, dual_alpha);
+      prim_tol = prim_tol0 * std::pow(mu_eq_, prim_alpha);
+      inner_tol = inner_tol0 * std::pow(mu_eq_, dual_alpha);
     }
 
     /**
@@ -533,8 +475,8 @@ namespace proxnlp
      */
     void updateToleranceSuccess()
     {
-      prim_tol = prim_tol * std::pow(mu_eq, prim_beta);
-      inner_tol = inner_tol * std::pow(mu_eq, dual_beta);
+      prim_tol = prim_tol * std::pow(mu_eq_, prim_beta);
+      inner_tol = inner_tol * std::pow(mu_eq_, dual_beta);
     }
 
     /// @brief  Accept Lagrange multiplier estimates.
@@ -547,45 +489,13 @@ namespace proxnlp
      * Evaluate the primal residual vectors, and compute
      * the first-order and primal-dual Lagrange multiplier estimates.
      */
-    void computeResidualsAndMultipliers(
-      const ConstVectorRef& x,
-      const ConstVectorRef& lams_data,
-      Workspace& workspace) const
-    {
-      problem->evaluate(x, workspace);
-      workspace.lamsPlusPre_data = workspace.lamsPrev_data + mu_eq_inv * workspace.cstr_values_data;
-      // project multiplier estimate
-      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
-      {
-        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
-        workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
-      }
-      workspace.subproblemDualErr_data = mu_eq * (workspace.lamsPlus_data - lams_data);
-      workspace.lamsPDAL_data = 2 * workspace.lamsPlus_data - lams_data;
-    }
+    void computeResidualsAndMultipliers(const ConstVectorRef& x, const ConstVectorRef& lams_data, Workspace& workspace) const;
 
     /**
      * Evaluate the derivatives (Jacobian, and vector-Hessian products) of the
      * constraint residuals.
      */
-    void computeResidualDerivatives(
-      const ConstVectorRef& x,
-      Workspace& workspace) const
-    {
-      problem->computeDerivatives(x, workspace);
-      problem->m_cost.computeHessian(x, workspace.objectiveHessian);
-      for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
-      {
-        const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
-        cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
-
-        bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) || !(use_gauss_newton); 
-        if (use_vhp)
-        {
-          cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessianProd[i]);
-        }
-      }
-    } 
+    void computeResidualDerivatives(const ConstVectorRef& x, Workspace& workspace) const;
 
     /**
      * Take a trial step.
@@ -596,10 +506,8 @@ namespace proxnlp
      */
     static void tryStep(const Manifold& manifold, Workspace& workspace, const Results& results, Scalar alpha)
     {
-      const int ndx = manifold.ndx();
-      const long ntot = workspace.kktRhs.rows();
-      manifold.integrate(results.xOpt, alpha * workspace.pdStep.head(ndx), workspace.xTrial);
-      workspace.lamsTrial_data = results.lamsOpt_data + alpha * workspace.pdStep.tail(ntot - ndx);
+      manifold.integrate(results.xOpt, alpha * workspace.prim_step, workspace.xTrial);
+      workspace.lamsTrial_data = results.lamsOpt_data + alpha * workspace.dual_step;
     }
 
     void invokeCallbacks(Workspace& workspace, Results& results)
@@ -610,7 +518,14 @@ namespace proxnlp
       }
     }
 
+  protected:
+    /// Check the matrix has the desired inertia.
+    /// @param    kktMatrix The KKT matrix.
+    /// @param    signature The computed inertia as a vector of ints valued -1, 0, or 1.
+    InertiaFlag checkInertia(const Eigen::VectorXi& signature, const Scalar delta) const;
+
   };
 
 } // namespace proxnlp
 
+#include "proxnlp/solver-base.hxx"

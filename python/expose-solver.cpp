@@ -67,7 +67,7 @@ namespace proxnlp
                                          const ConstVectorRef&, const std::vector<VectorRef>&))&Solver::solve,
              bp::args("workspace", "results", "x0", "lams0"))
         .def("set_penalty",    &Solver::setPenalty,   bp::args("self", "mu"), "Set the augmented Lagrangian penalty parameter.")
-        .def("set_prox_param", &Solver::setProxParam, bp::args("self", "rho"), "Set the primal proximal penalty parameter.")
+        .def("set_prox_param", &Solver::setProxParameter, bp::args("self", "rho"), "Set the primal proximal penalty parameter.")
         .def("set_tolerance",  &Solver::setTolerance, bp::args("self", "tol"), "Set the solver's target tolerance.")
         .add_property("maxiters",
                       &Solver::getMaxIters,
@@ -77,7 +77,7 @@ namespace proxnlp
         .def_readonly("prim_beta", &Solver::prim_beta)
         .def_readonly("dual_alpha", &Solver::dual_alpha)
         .def_readonly("dual_beta", &Solver::dual_beta)
-        .def_readonly("mu_min", &Solver::mu_lower)
+        .def_readonly("mu_min", &Solver::mu_lower_)
         .def_readonly("alpha_min", &Solver::alpha_min)
         .def_readonly("armijo_c1", &Solver::armijo_c1)
         .def_readwrite("ls_beta", &Solver::ls_beta)

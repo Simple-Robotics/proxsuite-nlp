@@ -33,8 +33,10 @@ namespace proxnlp
     MatrixXs kktMatrix;
     /// KKT iteration right-hand side.
     VectorXs kktRhs;
-    /// Primal-dual step.
-    VectorXs pdStep;
+    /// Primal-dual step \f$\delta w = (\delta x, \delta\lambda)\f$.
+    VectorXs pd_step;
+    VectorRef prim_step;
+    VectorRef dual_step;
     /// Signature of the matrix
     Eigen::VectorXi signature;
 
@@ -91,17 +93,21 @@ namespace proxnlp
 
     std::vector<Scalar> ls_alphas;
     std::vector<Scalar> ls_values;
-    Scalar d1;
+    Scalar alpha_opt;
+    /// Merit function derivative in descent direction
+    Scalar dmerit_dir = 0.;
 
     WorkspaceTpl(const int nx,
-               const int ndx,
-               const Problem& prob)
+                 const int ndx,
+                 const Problem& prob)
       : ndx(ndx)
       , numblocks(prob.getNumConstraints())
       , numdual(prob.getTotalConstraintDim())
       , kktMatrix(ndx + numdual, ndx + numdual)
       , kktRhs(ndx + numdual)
-      , pdStep(ndx + numdual)
+      , pd_step(ndx + numdual)
+      , prim_step(pd_step.head(ndx))
+      , dual_step(pd_step.tail(numdual))
       , signature(ndx + numdual)
       , ldlt_(kktMatrix)
       , xPrev(nx)
@@ -128,7 +134,7 @@ namespace proxnlp
     {
       kktMatrix.setZero();
       kktRhs.setZero();
-      pdStep.setZero();
+      pd_step.setZero();
       signature.setZero();
 
       xPrev.setZero();

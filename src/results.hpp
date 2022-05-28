@@ -37,6 +37,7 @@ namespace proxnlp
     VectorXs xOpt;
     VectorXs lamsOpt_data;
     VectorOfRef lamsOpt;
+    /// Current active set of the algorithm.
     std::vector<VecBool> activeSet;
     Scalar dualInfeas = 0.;
     Scalar primalInfeas = 0.;
