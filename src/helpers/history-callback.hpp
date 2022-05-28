@@ -33,7 +33,9 @@ namespace proxnlp
         std::vector<Scalar> dual_infeas;
         std::vector<VectorXs> ls_alphas;
         std::vector<VectorXs> ls_values;
-        std::vector<Scalar> d1_s;
+        /// Linesearch step-lengths
+        std::vector<Scalar> alphas;
+        std::vector<Scalar> dmerit_dir;
       } storage;
 
       void call(const WorkspaceTpl<Scalar>& workspace,
@@ -55,7 +57,8 @@ namespace proxnlp
         const std::size_t asize = workspace.ls_alphas.size();
         storage.ls_alphas.emplace_back(Eigen::Map<const VectorXs>(&workspace.ls_alphas[0], asize));
         storage.ls_values.emplace_back(Eigen::Map<const VectorXs>(&workspace.ls_values[0], asize));
-        storage.d1_s.push_back(workspace.d1);
+        storage.alphas.push_back(workspace.alpha_opt);
+        storage.dmerit_dir.push_back(workspace.dmerit_dir);
       }
 
     protected:

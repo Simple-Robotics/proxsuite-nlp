@@ -50,7 +50,8 @@ namespace proxnlp
           .def_readonly("dual_infeas", &history_storage_t::dual_infeas)
           .def_readonly("ls_alphas", &history_storage_t::ls_alphas)
           .def_readonly("ls_values", &history_storage_t::ls_values)
-          .def_readonly("d1_s", &history_storage_t::d1_s)
+          .def_readonly("alphas", &history_storage_t::alphas)
+          .def_readonly("dmerit_dir", &history_storage_t::dmerit_dir)
           ;
       }
     }    
