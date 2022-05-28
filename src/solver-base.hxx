@@ -86,27 +86,39 @@ namespace proxnlp
       const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
       workspace.lamsPlus[i] = cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
     }
-    workspace.subproblemDualErr_data = mu_eq_ * (workspace.lamsPlus_data - lams_data);
+    workspace.dual_prox_err_data = mu_eq_ * (workspace.lamsPlus_data - lams_data);
     workspace.lamsPDAL_data = 2 * workspace.lamsPlus_data - lams_data;
   }
 
+  /// Compute problem derivatives
   template<typename S>
   void SolverTpl<S>::computeResidualDerivatives(
     const ConstVectorRef& x,
-    Workspace& workspace) const
+    Workspace& workspace,
+    bool second_order) const
   {
     problem->computeDerivatives(x, workspace);
-    problem->m_cost.computeHessian(x, workspace.objectiveHessian);
+    if (second_order)
+    {
+      problem->m_cost.computeHessian(x, workspace.objectiveHessian);
+
+    }
     for (std::size_t i = 0; i < problem->getNumConstraints(); i++)
     {
       const typename Problem::ConstraintPtr& cstr = problem->getConstraint(i);
       cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i], workspace.cstrJacobians[i]);
 
-      bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) || !(use_gauss_newton); 
-      if (use_vhp)
+      bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) || !(use_gauss_newton);
+      if (second_order && use_vhp)
       {
         cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i], workspace.cstrVectorHessianProd[i]);
       }
+    }
+    if (rho_ > 0.)
+    {
+      prox_penalty.computeGradient(x, workspace.prox_grad);
+      if (second_order)
+        prox_penalty.computeHessian(x, workspace.prox_hess);
     }
   } 
 

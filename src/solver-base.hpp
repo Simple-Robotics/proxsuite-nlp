@@ -57,7 +57,7 @@ namespace proxnlp
     Scalar inner_tol = inner_tol0;
     Scalar prim_tol = prim_tol0;
     Scalar rho_init;                        // Initial primal proximal penalty parameter.
-    Scalar rho = rho_init;                  // Primal proximal penalty parameter.
+    Scalar rho_ = rho_init;                  // Primal proximal penalty parameter.
     Scalar mu_eq_init;                      // Initial penalty parameter.
     Scalar mu_eq_ = mu_eq_init;             // Penalty parameter.
     Scalar mu_eq_inv_ = 1. / mu_eq_;        // Inverse penalty parameter.
@@ -162,7 +162,7 @@ namespace proxnlp
       while (results.numIters < MAX_ITERS)
       {
         results.mu = mu_eq_;
-        results.rho = rho;
+        results.rho = rho_;
         fmt::print(fmt::fg(fmt::color::yellow),
                    "[Outer iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n",
                    i, inner_tol, prim_tol, mu_eq_);
@@ -248,9 +248,9 @@ namespace proxnlp
     /// Set proximal penalty parameter.
     void setProxParameter(const Scalar& new_rho)
     {
-      rho = new_rho;
+      rho_ = new_rho;
       prox_penalty.m_weights.setZero();
-      prox_penalty.m_weights.diagonal().setConstant(rho);
+      prox_penalty.m_weights.diagonal().setConstant(rho_);
     }
 
     /// @brief    Add a callback to the solver instance.
@@ -295,10 +295,10 @@ namespace proxnlp
         results.value = problem->m_cost.call(results.xOpt);
 
         computeResidualsAndMultipliers(results.xOpt, results.lamsOpt_data, workspace);
-        computeResidualDerivatives(results.xOpt, workspace);
+        computeResidualDerivatives(results.xOpt, workspace, true);
 
         results.merit = merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
-        if (rho > 0.)
+        if (rho_ > 0.)
           results.merit += prox_penalty.call(results.xOpt);
 
         if (verbose >= 0)
@@ -318,19 +318,20 @@ namespace proxnlp
         workspace.kktMatrix.bottomRightCorner(ndual, ndual).diagonal().setConstant(-mu_eq_);
 
         // add jacobian-vector products to gradients
-        workspace.meritGradient      = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
         workspace.kktRhs.head(ndx)   = workspace.objectiveGradient + workspace.jacobians_data.transpose() * results.lamsOpt_data;
-        workspace.kktRhs.tail(ndual) = workspace.subproblemDualErr_data;
+        workspace.kktRhs.tail(ndual) = workspace.dual_prox_err_data;
 
         // add proximal penalty terms
-        if (rho > 0.)
+        if (rho_ > 0.)
         {
-          prox_penalty.computeGradient(results.xOpt, workspace.prox_grad);
-          prox_penalty.computeHessian(results.xOpt, workspace.prox_hess);
-          workspace.meritGradient.noalias() += workspace.prox_grad;
           workspace.kktRhs.head(ndx).noalias() += workspace.prox_grad;
           workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() += workspace.prox_hess;
         }
+
+        workspace.meritGradient = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+        workspace.meritGradient.noalias() += workspace.prox_grad;
+        workspace.dmerit_dir = workspace.meritGradient.dot(workspace.prim_step) \
+          - workspace.dual_prox_err_data.dot(workspace.dual_step);
 
         for (std::size_t i = 0; i < num_c; i++)
         {
@@ -346,7 +347,7 @@ namespace proxnlp
 
         // Compute dual residual and infeasibility
         workspace.dualResidual = workspace.kktRhs.head(ndx);
-        if (rho > 0.)
+        if (rho_ > 0.)
           workspace.dualResidual.noalias() -= workspace.prox_grad;
 
         results.dualInfeas = math::infty_norm(workspace.dualResidual);
@@ -428,10 +429,6 @@ namespace proxnlp
 
         //// Take the step
 
-        workspace.dmerit_dir = \
-                  workspace.meritGradient.dot(workspace.pd_step.head(ndx)) \
-                  - workspace.subproblemDualErr_data.dot(workspace.pd_step.tail(ndual));
-
         if (verbose >= 1)
         {
           fmt::print(" | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
@@ -488,16 +485,21 @@ namespace proxnlp
     }
 
     /** 
-     * Evaluate the primal residual vectors, and compute
-     * the first-order and primal-dual Lagrange multiplier estimates.
+     * Evaluate the problem data, as well as the proximal/projection operators,
+     * and the first-order & primal-dual multiplier estimates.
+     *
+     * @param workspace Problem workspace.
      */
     void computeResidualsAndMultipliers(const ConstVectorRef& x, const ConstVectorRef& lams_data, Workspace& workspace) const;
 
     /**
-     * Evaluate the derivatives (Jacobian, and vector-Hessian products) of the
-     * constraint residuals.
+     * Evaluate the derivatives (cost gradient, Hessian, constraint Jacobians, vector-Hessian products)
+     * of the problem data.
+     * 
+     * @param workspace Problem workspace.
+     * @param second_order Whether to compute the second-order information; set to false for e.g. linesearch.
      */
-    void computeResidualDerivatives(const ConstVectorRef& x, Workspace& workspace) const;
+    void computeResidualDerivatives(const ConstVectorRef& x, Workspace& workspace, bool second_order) const;
 
     /**
      * Take a trial step.
