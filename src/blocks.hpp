@@ -2,7 +2,7 @@
 /// @author Sarah El-Kazdadi
 /// @brief Routines for block-sparse (notably, KKT-type) matrix LDLT factorisation.
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include <Eigen/Core>
+#include "proxnlp/math.hpp"
 #include <type_traits>
 
 #include <vector>
@@ -16,11 +16,7 @@ namespace block_chol {
 
 using Scalar = double;
 using MatrixRef = Eigen::Map<
-		Eigen::Matrix< //
-				Scalar,
-				Eigen::Dynamic,
-				Eigen::Dynamic,
-				Eigen::ColMajor>,
+		proxnlp::math_types<Scalar>::MatrixXs,
 		Eigen::Unaligned,
 		Eigen::Stride<Eigen::Dynamic, 1>>;
 
@@ -292,9 +288,9 @@ struct SymbolicBlockMatrix {
 		for (isize i = 0; i < nrows; ++i) {
 			for (isize j = 0; j < ncols; ++j) {
 				if (buf[usize(i * ncols + j)]) {
-					std::cout << "■";
+					std::cout << "█";
 				} else {
-					std::cout << "□";
+					std::cout << "░";
 				}
 			}
 			std::cout << '\n';
