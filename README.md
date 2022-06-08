@@ -1,6 +1,6 @@
 # A nonlinear programming solver on manifolds
 
-This package is a C++ implementation of a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds.
+This package is a C++11 implementation of a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds.
 
 Copyright (C) 2022 LAAS-CNRS, INRIA
 
