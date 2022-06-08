@@ -37,47 +37,39 @@ namespace proxnlp
   }
 
   /// @brief  Basic backtracking Armijo line-search strategy.
-  template<typename _Scalar>
+  template<typename _Scalar, typename Fn>
   struct ArmijoLinesearch
   {
     using Scalar = _Scalar;
-    using Workspace = WorkspaceTpl<Scalar>;
-    using Results = ResultsTpl<Scalar>;
-    using Solver = SolverTpl<Scalar>;
 
     /// Directional derivative threshold
     static constexpr Scalar dphi_tresh = 1e-13;
 
-    static void run(const Solver& solver, Workspace& workspace,
-                    const Results& results, const Scalar phi0, const Scalar dphi0,
-                    VerboseLevel verbosity,
+    static void run(Fn phi,
+                    const Scalar phi0, const Scalar dphi0,
+                    const Scalar ls_beta, const Scalar armijo_c1,
+                    const Scalar alpha_min,
                     Scalar& alpha_try)
     {
       alpha_try = 1.;
-      const Scalar ls_beta = solver.ls_beta;
       Scalar phi_trial = 0., dM = 0.;
-      const Scalar armijo_c1 = solver.armijo_c1;
-
-      Solver::tryStep(solver.manifold, workspace, results, alpha_try);
-
-      // exit if directional derivative is small
-      if (std::abs(dphi0) < dphi_tresh) { return; }
 
       // try smaller and smaller step sizes
       // until Armijo condition is satisfied
 
       do
       {
-        phi_trial = solver.merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
-        phi_trial += solver.prox_penalty.call(workspace.xTrial);
+        phi_trial = phi(alpha_try);
         dM = phi_trial - phi0;
+
+        // exit if directional derivative is small
+        if (std::abs(dphi0) < dphi_tresh) { return; }
 
         if (dM <= armijo_c1 * alpha_try * dphi0) { break; }
 
-        alpha_try = std::max(alpha_try * ls_beta, solver.alpha_min);
-        Solver::tryStep(solver.manifold, workspace, results, alpha_try);
+        alpha_try = std::max(alpha_try * ls_beta, alpha_min);
 
-      } while (alpha_try > solver.alpha_min);
+      } while (alpha_try > alpha_min);
 
     }
 

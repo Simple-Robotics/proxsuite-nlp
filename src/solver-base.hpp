@@ -295,6 +295,11 @@ namespace proxnlp
 
       merit_fun.setPenalty(mu_eq_);
 
+      // lambda for evaluating the merit function
+      auto phiEval = [&](Scalar alpha) {
+        return compute_merit_for_step(*this, workspace, results, alpha);
+      };
+
       std::size_t k;
       for (k = 0; k < MAX_ITERS; k++)
       {
@@ -447,8 +452,10 @@ namespace proxnlp
 
         switch (ls_strat)
         {
-        case ARMIJO: ArmijoLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, verbose, alpha_opt);
-                     break;
+        case ARMIJO: {
+          ArmijoLinesearch<Scalar, decltype(phiEval)>::run(phiEval, results.merit, workspace.dmerit_dir, ls_beta, armijo_c1, alpha_min, alpha_opt);
+          break;
+        }
         case CUBIC_INTERP: CubicInterpLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, verbose, alpha_opt);
                         break;
         default: break;
