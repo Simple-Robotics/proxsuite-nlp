@@ -42,11 +42,11 @@ if(BUILD_PYTHON_INTERFACE)
   message(STATUS "Python examples: ${PY_EXAMPLES}")
   foreach(pyfile ${PY_EXAMPLES})
   	get_filename_component(pyfile_name ${pyfile} NAME)
-       execute_process(
-            COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${pyfile}
-            ${CMAKE_CURRENT_BINARY_DIR}/python/${pyfile_name}
-       )
+     execute_process(
+          COMMAND ${CMAKE_COMMAND} -E create_symlink
+          ${pyfile}
+          ${CMAKE_CURRENT_BINARY_DIR}/python/${pyfile_name}
+     )
   endforeach()
 
 endif(BUILD_PYTHON_INTERFACE)
