@@ -1,3 +1,6 @@
+/// @file linesearch-base.hpp
+/// @brief  Base structs for linesearch algorithms, and implements a basic Armijo back-tracking
+///         strategy.
 #pragma once
 
 #include "proxnlp/workspace.hpp"
