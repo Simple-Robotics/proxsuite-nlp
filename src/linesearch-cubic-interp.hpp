@@ -25,17 +25,19 @@ namespace proxnlp
       Scalar phi;
     };
 
-    static void run(const Solver& solver,
-                    Workspace& workspace,
-                    const Results& results,
-                    const Scalar phi0, const Scalar dphi0,
+    template<typename Fn>
+    static void run(Fn phi,
+                    const Scalar phi0,
+                    const Scalar dphi0,
                     VerboseLevel verbosity,
+                    const Scalar armijo_c1,
+                    const Scalar alpha_min,
                     Scalar& alpha_try)
     {
       auto eval = [&](auto alpha)
       {
         return ls_candidate {
-          alpha, compute_merit_for_step(solver, workspace, results, alpha)
+          alpha, phi(alpha)
         };
       };
 
@@ -43,8 +45,6 @@ namespace proxnlp
 
       ls_candidate cand0 = eval(1.);
       Scalar& a0 = cand0.alpha;
-
-      Scalar armijo_c1 = solver.armijo_c1;
 
       auto check_cond = [&](auto cand)
       {
@@ -109,7 +109,7 @@ namespace proxnlp
 
       }
 
-      alpha_try = std::max(alpha_try, solver.alpha_min);
+      alpha_try = std::max(alpha_try, alpha_min);
 
     }
 

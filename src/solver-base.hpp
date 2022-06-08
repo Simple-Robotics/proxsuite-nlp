@@ -453,11 +453,13 @@ namespace proxnlp
         switch (ls_strat)
         {
         case ARMIJO: {
-          ArmijoLinesearch<Scalar, decltype(phiEval)>::run(phiEval, results.merit, workspace.dmerit_dir, ls_beta, armijo_c1, alpha_min, alpha_opt);
+          ArmijoLinesearch<Scalar>::run(phiEval, results.merit, workspace.dmerit_dir, ls_beta, armijo_c1, alpha_min, alpha_opt);
           break;
         }
-        case CUBIC_INTERP: CubicInterpLinesearch<Scalar>::run(*this, workspace, results, results.merit, workspace.dmerit_dir, verbose, alpha_opt);
-                        break;
+        case CUBIC_INTERP: {
+          CubicInterpLinesearch<Scalar>::run(phiEval, results.merit, workspace.dmerit_dir, verbose, armijo_c1, alpha_min, alpha_opt);
+          break;
+        }
         default: break;
         }
         fmt::print(" | alph_opt={:4.3e}\n", alpha_opt);

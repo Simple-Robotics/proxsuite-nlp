@@ -37,7 +37,7 @@ namespace proxnlp
   }
 
   /// @brief  Basic backtracking Armijo line-search strategy.
-  template<typename _Scalar, typename Fn>
+  template<typename _Scalar>
   struct ArmijoLinesearch
   {
     using Scalar = _Scalar;
@@ -45,9 +45,12 @@ namespace proxnlp
     /// Directional derivative threshold
     static constexpr Scalar dphi_tresh = 1e-13;
 
+    template<typename Fn>
     static void run(Fn phi,
-                    const Scalar phi0, const Scalar dphi0,
-                    const Scalar ls_beta, const Scalar armijo_c1,
+                    const Scalar phi0,
+                    const Scalar dphi0,
+                    const Scalar ls_beta,
+                    const Scalar armijo_c1,
                     const Scalar alpha_min,
                     Scalar& alpha_try)
     {
