@@ -30,6 +30,7 @@ namespace python
       using JacobianFunType    = void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&, MatrixRef, int) const;
 
       bp::register_ptr_to_python<shared_ptr<Manifold>>();
+      bp::register_ptr_to_python<shared_ptr<const Manifold>>();
 
       bp::class_<Manifold, boost::noncopyable>(
         "ManifoldAbstract", "Manifold abstract class.", bp::no_init
