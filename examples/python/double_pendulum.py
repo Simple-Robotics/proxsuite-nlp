@@ -61,15 +61,16 @@ nsteps = int(Tf / dt)
 Tf = nsteps * dt
 print("Time horizon: {:.3g}".format(Tf))
 print("Time step   : {:.3g}".format(dt))
+print("No. of steps: {:d}".format(nsteps))
 
 nq = model.nq
-B = np.array([[1.0], [1.0]])
+B = np.array([[0.0], [1.0]])
 nu = B.shape[1]
 
 xspace = MultibodyPhaseSpace(model)
 pb_space = VectorSpace(nsteps * nu + (nsteps + 1) * (xspace.nx))
 
-u_bound = 0.4
+u_bound = 0.25
 x0 = xspace.neutral()
 theta0 = np.pi
 x0[0] = theta0
@@ -86,7 +87,6 @@ if USE_VIEWER:
     vizer.display(x0[: model.nq])
     vizer.viewer.open()
     drawer = ForceDraw(vizer)
-    drawer.set_bg()
     drawer.set_cam_angle_preset("acrobot")
 
 
@@ -120,7 +120,7 @@ class MultipleShootingProblem:
 
         w_u = 1e-2
         w_x = 1e-3
-        w_term = 1.0 * np.ones(xspace.ndx)
+        w_term = 2.0 * np.ones(xspace.ndx)
         w_term[2:] = 1e-3
         ferr = cxs[nsteps] - xtarget
         cost_expression = (
@@ -178,6 +178,7 @@ solver = proxnlp.Solver(
 solver.register_callback(callback)
 solver.maxiters = 600
 solver.use_gauss_newton = True
+solver.ls_strat = proxnlp.LinesearchStrategy.ARMIJO
 
 xu_init = pb_space.neutral()
 for t in range(nsteps + 1):
@@ -226,12 +227,25 @@ plt.hlines((-u_bound, u_bound), *times[[0, -2]], colors="k", **hlines_style)
 plt.xlabel("Time $t$")
 plt.title("Controls $u$")
 
-gss = gs0[2].subgridspec(2, 1)
+gss = gs0[2].subgridspec(2, 1, height_ratios=[3, 1])
 ax0 = plt.subplot(gss[0])
 plot_pd_errs(ax0, prim_errs, dual_errs)
 
 plt.subplot(gss[1])
 plt.plot(callback.storage.alphas, c='gray', alpha=.8, marker='.', markersize=2)
+plt.tight_layout()
+
+# plot kkt matrix
+fig, ax = plt.subplots()
+kkt_mat = workspace.kkt_matrix.copy()
+plt.imshow(kkt_mat.astype(bool), cmap=plt.cm.binary, vmin=0.)
+ntot = pb_space.ndx
+ptch = plt.Rectangle((0, 0), ntot, ntot)
+ptch.set_facecolor('#19ff1d')
+ptch.set_alpha(0.1)
+ptch.set_edgecolor('none')
+ptch.set_transform(ax.transData)
+ax.add_patch(ptch)
 
 plt.tight_layout()
 plt.show()
@@ -257,6 +271,4 @@ if USE_VIEWER:
     if args.record:
         import imageio
 
-        imageio.mimwrite(
-            args.video_file, ims=allimgs, fps=1.0 / dt, **VIDEO_CONFIG_DEFAULT
-        )
+        imageio.mimwrite(args.video_file, ims=allimgs, fps=1.0 / dt, **VIDEO_CONFIG_DEFAULT)

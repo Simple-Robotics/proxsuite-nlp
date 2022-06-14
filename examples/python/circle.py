@@ -69,6 +69,7 @@ solver = proxnlp.Solver(
     space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
 solver.use_gauss_newton = True
+# solver.ls_strat = proxnlp.LinesearchStrategy.CUBIC_INTERP
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
@@ -78,8 +79,6 @@ solver.solve(workspace, results, p1, lams0)
 
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
-
-assert results.numiters == 15  # numiters as of ef27e38
 
 
 if __name__ == "__main__":
@@ -138,9 +137,10 @@ if __name__ == "__main__":
         ls_values = ls_values[soidx]
         d1 = callback.storage.dmerit_dir[it]
         plt.figure()
-        plt.plot(ls_alphas, ls_values)
+        plt.plot(ls_alphas, ls_values, label="$\\phi(\\alpha)$")
         plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
-        plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, ls="--")
+        plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, label="armijo", ls="--")
+        plt.legend()
         plt.title("Iteration %d" % it)
 
     plt.show()
