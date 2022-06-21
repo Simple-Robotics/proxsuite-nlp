@@ -21,7 +21,7 @@ namespace proxnlp
     using Base = ManifoldAbstractTpl<Scalar, Options>;
     PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
-    const int dim_;
+    int dim_;
 
     /// @brief    Default constructor where the dimension is supplied.
     template<int N = Dim,

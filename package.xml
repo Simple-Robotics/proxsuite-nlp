@@ -10,7 +10,7 @@
 
   <build_depend>git</build_depend>
   <build_depend>doxygen</build_depend>
-  <doc_depend>doxyden</doc_depend>
+  <doc_depend>doxygen</doc_depend>
 
   <depend>python3</depend>
   <depend>python3-numpy</depend>
