@@ -34,7 +34,7 @@ namespace proxnlp
                     const Scalar alpha_min,
                     Scalar& alpha_try)
     {
-      auto eval = [&](auto alpha)
+      auto eval = [&](Scalar alpha)
       {
         return ls_candidate {
           alpha, phi(alpha)
@@ -46,7 +46,7 @@ namespace proxnlp
       ls_candidate cand0 = eval(1.);
       Scalar& a0 = cand0.alpha;
 
-      auto check_cond = [&](auto cand)
+      auto check_cond = [&](ls_candidate cand)
       {
         return (cand.phi <= phi0 + armijo_c1 * cand.alpha * dphi0) || (dphi0 < 1e-13);
       };
