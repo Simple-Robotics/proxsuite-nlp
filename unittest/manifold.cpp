@@ -131,6 +131,9 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
 
   tspace.Jintegrate(x0, dx0, J0, 0);
   tspace.Jintegrate(x0, dx0, J1, 1);
+
+  tspace.JintegrateTransport(x0, dx0, J0, 0);
+
 }
 
 
@@ -184,6 +187,11 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   auto x1 = space.rand();
   auto dx0 = space.difference(x0, x1);
   auto x1_exp = space.integrate(x0, dx0);
+  const int ndx = space.ndx();
+
+  Eigen::VectorXd J0(ndx, ndx);
+  J0.setRandom();
+  space.JintegrateTransport(x0, dx0, J0, 0);
 
 }
 #endif

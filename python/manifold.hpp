@@ -61,6 +61,9 @@ namespace python
                m.Jintegrate(x, v, Jout, arg);
                return Jout; },
              "Compute and return the Jacobian of the exp.")
+        .def("JintegrateTransport", &Manifold::JintegrateTransport,
+             bp::args("self", "x", "v", "J", "arg"),
+             "Perform parallel transport of matrix J expressed at point x+v to point x.")
         .def("Jdifference",
              +[](const Manifold& m, const ConstVectorRef x0, const ConstVectorRef& x1, int arg) {
                MatrixXs Jout(m.ndx(), m.ndx());

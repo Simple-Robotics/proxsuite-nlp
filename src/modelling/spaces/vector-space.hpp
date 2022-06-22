@@ -57,6 +57,8 @@ namespace proxnlp
       Jout.setIdentity();
     }
 
+    void JintegrateTransport(const ConstVectorRef&, const ConstVectorRef&, MatrixRef, int) const {}
+
     /* Difference */
 
     void difference_impl(const ConstVectorRef& x0,

@@ -57,11 +57,18 @@ namespace proxnlp
                    const ConstVectorRef& v,
                    VectorRef out) const;
 
-    /// @brief   Jacobian of the integation operation.
+    /// @brief    Jacobian of the integation operation.
     void Jintegrate(const ConstVectorRef& x,
                     const ConstVectorRef& v,
                     MatrixRef Jout,
                     int arg) const;
+
+    /// @brief    Perform the parallel transport operation
+    ///
+    virtual void JintegrateTransport(const ConstVectorRef& x,
+                                     const ConstVectorRef& v,
+                                     MatrixRef Jout,
+                                     int arg) const = 0;
 
     /// @brief Manifold difference/retraction operation \f$x_1 \ominus x_0\f$
     void difference(const ConstVectorRef& x0,

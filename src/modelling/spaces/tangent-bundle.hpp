@@ -49,19 +49,28 @@ namespace proxnlp
                          VectorRef out) const;
 
     void Jintegrate_impl(const ConstVectorRef& x,
-                    const ConstVectorRef& v,
-                    MatrixRef Jout,
-                    int arg) const;
+                         const ConstVectorRef& v,
+                         MatrixRef Jout,
+                         int arg) const;
+
+    virtual void JintegrateTransport(const ConstVectorRef& x,
+                                     const ConstVectorRef& v,
+                                     MatrixRef Jout,
+                                     int arg) const
+    {
+      const int nv_ = m_base.ndx();
+      m_base.JintegrateTransport(getBasePoint(x), getBaseTangent(v), Jout.topRows(nv_), arg);
+    }
 
     void Jdifference_impl(const ConstVectorRef& x0,
-                     const ConstVectorRef& x1,
-                     MatrixRef Jout,
-                     int arg) const;
+                          const ConstVectorRef& x1,
+                          MatrixRef Jout,
+                          int arg) const;
 
     virtual void interpolate_impl(const ConstVectorRef& x0,
-                             const ConstVectorRef& x1,
-                             const Scalar& u,
-                             VectorRef out) const
+                                  const ConstVectorRef& x1,
+                                  const Scalar& u,
+                                  VectorRef out) const
     {
       m_base.interpolate(getBasePoint(x0), getBasePoint(x1), u, getBasePointWrite(out));
       out.tail(m_base.ndx()) = (Scalar(1.) - u) * getBaseTangent(x0) + u * getBaseTangent(x1);

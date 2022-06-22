@@ -78,7 +78,20 @@ namespace proxnlp
                        v.tail(ndx2),
                        Jout.bottomRightCorner(ndx2, ndx2),
                        arg);
+    }
 
+    void JintegrateTransport(
+      const ConstVectorRef& x,
+      const ConstVectorRef& v,
+      MatrixRef Jout,
+      int arg) const
+    {
+      const int nx1 = left.nx();
+      const int nx2 = right.nx();
+      const int ndx1 = left.ndx();
+      const int ndx2 = right.ndx();
+      left .JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows   (ndx1), arg);
+      right.JintegrateTransport(x.tail(nx2), v.head(ndx2), Jout.bottomRows(ndx2), arg);
     }
 
     void Jdifference_impl(

@@ -65,15 +65,11 @@ namespace proxnlp
       MatrixRef J_,
       int arg) const
     {
-      const int ndxbase = m_base.ndx();
+      const int nv_ = m_base.ndx();
       J_.resize(ndx(), ndx());
       J_.setZero();
-      m_base.Jintegrate(
-        getBasePoint(x),
-        getBaseTangent(dx),
-        getBaseJacobian(J_),
-        arg);
-      J_.bottomRightCorner(ndxbase, ndxbase).setIdentity();
+      m_base.Jintegrate(getBasePoint(x), getBaseTangent(dx), getBaseJacobian(J_), arg);
+      J_.bottomRightCorner(nv_, nv_).setIdentity();
     }
 
     template<class Base>
@@ -83,7 +79,7 @@ namespace proxnlp
       MatrixRef J_,
       int arg) const
     {
-      const int ndxbase = m_base.ndx();
+      const int nv_ = m_base.ndx();
       J_.resize(ndx(), ndx());
       J_.setZero();
       m_base.Jdifference(
@@ -93,9 +89,9 @@ namespace proxnlp
         arg);
       if (arg == 0)
       {
-        J_.bottomRightCorner(ndxbase,ndxbase).diagonal().array() = Scalar(-1);
+        J_.bottomRightCorner(nv_,nv_).diagonal().array() = Scalar(-1);
       } else if (arg == 1) {
-        J_.bottomRightCorner(ndxbase,ndxbase).setIdentity();
+        J_.bottomRightCorner(nv_,nv_).setIdentity();
       }
     }
 

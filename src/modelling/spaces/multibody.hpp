@@ -69,6 +69,24 @@ namespace proxnlp
       }
     }
 
+    void JintegrateTransport(const ConstVectorRef& x,
+                    const ConstVectorRef& v,
+                    MatrixRef Jout,
+                    int arg) const
+    {
+      switch (arg)
+      {
+      case 0:
+        pin::dIntegrateTransport(m_model, x, v, Jout, pin::ARG0);
+        break;
+      case 1:
+        pin::dIntegrateTransport(m_model, x, v, Jout, pin::ARG1);
+        break;
+      default:
+        break;
+      }
+    }
+
     void difference_impl(const ConstVectorRef& x0,
                     const ConstVectorRef& x1,
                     VectorRef vout) const
