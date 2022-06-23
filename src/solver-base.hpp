@@ -24,11 +24,29 @@
 namespace proxnlp
 {
 
-  enum LinesearchStrategy
+  template<typename Scalar>
+  Scalar compute_merit_for_step(const SolverTpl<Scalar>& solver, WorkspaceTpl<Scalar>& workspace, const ResultsTpl<Scalar>& results, const Scalar a0)
   {
-    ARMIJO,
-    CUBIC_INTERP
-  };
+    SolverTpl<Scalar>::tryStep(solver.manifold, workspace, results, a0);
+    return solver.merit_fun(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev) + solver.prox_penalty.call(workspace.xTrial);
+  }
+
+  /// Recompute the line-search directional derivative at the current trial point.
+  ///
+  /// @param solver Solver instance; tied to the merit function and derivatives evaluation.
+  /// @param workspace Problem workspace; the trial point is a data member.
+  template<typename Scalar>
+  Scalar recompute_merit_derivative_at_trial_point(const SolverTpl<Scalar>& solver, WorkspaceTpl<Scalar>& workspace)
+  {
+    solver.computeResidualsAndMultipliers(workspace.xTrial, workspace.lamsTrial, workspace.lamsPrev);
+    solver.computeResidualDerivatives(workspace.xTrial, workspace, false);
+
+    workspace.meritGradient = workspace.objectiveGradient + workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+    workspace.meritGradient.noalias() += workspace.prox_grad;
+    Scalar d1_new = workspace.meritGradient.dot(workspace.prim_step) \
+      - workspace.dual_prox_err_data.dot(workspace.dual_step);
+    return d1_new;
+  }
 
   template<typename _Scalar>
   class SolverTpl

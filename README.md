@@ -23,10 +23,10 @@ cmake --build build/ --config Release --target install
 
 * CMake (with the [JRL CMake modules](https://github.com/jrl-umi3218/jrl-cmakemodules))
 * Eigenpy>=2.7.2 ([GitHub](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/eigenpy))
-* Pinocchio>=2.9.1
+* Pinocchio>=2.9.1 ([GitHub](https://github.com/stack-of-tasks/eigenpy))
 * Eigen>=3.3.7
-* [fmtlib](https://github.com/fmtlib/fmt) version 8.1.1
-* Boost>=1.71
+* [fmtlib](https://github.com/fmtlib/fmt)>=6.1.2
+* [Boost](https://www.boost.org/)>=1.71
 * [Benchmark](https://github.com/google/benchmark)>=1.6.1
 
 For easy dependency management, I suggest using the [conda](https://github.com/conda/conda) package manager.
