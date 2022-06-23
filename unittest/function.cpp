@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(test_linear)
   A.topLeftCorner(2, 2).setConstant(0.5);
   Eigen::Vector4d b;
   b.setRandom();
-  LinearFunction<double> res(A, b);
+  LinearFunctionTpl<double> res(A, b);
 
   Eigen::Vector4d x0, x1;
   x0.setZero();
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_compose)
   Vector_t b;
   A.setRandom();
   b.setRandom();
-  using ResType = LinearFunction<double>;
+  using ResType = LinearFunctionTpl<double>;
   ResType res1(A, b);
   
   Vector_t x0;

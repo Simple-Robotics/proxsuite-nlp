@@ -29,7 +29,7 @@ namespace python
     using context::ConstVectorRef;
     using context::Manifold;
 
-    expose_function<LinearFunction<Scalar>>(
+    expose_function<LinearFunctionTpl<Scalar>>(
       "LinearFunction", "Residual f(x) = Ax + b.",
       bp::init<MatrixXs, VectorXs>(bp::args("A", "b")));
 

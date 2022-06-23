@@ -50,7 +50,7 @@ int submain()
   Eigen::VectorXd b(M);
   b.setRandom();
 
-  LinearFunction<double> res1(A, b);
+  LinearFunctionTpl<double> res1(A, b);
 
   QuadraticDistanceCost<double> cost(space, space.neutral(), Q_);
 

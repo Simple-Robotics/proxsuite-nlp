@@ -13,7 +13,7 @@ namespace proxnlp
    * @brief Linear residuals \f$r(x) = Ax + b\f$.
    */
   template<typename _Scalar>
-  struct LinearFunction : C2FunctionTpl<_Scalar>
+  struct LinearFunctionTpl : C2FunctionTpl<_Scalar>
   {
     using Scalar = _Scalar;
     PROXNLP_FUNCTION_TYPEDEFS(Scalar);
@@ -24,7 +24,7 @@ namespace proxnlp
     const MatrixXs mat;
     const VectorXs b;
 
-    LinearFunction(const ConstMatrixRef& A, const ConstVectorRef& b)
+    LinearFunctionTpl(const ConstMatrixRef& A, const ConstVectorRef& b)
       : Base((int)A.cols(), (int)A.cols(), (int)A.rows()),
         mat(A),
         b(b) {}
@@ -55,7 +55,7 @@ namespace proxnlp
 
     LinearFunctionDifferenceToPoint(const M& manifold, const ConstVectorRef& target,
                         const ConstMatrixRef& A, const ConstVectorRef& b)
-                        : Base(LinearFunction<Scalar>(A, b),
+                        : Base(LinearFunctionTpl<Scalar>(A, b),
                                ManifoldDifferenceToPoint<Scalar>(manifold, target)
                                ) {}
 
