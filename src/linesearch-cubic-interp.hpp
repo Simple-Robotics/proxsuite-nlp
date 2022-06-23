@@ -19,11 +19,7 @@ namespace proxnlp
     using Solver = SolverTpl<Scalar>;
     using Workspace = WorkspaceTpl<Scalar>;
     using Results = ResultsTpl<Scalar>;
-    struct ls_candidate
-    {
-      Scalar alpha;
-      Scalar phi;
-    };
+    using ls_candidate = ls_candidate_tpl<Scalar>;
 
     template<typename Fn>
     static void run(Fn phi,

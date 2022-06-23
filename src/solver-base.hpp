@@ -1,4 +1,5 @@
-/** @file solver-base.hpp
+/**
+ * @file solver-base.hpp
  * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
  */
 #pragma once
@@ -13,7 +14,6 @@
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "proxnlp/linesearch-base.hpp"
-#include "proxnlp/linesearch-cubic-interp.hpp"
 
 #include <cassert>
 
@@ -471,7 +471,7 @@ namespace proxnlp
         switch (ls_strat)
         {
         case ARMIJO: {
-          ArmijoLinesearch<Scalar>::run(phiEval, results.merit, workspace.dmerit_dir, ls_beta, armijo_c1, alpha_min, alpha_opt);
+          ArmijoLinesearch<Scalar>::run(phiEval, results.merit, workspace.dmerit_dir, verbose, ls_beta, armijo_c1, alpha_min, alpha_opt);
           break;
         }
         case CUBIC_INTERP: {
