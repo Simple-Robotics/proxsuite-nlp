@@ -1,6 +1,6 @@
-
-INPUT                   = @PROJECT_SOURCE_DIR@/doc \
-                          @PROJECT_SOURCE_DIR@/src
+INPUT                   = @CMAKE_SOURCE_DIR@/doc \
+                          @CMAKE_SOURCE_DIR@/src \
+                          @CMAKE_SOURCE_DIR@/README.md
 
 RECURSIVE               = YES
 
@@ -8,7 +8,7 @@ FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.dox *.md *.py
 
 # Document members in declaration order
 SORT_MEMBER_DOCS        = NO
-SORT_BRIEF_DOCS         = YES
+SORT_BRIEF_DOCS         = NO
 SORT_MEMBERS_CTORS_1ST  = YES
 
 GENERATE_TESTLIST       = YES
@@ -24,6 +24,7 @@ PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
 
 FULL_PATH_NAMES         = YES
 EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
+# Do not show source files
 EXCLUDE_PATTERNS        = *.hxx
 
 INCLUDE_PATH            = @PROJECT_BINARY_DIR@/include
@@ -32,6 +33,7 @@ EXCLUDE_SYMLINKS        = YES
 
 EXAMPLE_PATH            = @PROJECT_SOURCE_DIR@/examples
 
+EXTRA_PACKAGES          = {bm,stmaryrd}
 FORMULA_MACROFILE       = @PROJECT_SOURCE_DIR@/doc/macros.inc
 
 GENERATE_TREEVIEW       = YES
@@ -54,3 +56,10 @@ MATHJAX_FORMAT          = SVG
 SOURCE_BROWSER          = YES
 
 ALPHABETICAL_INDEX      = YES
+
+USE_MDFILE_AS_MAINPAGE  = README.md
+
+BUILTIN_STL_SUPPORT     = YES
+HAVE_DOT                = YES
+DOT_IMAGE_FORMAT        = SVG
+DOT_TRANSPARENT         = YES

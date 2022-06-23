@@ -1,8 +1,7 @@
-# A nonlinear programming solver on manifolds
+# proxnlp: An augmented Lagrangian nonlinear solver on manifolds
 
-This package is a C++11 implementation of a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds.
-
-Copyright (C) 2022 LAAS-CNRS, INRIA
+`proxnlp` is a C++11 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds,
+as well as some modelling tools.
 
 ## Building from source
 
@@ -50,3 +49,7 @@ For easy dependency management, I suggest using the [conda](https://github.com/c
     cd build/
     make doc
     ```
+
+# Credits
+
+**Copyright (C) 2022 LAAS-CNRS, INRIA**
