@@ -2,10 +2,6 @@
 <package format="3">
   <name>proxnlp</name>
   <version>0.2.3</version>
-  <description>
-    A primal-dual augmented Lagrangian-type algorithm
-    for nonlinear optimization on manifolds.
-  </description>
   <maintainer email="wilson.jallet@laas.fr">Wilson Jallet</maintainer>
 
   <build_depend>git</build_depend>
