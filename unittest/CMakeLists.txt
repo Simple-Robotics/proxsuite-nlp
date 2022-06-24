@@ -6,7 +6,7 @@ set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 ADD_PROJECT_DEPENDENCY(Boost COMPONENTS unit_test_framework REQUIRED)
-find_package(benchmark REQUIRED)
+ADD_PROJECT_DEPENDENCY(benchmark REQUIRED)
 
 
 macro(ADD_TEST_CFLAGS test_name flag)

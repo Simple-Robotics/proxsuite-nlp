@@ -75,7 +75,7 @@ void bm_unblocked(benchmark::State& s) {
 BENCHMARK(bm_unblocked);
 BENCHMARK(bm_blocked);
 
-auto main(int argc, char** argv) -> int {
+int main(int argc, char** argv) {
 	using block_chol::backend::ref;
 
 	fmt::print("Input matrix pattern:\n");
@@ -130,5 +130,4 @@ auto main(int argc, char** argv) -> int {
 		return 1;
 	}
 	benchmark::RunSpecifiedBenchmarks();
-	benchmark::Shutdown();
 }

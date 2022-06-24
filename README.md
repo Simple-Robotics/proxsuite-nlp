@@ -27,7 +27,7 @@ cmake --build build/ --config Release --target install
 * Eigen>=3.3.7
 * [fmtlib](https://github.com/fmtlib/fmt)>=6.1.2
 * [Boost](https://www.boost.org/)>=1.71
-* [Benchmark](https://github.com/google/benchmark)>=1.6.1
+* [Benchmark](https://github.com/google/benchmark)>=1.5.0
 
 For easy dependency management, I suggest using the [conda](https://github.com/conda/conda) package manager.
 
