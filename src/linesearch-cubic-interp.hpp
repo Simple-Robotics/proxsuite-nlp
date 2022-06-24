@@ -67,9 +67,11 @@ namespace proxnlp
         return;
       }
 
+      using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
+
       // if not sufficient: use cubic interpolation
       Eigen::Matrix<Scalar, 2, 2> alphMat;
-      Eigen::Vector2<Scalar> rhs;
+      Vector2s rhs;
 
       for (int i = 0; i < 10; i++)
       {
@@ -84,7 +86,7 @@ namespace proxnlp
         rhs(1) = cand0.phi - phi0 - dphi0 * a0;
         alphMat.noalias() = alphMat / den;
 
-        Eigen::Vector2<Scalar> newCoeffs = alphMat.fullPivLu().solve(rhs);
+        Vector2s newCoeffs = alphMat.fullPivLu().solve(rhs);
 
         Scalar c3 = newCoeffs(0);
         Scalar c2 = newCoeffs(1);
