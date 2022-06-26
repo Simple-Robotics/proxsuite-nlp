@@ -3,6 +3,7 @@
 #include <pinocchio/fwd.hpp>
 #include "proxnlp/python/fwd.hpp"
 #include "proxnlp/manifold-base.hpp"
+#include "proxnlp/modelling/spaces/cartesian-product.hpp"
 
 
 namespace proxnlp
@@ -10,31 +11,27 @@ namespace proxnlp
 namespace python
 {
 
-  namespace internal
-  {
+namespace internal
+{
 
-    
-    /// Expose the base manifold type
-    void exposeBaseManifold()
-    {
-      using context::Scalar;
-      using context::VectorXs;
-      using context::VectorRef;
-      using context::ConstVectorRef;
-      using context::MatrixXs;
-      using context::MatrixRef;
-      using context::Manifold;
 
-      using BinaryFunTypeRet = VectorXs(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
-      using BinaryFunType    = void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
-      using JacobianFunType    = void(Manifold::*)(const ConstVectorRef&,const ConstVectorRef&, MatrixRef, int) const;
+/// Expose the base manifold type
+void exposeBaseManifold()
+{
+    using context::Scalar;
+    using context::VectorXs;
+    using context::VectorRef;
+    using context::ConstVectorRef;
+    using context::MatrixXs;
+    using context::MatrixRef;
+    using context::Manifold;
 
-      bp::register_ptr_to_python<shared_ptr<Manifold>>();
-      bp::register_ptr_to_python<shared_ptr<const Manifold>>();
+    using BinaryFunTypeRet = VectorXs(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&) const;
+    using BinaryFunType    = void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, VectorRef) const;
+    using JacobianFunType  = void(Manifold::*)(const ConstVectorRef&, const ConstVectorRef&, MatrixRef, int) const;
 
-      bp::class_<Manifold, boost::noncopyable>(
-        "ManifoldAbstract", "Manifold abstract class.", bp::no_init
-      )
+    bp::class_<Manifold, shared_ptr<Manifold>, boost::noncopyable>(
+        "ManifoldAbstract", "Manifold abstract class.", bp::no_init)
         .add_property("nx", &Manifold::nx,  "Manifold representation dimension.")
         .add_property("ndx",&Manifold::ndx, "Tangent space dimension.")
         .def("neutral", &Manifold::neutral, "Get the neutral point from the manifold (if a Lie group).")
@@ -57,26 +54,27 @@ namespace python
              "Compute the Jacobian of the log operator.")
         .def("Jintegrate",
              +[](const Manifold& m, const ConstVectorRef x, const ConstVectorRef& v, int arg) {
-               MatrixXs Jout(m.ndx(), m.ndx());
-               m.Jintegrate(x, v, Jout, arg);
-               return Jout; },
+                MatrixXs Jout(m.ndx(), m.ndx());
+                m.Jintegrate(x, v, Jout, arg);
+                return Jout; },
              "Compute and return the Jacobian of the exp.")
         .def("JintegrateTransport", &Manifold::JintegrateTransport,
              bp::args("self", "x", "v", "J", "arg"),
              "Perform parallel transport of matrix J expressed at point x+v to point x.")
         .def("Jdifference",
              +[](const Manifold& m, const ConstVectorRef x0, const ConstVectorRef& x1, int arg) {
-               MatrixXs Jout(m.ndx(), m.ndx());
-               m.Jdifference(x0, x1, Jout, arg);
-               return Jout; },
+                 MatrixXs Jout(m.ndx(), m.ndx());
+                 m.Jdifference(x0, x1, Jout, arg);
+                 return Jout; },
              "Compute and return the Jacobian of the log.")
-        .def("tangent_space", &Manifold::tangentSpace, bp::args("self"), "Returns an object representing the tangent space to this manifold.")
-        .def(bp::self * bp::self)  // multiplication operator
+        .def("tangent_space", &Manifold::tangentSpace, bp::args("self"),
+             "Returns an object representing the tangent space to this manifold.")
+        .def("__mul__", +[](const shared_ptr<Manifold>& a, const shared_ptr<Manifold>& b) { return a * b; })
         ;
 
-    }
-  } // namespace internal
-  
+}
+} // namespace internal
+
 
 } // namespace python
 

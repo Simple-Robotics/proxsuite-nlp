@@ -14,10 +14,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace proxnlp;
-
 
 BOOST_AUTO_TEST_SUITE(manifold)
+
+using namespace proxnlp;
+using Manifold = ManifoldAbstractTpl<double>;
 
 BOOST_AUTO_TEST_CASE(test_vectorspace)
 {
@@ -40,18 +41,19 @@ BOOST_AUTO_TEST_CASE(test_vectorspace)
 
   BOOST_CHECK(x0.isApprox(Eigen::VectorXd::Zero(35)));
 
-  CartesianProductTpl<double> space3 = space1 * space2;
-  BOOST_CHECK_EQUAL(space3.nx(), N1 + N2);
-  x0 = space3.neutral();
+  CartesianProductTpl<double> prod1(space1, space2);
+  BOOST_CHECK_EQUAL(prod1.nx(), N1 + N2);
+  x0 = prod1.neutral();
   BOOST_CHECK_EQUAL(x0.size(), N1 + N2);
+  x0 = prod1.rand();
 
   // test copy constructor
   VectorSpaceTpl<double, N1> space1_copy(space1);
   VectorSpaceTpl<double> space2_copy(space2);
+  shared_ptr<Manifold> space2_ptr = std::make_shared<VectorSpaceTpl<double>>(space2);
 
-  // CartesianProductTpl<double> space4 = space1 * space1 * space1;
-  // BOOST_CHECK_EQUAL(space4.nx(), N1 * 3);
-  // x0 = space4.neutral();
+  CartesianProductTpl<double> prod2 = space2_ptr * space2_ptr;
+  x1 = prod2.rand();
 }
 
 
@@ -105,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   dx0.setZero();
   tspace.difference(x0, x1, dx0);
 
-  BOOST_TEST_MESSAGE(" testing interpolate ");
+  BOOST_TEST_MESSAGE("Testing interpolate");
   auto mid = tspace.interpolate(x0, x1, 0.5);
 
   BOOST_TEST_MESSAGE(" diff Jacobians");
@@ -122,12 +124,12 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   BOOST_CHECK(J1.isApprox( id));
 
   // INTEGRATION OP
-  BOOST_TEST_MESSAGE(" testing integration");
+  BOOST_TEST_MESSAGE("Testing integration");
   TSO2::PointType x1_new(tspace.nx());
   tspace.integrate(x0, dx0, x1_new);
   BOOST_CHECK(x1_new.isApprox(x1));
 
-  BOOST_TEST_MESSAGE(" integrate jacobians");
+  BOOST_TEST_MESSAGE("Integrate jacobians");
 
   tspace.Jintegrate(x0, dx0, J0, 0);
   tspace.Jintegrate(x0, dx0, J1, 1);
@@ -163,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
   space.difference(x0, x0, d);
   BOOST_CHECK(d.isZero());
 
-  BOOST_TEST_MESSAGE(" testing interpolate ");
+  BOOST_TEST_MESSAGE("Testing interpolate ");
   auto mid = space.interpolate(x0, x1, 0.5);
   BOOST_CHECK(mid.isApprox(pinocchio::interpolate(model, x0, x1, 0.5)));
 

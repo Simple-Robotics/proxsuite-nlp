@@ -3,10 +3,17 @@
 #include "proxnlp/manifold-base.hpp"
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 
+#include <type_traits>
 
 
 namespace proxnlp
 {
+  namespace {
+    /// Typedef in anon namespace for use in rest of file.
+    template<typename T>
+    using ManifoldPtr = shared_ptr<ManifoldAbstractTpl<T>>;
+  }
+
   /** @brief    The cartesian product of two manifolds.
    */
   template<typename _Scalar>
@@ -17,30 +24,35 @@ namespace proxnlp
     using Base = ManifoldAbstractTpl<Scalar>;
     PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
-    const Base& left;
-    const Base& right;
+    shared_ptr<const Base> left_, right_;
+    const Base& left() const { return *left_; }
+    const Base& right() const { return *right_; }
 
-    CartesianProductTpl(const Base& left, const Base& right)
-      : left(left), right(right) {}
+    template<typename U, typename V>
+    CartesianProductTpl(const U& left, const V& right)
+      : left_(std::make_shared<U>(left)), right_(std::make_shared<V>(right)) {}
 
-    inline int nx()  const { return m_nx; }
-    inline int ndx() const { return m_ndx; }
+    CartesianProductTpl(const shared_ptr<Base>& left, const shared_ptr<Base>& right)
+      : left_(left), right_(right) {}
+
+    inline int nx()  const { return left().nx() + right().nx(); }
+    inline int ndx() const { return left().ndx() + right().ndx(); }
 
     PointType neutral() const
     {
-      PointType out(m_nx);
+      PointType out(this->nx());
       out.setZero();
-      out.head(left.nx()) = left.neutral();
-      out.tail(right.nx()) = right.neutral();
+      out.head(left().nx())  = left().neutral();
+      out.tail(right().nx()) = right().neutral();
       return out;
     }
 
     PointType rand() const
     {
-      PointType out(m_ndx);
+      PointType out(this->ndx());
       out.setZero();
-      out.head(left.nx()) = left.rand();
-      out.tail(right.nx()) = right.rand();
+      out.head(left().nx())  = left().rand();
+      out.tail(right().nx()) = right().rand();
       return out;
     }
 
@@ -48,16 +60,16 @@ namespace proxnlp
                         const ConstVectorRef& v,
                         VectorRef out) const
     {
-      left.integrate(x.head(left.nx()), v.head(left.ndx()), out.head(left.nx()));
-      right.integrate(x.head(right.nx()), v.head(right.ndx()), out.head(right.nx()));
+      left() .integrate(x.head(left() .nx()), v.head(left() .ndx()), out.head(left() .nx()));
+      right().integrate(x.head(right().nx()), v.head(right().ndx()), out.head(right().nx()));
     }
 
     void difference_impl(const ConstVectorRef& x0,
                          const ConstVectorRef& x1,
                          VectorRef out) const
     {
-      left.difference(x0.head(left.nx()), x1.head(left.nx()), out.head(left.ndx()));
-      right.difference(x0.head(right.nx()), x1.head(right.nx()), out.head(right.ndx()));
+      left() .difference(x0.head(left() .nx()), x1.head(left() .nx()), out.head(left() .ndx()));
+      right().difference(x0.head(right().nx()), x1.head(right().nx()), out.head(right().ndx()));
     }
     
     void Jintegrate_impl(
@@ -66,18 +78,12 @@ namespace proxnlp
       MatrixRef Jout,
       int arg) const
     {
-      const int nx1 = left.nx();
-      const int nx2 = right.nx();
-      const int ndx1 = left.ndx();
-      const int ndx2 = right.ndx();
-      left.Jintegrate(x.head(nx1),
-                      v.head(ndx1),
-                      Jout.topLeftCorner(ndx1, ndx1),
-                      arg);
-      right.Jintegrate(x.tail(nx2),
-                       v.tail(ndx2),
-                       Jout.bottomRightCorner(ndx2, ndx2),
-                       arg);
+      const int nx1 = left().nx();
+      const int nx2 = right().nx();
+      const int ndx1 = left().ndx();
+      const int ndx2 = right().ndx();
+      left(). Jintegrate(x.head(nx1), v.head(ndx1), Jout.topLeftCorner    (ndx1, ndx1), arg);
+      right().Jintegrate(x.tail(nx2), v.tail(ndx2), Jout.bottomRightCorner(ndx2, ndx2), arg);
     }
 
     void JintegrateTransport(
@@ -86,12 +92,12 @@ namespace proxnlp
       MatrixRef Jout,
       int arg) const
     {
-      const int nx1 = left.nx();
-      const int nx2 = right.nx();
-      const int ndx1 = left.ndx();
-      const int ndx2 = right.ndx();
-      left .JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows   (ndx1), arg);
-      right.JintegrateTransport(x.tail(nx2), v.head(ndx2), Jout.bottomRows(ndx2), arg);
+      const int nx1 = left().nx();
+      const int nx2 = right().nx();
+      const int ndx1 = left().ndx();
+      const int ndx2 = right().ndx();
+      left() .JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows   (ndx1), arg);
+      right().JintegrateTransport(x.tail(nx2), v.head(ndx2), Jout.bottomRows(ndx2), arg);
     }
 
     void Jdifference_impl(
@@ -100,39 +106,37 @@ namespace proxnlp
       MatrixRef Jout,
       int arg) const
     {
-      const int nx1 = left.nx();
-      const int nx2 = right.nx();
-      const int ndx1 = left.ndx();
-      const int ndx2 = right.ndx();
-      left.Jdifference(x0.head(nx1),
-                       x1.head(nx1),
-                       Jout.topLeftCorner(ndx1, ndx1),
-                       arg);
-      right.Jdifference(x0.tail(nx2),
-                        x1.tail(nx2),
-                        Jout.bottomRightCorner(ndx2, ndx2),
-                        arg);
+      const int nx1 = left().nx();
+      const int nx2 = right().nx();
+      const int ndx1 = left().ndx();
+      const int ndx2 = right().ndx();
+      left() .Jdifference(x0.head(nx1), x1.head(nx1), Jout.topLeftCorner    (ndx1, ndx1), arg);
+      right().Jdifference(x0.tail(nx2), x1.tail(nx2), Jout.bottomRightCorner(ndx2, ndx2), arg);
 
     }
 
-    CartesianProductTpl<Scalar> operator*(const Base& right)
-    {
-      return CartesianProductTpl(*this, right);
-    }
-
-  private:
-    const int m_nx = left.nx() + right.nx();
-    const int m_ndx = left.ndx() + right.ndx();
   };
 
-
   /// Direct product of two manifolds as a cartesian product.
-  template<typename Scalar>
-  CartesianProductTpl<Scalar>
-  operator*(const ManifoldAbstractTpl<Scalar>& left,
-            const ManifoldAbstractTpl<Scalar>& right)
+  // template<typename U, typename V>
+  // CartesianProductTpl<typename U::Scalar> operator*(const U& left, const V& right)
+  // {
+  //   using T = typename U::Scalar;
+  //   static_assert(std::is_same<T, typename V::Scalar>::value, "Both arguments should have same Scalar template arg!");
+  //   return CartesianProductTpl<T>(std::make_shared<U>(left), std::make_shared<V>(right));
+  // }
+
+  template<typename T>
+  CartesianProductTpl<T> operator*(const ManifoldPtr<T>& left, const ManifoldPtr<T>& right)
   {
-    return CartesianProductTpl<Scalar>(left, right);
+    return CartesianProductTpl<T>(left, right);
+  }
+
+  template<typename T>
+  CartesianProductTpl<T> operator*(const CartesianProductTpl<T>& left, const ManifoldPtr<T>& right)
+  {
+    using out_t = CartesianProductTpl<T>;
+    return out_t(std::make_shared<out_t>(left), right);
   }
 
   
