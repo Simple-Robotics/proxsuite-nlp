@@ -32,7 +32,7 @@ namespace proxnlp
       : m_model(model)
       {};
 
-    const ModelType& getModel() { return m_model; }
+    const ModelType& getModel() const { return m_model; }
 
     PointType neutral() const
     {
@@ -139,7 +139,7 @@ namespace proxnlp
     using ConfigSpace = MultibodyConfiguration<Scalar, Options>;
     using ModelType = typename ConfigSpace::ModelType;
 
-    const ModelType& getModel() { return this->m_base.getModel(); }
+    const ModelType& getModel() const { return this->m_base.getModel(); }
 
     MultibodyPhaseSpace(const ModelType& model)
       : TangentBundleTpl<ConfigSpace>(ConfigSpace(model))
