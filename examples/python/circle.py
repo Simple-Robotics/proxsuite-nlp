@@ -121,7 +121,7 @@ if __name__ == "__main__":
     ax.set_title("Optimization trajectory")
     ax.legend()
 
-    axes[1].plot(callback.storage.alphas, marker='.')
+    axes[1].plot(callback.storage.alphas, marker=".")
     axes[1].set_title("Step lengths $\\alpha_k$")
     plt.tight_layout()
 
@@ -139,7 +139,12 @@ if __name__ == "__main__":
         plt.figure()
         plt.plot(ls_alphas, ls_values, label="$\\phi(\\alpha)$")
         plt.plot(ls_alphas, ls_values[0] + ls_alphas * d1)
-        plt.plot(ls_alphas, ls_values[0] + solver.armijo_c1 * ls_alphas * d1, label="armijo", ls="--")
+        plt.plot(
+            ls_alphas,
+            ls_values[0] + solver.armijo_c1 * ls_alphas * d1,
+            label="armijo",
+            ls="--",
+        )
         plt.legend()
         plt.title("Iteration %d" % it)
 

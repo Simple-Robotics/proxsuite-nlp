@@ -1,4 +1,4 @@
-/** 
+/**
  * @file    Forward declarations and configuration macros.
  */
 #pragma once
@@ -10,13 +10,11 @@
 
 #include <memory>
 
-
 /// @brief  Main package namespace.
 ///
 /// A primal-dual augmented Lagrangian-type solver and its utilities
 /// (e.g. modelling, memory management, helpers...)
-namespace proxnlp
-{
+namespace proxnlp {
 
 /// Automatic differentiation utilities.
 namespace autodiff {}
@@ -33,74 +31,55 @@ using std::shared_ptr;
 #include "proxnlp/macros.hpp"
 #include "proxnlp/config.hpp"
 
-namespace proxnlp
-{
+namespace proxnlp {
 
 /* Function types */
 
 // fwd BaseFunction
-template<typename Scalar>
-struct BaseFunctionTpl;
+template <typename Scalar> struct BaseFunctionTpl;
 
 // fwd C1FunctionTpl
-template<typename Scalar>
-struct C1FunctionTpl;
+template <typename Scalar> struct C1FunctionTpl;
 
 // fwd C2FunctionTpl
-template<typename Scalar>
-struct C2FunctionTpl;
+template <typename Scalar> struct C2FunctionTpl;
 
 // fwd ComposeFunctionTpl
-template<typename Scalar>
-struct ComposeFunctionTpl;
+template <typename Scalar> struct ComposeFunctionTpl;
 
 // fwd Cost
-template<typename Scalar>
-struct CostFunctionBaseTpl;
+template <typename Scalar> struct CostFunctionBaseTpl;
 
 /* Manifolds */
 
 // fwd ManifoldAbstractTpl
-template<typename Scalar, int Options=0>
-struct ManifoldAbstractTpl;
+template <typename Scalar, int Options = 0> struct ManifoldAbstractTpl;
 
-template<typename Scalar, int Dim=Eigen::Dynamic, int Options=0>
+template <typename Scalar, int Dim = Eigen::Dynamic, int Options = 0>
 struct VectorSpaceTpl;
 
-template<typename Base>
-struct TangentBundleTpl;
+template <typename Base> struct TangentBundleTpl;
 
 // fwd ConstraintObject
-template<typename Scalar>
-struct ConstraintSetBase;
+template <typename Scalar> struct ConstraintSetBase;
 
 // fwd ConstraintObject
-template<typename Scalar>
-struct ConstraintObject;
+template <typename Scalar> struct ConstraintObject;
 
 /* Solver structs */
 
 // fwd Problem
-template<typename Scalar>
-struct ProblemTpl;
+template <typename Scalar> struct ProblemTpl;
 
 // fwd ResultsTpl
-template<typename Scalar>
-struct ResultsTpl;
+template <typename Scalar> struct ResultsTpl;
 
 // fwd WorkspaceTpl
-template<typename Scalar>
-struct WorkspaceTpl;
+template <typename Scalar> struct WorkspaceTpl;
 
 /// Verbosity level.
-enum VerboseLevel
-{
-  QUIET=0,
-  VERBOSE=1,
-  VERY=2
-};
+enum VerboseLevel { QUIET = 0, VERBOSE = 1, VERY = 2 };
 
-template<typename Scalar>
-class SolverTpl;
+template <typename Scalar> class SolverTpl;
 
-}  // namespace proxnlp
+} // namespace proxnlp

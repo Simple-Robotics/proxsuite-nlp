@@ -9,7 +9,7 @@ function(create_library)
   add_library(${PROJECT_NAME} SHARED ${HEADERS})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
-  
+
   set_target_properties(${PROJECT_NAME} PROPERTIES
                         VERSION ${PROJECT_VERSION}
                         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

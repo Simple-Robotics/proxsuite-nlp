@@ -23,7 +23,10 @@ def test_product():
     assert prod.nx == 2 + 3 + 7
     assert prod.ndx == 2 + 2 + 6
     x1 = prod.neutral()
-    assert np.allclose(x1, np.concatenate([vs.neutral(), tso2_space.neutral(), manifolds.SE3().neutral()]))
+    assert np.allclose(
+        x1,
+        np.concatenate([vs.neutral(), tso2_space.neutral(), manifolds.SE3().neutral()]),
+    )
 
 
 def test_configspace():

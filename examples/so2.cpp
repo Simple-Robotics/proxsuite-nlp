@@ -1,6 +1,6 @@
 /**
  * Optimize a quadratic function on a circle, or on a disk.
- * 
+ *
  */
 #include "proxnlp/cost-function.hpp"
 #include "proxnlp/merit-function-base.hpp"
@@ -11,7 +11,6 @@
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"
 
-
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 
 using fmt::format;
@@ -20,12 +19,11 @@ using namespace proxnlp;
 using Manifold = PinocchioLieGroup<SO2>;
 using Problem = ProblemTpl<double>;
 
-int main()
-{
+int main() {
   Manifold space;
   SO2 lg = space.m_lg;
   Manifold::PointType neut = lg.neutral();
-  Manifold::PointType p0 = lg.random();  // target
+  Manifold::PointType p0 = lg.random(); // target
   Manifold::PointType p1 = lg.random();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
@@ -84,7 +82,6 @@ int main()
   merit_fun.computeGradient(p0, grad);
   fmt::print("eval merit grad: ∇M={}\n", grad);
 
-
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
@@ -95,7 +92,8 @@ int main()
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers\n"
-             "1st mul = {}\n", lams.size(), lams[0]);
+             "1st mul = {}\n",
+             lams.size(), lams[0]);
 
   // lagrangian
   fmt::print("\tL(p0) = {}\n", lagr(p0, lams));

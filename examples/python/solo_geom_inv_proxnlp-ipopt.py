@@ -1,4 +1,4 @@
-""" 
+"""
 Inverse kinematics with friction cone constraint.
 
 min Dq, f || q - q0 ||**2 + || f ||**2
@@ -6,7 +6,7 @@ min Dq, f || q - q0 ||**2 + || f ||**2
 subject to  q = pin.integrate(q0, Dq)
             sum(f_i) == weight
             com_z >= avg(p_z) # com height higher than the average height of the feet
-            f_i X (com_pos - p_i) == 0 # zero angular momentum at the com 
+            f_i X (com_pos - p_i) == 0 # zero angular momentum at the com
 
             # The friction cone constraint can be one of the following:
             0)  || f_t ||**2 <= mu**2 * || f_n ||**2   # f_t and f_n are the tangential and orthogonal component of the contact force
@@ -296,11 +296,11 @@ except KeyboardInterrupt:
     pass
 
 dxus_opt = results.xopt
-dxs_opt_flat = dxus_opt[:xspace.nx]
-dqs_opt = dxs_opt_flat[:model.nv]
-dvs_opt = dxs_opt_flat[model.nv:]
+dxs_opt_flat = dxus_opt[: xspace.nx]
+dqs_opt = dxs_opt_flat[: model.nv]
+dvs_opt = dxs_opt_flat[model.nv :]
 
-f_opt_proxnlp = dxus_opt[xspace.ndx:]
+f_opt_proxnlp = dxus_opt[xspace.ndx :]
 f_opt_proxnlp = np.split(f_opt_proxnlp, 4)
 
 pr_proxnlp = callback.storage.prim_infeas

@@ -10,29 +10,24 @@
 
 #include <Eigen/QR>
 
-
 /**
  * Sample a random orthonormal matrix.
  */
-template<typename Scalar>
-Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N)
-{
+template <typename Scalar>
+Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N) {
   using MatrixXs = Eigen::Matrix<Scalar, -1, -1>;
   MatrixXs out = MatrixXs::Random(N, N);
   Eigen::FullPivHouseholderQR<Eigen::Ref<MatrixXs>> qr(out);
   Eigen::Matrix<Scalar, -1, -1> Q(qr.matrixQ());
-  return Q.template topLeftCorner<-1,-1>(M, N);
+  return Q.template topLeftCorner<-1, -1>(M, N);
 }
-
 
 using namespace proxnlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraint<double>;
 using Constraint = ConstraintObject<double>;
 
-template<int N, int M = 1>
-int submain()
-{
+template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
   Manifold space(N);
   typename Manifold::PointType p1 = space.rand();
@@ -43,8 +38,7 @@ int submain()
 
   Eigen::MatrixXd A(M, N);
   A.setZero();
-  if (M > 0)
-  {
+  if (M > 0) {
     A = randomOrthogonal<double>(M, N);
   }
   Eigen::VectorXd b(M);
@@ -55,9 +49,9 @@ int submain()
   QuadraticDistanceCost<double> cost(space, space.neutral(), Q_);
 
   std::vector<Problem::ConstraintPtr> cstrs_;
-  if (M > 0)
-  {
-    cstrs_.push_back(std::make_shared<Constraint>(res1, std::make_shared<EqualityType>()));
+  if (M > 0) {
+    cstrs_.push_back(
+        std::make_shared<Constraint>(res1, std::make_shared<EqualityType>()));
   }
 
   auto prob = std::make_shared<Problem>(cost, cstrs_);
@@ -77,8 +71,7 @@ int submain()
   return 0;
 }
 
-int main()
-{
+int main() {
   submain<2>();
   submain<4>();
   submain<4, 3>();
