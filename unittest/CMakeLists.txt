@@ -45,10 +45,16 @@ function(add_proxnlp_test name)
 endfunction(add_proxnlp_test)
 
 
-add_proxnlp_test(block-chol)
-add_proxnlp_test(constraints)
-add_proxnlp_test(costs)
-add_proxnlp_test(finite-diff)
-add_proxnlp_test(function)
-add_proxnlp_test(manifold)
+set(TEST_NAMES
+    block-chol
+    constraints
+    costs
+    finite-diff
+    functions
+    manifolds
+    solver)
+
+foreach(test_name ${TEST_NAMES})
+  add_proxnlp_test(${test_name})
+endforeach(test_name)
 

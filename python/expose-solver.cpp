@@ -51,7 +51,6 @@ namespace proxnlp
                     , bp::arg("mu_init") = 1e-2
                     , bp::arg("rho_init") = 0.
                     , bp::arg("verbose") = VerboseLevel::QUIET
-                    , bp::arg("mu_factor") = 0.1
                     , bp::arg("mu_min") = 1e-9
                     , bp::arg("prim_alpha") = 0.1
                     , bp::arg("prim_beta") = 0.9
@@ -59,10 +58,12 @@ namespace proxnlp
                     , bp::arg("dual_beta") = 1.
                     , bp::arg("alpha_min") = 1e-7
                     , bp::arg("armijo_c1") = 1e-4
+                    , bp::arg("ls_beta") = 0.5
                     ))
       )
         .def_readwrite("use_gauss_newton", &Solver::use_gauss_newton, "Whether to use a Gauss-Newton Hessian matrix approximation.")
         .def_readwrite("record_linesearch_process", &Solver::record_linesearch_process)
+        .def_readwrite("ls_strat", &Solver::ls_strat)
         .def("register_callback", &Solver::registerCallback, bp::args("self", "cb"), "Add a callback to the solver.")
         .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
         .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
@@ -73,11 +74,10 @@ namespace proxnlp
         .def("set_penalty",    &Solver::setPenalty,   bp::args("self", "mu"), "Set the augmented Lagrangian penalty parameter.")
         .def("set_prox_param", &Solver::setProxParameter, bp::args("self", "rho"), "Set the primal proximal penalty parameter.")
         .def("set_tolerance",  &Solver::setTolerance, bp::args("self", "tol"), "Set the solver's target tolerance.")
-        .add_property("maxiters",
-                      &Solver::getMaxIters,
-                      &Solver::setMaxIters,
-                      "Maximum number of iterations.")
-        .def_readonly("prim_alpha", &Solver::prim_alpha)
+        .def_readwrite("maxiters", &Solver::MAX_ITERS, "Maximum number of iterations.")
+        .def_readwrite("mu_factor", &Solver::mu_factor_, "Multiplier update factor.")
+        .def_readwrite("rho_factor", &Solver::rho_factor_, "Proximal penalty update factor.")
+        .def_readonly("prim_alpha", &Solver::prim_alpha_)
         .def_readonly("prim_beta", &Solver::prim_beta)
         .def_readonly("dual_alpha", &Solver::dual_alpha)
         .def_readonly("dual_beta", &Solver::dual_beta)
@@ -85,7 +85,6 @@ namespace proxnlp
         .def_readonly("alpha_min", &Solver::alpha_min)
         .def_readonly("armijo_c1", &Solver::armijo_c1)
         .def_readwrite("ls_beta", &Solver::ls_beta)
-        .def_readwrite("ls_strat", &Solver::ls_strat)
         ;
     }
   } // namespace python

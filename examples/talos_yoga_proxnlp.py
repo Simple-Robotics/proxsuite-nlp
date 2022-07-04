@@ -1,4 +1,6 @@
 """
+Copyright (C) 2022 LAAS-CNRS, INRIA
+
 minimization with constraints
 
 Simple example with regularization cost, desired position and position constraints.
@@ -30,7 +32,7 @@ import example_robot_data as robex
 import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace
 from proxnlp.utils import CasadiFunction, plot_pd_errs
-from meshcat_utils import ForceDraw
+import meshcat_utils as msu
 
 import matplotlib.pyplot as plt
 
@@ -63,7 +65,7 @@ viz.initViewer()
 viz.loadViewerModel()
 viz.display(robot.q0)
 viz.viewer.open()
-drawer = ForceDraw(viz)
+viz_util = msu.VizUtil(viz)
 
 cq = casadi.SX.sym("cq", nq, 1)
 cDq = casadi.SX.sym("cx", nDq, 1)
@@ -301,8 +303,8 @@ print("Right foot pos:", rf_position(qs_opt).full().flatten())
 
 input("Enter to continue")
 viz.display(qs_opt)
-viz.viewer.set_cam_target([0.0, 1.1, 0.0])
-drawer.set_cam_pos([1.7, 1.0, 0.0])
+viz_util.set_cam_target([0.0, 0.0, 1.1])
+viz_util.set_cam_pos([1.7, 0.0, 1.0])
 
 fig, ax0 = plt.subplots(figsize=(6.4, 6.4))
 plot_pd_errs(ax0, prim_errs, dual_errs)
