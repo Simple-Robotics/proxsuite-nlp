@@ -118,11 +118,11 @@ int main() {
   ResultsTpl<double> results(space.nx(), *prob);
 
   SolverTpl<double> solver(space, prob);
+  solver.verbose = VerboseLevel::VERY;
   solver.setPenalty(1. / 50);
   solver.use_gauss_newton = true;
 
   auto lams0 = lams;
-  fmt::print(fmt::fg(fmt::color::green), "[CALLING SOLVER]\n");
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.xOpt.transpose());
