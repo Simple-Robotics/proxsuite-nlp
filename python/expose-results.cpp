@@ -1,25 +1,20 @@
 #include "proxnlp/python/fwd.hpp"
 #include "proxnlp/results.hpp"
 
+namespace proxnlp {
+namespace python {
 
-namespace proxnlp
-{
-namespace python
-{
+void exposeResults() {
+  using context::Results;
 
-  void exposeResults()
-  {
-    using context::Results;
-
-    bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
+  bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
       .value("uninit", ConvergenceFlag::UNINIT)
       .value("success", ConvergenceFlag::SUCCESS)
-      .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED)
-      ;
+      .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED);
 
-    bp::class_<Results>(
+  bp::class_<Results>(
       "Results", "Results holder struct.",
-      bp::init<int, context::Problem&>(bp::args("self", "nx", "problem")))
+      bp::init<int, context::Problem &>(bp::args("self", "nx", "problem")))
       .def_readonly("converged", &Results::converged)
       .def_readonly("merit", &Results::merit, "Merit function value.")
       .def_readonly("value", &Results::value)
@@ -31,11 +26,10 @@ namespace python
       .def_readonly("rho", &Results::rho)
       .def_readonly("dual_infeas", &Results::dualInfeas)
       .def_readonly("primal_infeas", &Results::primalInfeas)
-      .def_readonly("constraint_errs", &Results::constraint_violations_, "Constraint violations.")
-      .def(bp::self_ns::str(bp::self))
-      ;
-  }  
+      .def_readonly("constraint_errs", &Results::constraint_violations_,
+                    "Constraint violations.")
+      .def(bp::self_ns::str(bp::self));
+}
 
 } // namespace python
 } // namespace proxnlp
-

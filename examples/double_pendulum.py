@@ -232,18 +232,18 @@ ax0 = plt.subplot(gss[0])
 plot_pd_errs(ax0, prim_errs, dual_errs)
 
 plt.subplot(gss[1])
-plt.plot(callback.storage.alphas, c='gray', alpha=.8, marker='.', markersize=2)
+plt.plot(callback.storage.alphas, c="gray", alpha=0.8, marker=".", markersize=2)
 plt.tight_layout()
 
 # plot kkt matrix
 fig, ax = plt.subplots()
 kkt_mat = workspace.kkt_matrix.copy()
-plt.imshow(kkt_mat.astype(bool), cmap=plt.cm.binary, vmin=0.)
+plt.imshow(kkt_mat.astype(bool), cmap=plt.cm.binary, vmin=0.0)
 ntot = pb_space.ndx
 ptch = plt.Rectangle((0, 0), ntot, ntot)
-ptch.set_facecolor('#19ff1d')
+ptch.set_facecolor("#19ff1d")
 ptch.set_alpha(0.1)
-ptch.set_edgecolor('none')
+ptch.set_edgecolor("none")
 ptch.set_transform(ax.transData)
 ax.add_patch(ptch)
 
@@ -264,4 +264,5 @@ if USE_VIEWER:
             show_vel=True,
             timestep=dt,
             record=args.record,
-            recorder=recorder)
+            recorder=recorder,
+        )

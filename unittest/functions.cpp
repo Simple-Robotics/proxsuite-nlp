@@ -11,13 +11,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
-
 BOOST_AUTO_TEST_SUITE(residual)
 
 using namespace proxnlp;
 
-BOOST_AUTO_TEST_CASE(test_linear)
-{
+BOOST_AUTO_TEST_CASE(test_linear) {
   BOOST_TEST_MESSAGE("Test linear function:");
   Eigen::Matrix4d A;
   A.setIdentity();
@@ -38,23 +36,21 @@ BOOST_AUTO_TEST_CASE(test_linear)
 
   BOOST_CHECK(res(x0).isApprox(b));
   BOOST_CHECK(J0.isApprox(A));
-
 }
 
-BOOST_AUTO_TEST_CASE(test_compose)
-{
+BOOST_AUTO_TEST_CASE(test_compose) {
   BOOST_TEST_MESSAGE("Test function composition:");
   const int N = 3;
   using Matrix_t = Eigen::Matrix<double, N, N>;
   using Vector_t = Eigen::Matrix<double, N, 1>;
-  
+
   Matrix_t A;
   Vector_t b;
   A.setRandom();
   b.setRandom();
   using ResType = LinearFunctionTpl<double>;
   ResType res1(A, b);
-  
+
   Vector_t x0;
   x0.setOnes();
 
@@ -69,10 +65,9 @@ BOOST_AUTO_TEST_CASE(test_compose)
 
   auto v0 = res2(x0);
   auto v1_manual = res1(res1(x0));
-  fmt::print("f(f(x0)):  {}\nshould be: {}\n",
-             v0.transpose(), v1_manual.transpose());
+  fmt::print("f(f(x0)):  {}\nshould be: {}\n", v0.transpose(),
+             v1_manual.transpose());
   BOOST_CHECK(v1_manual.isApprox(v0));
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

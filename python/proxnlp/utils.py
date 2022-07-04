@@ -9,7 +9,14 @@ import matplotlib.pyplot as plt
 
 
 class CasadiFunction(proxnlp.C2Function):
-    def __init__(self, nx: int, ndx: int, expression: casadi.SX, cx: casadi.SX, use_hessian: bool = True):
+    def __init__(
+        self,
+        nx: int,
+        ndx: int,
+        expression: casadi.SX,
+        cx: casadi.SX,
+        use_hessian: bool = True,
+    ):
         nres = expression.shape[0]
         super().__init__(nx, ndx, nres)
         assert nx == cx.shape[0]

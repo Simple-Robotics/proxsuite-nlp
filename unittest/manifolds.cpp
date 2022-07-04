@@ -4,9 +4,9 @@
 #include "proxnlp/modelling/spaces/cartesian-product.hpp"
 
 #ifdef WITH_PINOCCHIO
-  #include <pinocchio/parsers/sample-models.hpp>
-  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
-  #include "proxnlp/modelling/spaces/multibody.hpp"
+#include <pinocchio/parsers/sample-models.hpp>
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
 
 #include <fmt/core.h>
@@ -14,14 +14,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-
 BOOST_AUTO_TEST_SUITE(manifold)
 
 using namespace proxnlp;
 using Manifold = ManifoldAbstractTpl<double>;
 
-BOOST_AUTO_TEST_CASE(test_vectorspace)
-{
+BOOST_AUTO_TEST_CASE(test_vectorspace) {
   constexpr int N1 = 3;
   VectorSpaceTpl<double, N1> space1;
 
@@ -50,17 +48,16 @@ BOOST_AUTO_TEST_CASE(test_vectorspace)
   // test copy constructor
   VectorSpaceTpl<double, N1> space1_copy(space1);
   VectorSpaceTpl<double> space2_copy(space2);
-  shared_ptr<Manifold> space2_ptr = std::make_shared<VectorSpaceTpl<double>>(space2);
+  shared_ptr<Manifold> space2_ptr =
+      std::make_shared<VectorSpaceTpl<double>>(space2);
 
   CartesianProductTpl<double> prod2 = space2_ptr * space2_ptr;
   x1 = prod2.rand();
 }
 
-
 #ifdef WITH_PINOCCHIO
 
-BOOST_AUTO_TEST_CASE(test_lg_vecspace)
-{
+BOOST_AUTO_TEST_CASE(test_lg_vecspace) {
   const int N = 4;
   using Vs = pinocchio::VectorSpaceOperationTpl<N, double>;
   PinocchioLieGroup<Vs> space;
@@ -79,13 +76,10 @@ BOOST_AUTO_TEST_CASE(test_lg_vecspace)
 
   // test copy ctor
   PinocchioLieGroup<Vs> space_copy(space);
-
 }
 
-
 /// The tangent bundle of the SO2 Lie group.
-BOOST_AUTO_TEST_CASE(test_so2_tangent)
-{
+BOOST_AUTO_TEST_CASE(test_so2_tangent) {
   BOOST_TEST_MESSAGE("Starting T(SO2) test");
   using _SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
   using SO2 = PinocchioLieGroup<_SO2>;
@@ -121,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   TSO2::MatrixXs id(2, 2);
   id.setIdentity();
   BOOST_CHECK(J0.isApprox(-id));
-  BOOST_CHECK(J1.isApprox( id));
+  BOOST_CHECK(J1.isApprox(id));
 
   // INTEGRATION OP
   BOOST_TEST_MESSAGE("Testing integration");
@@ -135,12 +129,9 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent)
   tspace.Jintegrate(x0, dx0, J1, 1);
 
   tspace.JintegrateTransport(x0, dx0, J0, 0);
-
 }
 
-
-BOOST_AUTO_TEST_CASE(test_pinmodel)
-{
+BOOST_AUTO_TEST_CASE(test_pinmodel) {
   BOOST_TEST_MESSAGE("Starting");
 
   pinocchio::Model model;
@@ -175,8 +166,7 @@ BOOST_AUTO_TEST_CASE(test_pinmodel)
 // #endif
 
 /// Test the tangent bundle specialization on rigid multibodies.
-BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
-{
+BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody) {
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
@@ -194,9 +184,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody)
   Eigen::VectorXd J0(ndx, ndx);
   J0.setRandom();
   space.JintegrateTransport(x0, dx0, J0, 0);
-
 }
 #endif
-
 
 BOOST_AUTO_TEST_SUITE_END()

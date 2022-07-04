@@ -1,6 +1,6 @@
 /**
  * Optimize a quadratic function on a circle, or on a disk.
- * 
+ *
  */
 #include "proxnlp/cost-function.hpp"
 #include "proxnlp/pdal.hpp"
@@ -12,17 +12,15 @@
 
 #include "example-base.hpp"
 
-
 using namespace proxnlp;
 using Manifold = VectorSpaceTpl<double>;
 using Problem = ProblemTpl<double>;
 
-int main()
-{
+int main() {
   constexpr int dim = 2;
   Manifold space(dim);
   const int nx = space.nx();
-  Manifold::PointType p0(nx);  // target
+  Manifold::PointType p0(nx); // target
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
   Manifold::PointType p1(nx);
@@ -68,8 +66,9 @@ int main()
   const QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
 
   using Ineq_t = NegativeOrthant<double>;
-  auto cstr1 = std::make_shared<ConstraintObject<double>>(residualCircle, std::make_shared<Ineq_t>());
-  std::vector<Problem::ConstraintPtr> cstrs { cstr1 };
+  auto cstr1 = std::make_shared<ConstraintObject<double>>(
+      residualCircle, std::make_shared<Ineq_t>());
+  std::vector<Problem::ConstraintPtr> cstrs{cstr1};
   auto prob = std::make_shared<Problem>(cf, cstrs);
 
   /// Test out merit functions
@@ -84,18 +83,17 @@ int main()
   merit_fun.computeGradient(p0, grad);
   fmt::print("eval merit grad: ∇M={}\n", grad);
 
-
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
   PDALFunction<double> pdmerit(prob);
-  LagrangianFunction<double>& lagr = pdmerit.m_lagr;
+  LagrangianFunction<double> &lagr = pdmerit.m_lagr;
   Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
-  fmt::print("Allocated {:d} multipliers | 1st mul = {}\n",
-             lams.size(), lams[0]);
+  fmt::print("Allocated {:d} multipliers | 1st mul = {}\n", lams.size(),
+             lams[0]);
 
   // lagrangian
   fmt::print("\tL(p0) = {}\n", lagr(p0, lams));

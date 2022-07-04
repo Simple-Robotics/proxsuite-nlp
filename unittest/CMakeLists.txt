@@ -27,17 +27,17 @@ function(add_proxnlp_test name)
   ADD_UNIT_TEST(${test_name} ${test_file})
   set_target_properties(${test_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${test_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-  
-  
+
+
   # define macros required by boost_test
   # see: https://www.boost.org/doc/libs/1_78_0/libs/test/doc/html/boost_test/usage_variants.html
   # define module name, replace '-' by '_'
   set(MODULE_NAME "${name}Test")
   string(REGEX REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
-  
+
   ADD_TEST_CFLAGS(${test_name} "-DBOOST_TEST_DYN_LINK")
   ADD_TEST_CFLAGS(${test_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
-  
+
   target_link_libraries(${test_name} ${PROJECT_NAME})
   target_link_libraries(${test_name} fmt::fmt)
   target_link_libraries(${test_name} Boost::unit_test_framework)
