@@ -19,13 +19,6 @@ radius = 0.6
 radius_sq = radius**2
 weights = np.eye(nx)
 
-
-# A_mat = np.array([[0., 1.],
-#                   [0., 1.]])
-# b = np.array([0., -0.2])
-# reslin = proxnlp.residuals.LinearFunction(A_mat, b)
-
-
 cost_ = QuadraticDistanceCost(space, p0, weights)
 center1 = space.neutral()
 print(cost_(p0))
