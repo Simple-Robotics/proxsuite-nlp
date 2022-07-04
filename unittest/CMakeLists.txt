@@ -46,8 +46,8 @@ endfunction(add_proxnlp_test)
 
 
 add_proxnlp_test(block-chol)
-add_proxnlp_test(constraint)
-add_proxnlp_test(cost)
+add_proxnlp_test(constraints)
+add_proxnlp_test(costs)
 add_proxnlp_test(finite-diff)
 add_proxnlp_test(function)
 add_proxnlp_test(manifold)

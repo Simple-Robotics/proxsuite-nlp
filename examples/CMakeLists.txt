@@ -33,19 +33,16 @@ endforeach()
 # Python examples
 if(BUILD_PYTHON_INTERFACE)
 
-  file(MAKE_DIRECTORY
-       ${CMAKE_CURRENT_BINARY_DIR}/python)
+  file(GLOB_RECURSE EXAMPLES_PY
+       ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
 
-  file(GLOB_RECURSE PY_EXAMPLES
-       ${CMAKE_CURRENT_SOURCE_DIR}/python/*.py)
-
-  message(STATUS "Python examples: ${PY_EXAMPLES}")
-  foreach(pyfile ${PY_EXAMPLES})
-  	get_filename_component(pyfile_name ${pyfile} NAME)
+  message(STATUS "Python examples: ${EXAMPLES_PY}")
+  foreach(pyfile ${EXAMPLES_PY})
+    get_filename_component(pyfile_name ${pyfile} NAME)
      execute_process(
           COMMAND ${CMAKE_COMMAND} -E create_symlink
           ${pyfile}
-          ${CMAKE_CURRENT_BINARY_DIR}/python/${pyfile_name}
+          ${CMAKE_CURRENT_BINARY_DIR}/${pyfile_name}
      )
   endforeach()
 

@@ -39,7 +39,7 @@ print(args)
 USE_VIEWER = args.view
 if USE_VIEWER:
     try:
-        from meshcat_utils import display_trajectory, ForceDraw, VIDEO_CONFIG_DEFAULT
+        import meshcat_utils as msu
     except ImportError:
         import warnings
 
@@ -86,8 +86,8 @@ if USE_VIEWER:
     vizer.initViewer(loadModel=True)
     vizer.display(x0[: model.nq])
     vizer.viewer.open()
-    drawer = ForceDraw(vizer)
-    drawer.set_cam_angle_preset("acrobot")
+    viz_util = msu.VizUtil(vizer)
+    viz_util.set_cam_angle_preset("acrobot")
 
 
 def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus):
@@ -252,23 +252,16 @@ plt.show()
 
 
 if USE_VIEWER:
-    drawer.set_cam_angle_preset("acrobot")
+    viz_util.set_cam_angle_preset("acrobot")
     allimgs = []
+    fps = 1.0 / dt
+    recorder = msu.VideoRecorder(args.video_file, fps)
     for _ in range(args.num_replay):
-        imgs = display_trajectory(
-            vizer,
-            drawer,
+        viz_util.play_trajectory(
             xs_opt,
             us_opt,
             frame_ids=[toolid],
             show_vel=True,
-            wait=dt,
+            timestep=dt,
             record=args.record,
-        )
-        if imgs is not None:
-            allimgs.extend(imgs)
-
-    if args.record:
-        import imageio
-
-        imageio.mimwrite(args.video_file, ims=allimgs, fps=1.0 / dt, **VIDEO_CONFIG_DEFAULT)
+            recorder=recorder)
