@@ -1,8 +1,9 @@
-/// @file blocks.hpp
-/// @author Sarah El-Kazdadi
-/// @brief Routines for block-sparse (notably, KKT-type) matrix LDLT
-/// factorisation.
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/**
+ * @file blocks.hpp
+ * @author Sarah El-Kazdadi
+ * @brief Routines for block-sparse (notably, KKT-type) matrix LDLT factorisation.
+ * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+ */
 #include "proxnlp/math.hpp"
 #include <type_traits>
 
@@ -12,15 +13,14 @@
 
 #include <iostream>
 
+namespace proxnlp {
 /// @brief	Block-wise Cholesky or LDLT factorisation routines.
 namespace block_chol {
 
 using Scalar = double;
-using MatrixRef =
-    Eigen::Map<proxnlp::math_types<Scalar>::MatrixXs, Eigen::Unaligned,
-               Eigen::Stride<Eigen::Dynamic, 1>>;
+using MatrixRef = proxnlp::math_types<Scalar>::MatrixRef;
 
-using usize = decltype(sizeof(0));
+using usize = std::size_t;
 using isize = typename std::make_signed<usize>::type;
 
 enum BlockKind {
@@ -299,28 +299,12 @@ struct SymbolicBlockMatrix {
 namespace backend {
 template <typename M> auto ref(M &mat) noexcept -> MatrixRef {
   static_assert(M::InnerStrideAtCompileTime == 1, ".");
-  return MatrixRef{
-      mat.data(),
-      mat.rows(),
-      mat.cols(),
-      Eigen::Stride<Eigen::Dynamic, 1>{
-          mat.outerStride(),
-          1,
-      },
-  };
+  return MatrixRef(mat);
 }
 
 auto ref_submatrix(MatrixRef a, isize i, isize j, isize nrows,
                    isize ncols) noexcept -> MatrixRef {
-  return MatrixRef{
-      a.data() + (i + j * a.outerStride()),
-      nrows,
-      ncols,
-      Eigen::Stride<Eigen::Dynamic, 1>{
-          a.outerStride(),
-          1,
-      },
-  };
+  return a.block(i, j, nrows, ncols);
 }
 
 void ldlt_in_place_unblocked(MatrixRef a) {
@@ -861,3 +845,5 @@ struct BlockMatrix {
   void ldlt_in_place() { ldlt_in_place_impl(); }
 };
 } // namespace block_chol
+
+} // namespace proxnlp

@@ -4,6 +4,7 @@
 
 #include <fmt/core.h>
 
+using namespace proxnlp;
 using block_chol::BlockKind;
 using block_chol::BlockMatrix;
 using block_chol::isize;
@@ -46,13 +47,7 @@ void bm_blocked(benchmark::State &s) {
     l = a;
 
     BlockMatrix l_block{
-        MatrixRef{
-            l.data(),
-            l.rows(),
-            l.cols(),
-            Eigen::Stride<Eigen::Dynamic, 1>{a.outerStride(), 1},
-        },
-        mat,
+        MatrixRef(l), mat
     };
     l_block.ldlt_in_place();
   }
@@ -62,12 +57,7 @@ void bm_unblocked(benchmark::State &s) {
   auto l = a;
   for (auto _ : s) {
     l = a;
-    block_chol::backend::ldlt_in_place(MatrixRef{
-        l.data(),
-        l.rows(),
-        l.cols(),
-        Eigen::Stride<Eigen::Dynamic, 1>{a.outerStride(), 1},
-    });
+    block_chol::backend::ldlt_in_place(MatrixRef(l));
     l.template triangularView<Eigen::StrictlyUpper>().setZero();
   }
 }
