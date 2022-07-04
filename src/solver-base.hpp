@@ -15,12 +15,6 @@
 
 #include "proxnlp/linesearch-base.hpp"
 
-#include <cassert>
-
-#include <fmt/core.h>
-#include <fmt/color.h>
-#include <fmt/ostream.h>
-
 namespace proxnlp {
 template <typename _Scalar> class SolverTpl {
 public:

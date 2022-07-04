@@ -6,6 +6,10 @@
 
 #include <stdexcept>
 
+#include <fmt/core.h>
+#include <fmt/ostream.h>
+#include <fmt/color.h>
+
 namespace proxnlp {
 template <typename Scalar>
 SolverTpl<Scalar>::SolverTpl(const Manifold &manifold,
@@ -375,8 +379,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     workspace.pd_step = -workspace.kktRhs;
     workspace.ldlt_.solveInPlace(workspace.pd_step);
     resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
-
-    assert(workspace.ldlt_.info() == Eigen::ComputationInfo::Success);
 
     //// Take the step
 
