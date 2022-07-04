@@ -4,6 +4,8 @@
  * @brief Routines for block-sparse (notably, KKT-type) matrix LDLT factorisation.
  * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
  */
+#pragma once
+
 #include "proxnlp/math.hpp"
 #include <type_traits>
 
@@ -299,7 +301,7 @@ struct SymbolicBlockMatrix {
 namespace backend {
 template <typename M> auto ref(M &mat) noexcept -> MatrixRef {
   static_assert(M::InnerStrideAtCompileTime == 1, ".");
-  return MatrixRef(mat);
+  return mat;
 }
 
 auto ref_submatrix(MatrixRef a, isize i, isize j, isize nrows,
@@ -658,6 +660,7 @@ void gemmt(MatrixRef const &dst, MatrixRef const &lhs, MatrixRef const &rhs,
 }
 } // namespace backend
 
+/// @brief Block matrix data structure with LDLT algos.
 struct BlockMatrix {
 
   MatrixRef storage;
@@ -844,6 +847,6 @@ struct BlockMatrix {
 
   void ldlt_in_place() { ldlt_in_place_impl(); }
 };
-} // namespace block_chol
 
+} // namespace block_chol
 } // namespace proxnlp
