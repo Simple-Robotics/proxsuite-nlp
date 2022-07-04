@@ -336,9 +336,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     }
 
     /* Compute the step */
-
-    // factorization
-    // regularization strength : always try 0
     delta = DELTA_INIT;
     InertiaFlag is_inertia_correct = BAD;
     while (!(is_inertia_correct == OK) && delta <= DELTA_MAX) {
@@ -359,18 +356,13 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
         delta_last = delta;
         break;
       } else if (delta == 0.) {
-
-        // check if previous was zero:
-        // either use some nonzero value
-        // or try some fraction of previous
+        // check if previous was zero
         if (delta_last == 0.) {
           delta = DELTA_NONZERO_INIT; // try a set nonzero value
         } else {
           delta = std::max(DELTA_MIN, del_dec_k * delta_last);
         }
-
       } else {
-
         // check previous; decide increase factor
         if (delta_last == 0.) {
           delta *= del_inc_big;
