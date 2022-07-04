@@ -431,7 +431,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) {
+void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
   merit_fun.setPenalty(mu_);
@@ -444,12 +444,12 @@ void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) {
   prox_penalty.m_weights.diagonal().setConstant(rho_);
 }
 
-template <typename Scalar> void SolverTpl<Scalar>::updateToleranceFailure() {
+template <typename Scalar> void SolverTpl<Scalar>::updateToleranceFailure() noexcept {
   prim_tol = prim_tol0 * std::pow(mu_, prim_alpha_);
   inner_tol = inner_tol0 * std::pow(mu_, dual_alpha);
 }
 
-template <typename Scalar> void SolverTpl<Scalar>::updateToleranceSuccess() {
+template <typename Scalar> void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
   prim_tol = prim_tol * std::pow(mu_, prim_beta);
   inner_tol = inner_tol * std::pow(mu_, dual_beta);
 }

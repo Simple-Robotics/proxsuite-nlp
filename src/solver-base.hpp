@@ -127,7 +127,7 @@ public:
                         const ConstVectorRef &x0, const ConstVectorRef &lams0);
 
   /// Set solver convergence threshold.
-  void setTolerance(const Scalar tol) { target_tol = tol; }
+  void setTolerance(const Scalar tol) noexcept { target_tol = tol; }
 
   void solveInner(Workspace &workspace, Results &results);
 
@@ -137,18 +137,16 @@ public:
 
   /// @brief Set penalty parameter, its inverse and update the merit function.
   /// @param new_mu The new penalty parameter.
-  void setPenalty(const Scalar &new_mu);
+  void setPenalty(const Scalar &new_mu) noexcept;
 
   /// Set proximal penalty parameter.
   void setProxParameter(const Scalar &new_rho);
 
   /// @brief    Add a callback to the solver instance.
-  inline void registerCallback(const CallbackPtr &cb) {
-    callbacks_.push_back(cb);
-  }
+  inline void registerCallback(const CallbackPtr &cb) noexcept { callbacks_.push_back(cb); }
 
   /// @brief    Remove all callbacks from the instance.
-  inline void clearCallbacks() { callbacks_.clear(); }
+  inline void clearCallbacks() noexcept { callbacks_.clear(); }
 
   /**
    * @brief Update primal-dual subproblem tolerances upon failure (insufficient
@@ -156,13 +154,13 @@ public:
    *
    * This is called upon initialization of the solver.
    */
-  void updateToleranceFailure();
+  void updateToleranceFailure() noexcept;
 
   /**
    * @brief Update primal-dual subproblem tolerances upon  successful outer-loop
    * iterate (good primal feasibility)
    */
-  void updateToleranceSuccess();
+  void updateToleranceSuccess() noexcept;
 
   /// @brief  Accept Lagrange multiplier estimates.
   void acceptMultipliers(Workspace &workspace) const {
