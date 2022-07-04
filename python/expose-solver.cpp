@@ -1,5 +1,4 @@
 #include "proxnlp/python/fwd.hpp"
-
 #include "proxnlp/solver-base.hpp"
 
 namespace proxnlp {

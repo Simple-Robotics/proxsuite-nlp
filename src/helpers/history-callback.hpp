@@ -1,7 +1,9 @@
 #pragma once
 
+#include "proxnlp/fwd.hpp"
 #include "proxnlp/helpers-base.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/workspace.hpp"
+#include "proxnlp/results.hpp"
 
 namespace proxnlp {
 namespace helpers {

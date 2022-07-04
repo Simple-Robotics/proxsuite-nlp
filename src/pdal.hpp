@@ -44,7 +44,7 @@ struct PDALFunction
   const Scalar m_gamma = 1.;
 
   /// Set the merit function penalty parameter.
-  void setPenalty(const Scalar &new_mu) {
+  void setPenalty(const Scalar &new_mu) noexcept {
     m_mu = new_mu;
     m_muInv = 1. / new_mu;
   };
