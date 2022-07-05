@@ -58,3 +58,14 @@ foreach(test_name ${TEST_NAMES})
   add_proxnlp_test(${test_name})
 endforeach(test_name)
 
+
+# PYTHON TESTS
+file(GLOB PYTHON_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} python/test_*.py)
+message(STATUS "Python tests: ${PYTHON_TESTS}")
+make_directory(${CMAKE_CURRENT_BINARY_DIR}/python)
+
+foreach(pyfile ${PYTHON_TESTS})
+  get_filename_component(pyfile_name ${pyfile} NAME)
+  message(STATUS "adding python test ${pyfile_name}")
+  ADD_PYTHON_UNIT_TEST(${pyfile_name} "tests/${pyfile}")
+endforeach()
