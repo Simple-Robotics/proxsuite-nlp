@@ -270,7 +270,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     //// fill in LHS/RHS
     //// TODO create an Eigen::Map to map submatrices to the active sets of each
-    ///constraint
+    /// constraint
 
     workspace.kktRhs.setZero();
     workspace.kktMatrix.setZero();
@@ -444,12 +444,14 @@ void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) {
   prox_penalty.m_weights.diagonal().setConstant(rho_);
 }
 
-template <typename Scalar> void SolverTpl<Scalar>::updateToleranceFailure() noexcept {
+template <typename Scalar>
+void SolverTpl<Scalar>::updateToleranceFailure() noexcept {
   prim_tol = prim_tol0 * std::pow(mu_, prim_alpha_);
   inner_tol = inner_tol0 * std::pow(mu_, dual_alpha);
 }
 
-template <typename Scalar> void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
+template <typename Scalar>
+void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
   prim_tol = prim_tol * std::pow(mu_, prim_beta);
   inner_tol = inner_tol * std::pow(mu_, dual_beta);
 }

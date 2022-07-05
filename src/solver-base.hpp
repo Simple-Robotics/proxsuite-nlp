@@ -143,7 +143,9 @@ public:
   void setProxParameter(const Scalar &new_rho);
 
   /// @brief    Add a callback to the solver instance.
-  inline void registerCallback(const CallbackPtr &cb) noexcept { callbacks_.push_back(cb); }
+  inline void registerCallback(const CallbackPtr &cb) noexcept {
+    callbacks_.push_back(cb);
+  }
 
   /// @brief    Remove all callbacks from the instance.
   inline void clearCallbacks() noexcept { callbacks_.clear(); }

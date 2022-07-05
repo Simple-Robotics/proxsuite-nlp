@@ -1,7 +1,8 @@
 /**
  * @file blocks.hpp
  * @author Sarah El-Kazdadi
- * @brief Routines for block-sparse (notably, KKT-type) matrix LDLT factorisation.
+ * @brief Routines for block-sparse (notably, KKT-type) matrix LDLT
+ * factorisation.
  * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
  */
 #pragma once

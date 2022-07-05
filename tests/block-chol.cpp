@@ -46,9 +46,7 @@ void bm_blocked(benchmark::State &s) {
   for (auto _ : s) {
     l = a;
 
-    BlockMatrix l_block{
-        MatrixRef(l), mat
-    };
+    BlockMatrix l_block{MatrixRef(l), mat};
     l_block.ldlt_in_place();
   }
 }
