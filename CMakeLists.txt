@@ -154,7 +154,7 @@ endif()
 add_subdirectory(examples)
 
 # Unit tests
-add_subdirectory(unittest)
+add_subdirectory(tests)
 
 # --- PACKAGING ----------------------------------------------------------------
 macro(EXPORT_VARIABLE var_name var_value)
