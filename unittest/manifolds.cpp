@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_tangentbundle_multibody) {
   auto x1_exp = space.integrate(x0, dx0);
   const int ndx = space.ndx();
 
-  Eigen::VectorXd J0(ndx, ndx);
+  Eigen::MatrixXd J0(ndx, ndx);
   J0.setRandom();
   space.JintegrateTransport(x0, dx0, J0, 0);
 }
