@@ -20,6 +20,13 @@ template <typename _Scalar> struct math_types {
   using ConstVectorRef = Eigen::Ref<const VectorXs>;
   using ConstMatrixRef = Eigen::Ref<const MatrixXs>;
   using VectorOfRef = std::vector<VectorRef>;
+
+  using Vector3s = Eigen::Matrix<Scalar, 3, 1>;
+  using Vector6s = Eigen::Matrix<Scalar, 6, 1>;
+
+  using Matrix3Xs = Eigen::Matrix<Scalar, 3, Eigen::Dynamic>;
+  using Matrix6Xs = Eigen::Matrix<Scalar, 6, Eigen::Dynamic>;
+  using Matrix6s = Eigen::Matrix<Scalar, 6, 6>;
 };
 
 /// Math utilities
