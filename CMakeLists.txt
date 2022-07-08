@@ -97,8 +97,8 @@ ADD_PROJECT_DEPENDENCY(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   FINDPYTHON(REQUIRED)
-  set(PY_NAME "py${PROJECT_NAME}")
-  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
+  set(PYLIB_NAME "py${PROJECT_NAME}")
+  set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
   SEARCH_FOR_BOOST_PYTHON(REQUIRED)
   ADD_PROJECT_DEPENDENCY(eigenpy 2.7.2 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 2.7.2")
 
@@ -151,9 +151,8 @@ add_subdirectory(src)
 if(BUILD_PYTHON_INTERFACE)
   add_subdirectory(python)
 endif()
-add_subdirectory(examples)
 
-# Unit tests
+add_subdirectory(examples)
 add_subdirectory(tests)
 
 # --- PACKAGING ----------------------------------------------------------------

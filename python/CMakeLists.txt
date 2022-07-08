@@ -5,26 +5,26 @@
 include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
 
 # identify bindings C++ source files
-file(GLOB_RECURSE ${PY_NAME}_SOURCES
+file(GLOB_RECURSE ${PYLIB_NAME}_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
      )
 
-file(GLOB_RECURSE ${PY_NAME}_HEADERS
+file(GLOB_RECURSE ${PYLIB_NAME}_HEADERS
      ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
      )
 
-set(PY_HEADERS ${${PY_NAME}_HEADERS})
-set(PY_SOURCES ${${PY_NAME}_SOURCES})
+set(PY_HEADERS ${${PYLIB_NAME}_HEADERS})
+set(PY_SOURCES ${${PYLIB_NAME}_SOURCES})
 
 ADD_HEADER_GROUP(PY_HEADERS)
 
 message(STATUS "Python headers: ${PY_HEADERS}")
 
 function(MAKE_BINDINGS)
-  add_library(${PY_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
+  add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
 
-  target_include_directories(${PY_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
-  set_target_properties(${PY_NAME}
+  target_include_directories(${PYLIB_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
+  set_target_properties(${PYLIB_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_NAME}
     PREFIX ""
@@ -32,18 +32,18 @@ function(MAKE_BINDINGS)
     VERSION ${PROJECT_VERSION}
     )
   if(UNIX AND NOT APPLE)
-    set_target_properties(${PY_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
+    set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
   endif()
 
-  target_compile_options(${PY_NAME} PRIVATE -Wno-conversion -Wno-comment)
+  target_compile_options(${PYLIB_NAME} PRIVATE -Wno-conversion -Wno-comment)
 
   # link solver, eigenpy, Boost.Python
-  target_link_libraries(${PY_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
-  target_link_libraries(${PY_NAME} PRIVATE fmt::fmt)
-  target_link_boost_python(${PY_NAME} PUBLIC)
-  install(TARGETS ${PY_NAME}
+  target_link_libraries(${PYLIB_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
+  target_link_libraries(${PYLIB_NAME} PRIVATE fmt::fmt)
+  target_link_boost_python(${PYLIB_NAME} PUBLIC)
+  install(TARGETS ${PYLIB_NAME}
           EXPORT ${TARGETS_EXPORT_NAME}
-          DESTINATION ${${PY_NAME}_INSTALL_DIR})
+          DESTINATION ${${PYLIB_NAME}_INSTALL_DIR})
 endfunction()
 
 MAKE_BINDINGS()
@@ -65,11 +65,11 @@ install(FILES ${PY_HEADERS}
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
-set(${PY_NAME}_PYFILES
+set(${PYLIB_NAME}_PYFILES
     __init__.py
     utils.py)
 
-foreach(pyfile ${${PY_NAME}_PYFILES})
+foreach(pyfile ${${PYLIB_NAME}_PYFILES})
 	python_install_on_site(${PROJECT_NAME} ${pyfile})
 endforeach()
 
