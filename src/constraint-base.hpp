@@ -21,15 +21,23 @@ public:
   /// for Gauss Newton.
   virtual bool disableGaussNewton() const { return true; }
 
+  /// Provided the image @p zproj by the proximal/projection map, evaluate the nonsmooth penalty or
+  /// constraint set indicator function.
+  virtual Scalar evaluate(const ConstVectorRef &/*zproj*/) const {
+    return 0.;
+  }
+
   /// Compute projection of variable @p z onto the constraint set.
   virtual ReturnType projection(const ConstVectorRef &z) const = 0;
 
-  /* Compute projection of @p z onto the normal cone to the set.
+  /**
+   * Compute projection of @p z onto the normal cone to the set.
    * The default implementation is just $\f\mathrm{id} - P\f$.
    */
   inline ReturnType normalConeProjection(const ConstVectorRef &z) const;
 
-  /** Apply the jacobian of the constraint set projection operator.
+  /**
+   * Apply the jacobian of the constraint set projection operator.
    * @param[in]  z     Input vector (multiplier estimate)
    * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
    * and returned.
@@ -37,7 +45,8 @@ public:
   virtual void applyProjectionJacobian(const ConstVectorRef &z,
                                        MatrixRef Jout) const;
 
-  /** Apply the jacobian of the projection on the normal cone.
+  /**
+   * Apply the jacobian of the projection on the normal cone.
    * @param[in]  z     Input vector
    * @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which
    * will be modified in place. The modification should be a row-wise operation.
@@ -47,15 +56,48 @@ public:
 
   /// Update proximal parameter; this applies to when this class is a proximal
   /// operator.
-  virtual void updateProxParameters(const Scalar){};
+  virtual void setProxParameters(const Scalar){};
 
   /// Compute the active set of the constraint.
   virtual void computeActiveSet(const ConstVectorRef &z,
                                 Eigen::Ref<ActiveType> out) const = 0;
+
   virtual ~ConstraintSetBase<Scalar>() = default;
 
   bool operator==(const ConstraintSetBase<Scalar> &rhs) { return this == &rhs; }
 };
+
+/**
+ * @brief Evaluate the Moreau envelope with parameter @p mu for the given contraint set
+ *        or nonsmooth penalty \f$P\f$ at point @p zin.
+ * 
+ * @details    The envelope is
+ *              \f[ P(\prox_{P/\mu}(z)) + \frac{1}{2\mu} \| z - \prox_{P/\mu}(z) \|^2. \f]
+ * 
+ * @param cstr_set  The constraint set/nonsmooth penalty.
+ * @param zin    		The input.
+ * @param zproj     Projection of the input to the normal.
+ * @param inv_mu    The inverse penalty parameter.
+ */
+template <typename Scalar>
+Scalar evaluateMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
+                              const typename math_types<Scalar>::ConstVectorRef &zin,
+                              const typename math_types<Scalar>::ConstVectorRef &zproj,
+                              const Scalar inv_mu) {
+  Scalar res = cstr_set.evaluate(zin - zproj);
+  res += 0.5 * inv_mu * zproj.squaredNorm();
+  return res;
+}
+
+/// @copybrief evaluateMoreauEnvelope(). This variant evaluates the prox map.
+template <typename Scalar>
+Scalar computeMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
+                              const typename math_types<Scalar>::ConstVectorRef &zin,
+                              const Scalar inv_mu,
+                              typename math_types<Scalar>::VectorRef zprojout) {
+  zprojout = cstr_set.normalConeProjection(zin);
+  return evaluateMoreauEnvelope(cstr_set, zin, zprojout, inv_mu);
+}
 
 /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
  *

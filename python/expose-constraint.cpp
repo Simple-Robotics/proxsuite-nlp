@@ -71,6 +71,11 @@ void exposeConstraints() {
           &make_constraint<NegativeOrthant<Scalar>>,
           "Convenience function to create an inequality constraint from a "
           "C2Function.");
+
+  bp::def("evaluateMoreauEnvelope",
+          &evaluateMoreauEnvelope<Scalar>,
+          bp::args("cstr_set", "zin", "zproj", "inv_mu"),
+          "Evaluate the Moreau envelope with parameter :math:`\\mu`.");
 }
 
 } // namespace python

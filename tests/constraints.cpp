@@ -21,6 +21,15 @@ PROXNLP_DYNAMIC_TYPEDEFS(double);
 BOOST_AUTO_TEST_CASE(test_equality) {
   VectorXs x0 = space.neutral();
   VectorXs x1 = space.rand();
+  VectorXs zout(N);
+  zout.setZero();
+
+  EqualityConstraint<double> eq_set;
+  double mu = 0.1;
+
+  double m = computeMoreauEnvelope(eq_set, x1, 1. / mu, zout);
+  BOOST_TEST_CHECK(zout.isApprox(x1));
+  BOOST_TEST_CHECK(m == (0.5 / mu * zout.squaredNorm()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -22,6 +22,10 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
 
   Scalar m_mu;
 
+  Scalar evaluate(const ConstVectorRef &zproj) const {
+    return zproj.lpNorm<1>();
+  }
+
   ReturnType projection(const ConstVectorRef &z) const {
     return z.array().sign() * (z.abs().array() - m_mu).max(Scalar(0.));
   }
@@ -31,7 +35,7 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
     out = (z.abs().array() - m_mu) <= Scalar(0.);
   }
 
-  void updateProxParameters(const Scalar mu) { m_mu = mu; };
+  void setProxParameters(const Scalar mu) { m_mu = mu; };
 };
 
 } // namespace proxnlp

@@ -216,7 +216,7 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
   }
   for (std::size_t i = 0; i < problem->getNumConstraints(); i++) {
     const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-    cstr->m_set->updateProxParameters(mu_);
+    cstr->m_set->setProxParameters(mu_);
   }
 }
 
