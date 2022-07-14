@@ -20,7 +20,7 @@ SolverTpl<Scalar>::SolverTpl(const Manifold &manifold,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              const Scalar alpha_min, const Scalar armijo_c1,
                              const Scalar ls_beta)
-    : manifold(manifold), problem(prob), merit_fun(problem, mu_init),
+    : manifold(manifold), problem_(prob), merit_fun(problem_, mu_init),
       prox_penalty(manifold, manifold.neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
@@ -33,17 +33,17 @@ template <typename Scalar>
 ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
                                          const ConstVectorRef &x0,
                                          const std::vector<VectorRef> &lams0) {
-  VectorXs new_lam(problem->getTotalConstraintDim());
+  VectorXs new_lam(problem_->getTotalConstraintDim());
   new_lam.setZero();
   int nr = 0;
-  const std::size_t numc = problem->getNumConstraints();
+  const std::size_t numc = problem_->getNumConstraints();
   if (numc != lams0.size()) {
     throw std::runtime_error("Specified number of constraints is not the same "
                              "as the provided number of multipliers!");
   }
   for (std::size_t i = 0; i < numc; i++) {
-    nr = problem->getConstraintDims()[i];
-    new_lam.segment(problem->getIndex(i), nr) = lams0[i];
+    nr = problem_->getConstraintDim(i);
+    new_lam.segment(problem_->getIndex(i), nr) = lams0[i];
   }
   return solve(workspace, results, x0, new_lam);
 }
@@ -55,8 +55,8 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   // init variables
   results.xOpt = x0;
   workspace.xPrev = x0;
-  results.lamsOpt_data = lams0;
-  workspace.lamsPrev_data = lams0;
+  results.lams_opt_data = lams0;
+  workspace.data_lams_prev = lams0;
 
   updateToleranceFailure();
 
@@ -121,7 +121,7 @@ template <typename Scalar>
 typename SolverTpl<Scalar>::InertiaFlag
 SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
   const int ndx = manifold.ndx();
-  const int numc = problem->getTotalConstraintDim();
+  const int numc = problem_->getTotalConstraintDim();
   const long n = signature.size();
   int numpos = 0;
   int numneg = 0;
@@ -164,40 +164,39 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeResidualsAndMultipliers(
+void SolverTpl<Scalar>::computeConstraintsAndMultipliers(
     const ConstVectorRef &x, const ConstVectorRef &lams_data,
     Workspace &workspace) const {
-  problem->evaluate(x, workspace);
-  workspace.lamsPlusPre_data =
-      workspace.lamsPrev_data + mu_inv_ * workspace.cstr_values_data;
+  problem_->evaluate(x, workspace);
+  workspace.data_lams_plus_pre =
+      workspace.data_lams_prev + mu_inv_ * workspace.data_cstr_values;
   // project multiplier estimate
-  for (std::size_t i = 0; i < problem->getNumConstraints(); i++) {
-    const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-    workspace.lamsPlus[i] =
-        cstr->m_set->normalConeProjection(workspace.lamsPlusPre[i]);
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
+    cstr_set.normalConeProjection(workspace.lamsPlusPre[i], workspace.lamsPlus[i]);
   }
-  workspace.dual_prox_err_data = mu_ * (workspace.lamsPlus_data - lams_data);
-  workspace.lamsPDAL_data = 2 * workspace.lamsPlus_data - lams_data;
+  workspace.dual_prox_err_data = mu_ * (workspace.data_lams_plus - lams_data);
+  workspace.data_lams_pdal = 2 * workspace.data_lams_plus - lams_data;
 }
 
 /// Compute problem derivatives
 template <typename Scalar>
-void SolverTpl<Scalar>::computeResidualDerivatives(const ConstVectorRef &x,
+void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
                                                    Workspace &workspace,
                                                    bool second_order) const {
-  problem->computeDerivatives(x, workspace);
+  problem_->computeDerivatives(x, workspace);
   if (second_order) {
-    problem->m_cost.computeHessian(x, workspace.objectiveHessian);
+    problem_->cost_.computeHessian(x, workspace.objectiveHessian);
   }
-  for (std::size_t i = 0; i < problem->getNumConstraints(); i++) {
-    const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-    cstr->m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i],
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    cstr.m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i],
                                                    workspace.cstrJacobians[i]);
 
-    bool use_vhp = (use_gauss_newton && !(cstr->m_set->disableGaussNewton())) ||
+    bool use_vhp = (use_gauss_newton && !(cstr.m_set->disableGaussNewton())) ||
                    !(use_gauss_newton);
     if (second_order && use_vhp) {
-      cstr->m_func.vectorHessianProduct(x, workspace.lamsPDAL[i],
+      cstr.func().vectorHessianProduct(x, workspace.lamsPDAL[i],
                                         workspace.cstrVectorHessianProd[i]);
     }
   }
@@ -214,9 +213,9 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
   } else {
     setPenalty(std::max(mu_ * mu_factor_, mu_lower_));
   }
-  for (std::size_t i = 0; i < problem->getNumConstraints(); i++) {
-    const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-    cstr->m_set->setProxParameters(mu_);
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    cstr.m_set->setProxParameters(mu_);
   }
 }
 
@@ -225,25 +224,22 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   const int ndx = manifold.ndx();
   const long ntot = workspace.kktRhs.size();
   const long ndual = ntot - ndx;
-  const std::size_t num_c = problem->getNumConstraints();
+  const std::size_t num_c = problem_->getNumConstraints();
 
-  results.lamsOpt_data = workspace.lamsPrev_data;
+  results.lams_opt_data = workspace.data_lams_prev;
 
   Scalar delta_last = 0.;
   Scalar delta = delta_last;
   Scalar old_delta = 0.;
-  Scalar conditioning_ = 0;
-
-  VectorXs resdl(workspace.ndx + workspace.numdual);
-  resdl.setZero();
+  Scalar conditioning = 0;
 
   merit_fun.setPenalty(mu_);
 
   // lambda for evaluating the merit function
-  auto phi_func = [&](const Scalar alpha) {
+  auto phi_trial = [&](const Scalar alpha) {
     tryStep(manifold, workspace, results, alpha);
-    return merit_fun(workspace.xTrial, workspace.lamsTrial,
-                     workspace.lamsPrev) +
+    return merit_fun.evaluate(workspace.xTrial, workspace.lamsTrial,
+                              workspace.lamsPrev, workspace.lamsPlusPre) +
            prox_penalty.call(workspace.xTrial);
   };
 
@@ -252,14 +248,15 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     //// precompute temp data
 
-    results.value = problem->m_cost.call(results.xOpt);
+    results.value = problem_->cost_.call(results.xOpt);
 
-    computeResidualsAndMultipliers(results.xOpt, results.lamsOpt_data,
-                                   workspace);
-    computeResidualDerivatives(results.xOpt, workspace, true);
+    computeConstraintsAndMultipliers(results.xOpt, results.lams_opt_data, workspace);
+    computeConstraintDerivatives(results.xOpt, workspace, true);
 
-    results.merit =
-        merit_fun(results.xOpt, results.lamsOpt, workspace.lamsPrev);
+    results.merit = merit_fun.evaluate(results.xOpt,
+                                       results.lamsOpt,
+                                       workspace.lamsPrev,
+                                       workspace.lamsPlusPre);
     if (rho_ > 0.)
       results.merit += prox_penalty.call(results.xOpt);
 
@@ -286,29 +283,29 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     // add jacobian-vector products to gradients
     workspace.kktRhs.head(ndx) =
         workspace.objectiveGradient +
-        workspace.jacobians_data.transpose() * results.lamsOpt_data;
+        workspace.jacobians_data.transpose() * results.lams_opt_data;
     workspace.kktRhs.tail(ndual) = workspace.dual_prox_err_data;
     workspace.meritGradient =
         workspace.objectiveGradient +
-        workspace.jacobians_data.transpose() * workspace.lamsPDAL_data;
+        workspace.jacobians_data.transpose() * workspace.data_lams_pdal;
 
     // add proximal penalty terms
     if (rho_ > 0.) {
-      workspace.kktRhs.head(ndx).noalias() += workspace.prox_grad;
-      workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() +=
+      workspace.kktRhs.head(ndx) += workspace.prox_grad;
+      workspace.kktMatrix.topLeftCorner(ndx, ndx) +=
           workspace.prox_hess;
-      workspace.meritGradient.noalias() += workspace.prox_grad;
+      workspace.meritGradient += workspace.prox_grad;
     }
 
     for (std::size_t i = 0; i < num_c; i++) {
-      const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-      cstr->m_set->computeActiveSet(workspace.cstrValues[i],
-                                    results.activeSet[i]);
+      const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
+      cstr_set.computeActiveSet(workspace.cstrValues[i],
+                                results.activeSet[i]);
 
-      bool use_vhp = (use_gauss_newton && !cstr->m_set->disableGaussNewton()) ||
+      bool use_vhp = (use_gauss_newton && !cstr_set.disableGaussNewton()) ||
                      !use_gauss_newton;
       if (use_vhp) {
-        workspace.kktMatrix.topLeftCorner(ndx, ndx).noalias() +=
+        workspace.kktMatrix.topLeftCorner(ndx, ndx) +=
             workspace.cstrVectorHessianProd[i];
       }
     }
@@ -316,17 +313,15 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     // Compute dual residual and infeasibility
     workspace.dualResidual = workspace.kktRhs.head(ndx);
     if (rho_ > 0.)
-      workspace.dualResidual.noalias() -= workspace.prox_grad;
+      workspace.dualResidual -= workspace.prox_grad;
 
     results.dualInfeas = math::infty_norm(workspace.dualResidual);
-    for (std::size_t i = 0; i < problem->getNumConstraints(); i++) {
-      const typename Problem::ConstraintPtr &cstr = problem->getConstraint(i);
-      auto set = cstr->m_set;
-      results.constraint_violations_((long)i) =
-          math::infty_norm(set->normalConeProjection(workspace.cstrValues[i]));
+    for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+      const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
+      cstr_set.normalConeProjection(workspace.cstrValues[i], workspace.cstrValuesProj[i]);
+      results.constraint_violations_(long(i)) = math::infty_norm(workspace.cstrValuesProj[i]);
     }
     results.primalInfeas = math::infty_norm(results.constraint_violations_);
-    // Compute inner stopping criterion
     Scalar inner_crit = math::infty_norm(workspace.kktRhs);
 
     fmt::print(
@@ -347,7 +342,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
         workspace.kktMatrix.diagonal().head(ndx).array() += delta;
       }
       workspace.ldlt_.compute(workspace.kktMatrix);
-      conditioning_ = 1. / workspace.ldlt_.rcond();
+      conditioning = 1. / workspace.ldlt_.rcond();
       workspace.signature.array() =
           workspace.ldlt_.vectorD().array().sign().template cast<int>();
       workspace.kktMatrix.diagonal().head(ndx).array() -= delta;
@@ -378,7 +373,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     workspace.pd_step = -workspace.kktRhs;
     workspace.ldlt_.solveInPlace(workspace.pd_step);
-    resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
 
     //// Take the step
 
@@ -387,33 +381,32 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
         workspace.dual_prox_err_data.dot(workspace.dual_step);
 
     if (verbose >= 1) {
+      auto resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
       fmt::print(
           " | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
-          math::infty_norm(resdl), workspace.dmerit_dir, conditioning_, delta);
+          math::infty_norm(resdl), workspace.dmerit_dir, conditioning, delta);
     }
-
-    Scalar &alpha_opt = workspace.alpha_opt;
 
     switch (ls_strat) {
     case ARMIJO: {
-      ArmijoLinesearch<Scalar>::run(phi_func, results.merit,
+      ArmijoLinesearch<Scalar>::run(phi_trial, results.merit,
                                     workspace.dmerit_dir, verbose, ls_beta,
-                                    armijo_c1, alpha_min, alpha_opt);
+                                    armijo_c1, alpha_min, workspace.alpha_opt);
       break;
     }
     case CUBIC_INTERP: {
-      CubicInterpLinesearch<Scalar>::run(phi_func, results.merit,
+      CubicInterpLinesearch<Scalar>::run(phi_trial, results.merit,
                                          workspace.dmerit_dir, verbose,
-                                         armijo_c1, alpha_min, alpha_opt);
+                                         armijo_c1, alpha_min, workspace.alpha_opt);
       break;
     }
     default:
       break;
     }
-    fmt::print(" | alph_opt={:4.3e}\n", alpha_opt);
+    fmt::print(" | alph_opt={:4.3e}\n", workspace.alpha_opt);
 
     results.xOpt = workspace.xTrial;
-    results.lamsOpt_data = workspace.lamsTrial_data;
+    results.lams_opt_data = workspace.lamsTrial_data;
 
     invokeCallbacks(workspace, results);
 
@@ -454,5 +447,14 @@ template <typename Scalar>
 void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
   prim_tol = prim_tol * std::pow(mu_, prim_beta);
   inner_tol = inner_tol * std::pow(mu_, dual_beta);
+}
+
+template <typename Scalar>
+void SolverTpl<Scalar>::tryStep(const Manifold &manifold, Workspace &workspace,
+                                const Results &results, Scalar alpha) {
+  manifold.integrate(results.xOpt, alpha * workspace.prim_step,
+                     workspace.xTrial);
+  workspace.lamsTrial_data =
+      results.lams_opt_data + alpha * workspace.dual_step;
 }
 } // namespace proxnlp

@@ -22,8 +22,12 @@ public:
 
   bool disableGaussNewton() const { return true; }
 
-  inline ReturnType projection(const ConstVectorRef &z) const {
-    return z * Scalar(0.);
+  inline void projection(const ConstVectorRef &z, VectorRef zout) const {
+    zout.setZero();
+  }
+
+  inline void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
+    zout = z;
   }
 
   inline void applyProjectionJacobian(const ConstVectorRef &,

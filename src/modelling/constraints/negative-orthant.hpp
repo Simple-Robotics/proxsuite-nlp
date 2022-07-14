@@ -21,14 +21,18 @@ struct NegativeOrthant : ConstraintSetBase<_Scalar> {
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
-  ReturnType projection(const ConstVectorRef &z) const {
-    return z.cwiseMin(Scalar(0.));
+  void projection(const ConstVectorRef &z, VectorRef zout) const {
+    zout = z.cwiseMin(static_cast<Scalar>(0.));
+  }
+
+  void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
+    zout = z.cwiseMax(static_cast<Scalar>(0.));
   }
 
   /// The elements of the active set are the components such that \f$z_i > 0\f$.
   void computeActiveSet(const ConstVectorRef &z,
                         Eigen::Ref<ActiveType> out) const {
-    out.array() = (z.array() > Scalar(0.));
+    out.array() = (z.array() > static_cast<Scalar>(0.));
   }
 };
 

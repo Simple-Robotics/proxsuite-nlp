@@ -44,7 +44,7 @@ public:
 
   VectorXs xPrev;
   VectorXs xTrial;
-  VectorXs lamsPrev_data;
+  VectorXs data_lams_prev;
   VectorXs lamsTrial_data;
   VectorOfRef lamsPrev;
   VectorOfRef lamsTrial;
@@ -56,9 +56,12 @@ public:
 
   /// Dual residual: gradient of the Lagrangian function
   VectorXs dualResidual;
-  VectorXs cstr_values_data;
+  VectorXs data_cstr_values;
   /// Values of each constraint
   VectorOfRef cstrValues;
+  VectorXs data_cstr_values_proj;
+  /// Projected values of each constraint
+  std::vector<VectorRef> cstrValuesProj;
 
   /// Objective value
   Scalar objectiveValue;
@@ -74,9 +77,9 @@ public:
   std::vector<MatrixRef> cstrJacobians;
   std::vector<MatrixRef> cstrVectorHessianProd;
 
-  VectorXs lamsPlusPre_data;
-  VectorXs lamsPlus_data;
-  VectorXs lamsPDAL_data;
+  VectorXs data_lams_plus_pre;
+  VectorXs data_lams_plus;
+  VectorXs data_lams_pdal;
   VectorXs dual_prox_err_data;
 
   /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
@@ -100,12 +103,12 @@ public:
         kktMatrix(ndx + numdual, ndx + numdual), kktRhs(ndx + numdual),
         pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
-        ldlt_(kktMatrix), xPrev(nx), xTrial(nx), lamsPrev_data(numdual),
+        ldlt_(kktMatrix), xPrev(nx), xTrial(nx), data_lams_prev(numdual),
         lamsTrial_data(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
-        dualResidual(ndx), cstr_values_data(numdual), objectiveGradient(ndx),
+        dualResidual(ndx), data_cstr_values(numdual), data_cstr_values_proj(numdual), objectiveGradient(ndx),
         objectiveHessian(ndx, ndx), meritGradient(ndx),
         jacobians_data(numdual, ndx), hessians_data((int)numblocks * ndx, ndx),
-        lamsPlus_data(numdual), lamsPDAL_data(numdual),
+        data_lams_plus(numdual), data_lams_pdal(numdual),
         dual_prox_err_data(numdual) {
     init(prob);
   }
@@ -118,14 +121,16 @@ public:
 
     xPrev.setZero();
     xTrial.setZero();
-    helpers::allocateMultipliersOrResiduals(prob, lamsPrev_data, lamsPrev);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_prev, lamsPrev);
     helpers::allocateMultipliersOrResiduals(prob, lamsTrial_data, lamsTrial);
     prox_grad.setZero();
     prox_hess.setZero();
 
     dualResidual.setZero();
     helpers::allocateMultipliersOrResiduals(
-        prob, cstr_values_data, cstrValues); // not multipliers but same dims
+        prob, data_cstr_values, cstrValues); // not multipliers but same dims
+    data_cstr_values_proj.setZero();
+    helpers::allocateMultipliersOrResiduals(prob, data_cstr_values_proj, cstrValuesProj);
 
     objectiveGradient.setZero();
     objectiveHessian.setZero();
@@ -133,10 +138,10 @@ public:
     jacobians_data.setZero();
     hessians_data.setZero();
 
-    helpers::allocateMultipliersOrResiduals(prob, lamsPlusPre_data,
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus_pre,
                                             lamsPlusPre);
-    helpers::allocateMultipliersOrResiduals(prob, lamsPlus_data, lamsPlus);
-    helpers::allocateMultipliersOrResiduals(prob, lamsPDAL_data, lamsPDAL);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus, lamsPlus);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lamsPDAL);
     helpers::allocateMultipliersOrResiduals(prob, dual_prox_err_data,
                                             subproblemDualErr);
 

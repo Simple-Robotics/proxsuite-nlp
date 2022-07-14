@@ -1,8 +1,9 @@
 #pragma once
 
 #include "proxnlp/fwd.hpp"
-#include "proxnlp/merit-function-base.hpp"
 #include "proxnlp/lagrangian.hpp"
+
+#include "proxnlp/workspace.hpp"
 
 #include <vector>
 
@@ -22,54 +23,39 @@ namespace proxnlp {
  *
  */
 template <typename _Scalar>
-struct PDALFunction
-    : public MeritFunctionBaseTpl<_Scalar,
-                                  typename math_types<_Scalar>::VectorOfRef,
-                                  typename math_types<_Scalar>::VectorOfRef> {
+struct PDALFunction {
+public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-  using Base = MeritFunctionBaseTpl<Scalar, VectorOfRef, VectorOfRef>;
-  using Base::m_prob;
   using Problem = ProblemTpl<Scalar>;
-  using Lagrangian_t = LagrangianFunction<Scalar>;
+  using LagrangianType = LagrangianFunction<Scalar>;
 
-  Lagrangian_t m_lagr;
-
-  /// AL penalty parameter
-  Scalar m_mu;
-  /// Reciprocal penalty parameter
-  Scalar m_muInv = 1. / m_mu;
-
+  shared_ptr<Problem> problem_;
+  LagrangianType lagrangian_;
   /// Generalized pdAL dual penalty param
-  const Scalar m_gamma = 1.;
+  const Scalar gamma_ = 1.;
 
-  /// Set the merit function penalty parameter.
-  void setPenalty(const Scalar &new_mu) noexcept {
-    m_mu = new_mu;
-    m_muInv = 1. / new_mu;
-  };
-
-  PDALFunction(shared_ptr<Problem> prob, const Scalar mu = 0.01)
-      : Base(prob), m_lagr(Lagrangian_t(prob)), m_mu(mu) {}
+  PDALFunction(shared_ptr<Problem> prob, const Scalar mu);
 
   /**
    *  @brief Compute the first-order multiplier estimates.
    */
   void computeFirstOrderMultipliers(const ConstVectorRef &x,
                                     const VectorOfRef &lams_ext,
-                                    VectorOfRef &out) const;
+                                    std::vector<VectorRef> &lams_cache,
+                                    std::vector<VectorRef> &out) const;
 
-  /// @brief Compute the pdAL (Gill-Robinson) multipliers
-  /// @todo  Use this at some point in the algorithm
-  void computePDALMultipliers(const ConstVectorRef &x, const VectorOfRef &lams,
-                              const VectorOfRef &lams_ext,
-                              VectorOfRef &out) const;
+  Scalar evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
+                  const VectorOfRef &lams_ext,
+                  std::vector<VectorRef> &lams_cache) const;
 
-  Scalar operator()(const ConstVectorRef &x, const VectorOfRef &lams,
-                    const VectorOfRef &lams_ext) const;
-
-  void computeGradient(const ConstVectorRef &x, const VectorOfRef &lams,
-                       const VectorOfRef &lams_ext, VectorRef out) const;
+  /// @brief  Set the merit function penalty parameter.
+  void setPenalty(const Scalar &new_mu) noexcept;
+protected:
+  /// AL penalty parameter
+  Scalar mu_penal_;
+  /// Reciprocal penalty parameter
+  Scalar mu_inv_ = 1. / mu_penal_;
 };
 
 } // namespace proxnlp

@@ -12,9 +12,9 @@ template <typename _Scalar, typename... Args> struct MeritFunctionBaseTpl {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
 
-  shared_ptr<Problem> m_prob;
+  shared_ptr<Problem> problem_;
 
-  MeritFunctionBaseTpl(shared_ptr<Problem> prob) : m_prob(prob) {}
+  MeritFunctionBaseTpl(shared_ptr<Problem> prob) : problem_(prob) {}
 
   /// Evaluate the merit function.
   virtual Scalar operator()(const ConstVectorRef &x,
@@ -31,16 +31,16 @@ struct EvalObjective : public MeritFunctionBaseTpl<_Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
   using Base = MeritFunctionBaseTpl<Scalar>;
-  using Base::m_prob;
+  using Base::problem_;
 
   EvalObjective(shared_ptr<Problem> prob) : Base(prob) {}
 
   Scalar operator()(const ConstVectorRef &x) const {
-    return m_prob->m_cost.call(x);
+    return problem_->cost_.call(x);
   }
 
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    m_prob->m_cost.computeGradient(x, out);
+    problem_->cost_.computeGradient(x, out);
   }
 };
 

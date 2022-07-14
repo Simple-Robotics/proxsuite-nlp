@@ -4,57 +4,42 @@
 
 namespace proxnlp {
 template <typename Scalar>
-Scalar PDALFunction<Scalar>::operator()(const ConstVectorRef &x,
-                                        const VectorOfRef &lams,
-                                        const VectorOfRef &lams_ext) const {
-  Scalar result_ = m_prob->m_cost.call(x);
-
-  const std::size_t nc = m_prob->getNumConstraints();
-  for (std::size_t i = 0; i < nc; i++) {
-    const auto cstr = m_prob->getConstraint(i);
-    VectorXs cval =
-        cstr->m_set->normalConeProjection(cstr->m_func(x) + m_mu * lams_ext[i]);
-    result_ += Scalar(0.5) * (m_muInv * cval.squaredNorm() -
-                              m_mu * lams_ext[i].squaredNorm());
-    result_ += Scalar(0.5) * m_muInv * (cval - m_mu * lams[i]).squaredNorm();
-  }
-
-  return result_;
-}
+PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu)
+    : problem_(prob), lagrangian_(prob), mu_penal_(mu) {}
 
 template <typename Scalar>
-void PDALFunction<Scalar>::computeGradient(const ConstVectorRef &x,
-                                           const VectorOfRef &lams,
-                                           const VectorOfRef &lams_ext,
-                                           VectorRef out) const {
-  VectorOfRef lams_plus;
-  VectorXs data(m_prob->getTotalConstraintDim());
-  helpers::allocateMultipliersOrResiduals(*m_prob, data, lams_plus);
-  computePDALMultipliers(x, lams, lams_ext, lams_plus);
-  m_lagr.computeGradient(x, lams_plus, out);
+Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
+                                      const VectorOfRef &lams,
+                                      const VectorOfRef &lams_ext,
+                                      std::vector<VectorRef> &tmp_cvals) const {
+  Scalar res = problem_->cost_.call(x);
+  const std::size_t nc = problem_->getNumConstraints();
+  for (std::size_t i = 0; i < nc; i++) {
+    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    tmp_cvals[i] = cstr.func()(x) + mu_penal_ * lams_ext[i];
+    res += computeMoreauEnvelope(*cstr.m_set, tmp_cvals[i], mu_inv_, tmp_cvals[i]);
+    res += -static_cast<Scalar>(0.5) * mu_penal_ * lams_ext[i].squaredNorm();
+    res += gamma_ * static_cast<Scalar>(0.5) * mu_inv_ * (tmp_cvals[i] - mu_penal_ * lams[i]).squaredNorm();
+  }
+  return res;
 }
 
 template <typename Scalar>
 void PDALFunction<Scalar>::computeFirstOrderMultipliers(
     const ConstVectorRef &x, const VectorOfRef &lams_ext,
-    VectorOfRef &out) const {
-  for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++) {
-    auto cstr = m_prob->getConstraint(i);
-    out[i].noalias() = cstr->m_set->normalConeProjection(
-        lams_ext[i] + m_muInv * cstr->m_func(x));
+    std::vector<VectorRef> &lams_cache,
+    std::vector<VectorRef> &out) const {
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    lams_cache[i] = lams_ext[i] + mu_inv_ + cstr.func()(x);
+    cstr.m_set->normalConeProjection(lams_cache[i], out[i]);
   }
 }
 
 template <typename Scalar>
-void PDALFunction<Scalar>::computePDALMultipliers(const ConstVectorRef &x,
-                                                  const VectorOfRef &lams,
-                                                  const VectorOfRef &lams_ext,
-                                                  VectorOfRef &out) const {
-  // TODO fix calling this again; grab values from workspace
-  computeFirstOrderMultipliers(x, lams_ext, out);
-  for (std::size_t i = 0; i < m_prob->getNumConstraints(); i++) {
-    auto cstr = m_prob->getConstraint(i);
-    out[i].noalias() = cstr->m_set->normalConeProjection(2 * out[i] - lams[i]);
-  }
-}
+void PDALFunction<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
+  mu_penal_ = new_mu;
+  mu_inv_ = 1. / new_mu;
+};
+
 } // namespace proxnlp

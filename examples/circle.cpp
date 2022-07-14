@@ -49,11 +49,12 @@ int main() {
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
 
-  ManifoldDifferenceToPoint<double> residual(space, space.neutral());
+  using DistResType = ManifoldDifferenceToPoint<double>;
+  auto resptr = std::make_shared<DistResType>(space, space.neutral());
+  const auto &residual = *resptr;
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
-  auto resptr = std::make_shared<decltype(residual)>(residual);
 
   /// DEFINE A PROBLEM
 
@@ -63,12 +64,13 @@ int main() {
   w2.setIdentity();
   w2 *= 2;
 
-  const QuadraticResidualCost<double> residualCircle(resptr, w2, -radius_sq);
+  auto residualCirclePtr = std::make_shared<QuadraticResidualCost<double>>(resptr, w2, -radius_sq);
+  const auto &resdiualCircle = *residualCirclePtr;
 
   using Ineq_t = NegativeOrthant<double>;
-  auto cstr1 = std::make_shared<ConstraintObject<double>>(
-      residualCircle, std::make_shared<Ineq_t>());
-  std::vector<Problem::ConstraintPtr> cstrs{cstr1};
+  using CstrType = Problem::ConstraintType;
+  CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
+  std::vector<CstrType> cstrs{cstr1};
   auto prob = std::make_shared<Problem>(cf, cstrs);
 
   /// Test out merit functions
@@ -80,14 +82,12 @@ int main() {
 
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
-  merit_fun.computeGradient(p0, grad);
-  fmt::print("eval merit grad: ∇M={}\n", grad);
 
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  PDALFunction<double> pdmerit(prob);
-  LagrangianFunction<double> &lagr = pdmerit.m_lagr;
+  PDALFunction<double> pdmerit(prob, 0.01);
+  LagrangianFunction<double> &lagr = pdmerit.lagrangian_;
   Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
@@ -99,20 +99,11 @@ int main() {
   fmt::print("\tL(p0) = {}\n", lagr(p0, lams));
   fmt::print("\tL(p1) = {}\n", lagr(p1, lams));
   lagr.computeGradient(p0, lams, grad);
-  fmt::print("\tgradL(p0) = {}\n", grad);
+  fmt::print("\tgradL(p0) = {}\n", grad.transpose());
   lagr.computeGradient(p1, lams, grad);
-  fmt::print("\tgradL(p1) = {}\n", grad);
-
-  // merit function
-  fmt::print("  PDAL FUNC TEST\n");
-  fmt::print("\tpdmerit(p0) = {}\n", pdmerit(p0, lams, lams));
-  fmt::print("\tpdmerit(p1) = {}\n", pdmerit(p1, lams, lams));
+  fmt::print("\tgradL(p1) = {}\n", grad.transpose());
 
   // gradient of merit fun
-  pdmerit.computeGradient(p0, lams, lams, grad);
-  fmt::print("\tgradM(p0) {}\n", grad);
-  pdmerit.computeGradient(p1, lams, lams, grad);
-  fmt::print("\tgradM(p1) {}\n", grad);
 
   WorkspaceTpl<double> workspace(space.nx(), space.ndx(), *prob);
   ResultsTpl<double> results(space.nx(), *prob);

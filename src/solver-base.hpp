@@ -29,7 +29,7 @@ public:
 
   /// Manifold on which to optimize.
   const Manifold &manifold;
-  shared_ptr<Problem> problem;
+  shared_ptr<Problem> problem_;
   /// Merit function.
   PDALFunction<Scalar> merit_fun;
   /// Proximal regularization penalty.
@@ -148,7 +148,7 @@ public:
   }
 
   /// @brief    Remove all callbacks from the instance.
-  inline void clearCallbacks() noexcept { callbacks_.clear(); }
+  void clearCallbacks() noexcept { callbacks_.clear(); }
 
   /**
    * @brief Update primal-dual subproblem tolerances upon failure (insufficient
@@ -166,7 +166,7 @@ public:
 
   /// @brief  Accept Lagrange multiplier estimates.
   void acceptMultipliers(Workspace &workspace) const {
-    workspace.lamsPrev_data = workspace.lamsPDAL_data;
+    workspace.data_lams_prev = workspace.data_lams_pdal;
   }
 
   /**
@@ -175,9 +175,9 @@ public:
    *
    * @param workspace Problem workspace.
    */
-  void computeResidualsAndMultipliers(const ConstVectorRef &x,
-                                      const ConstVectorRef &lams_data,
-                                      Workspace &workspace) const;
+  void computeConstraintsAndMultipliers(const ConstVectorRef &x,
+                                        const ConstVectorRef &lams_data,
+                                        Workspace &workspace) const;
 
   /**
    * Evaluate the derivatives (cost gradient, Hessian, constraint Jacobians,
@@ -187,8 +187,8 @@ public:
    * @param second_order Whether to compute the second-order information; set to
    * false for e.g. linesearch.
    */
-  void computeResidualDerivatives(const ConstVectorRef &x, Workspace &workspace,
-                                  bool second_order) const;
+  void computeConstraintDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                    bool second_order) const;
 
   /**
    * Take a trial step.
@@ -198,12 +198,7 @@ public:
    * @param alpha     Step size
    */
   static void tryStep(const Manifold &manifold, Workspace &workspace,
-                      const Results &results, Scalar alpha) {
-    manifold.integrate(results.xOpt, alpha * workspace.prim_step,
-                       workspace.xTrial);
-    workspace.lamsTrial_data =
-        results.lamsOpt_data + alpha * workspace.dual_step;
-  }
+                      const Results &results, Scalar alpha);
 
   void invokeCallbacks(Workspace &workspace, Results &results) {
     for (auto cb : callbacks_) {

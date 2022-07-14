@@ -27,14 +27,19 @@ public:
     return 0.;
   }
 
-  /// Compute projection of variable @p z onto the constraint set.
-  virtual ReturnType projection(const ConstVectorRef &z) const = 0;
+  /**
+   * @brief Compute projection of variable @p z onto the constraint set.
+   * 
+   * @param[in]   z     Input vector
+   * @param[out]  zout  Output projection
+   */
+  virtual void projection(const ConstVectorRef &z, VectorRef zout) const = 0;
 
   /**
    * Compute projection of @p z onto the normal cone to the set.
    * The default implementation is just $\f\mathrm{id} - P\f$.
    */
-  inline ReturnType normalConeProjection(const ConstVectorRef &z) const;
+  virtual void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const;
 
   /**
    * Apply the jacobian of the constraint set projection operator.
@@ -85,7 +90,7 @@ Scalar evaluateMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
                               const typename math_types<Scalar>::ConstVectorRef &zproj,
                               const Scalar inv_mu) {
   Scalar res = cstr_set.evaluate(zin - zproj);
-  res += 0.5 * inv_mu * zproj.squaredNorm();
+  res += static_cast<Scalar>(0.5) * inv_mu * zproj.squaredNorm();
   return res;
 }
 
@@ -95,7 +100,7 @@ Scalar computeMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
                               const typename math_types<Scalar>::ConstVectorRef &zin,
                               const Scalar inv_mu,
                               typename math_types<Scalar>::VectorRef zprojout) {
-  zprojout = cstr_set.normalConeProjection(zin);
+  cstr_set.normalConeProjection(zin, zprojout);
   return evaluateMoreauEnvelope(cstr_set, zin, zprojout, inv_mu);
 }
 
@@ -107,19 +112,16 @@ template <typename _Scalar> struct ConstraintObject {
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
   using FunctionType = C2FunctionTpl<Scalar>;
-  const FunctionType &m_func;
 
+  shared_ptr<FunctionType> m_func;
   shared_ptr<ConstraintSetBase<Scalar>> m_set;
 
-  ConstraintObject(const FunctionType &func,
+  const FunctionType &func() const { return *m_func; }
+  int nr() const { return m_func->nr(); }
+
+  ConstraintObject(const shared_ptr<FunctionType> &func,
                    const shared_ptr<ConstraintSetBase<Scalar>> &set)
       : m_func(func), m_set(set) {}
-
-  ConstraintObject(const FunctionType &func, ConstraintSetBase<Scalar> *set)
-      : m_func(func), m_set(set) {}
-
-  /// Get dimension of constraint representation.
-  int nr() const { return m_func.nr(); }
 };
 
 } // namespace proxnlp

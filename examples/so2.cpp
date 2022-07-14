@@ -64,11 +64,10 @@ int main() {
 
   /// DEFINE A PROBLEM
 
-  auto set1 = std::make_shared<Problem::EqualityType>();
-  std::vector<Problem::ConstraintPtr> cstrs;
-  cstrs.push_back(std::make_shared<Problem::ConstraintType>(residual, set1));
+  auto eq_set = std::make_shared<Problem::EqualityType>();
+  std::vector<Problem::ConstraintType> cstrs;
+  cstrs.emplace_back(resptr, eq_set);
   shared_ptr<Problem> prob(new Problem(cf, cstrs));
-  fmt::print("\tConstraint dimension: {:d}\n", prob->getConstraint(0)->nr());
 
   /// Test out merit functions
 
@@ -79,14 +78,12 @@ int main() {
 
   EvalObjective<double> merit_fun(prob);
   fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
-  merit_fun.computeGradient(p0, grad);
-  fmt::print("eval merit grad: ∇M={}\n", grad);
 
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  PDALFunction<double> pdmerit(prob);
-  auto lagr = pdmerit.m_lagr;
+  PDALFunction<double> pdmerit(prob, 0.01);
+  auto lagr = pdmerit.lagrangian_;
   Problem::VectorXs lams_data;
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
@@ -102,17 +99,6 @@ int main() {
   fmt::print("\tgradL(p0) = {}\n", grad);
   lagr.computeGradient(p1, lams, grad);
   fmt::print("\tgradL(p1) = {}\n", grad);
-
-  // merit function
-  fmt::print("  PDAL FUNC TEST\n");
-  fmt::print("\tpdmerit(p0) = {}\n", pdmerit(p0, lams, lams));
-  fmt::print("\tpdmerit(p1) = {}\n", pdmerit(p1, lams, lams));
-
-  // gradient of merit fun
-  pdmerit.computeGradient(p0, lams, lams, grad);
-  fmt::print("\tgradM(p0) {}\n", grad);
-  pdmerit.computeGradient(p1, lams, lams, grad);
-  fmt::print("\tgradM(p1) {}\n", grad);
 
   return 0;
 }

@@ -10,6 +10,8 @@
 namespace proxnlp {
 namespace python {
 
+namespace pp = pinocchio::python;
+
 template <typename T>
 void exposeSpecificConstraintSet(const char *name, const char *docstring) {
   bp::class_<T, shared_ptr<T>, bp::bases<context::ConstraintSet>>(
@@ -17,7 +19,7 @@ void exposeSpecificConstraintSet(const char *name, const char *docstring) {
 }
 
 template <typename T>
-context::Constraint make_constraint(const context::C2Function &f) {
+context::Constraint make_constraint(const shared_ptr<context::C2Function> &f) {
   shared_ptr<context::ConstraintSet> s(new T());
   return context::Constraint(f, s);
 }
@@ -31,9 +33,12 @@ void exposeConstraints() {
   bp::class_<ConstraintSet, ConstraintSetPtr, boost::noncopyable>(
       "ConstraintSetBase",
       "Base class for constraint sets or nonsmooth penalties.", bp::no_init)
-      .def("projection", &ConstraintSet::projection, bp::args("self", "z"))
+      .def("evaluate", &ConstraintSet::evaluate, bp::args("self", "z"),
+           "Evaluate the constraint indicator function or nonsmooth penalty "
+           "on the projection/prox map of :math:`z`.")
+      .def("projection", &ConstraintSet::projection, bp::args("self", "z", "zout"))
       .def("normal_cone_proj", &ConstraintSet::normalConeProjection,
-           bp::args("self", "z"))
+           bp::args("self", "z", "zout"))
       .def("apply_jacobian", &ConstraintSet::applyProjectionJacobian,
            bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
       .def("apply_normal_jacobian",
@@ -44,17 +49,17 @@ void exposeConstraints() {
            bp::args("self", "z", "out"))
       .def(bp::self == bp::self);
 
-  bp::class_<Constraint, shared_ptr<Constraint>>(
+  bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",
-      bp::init<const context::C2Function &, ConstraintSetPtr>(
+      bp::init<const shared_ptr<context::C2Function> &, ConstraintSetPtr>(
           bp::args("self", "func", "set")))
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
+      .def_readonly("func", &Constraint::m_func, "Underlying function.")
       .def_readonly("set", &Constraint::m_set, "Constraint set.");
 
   /* Expose constraint stack */
-  namespace pp = pinocchio::python;
-  pp::StdVectorPythonVisitor<std::vector<shared_ptr<Constraint>>, true>::expose(
-      "ConstraintVector");
+  pp::StdVectorPythonVisitor<std::vector<Constraint>, true>::expose(
+      "StdVec_Constraint");
 
   exposeSpecificConstraintSet<EqualityConstraint<Scalar>>(
       "EqualityConstraintSet", "Cast a function into an equality constraint");

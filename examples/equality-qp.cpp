@@ -44,14 +44,13 @@ template <int N, int M = 1> int submain() {
   Eigen::VectorXd b(M);
   b.setRandom();
 
-  LinearFunctionTpl<double> res1(A, b);
+  auto res1 = std::make_shared<LinearFunctionTpl<double>>(A, b);
 
   QuadraticDistanceCost<double> cost(space, space.neutral(), Q_);
 
-  std::vector<Problem::ConstraintPtr> cstrs_;
+  std::vector<Problem::ConstraintType> cstrs_;
   if (M > 0) {
-    cstrs_.push_back(
-        std::make_shared<Constraint>(res1, std::make_shared<EqualityType>()));
+    cstrs_.emplace_back(res1, std::make_shared<EqualityType>());
   }
 
   auto prob = std::make_shared<Problem>(cost, cstrs_);

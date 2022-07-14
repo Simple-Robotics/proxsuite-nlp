@@ -2,9 +2,10 @@
 
 namespace proxnlp {
 template <typename Scalar>
-inline typename ConstraintSetBase<Scalar>::ReturnType
-ConstraintSetBase<Scalar>::normalConeProjection(const ConstVectorRef &z) const {
-  return z - projection(z);
+void ConstraintSetBase<Scalar>::normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
+  VectorXs tmp(z.size());
+  projection(z, tmp);
+  zout = z - tmp;
 }
 
 template <typename Scalar>

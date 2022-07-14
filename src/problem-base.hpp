@@ -23,39 +23,37 @@ public:
   using CostType = CostFunctionBaseTpl<Scalar>;
 
   /// The cost functional
-  const CostType &m_cost;
+  const CostType &cost_;
 
   /// Get a pointer to the \f$i\f$-th constraint pointer
-  const ConstraintPtr &getConstraint(const std::size_t &i) const {
-    return m_cstrs[i];
+  const ConstraintType &getConstraint(const std::size_t &i) const {
+    return constraints_[i];
   }
 
   /// @brief Get the number of constraint blocks.
-  std::size_t getNumConstraints() const { return m_cstrs.size(); }
+  std::size_t getNumConstraints() const { return constraints_.size(); }
 
   int getTotalConstraintDim() const { return m_nc_total; }
-
-  std::vector<int> getConstraintDims() const { return m_ncs; }
 
   /// Get dimension of constraint \p i.
   int getConstraintDim(std::size_t i) const { return m_ncs[i]; }
 
-  std::size_t nx() const { return m_cost.nx(); }
-  std::size_t ndx() const { return m_cost.ndx(); }
+  std::size_t nx() const { return cost_.nx(); }
+  std::size_t ndx() const { return cost_.ndx(); }
 
-  ProblemTpl(const CostType &cost) : m_cost(cost), m_nc_total(0) {
+  ProblemTpl(const CostType &cost) : cost_(cost), m_nc_total(0) {
     reset_constraint_dim_vars();
   }
 
   ProblemTpl(const CostType &cost,
-             const std::vector<ConstraintPtr> &constraints)
-      : m_cost(cost), m_cstrs(constraints), m_nc_total(0) {
+             const std::vector<ConstraintType> &constraints)
+      : cost_(cost), constraints_(constraints), m_nc_total(0) {
     reset_constraint_dim_vars();
   }
 
   /// @brief Add a constraint to the problem, after initialization.
   template <typename T> void addConstraint(T &&cstr) {
-    m_cstrs.push_back(std::forward<T>(cstr));
+    constraints_.push_back(std::forward<T>(cstr));
     reset_constraint_dim_vars();
   }
 
@@ -65,25 +63,25 @@ public:
 
   void evaluate(const ConstVectorRef &x,
                 WorkspaceTpl<Scalar> &workspace) const {
-    workspace.objectiveValue = m_cost.call(x);
+    workspace.objectiveValue = cost_.call(x);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
-      const ConstraintType &cstr = *m_cstrs[i];
-      workspace.cstrValues[i] = cstr.m_func(x);
+      const ConstraintType &cstr = constraints_[i];
+      workspace.cstrValues[i] = cstr.func()(x);
     }
   }
 
   void computeDerivatives(const ConstVectorRef &x,
                           WorkspaceTpl<Scalar> &workspace) const {
-    m_cost.computeGradient(x, workspace.objectiveGradient);
+    cost_.computeGradient(x, workspace.objectiveGradient);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
-      const ConstraintType &cstr = *m_cstrs[i];
-      cstr.m_func.computeJacobian(x, workspace.cstrJacobians[i]);
+      const ConstraintType &cstr = constraints_[i];
+      cstr.func().computeJacobian(x, workspace.cstrJacobians[i]);
     }
   }
 
 protected:
-  /// Vector of equality constraints.
-  std::vector<ConstraintPtr> m_cstrs;
+  /// Vector of constraints.
+  std::vector<ConstraintType> constraints_;
   /// Total number of constraints
   int m_nc_total;
   std::vector<int> m_ncs;
@@ -94,11 +92,13 @@ protected:
     m_ncs.clear();
     m_indices.clear();
     int cursor = 0;
-    for (std::size_t i = 0; i < m_cstrs.size(); i++) {
-      const ConstraintPtr cstr = m_cstrs[i];
-      m_ncs.push_back(cstr->nr());
+    int nr = 0;
+    for (std::size_t i = 0; i < constraints_.size(); i++) {
+      const ConstraintType &cstr = constraints_[i];
+      nr = cstr.func().nr();
+      m_ncs.push_back(nr);
       m_indices.push_back(cursor);
-      cursor += cstr->nr();
+      cursor += nr;
     }
     m_nc_total = cursor;
   }
@@ -111,15 +111,14 @@ template <typename Scalar>
 void allocateMultipliersOrResiduals(
     const ProblemTpl<Scalar> &prob, typename math_types<Scalar>::VectorXs &data,
     typename math_types<Scalar>::VectorOfRef &out) {
-  using Problem = ProblemTpl<Scalar>;
   data.resize(prob.getTotalConstraintDim());
   data.setZero();
   out.reserve(prob.getNumConstraints());
   int cursor = 0;
   int nr = 0;
   for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
-    const typename Problem::ConstraintPtr &cstr = prob.getConstraint(i);
-    nr = cstr->nr();
+    const ConstraintObject<Scalar> &cstr = prob.getConstraint(i);
+    nr = cstr.func().nr();
     out.emplace_back(data.segment(cursor, nr));
     cursor += nr;
   }
