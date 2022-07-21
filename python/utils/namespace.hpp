@@ -19,7 +19,7 @@ inline std::string get_scope_name(bp::scope scope) {
 inline bp::object get_namespace(const std::string &name) {
   bp::scope cur_scope; // current scope
   const std::string complete_name = get_scope_name(cur_scope) + "." + name;
-  bp::object submodule(bp::borrowed(PyImport_AddModule(name.c_str())));
+  bp::object submodule(bp::borrowed(PyImport_AddModule(complete_name.c_str())));
   cur_scope.attr(name.c_str()) = submodule;
   return submodule;
 }

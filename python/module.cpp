@@ -2,7 +2,7 @@
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
 
 #include "proxnlp/python/fwd.hpp"
-#include "proxnlp/python/util.hpp"
+#include "proxnlp/python/utils/namespace.hpp"
 #include "proxnlp/version.hpp"
 
 namespace proxnlp {

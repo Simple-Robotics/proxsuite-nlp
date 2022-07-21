@@ -50,19 +50,21 @@ MAKE_BINDINGS()
 
 file(MAKE_DIRECTORY
      ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
+     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/utils
      )
 
 # copy headers to build/include/ directory
 foreach(pyheader ${PY_HEADERS})
   string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
+  get_filename_component(headerPath ${pyheader} PATH)
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
                   ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
                   ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
+  install(FILES ${pyheader}
+          DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/python/${headerPath}
+          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 endforeach(pyheader)
 
-install(FILES ${PY_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/python
-        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PYLIB_NAME}_PYFILES
