@@ -8,8 +8,6 @@ set(EXAMPLES_HEADER
 file(GLOB EXAMPLES_CPP
      "*.cpp")
 
-message(STATUS "CPP EXAMPLES: ${EXAMPLES_CPP}")
-
 
 function(add_proxnlp_example exfile)
   get_filename_component(example_name ${exfile} NAME_WE)
@@ -36,7 +34,6 @@ if(BUILD_PYTHON_INTERFACE)
   file(GLOB_RECURSE EXAMPLES_PY
        ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
 
-  message(STATUS "Python examples: ${EXAMPLES_PY}")
   foreach(pyfile ${EXAMPLES_PY})
     get_filename_component(pyfile_name ${pyfile} NAME)
      execute_process(
