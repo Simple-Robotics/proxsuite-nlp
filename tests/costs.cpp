@@ -9,6 +9,7 @@
 
 BOOST_AUTO_TEST_SUITE(cost)
 
+#ifdef WITH_PINOCCHIO
 using namespace proxnlp;
 namespace pin = pinocchio;
 namespace utf = boost::unit_test;
@@ -41,5 +42,6 @@ BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
   fmt::print("c4(x2): {:.3f}\n", c4.call(x2));
   BOOST_TEST(c3.call(x2) == c4.call(x2));
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

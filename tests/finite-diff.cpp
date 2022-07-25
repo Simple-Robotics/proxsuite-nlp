@@ -1,5 +1,7 @@
 #include "proxnlp/modelling/autodiff/finite-difference.hpp"
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#ifdef WITH_PINOCCHIO
+  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#endif
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -7,9 +9,9 @@
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
-using namespace proxnlp;
-
 BOOST_AUTO_TEST_SUITE(finite_diff)
+
+using namespace proxnlp;
 
 PROXNLP_FUNCTION_TYPEDEFS(double);
 static const double fd_eps = 1e-4;
@@ -68,6 +70,7 @@ BOOST_AUTO_TEST_CASE(test1) {
   fmt::print("Hessian:\n{}\n", fdfun2.vectorHessianProduct(x0, v0));
 }
 
+#ifdef WITH_PINOCCHIO
 BOOST_AUTO_TEST_CASE(test2) {
   PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>> space;
 
@@ -83,4 +86,5 @@ BOOST_AUTO_TEST_CASE(test2) {
 
   BOOST_CHECK(J0.isApprox(J0_fd, prec));
 }
+#endif
 BOOST_AUTO_TEST_SUITE_END()

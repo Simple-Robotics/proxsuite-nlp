@@ -79,12 +79,6 @@ if(BUILD_WITH_CASADI_SUPPORT)
   ADD_PROJECT_DEPENDENCY(casadi 3.4.5 REQUIRED PKG_CONFIG_REQUIRES "casadi >= 3.4.5")
 endif(BUILD_WITH_CASADI_SUPPORT)
 
-if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  message(STATUS "Building with Pinocchio support.")
-  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
-  add_definitions(-DWITH_PINOCCHIO)
-endif(BUILD_WITH_PINOCCHIO_SUPPORT)
-
 if(BUILD_WITH_OPENMP_SUPPORT)
   ADD_PROJECT_DEPENDENCY(OpenMP REQUIRED)
 endif(BUILD_WITH_OPENMP_SUPPORT)
@@ -109,6 +103,12 @@ if(BUILD_PYTHON_INTERFACE)
   message(STATUS "Python compiler: ${_python_implementation_value}")
 
 endif(BUILD_PYTHON_INTERFACE)
+
+if(BUILD_WITH_PINOCCHIO_SUPPORT)
+  message(STATUS "Building with Pinocchio support.")
+  ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
+  add_definitions(-DWITH_PINOCCHIO)
+endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # ----------------------------------------------------
 # --- INCLUDE ----------------------------------------

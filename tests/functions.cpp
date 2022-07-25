@@ -1,7 +1,6 @@
 #include "proxnlp/modelling/residuals/linear.hpp"
 #include "proxnlp/function-ops.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <Eigen/Core>
 
