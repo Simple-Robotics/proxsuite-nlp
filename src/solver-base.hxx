@@ -6,7 +6,6 @@
 
 #include <stdexcept>
 
-#include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/color.h>
 
