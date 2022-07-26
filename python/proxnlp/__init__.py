@@ -14,7 +14,10 @@ def __process():
 
     submodules = inspect.getmembers(pyproxnlp, inspect.ismodule)
     for mod_info in submodules:
-        sys.modules["{}.{}".format(lib_name, mod_info[0])] = mod_info[1]
+        mod_name = "{}.{}".format(lib_name, mod_info[0])
+        sys.modules[mod_name] = mod_info[1]
+        mod_info[1].__file__ = pyproxnlp.__file__
+        mod_info[1].__name__ = mod_name
 
 
 __process()
