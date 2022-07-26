@@ -137,9 +137,9 @@ BOOST_AUTO_TEST_CASE(test_pinmodel) {
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
 
-  using Q_t = MultibodyConfiguration<double>;
-  using Point_t = Q_t::PointType;
-  Q_t space(model);
+  using Man = MultibodyConfiguration<double>;
+  using Point_t = Man::PointType;
+  Man space(model);
 
   Point_t x0 = pinocchio::neutral(model);
   Point_t d(model.nv);

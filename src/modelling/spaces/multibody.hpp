@@ -95,7 +95,7 @@ public:
   /// \}
 
 protected:
-  const ModelType &m_model;
+  ModelType m_model;
 };
 
 /** @brief      The tangent bundle of a multibody configuration group.

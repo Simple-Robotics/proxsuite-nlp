@@ -115,7 +115,7 @@ void exposeManifold() {
   bp::class_<MultibodyPhaseSpace<Scalar>, bp::bases<Manifold>>(
       "MultibodyPhaseSpace",
       "Tangent space of the multibody configuration group.",
-      bp::init<const Model &>(bp::args("model")))
+      bp::init<const Model &>(bp::args("self", "model")))
       .add_property(
           "model",
           bp::make_function(
