@@ -42,7 +42,7 @@ typename MatType::Scalar infty_norm(const Eigen::MatrixBase<MatType> &z) {
 
 template <typename MatType>
 typename MatType::Scalar
-infty_norm(const std::vector<Eigen::MatrixBase<MatType>> &z) {
+infty_norm(const std::vector<const Eigen::MatrixBase<MatType>> &z) {
   const std::size_t n = z.size();
   typename MatType::Scalar out = 0.;
   for (std::size_t i = 0; i < n; i++) {
