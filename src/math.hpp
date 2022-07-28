@@ -46,7 +46,7 @@ infty_norm(const std::vector<MatType> &z) {
   const std::size_t n = z.size();
   typename MatType::Scalar out = 0.;
   for (std::size_t i = 0; i < n; i++) {
-    out = std::max(out, infty_norm(z));
+    out = std::max(out, infty_norm(z[i]));
   }
   return out;
 }

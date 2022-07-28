@@ -50,6 +50,7 @@ set(TEST_NAMES
     constraints
     costs
     finite-diff
+    math
     functions
     manifolds
     solver)
