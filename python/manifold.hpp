@@ -31,9 +31,9 @@ void exposeBaseManifold() {
       "ManifoldAbstract", "Manifold abstract class.", bp::no_init)
       .add_property("nx", &Manifold::nx, "Manifold representation dimension.")
       .add_property("ndx", &Manifold::ndx, "Tangent space dimension.")
-      .def("neutral", &Manifold::neutral,
+      .def("neutral", &Manifold::neutral, bp::args("self"),
            "Get the neutral point from the manifold (if a Lie group).")
-      .def("rand", &Manifold::rand, "Sample a random point from the manifold.")
+      .def("rand", &Manifold::rand, bp::args("self"), "Sample a random point from the manifold.")
       .def("integrate", static_cast<BinaryFunType>(&Manifold::integrate),
            bp::args("self", "x", "v", "out"))
       .def("difference", static_cast<BinaryFunType>(&Manifold::difference),
