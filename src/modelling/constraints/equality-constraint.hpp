@@ -22,7 +22,7 @@ public:
 
   bool disableGaussNewton() const { return true; }
 
-  inline void projection(const ConstVectorRef &z, VectorRef zout) const {
+  inline void projection(const ConstVectorRef &, VectorRef zout) const {
     zout.setZero();
   }
 
