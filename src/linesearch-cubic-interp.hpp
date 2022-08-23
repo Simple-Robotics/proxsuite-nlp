@@ -9,81 +9,104 @@
 
 namespace proxnlp {
 
-/// @brief  Bracketing quadratic-interpolation linesearch.
+/// @brief  Backtracking bracketing interpolation linesearch.
+/// This linesearch searches steplengths through interpolation and bracketing.
+/// See Nocedal & Wright Numerical Optimization, sec. 3.5.
+/// This implementation looks for the Goldstein conditions to be satisfied.
 template <typename _Scalar> struct CubicInterpLinesearch {
   using Scalar = _Scalar;
   using Solver = SolverTpl<Scalar>;
   using Workspace = WorkspaceTpl<Scalar>;
   using Results = ResultsTpl<Scalar>;
-  using ls_candidate = ls_candidate_tpl<Scalar>;
+  struct ls_candidate {
+    Scalar alpha;
+    Scalar phi;
+  };
 
   template <typename Fn>
   static void run(Fn phi, const Scalar phi0, const Scalar dphi0,
                   VerboseLevel verbosity, const Scalar armijo_c1,
                   const Scalar alpha_min, Scalar &alpha_try) {
-    auto eval = [&](Scalar alpha) { return ls_candidate{alpha, phi(alpha)}; };
+    auto evaluate_candidate = [&](Scalar alpha) {
+      return ls_candidate{alpha, phi(alpha)};
+    };
 
+    const Scalar wolfe_2_gamma = 1. -armijo_c1;
+    const Scalar dphi_thresh = 1e-13;
     Scalar aleft = 0.;
+    Scalar alph0 = 1.;
+    ls_candidate cand0 = evaluate_candidate(alph0);
 
-    ls_candidate cand0 = eval(1.);
-    Scalar &a0 = cand0.alpha;
+    // safeguards
+    Scalar red_low = 0.5;
+    Scalar red_high = 0.9;
 
-    auto check_cond = [&](ls_candidate cand) {
-      return (cand.phi <= phi0 + armijo_c1 * cand.alpha * dphi0) ||
-             (dphi0 < 1e-13);
+    auto check_condition = [&](ls_candidate cand) {
+      return cand.phi <= phi0 + armijo_c1 * cand.alpha * dphi0;
+    };
+    auto check_goldstein_2 = [&](ls_candidate cand) {
+      return phi0 + wolfe_2_gamma * cand.alpha * dphi0 <= cand.phi;
     };
 
     // check termination criterion
-    if (check_cond(cand0)) {
+    if (check_condition(cand0) || (std::abs(dphi0) < dphi_thresh)) {
       alpha_try = cand0.alpha;
-      fmt::print("  Accepted initial step.\n");
       return;
     }
 
-    // minimize quadratic interpolant
-    Scalar coeff2 =
-        (cand0.phi - phi0 - cand0.alpha * dphi0) / std::pow(cand0.alpha, 2);
-    ls_candidate cand1 = eval(-.5 * dphi0 / coeff2);
-    Scalar &a1 = cand1.alpha;
+    // step 2: construct & minimize quadratic interpolant
+    Scalar al1_den = cand0.phi - phi0 - alph0 * dphi0;
+    Scalar alph1 = -0.5 * dphi0 * alph0 * alph0 / al1_den;
+    ls_candidate cand1 = evaluate_candidate(alph1);
 
-    if (check_cond(cand1)) {
-      fmt::print("  Accepted quad interp sol. {}", cand1.alpha);
-      alpha_try = a1;
+    // check if good, if so exit
+    if (check_condition(cand1)) {
+      alpha_try = cand1.alpha;
       return;
     }
 
+    // step 3: construct brackets through cubic interpolation
+    using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
     using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
 
-    // if not sufficient: use cubic interpolation
-    Eigen::Matrix<Scalar, 2, 2> alphMat;
-    Vector2s rhs;
+
+    // buffers for cubic interpolation
+    Matrix2s alph_mat;
+    Vector2s alph_rhs;
+    Vector2s coeffs_cubic_interpolant;
 
     for (int i = 0; i < 10; i++) {
+      Scalar &a0 = cand0.alpha;
+      Scalar &a1 = cand1.alpha;
 
-      alphMat(0, 0) = a0 * a0;
-      alphMat(0, 1) = -a1 * a1;
-      alphMat(1, 0) = -a0 * a0 * a0;
-      alphMat(1, 1) = a1 * a1 * a1;
+      alph_mat(0, 0) = a0 * a0;
+      alph_mat(0, 1) = -a1 * a1;
+      alph_mat(1, 0) = -a0 * a0 * a0;
+      alph_mat(1, 1) = a1 * a1 * a1;
 
-      Scalar den = a0 * a0 * a1 * a1 * (a1 - a0);
-      rhs(0) = cand1.phi - phi0 - dphi0 * a1;
-      rhs(1) = cand0.phi - phi0 - dphi0 * a0;
-      alphMat.noalias() = alphMat / den;
+      Scalar mat_denom = a0 * a0 * a1 * a1 * (a1 - a0);
+      alph_mat /= mat_denom;
 
-      Vector2s newCoeffs = alphMat.fullPivLu().solve(rhs);
+      alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
+      alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
+      coeffs_cubic_interpolant = alph_mat * alph_rhs;
 
-      Scalar c3 = newCoeffs(0);
-      Scalar c2 = newCoeffs(1);
+      Scalar c3 = coeffs_cubic_interpolant(0);
+      Scalar c2 = coeffs_cubic_interpolant(1);
 
-      Scalar anext = (-c2 + std::sqrt(c2 * c2 - 3 * c3 * dphi0));
-      anext = anext / (3 * c3);
+      // minimizer of cubic interpolant -> solve dinterp/da = 0
+      Scalar anext = (-c2 + std::sqrt(c2 * c2 - 3.0 * c3 * dphi0)) / (3.0 * c3);
+
+      // safeguarding step
+      if ((anext > red_high * a1) || (anext < red_low * a1)) {
+        anext = a1 / 2.0;
+      }
 
       // update interpolation points
       cand0 = cand1;
-      cand1 = eval(anext);
-      fmt::print("  trying step size {}\n", anext);
+      cand1 = evaluate_candidate(anext);
 
-      if (check_cond(cand1)) {
+      if (check_condition(cand1)) {
         alpha_try = cand1.alpha;
         break;
       }

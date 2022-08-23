@@ -5,8 +5,8 @@ namespace proxnlp {
 namespace python {
 
 void exposeProblem() {
-  using context::Problem;
   using context::Constraint;
+  using context::Problem;
   bp::class_<Problem, shared_ptr<Problem>>(
       "Problem", "Problem definition class.",
       bp::init<const context::Cost &, const std::vector<Constraint> &>(

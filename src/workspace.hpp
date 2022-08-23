@@ -105,7 +105,8 @@ public:
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
         ldlt_(kktMatrix), xPrev(nx), xTrial(nx), data_lams_prev(numdual),
         lamsTrial_data(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
-        dualResidual(ndx), data_cstr_values(numdual), data_cstr_values_proj(numdual), objectiveGradient(ndx),
+        dualResidual(ndx), data_cstr_values(numdual),
+        data_cstr_values_proj(numdual), objectiveGradient(ndx),
         objectiveHessian(ndx, ndx), meritGradient(ndx),
         jacobians_data(numdual, ndx), hessians_data((int)numblocks * ndx, ndx),
         data_lams_plus(numdual), data_lams_pdal(numdual),
@@ -130,7 +131,8 @@ public:
     helpers::allocateMultipliersOrResiduals(
         prob, data_cstr_values, cstrValues); // not multipliers but same dims
     data_cstr_values_proj.setZero();
-    helpers::allocateMultipliersOrResiduals(prob, data_cstr_values_proj, cstrValuesProj);
+    helpers::allocateMultipliersOrResiduals(prob, data_cstr_values_proj,
+                                            cstrValuesProj);
 
     objectiveGradient.setZero();
     objectiveHessian.setZero();

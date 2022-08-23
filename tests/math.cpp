@@ -2,7 +2,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-
 BOOST_AUTO_TEST_SUITE(math)
 
 BOOST_AUTO_TEST_CASE(infty_norm) {
@@ -12,8 +11,7 @@ BOOST_AUTO_TEST_CASE(infty_norm) {
   double xnorm = proxnlp::math::infty_norm(x0);
   BOOST_CHECK_EQUAL(xnorm, x0.lpNorm<Eigen::Infinity>());
 
-
-  std::vector<Eigen::Vector3d> xv {10};
+  std::vector<Eigen::Vector3d> xv{10};
   for (std::size_t i = 0; i < xv.size(); i++) {
     xv[i].setRandom();
   }
@@ -23,7 +21,6 @@ BOOST_AUTO_TEST_CASE(infty_norm) {
     t = std::max(t, xv[i].lpNorm<Eigen::Infinity>());
   }
   BOOST_CHECK_EQUAL(vnorm, t);
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

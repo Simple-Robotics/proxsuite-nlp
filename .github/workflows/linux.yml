@@ -21,7 +21,7 @@ jobs:
       with:
         key: ${{ runner.os }}
         path: ${{ env.CCACHE_DIR }}
-        
+
     # extract branch name
     - name: Get branch name (merge)
       if: github.event_name != 'pull_request'
@@ -37,7 +37,7 @@ jobs:
     # print branch name
     - name: Debug
       run: echo ${{ env.BRANCH_NAME }}
-      
+
     - name: Set env variables
       run: |
         echo "PYTHONPATH=/builds/custom_install/lib/python3/dist-packages/" >> $GITHUB_ENV
@@ -49,8 +49,7 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
-        
+
         cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=~/custom_install -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python3)
         make -j3 install
         make test
-

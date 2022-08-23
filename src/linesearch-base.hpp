@@ -10,11 +10,6 @@
 namespace proxnlp {
 enum LinesearchStrategy { ARMIJO, CUBIC_INTERP };
 
-template <typename Scalar> struct ls_candidate_tpl {
-  Scalar alpha;
-  Scalar phi;
-};
-
 } // namespace proxnlp
 
 #include "proxnlp/linesearch-armijo.hpp"

@@ -187,7 +187,8 @@ public:
    * @param second_order Whether to compute the second-order information; set to
    * false for e.g. linesearch.
    */
-  void computeConstraintDerivatives(const ConstVectorRef &x, Workspace &workspace,
+  void computeConstraintDerivatives(const ConstVectorRef &x,
+                                    Workspace &workspace,
                                     bool second_order) const;
 
   /**

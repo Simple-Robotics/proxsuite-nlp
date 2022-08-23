@@ -26,7 +26,8 @@ public:
     zout.setZero();
   }
 
-  inline void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
+  inline void normalConeProjection(const ConstVectorRef &z,
+                                   VectorRef zout) const {
     zout = z;
   }
 

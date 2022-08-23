@@ -1,6 +1,6 @@
 #include "proxnlp/modelling/autodiff/finite-difference.hpp"
 #ifdef WITH_PINOCCHIO
-  #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 

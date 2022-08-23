@@ -22,8 +22,7 @@ namespace proxnlp {
  * \f]
  *
  */
-template <typename _Scalar>
-struct PDALFunction {
+template <typename _Scalar> struct PDALFunction {
 public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
@@ -51,6 +50,7 @@ public:
 
   /// @brief  Set the merit function penalty parameter.
   void setPenalty(const Scalar &new_mu) noexcept;
+
 protected:
   /// AL penalty parameter
   Scalar mu_penal_;

@@ -171,8 +171,10 @@ void SolverTpl<Scalar>::computeConstraintsAndMultipliers(
       workspace.data_lams_prev + mu_inv_ * workspace.data_cstr_values;
   // project multiplier estimate
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
-    cstr_set.normalConeProjection(workspace.lamsPlusPre[i], workspace.lamsPlus[i]);
+    const ConstraintSetBase<Scalar> &cstr_set =
+        *problem_->getConstraint(i).m_set;
+    cstr_set.normalConeProjection(workspace.lamsPlusPre[i],
+                                  workspace.lamsPlus[i]);
   }
   workspace.dual_prox_err_data = mu_ * (workspace.data_lams_plus - lams_data);
   workspace.data_lams_pdal = 2 * workspace.data_lams_plus - lams_data;
@@ -181,8 +183,8 @@ void SolverTpl<Scalar>::computeConstraintsAndMultipliers(
 /// Compute problem derivatives
 template <typename Scalar>
 void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
-                                                   Workspace &workspace,
-                                                   bool second_order) const {
+                                                     Workspace &workspace,
+                                                     bool second_order) const {
   problem_->computeDerivatives(x, workspace);
   if (second_order) {
     problem_->cost_.computeHessian(x, workspace.objectiveHessian);
@@ -190,13 +192,13 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
     cstr.m_set->applyNormalConeProjectionJacobian(workspace.lamsPlusPre[i],
-                                                   workspace.cstrJacobians[i]);
+                                                  workspace.cstrJacobians[i]);
 
     bool use_vhp = (use_gauss_newton && !(cstr.m_set->disableGaussNewton())) ||
                    !(use_gauss_newton);
     if (second_order && use_vhp) {
       cstr.func().vectorHessianProduct(x, workspace.lamsPDAL[i],
-                                        workspace.cstrVectorHessianProd[i]);
+                                       workspace.cstrVectorHessianProd[i]);
     }
   }
   if (rho_ > 0.) {
@@ -249,13 +251,13 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     results.value = problem_->cost_.call(results.xOpt);
 
-    computeConstraintsAndMultipliers(results.xOpt, results.lams_opt_data, workspace);
+    computeConstraintsAndMultipliers(results.xOpt, results.lams_opt_data,
+                                     workspace);
     computeConstraintDerivatives(results.xOpt, workspace, true);
 
-    results.merit = merit_fun.evaluate(results.xOpt,
-                                       results.lamsOpt,
-                                       workspace.lamsPrev,
-                                       workspace.lamsPlusPre);
+    results.merit =
+        merit_fun.evaluate(results.xOpt, results.lamsOpt, workspace.lamsPrev,
+                           workspace.lamsPlusPre);
     if (rho_ > 0.)
       results.merit += prox_penalty.call(results.xOpt);
 
@@ -291,15 +293,14 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     // add proximal penalty terms
     if (rho_ > 0.) {
       workspace.kktRhs.head(ndx) += workspace.prox_grad;
-      workspace.kktMatrix.topLeftCorner(ndx, ndx) +=
-          workspace.prox_hess;
+      workspace.kktMatrix.topLeftCorner(ndx, ndx) += workspace.prox_hess;
       workspace.meritGradient += workspace.prox_grad;
     }
 
     for (std::size_t i = 0; i < num_c; i++) {
-      const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
-      cstr_set.computeActiveSet(workspace.cstrValues[i],
-                                results.activeSet[i]);
+      const ConstraintSetBase<Scalar> &cstr_set =
+          *problem_->getConstraint(i).m_set;
+      cstr_set.computeActiveSet(workspace.cstrValues[i], results.activeSet[i]);
 
       bool use_vhp = (use_gauss_newton && !cstr_set.disableGaussNewton()) ||
                      !use_gauss_newton;
@@ -316,9 +317,12 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     results.dualInfeas = math::infty_norm(workspace.dualResidual);
     for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-      const ConstraintSetBase<Scalar> &cstr_set = *problem_->getConstraint(i).m_set;
-      cstr_set.normalConeProjection(workspace.cstrValues[i], workspace.cstrValuesProj[i]);
-      results.constraint_violations_(long(i)) = math::infty_norm(workspace.cstrValuesProj[i]);
+      const ConstraintSetBase<Scalar> &cstr_set =
+          *problem_->getConstraint(i).m_set;
+      cstr_set.normalConeProjection(workspace.cstrValues[i],
+                                    workspace.cstrValuesProj[i]);
+      results.constraint_violations_(long(i)) =
+          math::infty_norm(workspace.cstrValuesProj[i]);
     }
     results.primalInfeas = math::infty_norm(results.constraint_violations_);
     Scalar inner_crit = math::infty_norm(workspace.kktRhs);
@@ -394,9 +398,9 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
       break;
     }
     case CUBIC_INTERP: {
-      CubicInterpLinesearch<Scalar>::run(phi_trial, results.merit,
-                                         workspace.dmerit_dir, verbose,
-                                         armijo_c1, alpha_min, workspace.alpha_opt);
+      CubicInterpLinesearch<Scalar>::run(
+          phi_trial, results.merit, workspace.dmerit_dir, verbose, armijo_c1,
+          alpha_min, workspace.alpha_opt);
       break;
     }
     default:

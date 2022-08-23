@@ -36,7 +36,8 @@ void exposeConstraints() {
       .def("evaluate", &ConstraintSet::evaluate, bp::args("self", "z"),
            "Evaluate the constraint indicator function or nonsmooth penalty "
            "on the projection/prox map of :math:`z`.")
-      .def("projection", &ConstraintSet::projection, bp::args("self", "z", "zout"))
+      .def("projection", &ConstraintSet::projection,
+           bp::args("self", "z", "zout"))
       .def("normal_cone_proj", &ConstraintSet::normalConeProjection,
            bp::args("self", "z", "zout"))
       .def("apply_jacobian", &ConstraintSet::applyProjectionJacobian,
@@ -77,8 +78,7 @@ void exposeConstraints() {
           "Convenience function to create an inequality constraint from a "
           "C2Function.");
 
-  bp::def("evaluateMoreauEnvelope",
-          &evaluateMoreauEnvelope<Scalar>,
+  bp::def("evaluateMoreauEnvelope", &evaluateMoreauEnvelope<Scalar>,
           bp::args("cstr_set", "zin", "zproj", "inv_mu"),
           "Evaluate the Moreau envelope with parameter :math:`\\mu`.");
 }
