@@ -9,10 +9,9 @@
 
 namespace proxnlp {
 
-/// @brief  Backtracking bracketing interpolation linesearch.
-/// This linesearch searches steplengths through interpolation and bracketing.
+/// @brief  Backtracking cubic interpolation linesearch.
+/// This linesearch searches steplengths through safeguarded interpolation.
 /// See Nocedal & Wright Numerical Optimization, sec. 3.5.
-/// This implementation looks for the Goldstein conditions to be satisfied.
 template <typename _Scalar> struct CubicInterpLinesearch {
   using Scalar = _Scalar;
   using Solver = SolverTpl<Scalar>;
@@ -22,30 +21,24 @@ template <typename _Scalar> struct CubicInterpLinesearch {
     Scalar alpha;
     Scalar phi;
   };
+  static constexpr Scalar dphi_thresh = 1e-13;
 
   template <typename Fn>
   static void run(Fn phi, const Scalar phi0, const Scalar dphi0,
                   VerboseLevel verbosity, const Scalar armijo_c1,
-                  const Scalar alpha_min, Scalar &alpha_try) {
+                  const Scalar alpha_min, Scalar &alpha_try,
+                  Scalar red_low = 0.4,
+                  Scalar red_high = 0.9) {
     auto evaluate_candidate = [&](Scalar alpha) {
       return ls_candidate{alpha, phi(alpha)};
     };
 
-    const Scalar wolfe_2_gamma = 1. -armijo_c1;
-    const Scalar dphi_thresh = 1e-13;
     Scalar aleft = 0.;
     Scalar alph0 = 1.;
     ls_candidate cand0 = evaluate_candidate(alph0);
 
-    // safeguards
-    Scalar red_low = 0.5;
-    Scalar red_high = 0.9;
-
     auto check_condition = [&](ls_candidate cand) {
       return cand.phi <= phi0 + armijo_c1 * cand.alpha * dphi0;
-    };
-    auto check_goldstein_2 = [&](ls_candidate cand) {
-      return phi0 + wolfe_2_gamma * cand.alpha * dphi0 <= cand.phi;
     };
 
     // check termination criterion
@@ -57,6 +50,10 @@ template <typename _Scalar> struct CubicInterpLinesearch {
     // step 2: construct & minimize quadratic interpolant
     Scalar al1_den = cand0.phi - phi0 - alph0 * dphi0;
     Scalar alph1 = -0.5 * dphi0 * alph0 * alph0 / al1_den;
+    // safeguard
+    if ((alph1 > red_high * alph0) || (alph1 < red_low * alph0)) {
+      alph1 = alph0 / 2.0;
+    }
     ls_candidate cand1 = evaluate_candidate(alph1);
 
     // check if good, if so exit
@@ -68,7 +65,6 @@ template <typename _Scalar> struct CubicInterpLinesearch {
     // step 3: construct brackets through cubic interpolation
     using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
     using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
-
 
     // buffers for cubic interpolation
     Matrix2s alph_mat;
