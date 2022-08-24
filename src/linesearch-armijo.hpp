@@ -9,11 +9,11 @@ namespace proxnlp {
 
 /// @brief Polynomials represented by their coefficients in decreasing order of
 /// degree.
-template <typename T> struct Polynomial {
+template <typename T> struct PolynomialTpl {
   using VectorXs = typename math_types<T>::VectorXs;
   VectorXs coeffs;
-  Polynomial() {}
-  Polynomial(const VectorXs &c) : coeffs(c) {}
+  PolynomialTpl() {}
+  PolynomialTpl(const VectorXs &c) : coeffs(c) {}
   /// @brief Polynomial degree (number of coefficients minus one).
   std::size_t degree() const { return coeffs.size() - 1; }
   inline T evaluate(T a) const {
@@ -23,15 +23,15 @@ template <typename T> struct Polynomial {
     }
     return r;
   }
-  Polynomial derivative() const {
+  PolynomialTpl derivative() const {
     if (degree() == 0) {
-      return Polynomial({0.});
+      return PolynomialTpl({0.});
     }
     VectorXs out(degree());
     for (int i = 0; i < coeffs.size() - 1; i++) {
       out(i) = coeffs(i) * (degree() - i);
     }
-    return Polynomial(out);
+    return PolynomialTpl(out);
   }
 };
 
@@ -40,7 +40,7 @@ template <typename Scalar> class ArmijoLinesearch : public Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
   using FunctionSample = typename Base::FunctionSample;
-  using Polynomial = Polynomial<Scalar>;
+  using Polynomial = PolynomialTpl<Scalar>;
   using VectorXs = typename math_types<Scalar>::VectorXs;
   using Base::options;
 
