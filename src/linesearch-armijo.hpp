@@ -53,7 +53,7 @@ public:
       return FunctionSample{a, phi(a)};
     };
 
-    FunctionSample lowerbound(0., phi0, dphi0);
+    const FunctionSample lowerbound(0., phi0, dphi0);
 
     alpha_try = 1.;
     FunctionSample latest = eval_sample_nograd(alpha_try);
@@ -63,7 +63,7 @@ public:
       return;
     }
 
-    while (alpha_try > options().alpha_min) {
+    for (int i = 0; i < options().max_num_steps; i++) {
 
       const Scalar dM = latest.phi - phi0;
       if (dM <= options().armijo_c1 * alpha_try * dphi0) {
@@ -100,17 +100,21 @@ public:
           break;
         }
 
-        alpha_try = this->minimize_interpolant(strat, samples, 0.5 * alpha_try,
-                                               0.9 * alpha_try);
+        alpha_try = this->minimize_interpolant(
+            strat, samples, options().contraction_min * alpha_try,
+            options().contraction_max * alpha_try);
       }
       alpha_try = std::max(alpha_try, options().alpha_min);
       previous = latest;
       latest = eval_sample_nograd(alpha_try);
+      if (alpha_try <= options().alpha_min) {
+        break;
+      }
     }
   }
 
   // Propose a new candidate step size through interpolation
-  Scalar minimize_interpolant(const LSInterpolation strat,
+  Scalar minimize_interpolant(LSInterpolation strat,
                               const std::vector<FunctionSample> &samples,
                               Scalar min_step_size,
                               Scalar max_step_size) const {
@@ -121,6 +125,10 @@ public:
     const FunctionSample &lowerbound = samples[0];
     const Scalar &phi0 = lowerbound.phi;
     const Scalar &dphi0 = lowerbound.dphi;
+
+    if (samples.size() == 2) {
+      strat = LSInterpolation::QUADRATIC;
+    }
 
     switch (strat) {
     case LSInterpolation::QUADRATIC: {
@@ -173,7 +181,7 @@ public:
       break;
     }
 
-    if ((anext > max_step_size) && (anext < min_step_size)) {
+    if ((anext > max_step_size) || (anext < min_step_size)) {
       // if min outside of (amin; amax), look at the edges
       Scalar pleft = interpol.evaluate(min_step_size);
       Scalar pright = interpol.evaluate(max_step_size);
