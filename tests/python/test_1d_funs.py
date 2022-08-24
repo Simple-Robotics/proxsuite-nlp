@@ -9,15 +9,16 @@ space = manifolds.R()
 nx = space.nx
 
 
-@pytest.mark.parametrize("ls_strat",
-                         [proxnlp.LinesearchStrategy.ARMIJO,
-                          proxnlp.LinesearchStrategy.CUBIC_INTERP])
+@pytest.mark.parametrize(
+    "ls_strat",
+    [proxnlp.LinesearchStrategy.ARMIJO, proxnlp.LinesearchStrategy.CUBIC_INTERP],
+)
 def test_quad1d(ls_strat):
 
     x_sm = cas.SX.sym("x", 1)
     a = 0.01
     b = -0.53
-    f = x_sm ** 2 * a + b * x_sm
+    f = x_sm**2 * a + b * x_sm
     fs = utils.CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
@@ -36,15 +37,16 @@ def test_quad1d(ls_strat):
     assert rs.xopt[0] == real_solution
 
 
-@pytest.mark.parametrize("ls_strat",
-                         [proxnlp.LinesearchStrategy.ARMIJO,
-                          proxnlp.LinesearchStrategy.CUBIC_INTERP])
+@pytest.mark.parametrize(
+    "ls_strat",
+    [proxnlp.LinesearchStrategy.ARMIJO, proxnlp.LinesearchStrategy.CUBIC_INTERP],
+)
 def test_cubic1d(ls_strat):
     x_sm = cas.SX.sym("x", 1)
     b = -10
     c = 10
     d = -24
-    f = x_sm ** 3 + b * x_sm ** 2 + c * x_sm + d
+    f = x_sm**3 + b * x_sm**2 + c * x_sm + d
     fs = utils.CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
@@ -52,7 +54,7 @@ def test_cubic1d(ls_strat):
     solver = proxnlp.Solver(space, problem, 1e-5)
     ws = proxnlp.Workspace(nx, nx, problem)
     rs = proxnlp.Results(nx, problem)
-    x0 = np.array([1.])
+    x0 = np.array([1.0])
     solver.ls_strat = ls_strat
     flag = solver.solve(ws, rs, x0, [])
     assert flag == proxnlp.ConvergenceFlag.success
@@ -63,6 +65,7 @@ def test_cubic1d(ls_strat):
     assert np.allclose(real_sol, rs.xopt[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     sys.exit(pytest.main(sys.argv))

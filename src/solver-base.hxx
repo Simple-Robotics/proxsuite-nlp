@@ -392,15 +392,15 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     switch (ls_strat) {
     case ARMIJO: {
-      ArmijoLinesearch<Scalar>::run(phi_trial, results.merit,
-                                    workspace.dmerit_dir, verbose, ls_beta,
-                                    armijo_c1, alpha_min, workspace.alpha_opt);
+      ArmijoLinesearch<Scalar>().run(phi_trial, results.merit,
+                                     workspace.dmerit_dir, ls_beta, armijo_c1,
+                                     alpha_min, workspace.alpha_opt);
       break;
     }
     case CUBIC_INTERP: {
-      CubicInterpLinesearch<Scalar>::run(
-          phi_trial, results.merit, workspace.dmerit_dir, verbose, armijo_c1,
-          alpha_min, workspace.alpha_opt);
+      CubicInterpLinesearch<Scalar>().run(phi_trial, results.merit,
+                                          workspace.dmerit_dir, armijo_c1,
+                                          alpha_min, workspace.alpha_opt);
       break;
     }
     default:

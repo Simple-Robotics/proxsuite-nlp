@@ -12,37 +12,34 @@ namespace proxnlp {
 /// @brief  Backtracking cubic interpolation linesearch.
 /// This linesearch searches steplengths through safeguarded interpolation.
 /// See Nocedal & Wright Numerical Optimization, sec. 3.5.
-template <typename _Scalar> struct CubicInterpLinesearch {
-  using Scalar = _Scalar;
+template <typename Scalar>
+class CubicInterpLinesearch : public Linesearch<Scalar> {
+public:
+  using Base = Linesearch<Scalar>;
+  using FunctionSample = typename Base::FunctionSample;
+  using Base::options;
   using Solver = SolverTpl<Scalar>;
   using Workspace = WorkspaceTpl<Scalar>;
   using Results = ResultsTpl<Scalar>;
-  struct ls_candidate {
-    Scalar alpha;
-    Scalar phi;
-  };
-  static constexpr Scalar dphi_thresh = 1e-13;
 
   template <typename Fn>
-  static void run(Fn phi, const Scalar phi0, const Scalar dphi0,
-                  VerboseLevel verbosity, const Scalar armijo_c1,
-                  const Scalar alpha_min, Scalar &alpha_try,
-                  Scalar red_low = 0.4,
-                  Scalar red_high = 0.9) {
+  void run(Fn phi, const Scalar phi0, const Scalar dphi0,
+           const Scalar armijo_c1, const Scalar alpha_min, Scalar &alpha_try,
+           Scalar red_low = 0.4, Scalar red_high = 0.9) {
+
     auto evaluate_candidate = [&](Scalar alpha) {
-      return ls_candidate{alpha, phi(alpha)};
+      return FunctionSample{alpha, phi(alpha), 0.};
     };
 
-    Scalar aleft = 0.;
     Scalar alph0 = 1.;
-    ls_candidate cand0 = evaluate_candidate(alph0);
+    FunctionSample cand0 = evaluate_candidate(alph0);
 
-    auto check_condition = [&](ls_candidate cand) {
+    auto check_condition = [&](FunctionSample cand) {
       return cand.phi <= phi0 + armijo_c1 * cand.alpha * dphi0;
     };
 
     // check termination criterion
-    if (check_condition(cand0) || (std::abs(dphi0) < dphi_thresh)) {
+    if (check_condition(cand0) || (std::abs(dphi0) < options().dphi_thresh)) {
       alpha_try = cand0.alpha;
       return;
     }
@@ -54,7 +51,7 @@ template <typename _Scalar> struct CubicInterpLinesearch {
     if ((alph1 > red_high * alph0) || (alph1 < red_low * alph0)) {
       alph1 = alph0 / 2.0;
     }
-    ls_candidate cand1 = evaluate_candidate(alph1);
+    FunctionSample cand1 = evaluate_candidate(alph1);
 
     // check if good, if so exit
     if (check_condition(cand1)) {
