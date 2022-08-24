@@ -26,6 +26,7 @@ public:
   using Results = ResultsTpl<Scalar>;
 
   using Manifold = ManifoldAbstractTpl<Scalar>;
+  using LSOptions = typename Linesearch<Scalar>::Options;
 
   /// Manifold on which to optimize.
   const Manifold &manifold;
@@ -70,9 +71,7 @@ public:
   const Scalar dual_alpha;  // BCL failure scaling (dual)
   const Scalar dual_beta;   // BCL success scaling (dual)
 
-  const Scalar alpha_min; // Linesearch minimum step size.
-  const Scalar armijo_c1; // Armijo rule c1 parameter.
-  Scalar ls_beta;         // Linesearch step size decrease factor.
+  LSOptions ls_options; // Linesearch options.
 
   const Scalar del_inc_k = 8.;
   const Scalar del_inc_big = 100.;
@@ -94,8 +93,8 @@ public:
             const Scalar rho_init = 0., const VerboseLevel verbose = QUIET,
             const Scalar mu_lower = 1e-9, const Scalar prim_alpha = 0.1,
             const Scalar prim_beta = 0.9, const Scalar dual_alpha = 1.,
-            const Scalar dual_beta = 1., const Scalar alpha_min = 1e-7,
-            const Scalar armijo_c1 = 1e-4, const Scalar ls_beta = 0.5);
+            const Scalar dual_beta = 1.,
+            const LSOptions ls_options = LSOptions());
 
   enum InertiaFlag { OK = 0, BAD = 1, ZEROS = 2 };
 

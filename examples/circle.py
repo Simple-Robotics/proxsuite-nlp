@@ -62,7 +62,7 @@ solver = proxnlp.Solver(
     space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
 solver.use_gauss_newton = True
-# solver.ls_strat = proxnlp.LinesearchStrategy.CUBIC_INTERP
+solver.ls_options.interp_type = proxnlp.LSInterpolation.BISECTION
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 

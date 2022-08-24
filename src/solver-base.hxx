@@ -4,7 +4,7 @@
 
 #include "proxnlp/solver-base.hpp"
 
-#include <stdexcept>
+#include "proxnlp/exceptions.hpp"
 
 #include <fmt/ostream.h>
 #include <fmt/color.h>
@@ -17,8 +17,7 @@ SolverTpl<Scalar>::SolverTpl(const Manifold &manifold,
                              const VerboseLevel verbose, const Scalar mu_lower,
                              const Scalar prim_alpha, const Scalar prim_beta,
                              const Scalar dual_alpha, const Scalar dual_beta,
-                             const Scalar alpha_min, const Scalar armijo_c1,
-                             const Scalar ls_beta)
+                             const LSOptions ls_options)
     : manifold(manifold), problem_(prob), merit_fun(problem_, mu_init),
       prox_penalty(manifold, manifold.neutral(),
                    rho_init *
@@ -26,7 +25,7 @@ SolverTpl<Scalar>::SolverTpl(const Manifold &manifold,
       verbose(verbose), rho_init_(rho_init), mu_init_(mu_init),
       mu_lower_(mu_lower), target_tol(tol), prim_alpha_(prim_alpha),
       prim_beta(prim_beta), dual_alpha(dual_alpha), dual_beta(dual_beta),
-      alpha_min(alpha_min), armijo_c1(armijo_c1), ls_beta(ls_beta) {}
+      ls_options(ls_options) {}
 
 template <typename Scalar>
 ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
@@ -37,8 +36,8 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   int nr = 0;
   const std::size_t numc = problem_->getNumConstraints();
   if (numc != lams0.size()) {
-    throw std::runtime_error("Specified number of constraints is not the same "
-                             "as the provided number of multipliers!");
+    proxnlp_runtime_error("Specified number of constraints is not the same "
+                          "as the provided number of multipliers!");
   }
   for (std::size_t i = 0; i < numc; i++) {
     nr = problem_->getConstraintDim(i);
@@ -137,7 +136,7 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
       numneg++;
       break;
     default:
-      throw std::runtime_error(
+      proxnlp_runtime_error(
           "Matrix signature should only have Os, 1s, and -1s.");
     }
   }
@@ -392,18 +391,13 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     switch (ls_strat) {
     case ARMIJO: {
-      ArmijoLinesearch<Scalar>().run(phi_trial, results.merit,
-                                     workspace.dmerit_dir, ls_beta, armijo_c1,
-                                     alpha_min, workspace.alpha_opt);
-      break;
-    }
-    case CUBIC_INTERP: {
-      CubicInterpLinesearch<Scalar>().run(phi_trial, results.merit,
-                                          workspace.dmerit_dir, armijo_c1,
-                                          alpha_min, workspace.alpha_opt);
+      ArmijoLinesearch<Scalar>(ls_options)
+          .run(phi_trial, results.merit, workspace.dmerit_dir,
+               workspace.alpha_opt);
       break;
     }
     default:
+      proxnlp_runtime_error("Unrecognized linesearch alternative.\n");
       break;
     }
     fmt::print(" | alph_opt={:4.3e}\n", workspace.alpha_opt);

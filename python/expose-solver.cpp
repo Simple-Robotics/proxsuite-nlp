@@ -17,28 +17,56 @@ void exposeSolver() {
       .value("VERYVERBOSE", VERY)
       .export_values();
 
-  bp::enum_<LinesearchStrategy>("LinesearchStrategy")
-      .value("ARMIJO", LinesearchStrategy::ARMIJO)
-      .value("CUBIC_INTERP", LinesearchStrategy::CUBIC_INTERP);
+  bp::enum_<LinesearchStrategy>(
+      "LinesearchStrategy",
+      "Linesearch strategy. Only Armijo linesearch is implemented for now.")
+      .value("ARMIJO", LinesearchStrategy::ARMIJO);
+
+  bp::enum_<LSInterpolation>("LSInterpolation",
+                             "Linesearch interpolation scheme.")
+      .value("BISECTION", LSInterpolation::BISECTION)
+      .value("QUADRATIC", LSInterpolation::QUADRATIC)
+      .value("CUBIC", LSInterpolation::CUBIC);
+
+  using Options = Linesearch<Scalar>::Options;
+  bp::class_<Options>("LSOptions", "Linesearch options.",
+                      bp::init<>("Default constructor."))
+      .def_readwrite("armijo_c1", &Options::armijo_c1)
+      .def_readwrite("wolfe_c2", &Options::wolfe_c2)
+      .def_readwrite(
+          "dphi_thresh", &Options::dphi_thresh,
+          "Threshold on the derivative at the initial point; the linesearch "
+          "will be early-terminated if the derivative is below this threshold.")
+      .def_readwrite("alpha_min", &Options::alpha_min, "Minimum step size.")
+      .def_readwrite("max_num_steps", &Options::max_num_steps)
+      .def_readwrite("verbosity", &Options::verbosity)
+      .def_readwrite("interp_type", &Options::interp_type,
+                     "Interpolation type: bisection, quadratic or cubic.")
+      .def_readwrite("contraction_min", &Options::contraction_min,
+                     "Minimum step contraction.")
+      .def_readwrite("contraction_max", &Options::contraction_max,
+                     "Maximum step contraction.")
+      // .def(bp::self_ns::str(bp::self))
+      ;
 
   bp::class_<Solver>(
       "Solver", "The numerical solver.",
       bp::init<const Manifold &, shared_ptr<context::Problem> &, Scalar, Scalar,
                Scalar, VerboseLevel, Scalar, Scalar, Scalar, Scalar, Scalar,
-               Scalar, Scalar, Scalar>(
+               bp::optional<Options>>(
           (bp::arg("self"), bp::arg("space"), bp::arg("problem"),
            bp::arg("tol") = 1e-6, bp::arg("mu_init") = 1e-2,
            bp::arg("rho_init") = 0., bp::arg("verbose") = VerboseLevel::QUIET,
            bp::arg("mu_min") = 1e-9, bp::arg("prim_alpha") = 0.1,
            bp::arg("prim_beta") = 0.9, bp::arg("dual_alpha") = 1.,
-           bp::arg("dual_beta") = 1., bp::arg("alpha_min") = 1e-7,
-           bp::arg("armijo_c1") = 1e-4, bp::arg("ls_beta") = 0.5)))
+           bp::arg("dual_beta") = 1., bp::arg("ls_options"))))
       .def_readwrite(
           "use_gauss_newton", &Solver::use_gauss_newton,
           "Whether to use a Gauss-Newton Hessian matrix approximation.")
       .def_readwrite("record_linesearch_process",
                      &Solver::record_linesearch_process)
       .def_readwrite("ls_strat", &Solver::ls_strat)
+      .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def("register_callback", &Solver::registerCallback,
            bp::args("self", "cb"), "Add a callback to the solver.")
       .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
@@ -65,10 +93,7 @@ void exposeSolver() {
       .def_readonly("prim_beta", &Solver::prim_beta)
       .def_readonly("dual_alpha", &Solver::dual_alpha)
       .def_readonly("dual_beta", &Solver::dual_beta)
-      .def_readonly("mu_min", &Solver::mu_lower_)
-      .def_readonly("alpha_min", &Solver::alpha_min)
-      .def_readonly("armijo_c1", &Solver::armijo_c1)
-      .def_readwrite("ls_beta", &Solver::ls_beta);
+      .def_readonly("mu_min", &Solver::mu_lower_);
 }
 } // namespace python
 } // namespace proxnlp

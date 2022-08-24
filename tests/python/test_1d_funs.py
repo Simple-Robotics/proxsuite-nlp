@@ -3,18 +3,27 @@ from proxnlp import manifolds, utils, costs
 import casadi as cas
 import numpy as np
 import pytest
+import itertools
 
 
 space = manifolds.R()
 nx = space.nx
 
+linesearch_strategies = [proxnlp.LinesearchStrategy.ARMIJO]
+
+linesearch_interp_type = [
+    proxnlp.LSInterpolation.BISECTION,
+    proxnlp.LSInterpolation.QUADRATIC,
+    proxnlp.LSInterpolation.CUBIC,
+]
+
+linesearch_opts = itertools.product(linesearch_strategies, linesearch_interp_type)
 
 @pytest.mark.parametrize(
-    "ls_strat",
-    [proxnlp.LinesearchStrategy.ARMIJO, proxnlp.LinesearchStrategy.CUBIC_INTERP],
+    ("ls_strat", "ls_interp_type"), linesearch_opts
 )
-def test_quad1d(ls_strat):
-
+def test_quad1d(ls_strat, ls_interp_type):
+    print("OPTIONS:", ls_strat, ls_interp_type)
     x_sm = cas.SX.sym("x", 1)
     a = 0.01
     b = -0.53
@@ -38,10 +47,10 @@ def test_quad1d(ls_strat):
 
 
 @pytest.mark.parametrize(
-    "ls_strat",
-    [proxnlp.LinesearchStrategy.ARMIJO, proxnlp.LinesearchStrategy.CUBIC_INTERP],
+    ("ls_strat", "ls_interp_type"), linesearch_opts
 )
-def test_cubic1d(ls_strat):
+def test_cubic1d(ls_strat, ls_interp_type):
+    print("OPTIONS:", ls_strat, ls_interp_type)
     x_sm = cas.SX.sym("x", 1)
     b = -10
     c = 10

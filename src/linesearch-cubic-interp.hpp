@@ -59,7 +59,6 @@ public:
       return;
     }
 
-    // step 3: construct brackets through cubic interpolation
     using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
     using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
 
@@ -107,8 +106,6 @@ public:
 
     alpha_try = std::max(alpha_try, alpha_min);
   }
-
-  static void bounded_interp(Scalar alow, Scalar ahigh) {}
 };
 
 } // namespace proxnlp
