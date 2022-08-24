@@ -19,9 +19,8 @@ linesearch_interp_type = [
 
 linesearch_opts = itertools.product(linesearch_strategies, linesearch_interp_type)
 
-@pytest.mark.parametrize(
-    ("ls_strat", "ls_interp_type"), linesearch_opts
-)
+
+@pytest.mark.parametrize(("ls_strat", "ls_interp_type"), linesearch_opts)
 def test_quad1d(ls_strat, ls_interp_type):
     print("OPTIONS:", ls_strat, ls_interp_type)
     x_sm = cas.SX.sym("x", 1)
@@ -36,6 +35,7 @@ def test_quad1d(ls_strat, ls_interp_type):
     ws = proxnlp.Workspace(nx, nx, problem)
     rs = proxnlp.Results(nx, problem)
     solver.ls_strat = ls_strat
+    solver.ls_options.interp_type = ls_interp_type
     flag = solver.solve(ws, rs, space.neutral(), [])
 
     real_solution = -b / (2 * a)
@@ -46,9 +46,7 @@ def test_quad1d(ls_strat, ls_interp_type):
     assert rs.xopt[0] == real_solution
 
 
-@pytest.mark.parametrize(
-    ("ls_strat", "ls_interp_type"), linesearch_opts
-)
+@pytest.mark.parametrize(("ls_strat", "ls_interp_type"), linesearch_opts)
 def test_cubic1d(ls_strat, ls_interp_type):
     print("OPTIONS:", ls_strat, ls_interp_type)
     x_sm = cas.SX.sym("x", 1)
@@ -65,6 +63,7 @@ def test_cubic1d(ls_strat, ls_interp_type):
     rs = proxnlp.Results(nx, problem)
     x0 = np.array([1.0])
     solver.ls_strat = ls_strat
+    solver.ls_options.interp_type = ls_interp_type
     flag = solver.solve(ws, rs, x0, [])
     assert flag == proxnlp.ConvergenceFlag.success
     assert rs.numiters <= 7

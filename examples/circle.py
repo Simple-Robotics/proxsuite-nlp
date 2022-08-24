@@ -62,12 +62,13 @@ solver = proxnlp.Solver(
     space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
 solver.use_gauss_newton = True
-solver.ls_options.interp_type = proxnlp.LSInterpolation.BISECTION
+solver.ls_options.interp_type = proxnlp.LSInterpolation.CUBIC
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
 solver.solve(workspace, results, p1, lams0)
+solver.maxiters = 15
 
 
 print("Result x:  ", results.xopt)

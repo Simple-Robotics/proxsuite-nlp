@@ -178,13 +178,14 @@ solver = proxnlp.Solver(
 solver.register_callback(callback)
 solver.maxiters = 600
 solver.use_gauss_newton = True
-solver.ls_strat = proxnlp.LinesearchStrategy.ARMIJO
+solver.ls_options.interp_type = proxnlp.LSInterpolation.CUBIC
 
 xu_init = pb_space.neutral()
 for t in range(nsteps + 1):
     xu_init[t * xspace.nx] = theta0
 lams0 = [np.zeros(cs.nr) for cs in constraints_]
 flag = solver.solve(workspace, results, xu_init, lams0)
+assert results.numiters == 296
 
 print("Results struct:\n{}".format(results))
 prim_errs = callback.storage.prim_infeas
