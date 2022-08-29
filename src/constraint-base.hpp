@@ -100,8 +100,8 @@ template <typename Scalar>
 Scalar
 computeMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
                       const typename math_types<Scalar>::ConstVectorRef &zin,
-                      const Scalar inv_mu,
-                      typename math_types<Scalar>::VectorRef zprojout) {
+                      typename math_types<Scalar>::VectorRef zprojout,
+                      const Scalar inv_mu) {
   cstr_set.normalConeProjection(zin, zprojout);
   return evaluateMoreauEnvelope(cstr_set, zin, zprojout, inv_mu);
 }

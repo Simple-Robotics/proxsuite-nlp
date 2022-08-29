@@ -9,7 +9,7 @@
 #include <ostream>
 
 namespace proxnlp {
-enum LinesearchStrategy { ARMIJO, CUBIC_INTERP };
+enum LinesearchStrategy { ARMIJO, LS_WOLFE };
 enum class LSInterpolation { BISECTION, QUADRATIC, CUBIC };
 
 /// @brief Base linesearch class.

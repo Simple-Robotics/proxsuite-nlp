@@ -18,7 +18,7 @@ Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
     tmp_cvals[i] = cstr.func()(x) + mu_penal_ * lams_ext[i];
     res +=
-        computeMoreauEnvelope(*cstr.m_set, tmp_cvals[i], mu_inv_, tmp_cvals[i]);
+        computeMoreauEnvelope(*cstr.m_set, tmp_cvals[i], tmp_cvals[i], mu_inv_);
     res += -static_cast<Scalar>(0.5) * mu_penal_ * lams_ext[i].squaredNorm();
     res += gamma_ * static_cast<Scalar>(0.5) * mu_inv_ *
            (tmp_cvals[i] - mu_penal_ * lams[i]).squaredNorm();
