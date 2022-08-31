@@ -66,7 +66,6 @@ int main() {
 
   auto residualCirclePtr =
       std::make_shared<QuadraticResidualCost<double>>(resptr, w2, -radius_sq);
-  const auto &resdiualCircle = *residualCirclePtr;
 
   using Ineq_t = NegativeOrthant<double>;
   using CstrType = Problem::ConstraintType;
