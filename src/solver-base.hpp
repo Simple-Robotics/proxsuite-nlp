@@ -10,6 +10,7 @@
 #include "proxnlp/workspace.hpp"
 #include "proxnlp/results.hpp"
 #include "proxnlp/helpers-base.hpp"
+#include "proxnlp/logger.hpp"
 
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
@@ -72,6 +73,8 @@ public:
   const Scalar dual_beta;   // BCL success scaling (dual)
 
   LSOptions ls_options; // Linesearch options.
+
+  BaseLogger logger{};
 
   const Scalar del_inc_k = 8.;
   const Scalar del_inc_big = 100.;

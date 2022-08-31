@@ -47,8 +47,8 @@ public:
   ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
 
   template <typename Fn>
-  void run(Fn phi, const Scalar phi0, const Scalar dphi0,
-           Scalar &alpha_try) const {
+  Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0,
+             Scalar &alpha_try) const {
     auto eval_sample_nograd = [&](const Scalar a) {
       return FunctionSample{a, phi(a)};
     };
@@ -60,7 +60,7 @@ public:
     FunctionSample previous;
 
     if (std::abs(dphi0) < options().dphi_thresh) {
-      return;
+      return phi0;
     }
 
     for (std::size_t i = 0; i < options().max_num_steps; i++) {
@@ -111,6 +111,7 @@ public:
         break;
       }
     }
+    return latest.phi;
   }
 
   /// Propose a new candidate step size through safeguarded interpolation

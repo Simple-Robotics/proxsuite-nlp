@@ -50,6 +50,9 @@ template <typename Scalar>
 ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
                                          const ConstVectorRef &x0,
                                          const ConstVectorRef &lams0) {
+  if (verbose == 0)
+    logger.active = false;
+
   // init variables
   results.xOpt = x0;
   workspace.xPrev = x0;
@@ -60,13 +63,18 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
 
   results.numIters = 0;
 
+  auto outer_col = fmt::color::white;
+
   std::size_t i = 0;
   while (results.numIters < MAX_ITERS) {
     results.mu = mu_;
     results.rho = rho_;
-    fmt::print(fmt::fg(fmt::color::yellow),
-               "[Outer iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n", i,
+    fmt::print(fmt::emphasis::bold | fmt::fg(outer_col),
+               "[AL iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n", i,
                inner_tol, prim_tol, mu_);
+    if (results.numIters == 0) {
+      logger.start();
+    }
     solveInner(workspace, results);
 
     // accept new primal iterate
@@ -74,7 +82,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
     prox_penalty.updateTarget(workspace.xPrev);
 
     if (results.primalInfeas < prim_tol) {
-      fmt::print(fmt::fg(fmt::color::lime_green), "> Accept multipliers\n");
+      outer_col = fmt::color::lime_green;
       acceptMultipliers(workspace);
       if ((results.primalInfeas < target_tol) &&
           (results.dualInfeas < target_tol)) {
@@ -84,7 +92,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
       }
       updateToleranceSuccess();
     } else {
-      fmt::print(fmt::fg(fmt::color::orange_red), "> Reject multipliers\n");
+      outer_col = fmt::color::orange_red;
       updatePenalty();
       updateToleranceFailure();
     }
@@ -95,15 +103,13 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   }
 
   if (results.converged == SUCCESS)
-    fmt::print("Solver successfully converged\n"
-               "  numIters : {:d}\n"
-               "  residuals: p={:.3g}, d={:.3g}\n",
-               results.numIters, results.primalInfeas, results.dualInfeas);
+    fmt::print(fmt::fg(fmt::color::dodger_blue),
+               "Solver successfully converged");
 
   switch (results.converged) {
   case MAX_ITERS_REACHED:
     fmt::print(fmt::fg(fmt::color::orange_red),
-               "Max number of iterations reached.\n");
+               "Max number of iterations reached.");
     break;
   default:
     break;
@@ -142,21 +148,18 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
   }
   InertiaFlag flag = OK;
   bool print_info = verbose >= 2;
-  if (print_info)
-    fmt::print(" | Inertia: {:d}+, {:d}, {:d}-", numpos, numzer, numneg);
+  // if (print_info)
+  //   fmt::print(" | Inertia: {:d}+, {:d}, {:d}-", numpos, numzer, numneg);
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
   bool zer_ok = numzer == 0;
   if (!(pos_ok && neg_ok && zer_ok)) {
-    if (print_info)
-      fmt::print(" is incorrect");
     if (!zer_ok)
       flag = ZEROS;
     else
       flag = BAD;
   } else {
-    if (print_info)
-      fmt::print(fmt::fg(fmt::color::pale_green), " OK");
+    flag = OK;
   }
   return flag;
 }
@@ -236,7 +239,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   merit_fun.setPenalty(mu_);
 
   // lambda for evaluating the merit function
-  auto phi_trial = [&](const Scalar alpha) {
+  auto phi_eval = [&](const Scalar alpha) {
     tryStep(manifold, workspace, results, alpha);
     return merit_fun.evaluate(workspace.xTrial, workspace.lamsTrial,
                               workspace.lamsPrev, workspace.lamsPlusPre) +
@@ -259,11 +262,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
                            workspace.lamsPlusPre);
     if (rho_ > 0.)
       results.merit += prox_penalty.call(results.xOpt);
-
-    if (verbose >= 0) {
-      fmt::print("[iter {:>3d}] objective: {:g} merit: {:g}\n",
-                 results.numIters, results.value, results.merit);
-    }
 
     //// fill in LHS/RHS
     //// TODO create an Eigen::Map to map submatrices to the active sets of each
@@ -326,9 +324,9 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     results.primalInfeas = math::infty_norm(results.constraint_violations_);
     Scalar inner_crit = math::infty_norm(workspace.kktRhs);
 
-    fmt::print(
-        " | crit={:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
-        inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
+    // fmt::print(
+    //     " | crit={:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
+    //     inner_crit, results.dualInfeas, results.primalInfeas, inner_tol);
 
     bool outer_cond = (results.primalInfeas <= target_tol &&
                        results.dualInfeas <= target_tol);
@@ -349,8 +347,8 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
           workspace.ldlt_.vectorD().array().sign().template cast<int>();
       workspace.kktMatrix.diagonal().head(ndx).array() -= delta;
       is_inertia_correct = checkInertia(workspace.signature);
-      if (verbose >= 2)
-        fmt::print(" (reg={:>.3g})\n", delta);
+      // if (verbose >= 2)
+      //   fmt::print(" (reg={:>.3g})\n", delta);
       old_delta = delta;
 
       if (is_inertia_correct == OK) {
@@ -383,29 +381,39 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
         workspace.dual_prox_err_data.dot(workspace.dual_step);
 
     if (verbose >= 1) {
-      auto resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
-      fmt::print(
-          " | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
-          math::infty_norm(resdl), workspace.dmerit_dir, conditioning, delta);
+      // auto resdl = workspace.kktMatrix * workspace.pd_step +
+      // workspace.kktRhs; fmt::print(
+      //     " | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
+      //     math::infty_norm(resdl), workspace.dmerit_dir, conditioning,
+      //     delta);
     }
 
+    Scalar phi0 = results.merit;
+    Scalar phi_new = 0.;
     switch (ls_strat) {
     case ARMIJO: {
-      ArmijoLinesearch<Scalar>(ls_options)
-          .run(phi_trial, results.merit, workspace.dmerit_dir,
-               workspace.alpha_opt);
+      phi_new = ArmijoLinesearch<Scalar>(ls_options)
+                    .run(phi_eval, results.merit, workspace.dmerit_dir,
+                         workspace.alpha_opt);
       break;
     }
     default:
       proxnlp_runtime_error("Unrecognized linesearch alternative.\n");
       break;
     }
-    fmt::print(" | alph_opt={:4.3e}\n", workspace.alpha_opt);
+    // fmt::print(" | alph_opt={:4.3e}\n", workspace.alpha_opt);
 
     results.xOpt = workspace.xTrial;
     results.lams_opt_data = workspace.lamsTrial_data;
+    results.merit = phi_new;
 
     invokeCallbacks(workspace, results);
+
+    LogRecord record{results.numIters + 1, workspace.alpha_opt, inner_crit,
+                     results.primalInfeas, results.dualInfeas,  delta,
+                     workspace.dmerit_dir, results.merit,       phi_new - phi0};
+
+    logger.log(record);
 
     results.numIters++;
     if (results.numIters >= MAX_ITERS) {

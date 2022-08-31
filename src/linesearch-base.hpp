@@ -33,8 +33,10 @@ public:
     friend std::ostream &operator<<(std::ostream &oss, const Options &self) {
       oss << "{";
       oss << fmt::format("armijo_c1 = {:.3e}", self.armijo_c1);
-      oss << ", " << fmt::format("contraction_min = {:.3e}", self.contraction_min);
-      oss << ", " << fmt::format("contraction_max = {:.3e}", self.contraction_max);
+      oss << ", "
+          << fmt::format("contraction_min = {:.3e}", self.contraction_min);
+      oss << ", "
+          << fmt::format("contraction_max = {:.3e}", self.contraction_max);
       oss << "}";
       return oss;
     }
