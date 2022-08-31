@@ -28,32 +28,33 @@ void exposeSolver() {
       .value("QUADRATIC", LSInterpolation::QUADRATIC)
       .value("CUBIC", LSInterpolation::CUBIC);
 
-  using Options = Linesearch<Scalar>::Options;
-  bp::class_<Options>("LSOptions", "Linesearch options.",
+  using LSType = Linesearch<Scalar>;
+  using LSOptions = LSType::Options;
+  bp::class_<LSOptions>("LSOptions", "Linesearch options.",
                       bp::init<>("Default constructor."))
-      .def_readwrite("armijo_c1", &Options::armijo_c1)
-      .def_readwrite("wolfe_c2", &Options::wolfe_c2)
+      .def_readwrite("armijo_c1", &LSOptions::armijo_c1)
+      .def_readwrite("wolfe_c2", &LSOptions::wolfe_c2)
       .def_readwrite(
-          "dphi_thresh", &Options::dphi_thresh,
+          "dphi_thresh", &LSOptions::dphi_thresh,
           "Threshold on the derivative at the initial point; the linesearch "
           "will be early-terminated if the derivative is below this threshold.")
-      .def_readwrite("alpha_min", &Options::alpha_min, "Minimum step size.")
-      .def_readwrite("max_num_steps", &Options::max_num_steps)
-      .def_readwrite("verbosity", &Options::verbosity)
-      .def_readwrite("interp_type", &Options::interp_type,
-                     "Interpolation type: bisection, quadratic or cubic.")
-      .def_readwrite("contraction_min", &Options::contraction_min,
-                     "Minimum step contraction.")
-      .def_readwrite("contraction_max", &Options::contraction_max,
-                     "Maximum step contraction.")
-      // .def(bp::self_ns::str(bp::self))
+      .def_readwrite("alpha_min", &LSOptions::alpha_min, "Minimum step size.")
+      .def_readwrite("max_num_steps", &LSOptions::max_num_steps)
+      .def_readwrite("verbosity", &LSOptions::verbosity)
+      .def_readwrite("interp_type", &LSOptions::interp_type,
+                    "Interpolation type: bisection, quadratic or cubic.")
+      .def_readwrite("contraction_min", &LSOptions::contraction_min,
+                    "Minimum step contraction.")
+      .def_readwrite("contraction_max", &LSOptions::contraction_max,
+                    "Maximum step contraction.")
+      .def(bp::self_ns::str(bp::self))
       ;
 
   bp::class_<Solver>(
       "Solver", "The numerical solver.",
       bp::init<const Manifold &, shared_ptr<context::Problem> &, Scalar, Scalar,
                Scalar, VerboseLevel, Scalar, Scalar, Scalar, Scalar, Scalar,
-               bp::optional<Options>>(
+               bp::optional<LSOptions>>(
           (bp::arg("self"), bp::arg("space"), bp::arg("problem"),
            bp::arg("tol") = 1e-6, bp::arg("mu_init") = 1e-2,
            bp::arg("rho_init") = 0., bp::arg("verbose") = VerboseLevel::QUIET,

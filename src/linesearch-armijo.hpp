@@ -63,7 +63,7 @@ public:
       return;
     }
 
-    for (int i = 0; i < options().max_num_steps; i++) {
+    for (std::size_t i = 0; i < options().max_num_steps; i++) {
 
       const Scalar dM = latest.phi - phi0;
       if (dM <= options().armijo_c1 * alpha_try * dphi0) {
