@@ -113,7 +113,7 @@ public:
     }
   }
 
-  // Propose a new candidate step size through interpolation
+  /// Propose a new candidate step size through safeguarded interpolation
   Scalar minimize_interpolant(LSInterpolation strat,
                               const std::vector<FunctionSample> &samples,
                               Scalar min_step_size,
