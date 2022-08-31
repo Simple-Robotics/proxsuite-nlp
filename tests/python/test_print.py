@@ -6,7 +6,9 @@ import numpy as np
 class TestClass:
     space = proxnlp.manifolds.VectorSpace(1)
     cost = proxnlp.costs.CostSum(1, 1)
-    cost.add_component(proxnlp.costs.QuadraticDistanceCost(space, space.neutral(), np.zeros((1, 1))))
+    cost.add_component(
+        proxnlp.costs.QuadraticDistanceCost(space, space.neutral(), np.zeros((1, 1)))
+    )
     problem = proxnlp.Problem(cost, [])
 
     def test_print_options(self):

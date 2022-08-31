@@ -73,6 +73,7 @@ solver.maxiters = 15
 
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
+print("Results:", results)
 
 
 if __name__ == "__main__":
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     axes[1].plot(callback.storage.alphas, marker=".")
     axes[1].set_title("Step lengths $\\alpha_k$")
     axes[1].set_yscale("log", base=2)
-    plt.grid(True, which='both', axis='y', ls='--')
+    plt.grid(True, which="both", axis="y", ls="--")
     plt.tight_layout()
 
     it_list = [1, 2, 3, 4, 5, 10, 20, 30]

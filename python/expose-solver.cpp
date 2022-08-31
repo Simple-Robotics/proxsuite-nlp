@@ -31,7 +31,7 @@ void exposeSolver() {
   using LSType = Linesearch<Scalar>;
   using LSOptions = LSType::Options;
   bp::class_<LSOptions>("LSOptions", "Linesearch options.",
-                      bp::init<>("Default constructor."))
+                        bp::init<>("Default constructor."))
       .def_readwrite("armijo_c1", &LSOptions::armijo_c1)
       .def_readwrite("wolfe_c2", &LSOptions::wolfe_c2)
       .def_readwrite(
@@ -42,13 +42,12 @@ void exposeSolver() {
       .def_readwrite("max_num_steps", &LSOptions::max_num_steps)
       .def_readwrite("verbosity", &LSOptions::verbosity)
       .def_readwrite("interp_type", &LSOptions::interp_type,
-                    "Interpolation type: bisection, quadratic or cubic.")
+                     "Interpolation type: bisection, quadratic or cubic.")
       .def_readwrite("contraction_min", &LSOptions::contraction_min,
-                    "Minimum step contraction.")
+                     "Minimum step contraction.")
       .def_readwrite("contraction_max", &LSOptions::contraction_max,
-                    "Maximum step contraction.")
-      .def(bp::self_ns::str(bp::self))
-      ;
+                     "Maximum step contraction.")
+      .def(bp::self_ns::str(bp::self));
 
   bp::class_<Solver>(
       "Solver", "The numerical solver.",
