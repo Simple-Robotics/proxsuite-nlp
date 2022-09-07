@@ -109,42 +109,60 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   add_definitions(-DWITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
-# ----------------------------------------------------
-# --- INCLUDE ----------------------------------------
-# ----------------------------------------------------
-file(GLOB_RECURSE HEADERS
-     ${PROJECT_SOURCE_DIR}/src/*.hpp
-     ${PROJECT_SOURCE_DIR}/src/*.hxx
+# --- MAIN LIBRARY ----------------------------------------
+file(GLOB_RECURSE LIB_HEADERS
+     ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp
+     ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hxx
      )
 
-file(MAKE_DIRECTORY
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/helpers
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/autodiff
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/spaces
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/costs
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/residuals
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/modelling/constraints
-     )
+function(create_library)
+  # get the compile defs
+  get_directory_property(CURRENT_COMPILE_DEFINITIONS COMPILE_DEFINITIONS)
 
-# Process headers
-set(HEADERS_LIST)
-foreach(header ${HEADERS})
-  string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/src/" "" header ${header})
-  list(APPEND HEADERS_LIST ${header})
-  get_filename_component(headerName ${header} NAME)
-  get_filename_component(headerPath ${header} PATH)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
-    ${${PROJECT_NAME}_SOURCE_DIR}/src/${header}
-    ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/${header})
-  install(FILES ${${PROJECT_NAME}_SOURCE_DIR}/src/${header}
-          DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${headerPath}
-          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
-endforeach(header)
-set(HEADERS ${HEADERS_LIST})
+  add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS})
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
 
-# Source files
-add_subdirectory(src)
+  set_target_properties(${PROJECT_NAME}
+                        PROPERTIES
+                        LINKER_LANGUAGE CXX
+                        VERSION ${PROJECT_VERSION}
+                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+  if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
+    TAG_LIBRARY_VERSION(${PROJECT_NAME})
+  endif()
+
+  if(BUILD_WITH_PINOCCHIO_SUPPORT)
+    add_definitions(-DWITH_PINOCCHIO_SUPPORT)
+    target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio)
+  endif(BUILD_WITH_PINOCCHIO_SUPPORT)
+
+  target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
+  target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+  target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
+
+  foreach(headerFile ${LIB_HEADERS})
+    string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/" "" headerFileRelative ${headerFile})
+    get_filename_component(headerPath ${headerFileRelative} PATH)
+    install(FILES ${headerFileRelative}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${headerPath}
+            PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
+  endforeach(headerFile ${LIB_HEADERS})
+  
+endfunction()
+
+create_library()
+
+ADD_HEADER_GROUP(LIB_HEADERS)
+
+install(TARGETS ${PROJECT_NAME}
+        EXPORT ${TARGETS_EXPORT_NAME}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 # Python interface
 if(BUILD_PYTHON_INTERFACE)
