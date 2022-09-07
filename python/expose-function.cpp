@@ -34,12 +34,10 @@ void exposeFunctionTypes() {
   context::VHPFuncRetType C2Function::*compHess2 =
       &C2Function::vectorHessianProduct;
 
-  bp::class_<C2FunctionWrap, bp::bases<C1Function>,
-             boost::noncopyable>(
+  bp::class_<C2FunctionWrap, bp::bases<C1Function>, boost::noncopyable>(
       "C2Function", "Base class for twice-differentiable functions.",
       bp::init<int, int, int>())
-      .def("vectorHessianProduct", compHess1,
-           &C2FunctionWrap::default_vhp,
+      .def("vectorHessianProduct", compHess1, &C2FunctionWrap::default_vhp,
            bp::args("self", "x", "v", "Hout"))
       .def("get_vhp", compHess2, bp::args("self", "x", "v"),
            "Compute and return the vector-Hessian product.");

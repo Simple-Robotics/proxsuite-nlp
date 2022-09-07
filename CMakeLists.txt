@@ -149,7 +149,7 @@ function(create_library)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${headerPath}
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
   endforeach(headerFile ${LIB_HEADERS})
-  
+
 endfunction()
 
 create_library()

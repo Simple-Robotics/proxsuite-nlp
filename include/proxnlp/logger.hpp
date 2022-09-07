@@ -4,9 +4,7 @@
 #include <fmt/color.h>
 #include <fmt/ranges.h>
 
-
 namespace proxnlp {
-
 
 const std::vector<std::string> BASIC_KEYS{"iter",     "step_size", "inner_crit",
                                           "prim_err", "dual_err",  "xreg",
@@ -71,5 +69,3 @@ struct BaseLogger {
 };
 
 } // namespace proxnlp
-
-

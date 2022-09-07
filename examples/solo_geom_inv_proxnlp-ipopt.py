@@ -43,9 +43,7 @@ q0 = robot.q0
 x0 = np.concatenate([q0, np.zeros(nv)])
 cq0 = casadi.SX(q0)
 
-# Either 0, 1 or 2 This is used to choose between the 3 methods
-# They are equivalent, but the convergence is slower for some of them
-FRICTION_CONE_CONTRAINT_TYPE = 1
+# We adopt a second-order cone formulation for the friction cone
 mu_friction = 0.8
 alpha_k = casadi.atan(mu_friction)
 
@@ -69,9 +67,9 @@ def ground(xy):
 
 
 def vizGround(viz, elevation, space, name="ground", color=[1.0, 1.0, 0.6, 1.0]):
-    from meshcat_utils import ForceDraw
+    from meshcat_utils import VizUtil
 
-    drawer = ForceDraw(viz)
+    drawer = VizUtil(viz)
     viz.viewer.open()
     prefix = "bg2"
     xg = np.arange(-1, 1, space)

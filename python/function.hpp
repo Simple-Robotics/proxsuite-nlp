@@ -2,10 +2,8 @@
 
 #include "proxnlp/function-base.hpp"
 
+namespace proxnlp::python {
 
-namespace proxnlp::python
-{
-  
 struct FunctionWrap : context::Function, bp::wrapper<context::Function> {
 public:
   PROXNLP_FUNCTION_TYPEDEFS(context::Scalar);
@@ -70,4 +68,3 @@ struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
 };
 
 } // namespace proxnlp::python
-
