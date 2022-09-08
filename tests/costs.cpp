@@ -9,7 +9,7 @@
 
 BOOST_AUTO_TEST_SUITE(cost)
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 using namespace proxnlp;
 namespace pin = pinocchio;
 namespace utf = boost::unit_test;

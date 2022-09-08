@@ -3,7 +3,7 @@
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/spaces/cartesian-product.hpp"
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 #include <pinocchio/parsers/sample-models.hpp>
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/spaces/multibody.hpp"
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
   x1 = prod2.rand();
 }
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 
 BOOST_AUTO_TEST_CASE(test_lg_vecspace) {
   const int N = 4;

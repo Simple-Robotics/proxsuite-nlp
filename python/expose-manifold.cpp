@@ -2,7 +2,7 @@
 
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 #include "proxnlp/modelling/spaces/tangent-bundle.hpp"
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
@@ -32,7 +32,7 @@ exposeTangentBundle(const char *name, const char *docstring, Init init) {
   return exposeTangentBundle<M>(name, docstring).def(init);
 }
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 /// Expose a Pinocchio Lie group with a specified name, docstring,
 /// and no-arg default constructor.
 template <typename LieGroup>
@@ -59,7 +59,7 @@ void exposeManifold() {
       bp::init<const shared_ptr<Manifold> &, const shared_ptr<Manifold> &>(
           bp::args("self", "left", "right")));
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
   namespace pin = pinocchio;
   using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
   bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<Manifold>>(

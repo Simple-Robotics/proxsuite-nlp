@@ -1,5 +1,5 @@
 #include "proxnlp/modelling/autodiff/finite-difference.hpp"
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
 #include "proxnlp/modelling/spaces/vector-space.hpp"
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test1) {
   fmt::print("Hessian:\n{}\n", fdfun2.vectorHessianProduct(x0, v0));
 }
 
-#ifdef WITH_PINOCCHIO
+#ifdef PROXNLP_WITH_PINOCCHIO
 BOOST_AUTO_TEST_CASE(test2) {
   PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>> space;
 
