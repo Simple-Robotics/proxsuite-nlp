@@ -51,7 +51,7 @@ typename MatType::Scalar infty_norm(const std::vector<MatType> &z) {
 }
 
 /// @brief Check that a scalar is neither inf, nor NaN.
-template <typename Scalar> inline bool checkScalar(const Scalar value) {
+template <typename Scalar> inline bool check_scalar(const Scalar value) {
   return std::isnan(value) || std::isinf(value);
 }
 
