@@ -128,6 +128,9 @@ public:
   ConvergenceFlag solve(Workspace &workspace, Results &results,
                         const ConstVectorRef &x0, const ConstVectorRef &lams0);
 
+  ConvergenceFlag solve(Workspace &workspace, Results &results,
+                        const ConstVectorRef &x0);
+
   /// Set solver convergence threshold.
   void setTolerance(const Scalar tol) noexcept { target_tol = tol; }
 

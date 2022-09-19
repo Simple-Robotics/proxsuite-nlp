@@ -48,6 +48,14 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
 
 template <typename Scalar>
 ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
+                                         const ConstVectorRef &x0) {
+  VectorXs lams0(workspace.numdual);
+  lams0.setZero();
+  return solve(workspace, results, x0, lams0);
+}
+
+template <typename Scalar>
+ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
                                          const ConstVectorRef &x0,
                                          const ConstVectorRef &lams0) {
   if (verbose == 0)

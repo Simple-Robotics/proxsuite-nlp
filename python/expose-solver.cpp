@@ -76,7 +76,21 @@ void exposeSolver() {
                                        const ConstVectorRef &,
                                        const std::vector<VectorRef> &)) &
                Solver::solve,
-           bp::args("workspace", "results", "x0", "lams0"))
+           bp::args("self", "workspace", "results", "x0", "lams0"),
+           "Run the solver.")
+      .def("solve",
+           (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
+                                       const ConstVectorRef &,
+                                       const ConstVectorRef &)) &
+               Solver::solve,
+           bp::args("self", "workspace", "results", "x0", "lams0"),
+           "Run the solver.")
+      .def("solve",
+           (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
+                                       const ConstVectorRef &)) &
+               Solver::solve,
+           bp::args("self", "workspace", "results", "x0"),
+           "Run the solver (without initial multiplier guess).")
       .def("set_penalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
       .def("set_prox_param", &Solver::setProxParameter, bp::args("self", "rho"),
