@@ -20,14 +20,15 @@ public:
     Options()
         : armijo_c1(1e-4), wolfe_c2(0.9), dphi_thresh(1e-13), alpha_min(1e-6),
           max_num_steps(20), verbosity(VerboseLevel::QUIET),
-          contraction_min(0.5), contraction_max(0.8) {}
+          contraction_min(0.5), contraction_max(0.8),
+          interp_type(LSInterpolation::CUBIC) {}
     T armijo_c1;
     T wolfe_c2;
     T dphi_thresh;
     T alpha_min;
     std::size_t max_num_steps;
     VerboseLevel verbosity;
-    LSInterpolation interp_type = LSInterpolation::BISECTION;
+    LSInterpolation interp_type;
     T contraction_min;
     T contraction_max;
     friend std::ostream &operator<<(std::ostream &oss, const Options &self) {
