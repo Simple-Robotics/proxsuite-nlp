@@ -92,9 +92,9 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  std::vector<PointType> split(const ConstVectorRef &x) const {
+  std::vector<VectorRef> split(VectorRef x) const {
     proxnlp_dim_check(x, this->nx());
-    std::vector<PointType> out = {};
+    std::vector<VectorRef> out = {};
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
       const long n = components[i]->nx();
@@ -104,9 +104,9 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  std::vector<TangentVectorType> split_vector(const ConstVectorRef &v) const {
+  std::vector<VectorRef> split_vector(VectorRef v) const {
     proxnlp_dim_check(v, this->ndx());
-    std::vector<TangentVectorType> out = {};
+    std::vector<VectorRef> out = {};
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
       const long n = components[i]->ndx();
