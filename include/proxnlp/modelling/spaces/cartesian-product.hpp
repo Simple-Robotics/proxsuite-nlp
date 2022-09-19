@@ -116,7 +116,7 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  PointType merge(const std::vector<ConstVectorRef> &xs) const {
+  PointType merge(const std::vector<VectorXs> &xs) const {
     PointType out(this->nx());
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
@@ -127,7 +127,7 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  TangentVectorType merge_vector(const std::vector<ConstVectorRef> &vs) const {
+  TangentVectorType merge_vector(const std::vector<VectorXs> &vs) const {
     TangentVectorType out(this->ndx());
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
