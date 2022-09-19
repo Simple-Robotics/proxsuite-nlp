@@ -3,6 +3,8 @@
 #include "proxnlp/manifold-base.hpp"
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 
+#include "proxnlp/exceptions.hpp"
+
 #include <type_traits>
 
 namespace proxnlp {
@@ -44,10 +46,26 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
   }
 
   PointType rand() const {
-    PointType out(this->ndx());
+    PointType out(this->nx());
     out.setZero();
     out.head(left().nx()) = left().rand();
     out.tail(right().nx()) = right().rand();
+    return out;
+  }
+
+  std::vector<PointType> split(const ConstVectorRef &x) const {
+    proxnlp_dim_check(x, this->nx());
+    std::vector<PointType> out = {};
+    out.push_back(x.head(left_->nx()));
+    out.push_back(x.tail(right_->nx()));
+    return out;
+  }
+
+  std::vector<TangentVectorType> split_vector(const ConstVectorRef &v) const {
+    proxnlp_dim_check(v, this->ndx());
+    std::vector<TangentVectorType> out = {};
+    out.push_back(v.head(left_->ndx()));
+    out.push_back(v.tail(right_->ndx()));
     return out;
   }
 

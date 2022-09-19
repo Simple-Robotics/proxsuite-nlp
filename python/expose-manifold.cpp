@@ -59,7 +59,12 @@ void exposeManifold() {
       bp::init<const shared_ptr<Manifold> &, const shared_ptr<Manifold> &>(
           bp::args("self", "left", "right")))
       .def_readonly("left", &CartesianProductTpl<Scalar>::left_)
-      .def_readonly("right", &CartesianProductTpl<Scalar>::right_);
+      .def_readonly("right", &CartesianProductTpl<Scalar>::right_)
+      .def("split", &CartesianProductTpl<Scalar>::split,
+           "Takes an point on the product manifold and splits it up between "
+           "the two base manifolds.")
+      .def("split_vector", &CartesianProductTpl<Scalar>::split_vector,
+           "Takes a tangent vector on the product manifold and splits it up.");
 
 #ifdef PROXNLP_WITH_PINOCCHIO
   namespace pin = pinocchio;
