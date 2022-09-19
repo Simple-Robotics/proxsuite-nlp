@@ -57,7 +57,9 @@ void exposeManifold() {
   bp::class_<CartesianProductTpl<Scalar>, bp::bases<Manifold>>(
       "CartesianProduct", "Cartesian product of two manifolds.",
       bp::init<const shared_ptr<Manifold> &, const shared_ptr<Manifold> &>(
-          bp::args("self", "left", "right")));
+          bp::args("self", "left", "right")))
+      .def_readonly("left", &CartesianProductTpl<Scalar>::left_)
+      .def_readonly("right", &CartesianProductTpl<Scalar>::right_);
 
 #ifdef PROXNLP_WITH_PINOCCHIO
   namespace pin = pinocchio;

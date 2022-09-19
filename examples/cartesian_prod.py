@@ -12,6 +12,8 @@ prod = CartesianProduct(space1, space2)
 
 print(prod.nx)
 print(prod.ndx)
+print("left :", prod.left)
+print("right:", prod.right)
 
 x0 = prod.neutral()
 x1 = prod.rand()
