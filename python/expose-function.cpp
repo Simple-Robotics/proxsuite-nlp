@@ -23,7 +23,7 @@ void exposeFunctionTypes() {
 
   bp::class_<C1FunctionWrap, bp::bases<Function>, boost::noncopyable>(
       "C1Function", "Base class for differentiable functions",
-      bp::init<int, int, int>())
+      bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("computeJacobian", bp::pure_virtual(compJac1),
            bp::args("self", "x", "Jout"))
       .def("get_jacobian", compJac2, bp::args("self", "x"),
@@ -36,7 +36,7 @@ void exposeFunctionTypes() {
 
   bp::class_<C2FunctionWrap, bp::bases<C1Function>, boost::noncopyable>(
       "C2Function", "Base class for twice-differentiable functions.",
-      bp::init<int, int, int>())
+      bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("vectorHessianProduct", compHess1, &C2FunctionWrap::default_vhp,
            bp::args("self", "x", "v", "Hout"))
       .def("get_vhp", compHess2, bp::args("self", "x", "v"),

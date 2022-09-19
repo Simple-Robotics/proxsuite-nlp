@@ -49,7 +49,8 @@ void exposeCost() {
       &Cost::computeHessian;
 
   bp::class_<internal::CostWrapper, bp::bases<context::C2Function>,
-             boost::noncopyable>("CostFunctionBase", bp::init<int, int>())
+             boost::noncopyable>(
+      "CostFunctionBase", bp::init<int, int>(bp::args("self", "nx", "ndx")))
       .def("call", bp::pure_virtual(&Cost::call), bp::args("self", "x"))
       .def("computeGradient", bp::pure_virtual(compGrad1),
            bp::args("self", "x", "gout"))
