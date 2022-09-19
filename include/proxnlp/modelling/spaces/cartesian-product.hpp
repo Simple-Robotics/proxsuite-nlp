@@ -13,7 +13,7 @@ namespace {
 template <typename T> using ManifoldPtr = shared_ptr<ManifoldAbstractTpl<T>>;
 } // namespace
 
-/** @brief    The cartesian product of two manifolds.
+/** @brief    The cartesian product of two or more manifolds.
  */
 template <typename _Scalar>
 struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
