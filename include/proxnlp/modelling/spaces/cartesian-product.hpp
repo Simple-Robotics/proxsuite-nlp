@@ -22,103 +22,230 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
   using Base = ManifoldAbstractTpl<Scalar>;
   PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
-  shared_ptr<const Base> left_, right_;
-  const Base &left() const { return *left_; }
-  const Base &right() const { return *right_; }
+  std::vector<shared_ptr<Base>> components;
 
-  template <typename U, typename V>
-  CartesianProductTpl(const U &left, const V &right)
-      : left_(std::make_shared<U>(left)), right_(std::make_shared<V>(right)) {}
+  const Base &getComponent(std::size_t i) const { return *components[i]; }
+
+  inline std::size_t numComponents() const { return components.size(); }
+
+  inline void addComponent(const shared_ptr<Base> &c) {
+    components.push_back(c);
+  }
+
+  CartesianProductTpl() {}
+
+  CartesianProductTpl(const std::vector<shared_ptr<Base>> &components)
+      : components(components) {}
+
+  CartesianProductTpl(const std::initializer_list<shared_ptr<Base>> &components)
+      : components(components) {}
 
   CartesianProductTpl(const shared_ptr<Base> &left,
-                      const shared_ptr<Base> &right)
-      : left_(left), right_(right) {}
+                      const shared_ptr<Base> &right) {
+    components.push_back(left);
+    components.push_back(right);
+  }
 
-  inline int nx() const { return left().nx() + right().nx(); }
-  inline int ndx() const { return left().ndx() + right().ndx(); }
+  template <typename U, typename V>
+  CartesianProductTpl(const U &left, const V &right) {
+    static_assert(!std::is_pointer<U>::value);
+    static_assert(!std::is_pointer<V>::value);
+    components.push_back(std::make_shared<U>(left));
+    components.push_back(std::make_shared<V>(right));
+  }
+
+  inline int nx() const {
+    int r = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      r += components[i]->nx();
+    }
+    return r;
+  }
+
+  inline int ndx() const {
+    int r = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      r += components[i]->ndx();
+    }
+    return r;
+  }
 
   PointType neutral() const {
     PointType out(this->nx());
-    out.setZero();
-    out.head(left().nx()) = left().neutral();
-    out.tail(right().nx()) = right().neutral();
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->nx();
+      out.segment(c, n) = components[i]->neutral();
+      c += n;
+    }
     return out;
   }
 
   PointType rand() const {
     PointType out(this->nx());
-    out.setZero();
-    out.head(left().nx()) = left().rand();
-    out.tail(right().nx()) = right().rand();
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->nx();
+      out.segment(c, n) = components[i]->rand();
+      c += n;
+    }
     return out;
   }
 
   std::vector<PointType> split(const ConstVectorRef &x) const {
     proxnlp_dim_check(x, this->nx());
     std::vector<PointType> out = {};
-    out.push_back(x.head(left_->nx()));
-    out.push_back(x.tail(right_->nx()));
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->nx();
+      out.push_back(x.segment(c, n));
+      c += n;
+    }
     return out;
   }
 
   std::vector<TangentVectorType> split_vector(const ConstVectorRef &v) const {
     proxnlp_dim_check(v, this->ndx());
     std::vector<TangentVectorType> out = {};
-    out.push_back(v.head(left_->ndx()));
-    out.push_back(v.tail(right_->ndx()));
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->ndx();
+      out.push_back(v.segment(c, n));
+      c += n;
+    }
+    return out;
+  }
+
+  PointType merge(const std::vector<ConstVectorRef> &xs) const {
+    PointType out(this->nx());
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->nx();
+      out.segment(c, n) = xs[i];
+      c += n;
+    }
+    return out;
+  }
+
+  TangentVectorType merge_vector(const std::vector<ConstVectorRef> &vs) const {
+    TangentVectorType out(this->ndx());
+    Eigen::Index c = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long n = components[i]->ndx();
+      out.segment(c, n) = vs[i];
+      c += n;
+    }
     return out;
   }
 
   void integrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                       VectorRef out) const {
-    left().integrate(x.head(left().nx()), v.head(left().ndx()),
-                     out.head(left().nx()));
-    right().integrate(x.head(right().nx()), v.head(right().ndx()),
-                      out.head(right().nx()));
+    Eigen::Index cq = 0, cv = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long nq = components[i]->nx();
+      auto sx = x.segment(cq, nq);
+      cq += nq;
+
+      const long nv = components[i]->ndx();
+      auto sv = v.segment(cv, nv);
+      auto sout = out.segment(cv, nv);
+      cv += nv;
+
+      getComponent(i).integrate(sx, sv, sout);
+    }
   }
 
   void difference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                        VectorRef out) const {
-    left().difference(x0.head(left().nx()), x1.head(left().nx()),
-                      out.head(left().ndx()));
-    right().difference(x0.head(right().nx()), x1.head(right().nx()),
-                       out.head(right().ndx()));
+    Eigen::Index cq = 0, cv = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long nq = components[i]->nx();
+      auto sx0 = x0.segment(cq, nq);
+      auto sx1 = x1.segment(cq, nq);
+      cq += nq;
+
+      const long nv = components[i]->ndx();
+      auto sout = out.segment(cv, nv);
+      cv += nv;
+
+      getComponent(i).difference(sx0, sx1, sout);
+    }
   }
 
   void Jintegrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                        MatrixRef Jout, int arg) const {
-    const int nx1 = left().nx();
-    const int nx2 = right().nx();
-    const int ndx1 = left().ndx();
-    const int ndx2 = right().ndx();
-    left().Jintegrate(x.head(nx1), v.head(ndx1), Jout.topLeftCorner(ndx1, ndx1),
-                      arg);
-    right().Jintegrate(x.tail(nx2), v.tail(ndx2),
-                       Jout.bottomRightCorner(ndx2, ndx2), arg);
+    Eigen::Index cq = 0, cv = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long nq = components[i]->nx();
+      auto sx = x.segment(cq, nq);
+      cq += nq;
+
+      const long nv = components[i]->ndx();
+      auto sv = v.segment(cv, nv);
+      auto sJout = Jout.block(cv, cv, nv, nv);
+      cv += nv;
+
+      getComponent(i).Jintegrate(sx, sv, sJout, arg);
+    }
+    // const int nx1 = left().nx();
+    // const int nx2 = right().nx();
+    // const int ndx1 = left().ndx();
+    // const int ndx2 = right().ndx();
+    // left().Jintegrate(x.head(nx1), v.head(ndx1), Jout.topLeftCorner(ndx1,
+    // ndx1),
+    //                   arg);
+    // right().Jintegrate(x.tail(nx2), v.tail(ndx2),
+    //                    Jout.bottomRightCorner(ndx2, ndx2), arg);
   }
 
   void JintegrateTransport(const ConstVectorRef &x, const ConstVectorRef &v,
                            MatrixRef Jout, int arg) const {
-    const int nx1 = left().nx();
-    const int nx2 = right().nx();
-    const int ndx1 = left().ndx();
-    const int ndx2 = right().ndx();
-    left().JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows(ndx1),
-                               arg);
-    right().JintegrateTransport(x.tail(nx2), v.head(ndx2),
-                                Jout.bottomRows(ndx2), arg);
+    Eigen::Index cq = 0, cv = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long nq = components[i]->nx();
+      auto sx = x.segment(cq, nq);
+      cq += nq;
+
+      const long nv = components[i]->ndx();
+      auto sv = v.segment(cv, nv);
+      auto sJout = Jout.middleRows(cv, nv);
+      cv += nv;
+
+      getComponent(i).JintegrateTransport(sx, sv, sJout, arg);
+    }
+    // const int nx1 = left().nx();
+    // const int nx2 = right().nx();
+    // const int ndx1 = left().ndx();
+    // const int ndx2 = right().ndx();
+    // left().JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows(ndx1),
+    //                            arg);
+    // right().JintegrateTransport(x.tail(nx2), v.head(ndx2),
+    //                             Jout.bottomRows(ndx2), arg);
   }
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                         MatrixRef Jout, int arg) const {
-    const int nx1 = left().nx();
-    const int nx2 = right().nx();
-    const int ndx1 = left().ndx();
-    const int ndx2 = right().ndx();
-    left().Jdifference(x0.head(nx1), x1.head(nx1),
-                       Jout.topLeftCorner(ndx1, ndx1), arg);
-    right().Jdifference(x0.tail(nx2), x1.tail(nx2),
-                        Jout.bottomRightCorner(ndx2, ndx2), arg);
+    Eigen::Index cq = 0, cv = 0;
+    for (std::size_t i = 0; i < numComponents(); i++) {
+      const long nq = components[i]->nx();
+      auto sx0 = x0.segment(cq, nq);
+      auto sx1 = x1.segment(cq, nq);
+      cq += nq;
+
+      const long nv = components[i]->ndx();
+      auto sJout = Jout.block(cv, cv, nv, nv);
+      cv += nv;
+
+      getComponent(i).Jdifference(sx0, sx1, sJout, arg);
+    }
+    // const int nx1 = left().nx();
+    // const int nx2 = right().nx();
+    // const int ndx1 = left().ndx();
+    // const int ndx2 = right().ndx();
+    // left().Jdifference(x0.head(nx1), x1.head(nx1),
+    //                    Jout.topLeftCorner(ndx1, ndx1), arg);
+    // right().Jdifference(x0.tail(nx2), x1.tail(nx2),
+    //                     Jout.bottomRightCorner(ndx2, ndx2), arg);
   }
 };
 
@@ -137,14 +264,27 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 template <typename T>
 CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
                                  const ManifoldPtr<T> &right) {
-  return CartesianProductTpl<T>(left, right);
+  return CartesianProductTpl<T>({left, right});
+}
+
+template <typename T>
+CartesianProductTpl<T> operator*(const shared_ptr<CartesianProductTpl<T>> &left,
+                                 const ManifoldPtr<T> &right) {
+  return (*left) * right;
 }
 
 template <typename T>
 CartesianProductTpl<T> operator*(const CartesianProductTpl<T> &left,
                                  const ManifoldPtr<T> &right) {
-  using out_t = CartesianProductTpl<T>;
-  return out_t(std::make_shared<out_t>(left), right);
+  CartesianProductTpl<T> out(left);
+  out.addComponent(right);
+  return out;
+}
+
+template <typename T>
+CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
+                                 const CartesianProductTpl<T> &right) {
+  return right * left;
 }
 
 } // namespace proxnlp

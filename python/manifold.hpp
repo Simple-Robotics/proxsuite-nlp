@@ -86,7 +86,15 @@ void exposeBaseManifold() {
            "Returns an object representing the tangent space to this manifold.")
       .def(
           "__mul__", +[](const shared_ptr<Manifold> &a,
-                         const shared_ptr<Manifold> &b) { return a * b; });
+                         const shared_ptr<Manifold> &b) { return a * b; })
+      .def(
+          "__mul__",
+          +[](const shared_ptr<Manifold> &a,
+              const CartesianProductTpl<Scalar> &b) { return a * b; })
+      .def(
+          "__rmul__",
+          +[](const shared_ptr<Manifold> &a,
+              const CartesianProductTpl<Scalar> &b) { return a * b; });
 }
 } // namespace internal
 

@@ -55,16 +55,35 @@ void exposeManifold() {
       bp::init<const int>(bp::args("self", "dim")));
 
   bp::class_<CartesianProductTpl<Scalar>, bp::bases<Manifold>>(
-      "CartesianProduct", "Cartesian product of two manifolds.",
-      bp::init<const shared_ptr<Manifold> &, const shared_ptr<Manifold> &>(
+      "CartesianProduct", "Cartesian product of two or more manifolds.",
+      bp::init<const std::vector<shared_ptr<Manifold>> &>(
+          bp::args("self", "spaces")))
+      .def(bp::init<shared_ptr<Manifold>, shared_ptr<Manifold>>(
           bp::args("self", "left", "right")))
-      .def_readonly("left", &CartesianProductTpl<Scalar>::left_)
-      .def_readonly("right", &CartesianProductTpl<Scalar>::right_)
-      .def("split", &CartesianProductTpl<Scalar>::split,
+      .def("getComponent", &CartesianProductTpl<Scalar>::getComponent,
+           bp::return_internal_reference<>(), bp::args("self", "i"),
+           "Get the i-th component of the Cartesian product.")
+      .def("addComponent", &CartesianProductTpl<Scalar>::addComponent,
+           bp::args("self", "c"), "Add a component to the Cartesian product.")
+      .add_property("num_components",
+                    &CartesianProductTpl<Scalar>::numComponents,
+                    "Get the number of components in the Cartesian product.")
+      .def("split", &CartesianProductTpl<Scalar>::split, bp::args("self", "x"),
            "Takes an point on the product manifold and splits it up between "
            "the two base manifolds.")
       .def("split_vector", &CartesianProductTpl<Scalar>::split_vector,
-           "Takes a tangent vector on the product manifold and splits it up.");
+           bp::args("self", "v"),
+           "Takes a tangent vector on the product manifold and splits it up.")
+      .def("merge", &CartesianProductTpl<Scalar>::merge, bp::args("self", "xs"),
+           "Define a point on the manifold by merging two points of the "
+           "component manifolds.")
+      .def("merge_vector", &CartesianProductTpl<Scalar>::merge_vector,
+           bp::args("self", "vs"),
+           "Define a tangent vector on the manifold by merging two points of "
+           "the component manifolds.")
+      .def(
+          "__mul__", +[](const CartesianProductTpl<Scalar> &a,
+                         const shared_ptr<Manifold> &b) { return a * b; });
 
 #ifdef PROXNLP_WITH_PINOCCHIO
   namespace pin = pinocchio;
