@@ -2,6 +2,7 @@
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
 import pytest
+import numpy as np
 
 from proxnlp.manifolds import SO2, SO3, SE2, CartesianProduct
 
@@ -45,10 +46,18 @@ def test_cartesian_product():
     assert prod2.num_components == 3
     print(prod2.nx)
     print(prod2.ndx)
-    x0 = prod2.neutral()
+    x0 = prod2.rand()
     print(x0)
     splitx0 = prod2.split(x0).tolist()
     print(splitx0)
+    remerge0 = prod2.merge(splitx0).tolist()
+    assert np.allclose(remerge0, x0)
+
+    # modify
+    splitx0[0][1] = 1.42
+    print("modify:", splitx0)
+    print(x0)
+    assert np.allclose(prod2.merge(splitx0), x0)
 
     s32 = space3 * space3
     print(s32.__mul__)
