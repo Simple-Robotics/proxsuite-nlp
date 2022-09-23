@@ -44,7 +44,8 @@ int main() {
   Manifold::MatrixXs weights(ndx, ndx);
   weights.setIdentity();
 
-  auto cost_fun = std::make_shared<QuadraticDistanceCost<double>>(space, p0, weights);
+  auto cost_fun =
+      std::make_shared<QuadraticDistanceCost<double>>(space, p0, weights);
   const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));

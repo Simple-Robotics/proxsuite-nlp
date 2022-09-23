@@ -26,9 +26,7 @@ public:
   /// The cost functional
   CostPtr cost_;
 
-  const CostType &cost() const {
-    return *cost_;
-  }
+  const CostType &cost() const { return *cost_; }
 
   ProblemTpl(const CostPtr &cost) : cost_(cost), m_nc_total(0) {
     reset_constraint_dim_vars();

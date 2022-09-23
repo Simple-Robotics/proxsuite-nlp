@@ -57,8 +57,9 @@ int main() {
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<ManifoldDifferenceToPoint<double>>(residual);
 
-  auto cost_fun = std::make_shared<QuadraticResidualCost<double>>(resptr, weights);
-  const auto& cf = *cost_fun;
+  auto cost_fun =
+      std::make_shared<QuadraticResidualCost<double>>(resptr, weights);
+  const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
