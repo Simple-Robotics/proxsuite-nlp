@@ -7,11 +7,15 @@ namespace python {
 void exposeProblem() {
   using context::Constraint;
   using context::Problem;
+
+  using CostPtr = context::Problem::CostPtr;
+
   bp::class_<Problem, shared_ptr<Problem>>(
       "Problem", "Problem definition class.",
-      bp::init<const context::Cost &, const std::vector<Constraint> &>(
+      bp::init<const CostPtr &, const std::vector<Constraint> &>(
           bp::args("cost", "constraints")))
-      .def(bp::init<const context::Cost &>(bp::args("cost")))
+      .def(bp::init<const CostPtr &>(bp::args("cost")))
+      .def_readwrite("cost", &Problem::cost_, "The cost function instance.")
       .add_property("num_constraint_blocks", &Problem::getNumConstraints,
                     "Get the number of constraint blocks.")
       .add_property("total_constraint_dim", &Problem::getTotalConstraintDim,

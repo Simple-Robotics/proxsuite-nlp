@@ -25,7 +25,7 @@ struct LagrangianFunction
 
   Scalar operator()(const ConstVectorRef &x, const VectorOfRef &lams) const {
     Scalar result_ = 0.;
-    result_ = result_ + problem_->cost_.call(x);
+    result_ = result_ + problem_->cost().call(x);
     const std::size_t num_c = problem_->getNumConstraints();
     for (std::size_t i = 0; i < num_c; i++) {
       const auto cstr = problem_->getConstraint(i);
@@ -36,7 +36,7 @@ struct LagrangianFunction
 
   void computeGradient(const ConstVectorRef &x, const VectorOfRef &lams,
                        VectorRef out) const {
-    out = problem_->cost_.computeGradient(x);
+    out = problem_->cost().computeGradient(x);
     const std::size_t num_c = problem_->getNumConstraints();
     for (std::size_t i = 0; i < num_c; i++) {
       auto cstr = problem_->getConstraint(i);

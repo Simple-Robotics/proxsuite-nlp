@@ -36,11 +36,11 @@ struct EvalObjective : public MeritFunctionBaseTpl<_Scalar> {
   EvalObjective(shared_ptr<Problem> prob) : Base(prob) {}
 
   Scalar operator()(const ConstVectorRef &x) const {
-    return problem_->cost_.call(x);
+    return problem_->cost().call(x);
   }
 
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    problem_->cost_.computeGradient(x, out);
+    problem_->cost().computeGradient(x, out);
   }
 };
 

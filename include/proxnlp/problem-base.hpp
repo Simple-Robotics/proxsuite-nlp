@@ -21,9 +21,24 @@ public:
   using EqualityType = EqualityConstraint<Scalar>;
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
+  using CostPtr = shared_ptr<CostType>;
 
   /// The cost functional
-  const CostType &cost_;
+  CostPtr cost_;
+
+  const CostType &cost() const {
+    return *cost_;
+  }
+
+  ProblemTpl(const CostPtr &cost) : cost_(cost), m_nc_total(0) {
+    reset_constraint_dim_vars();
+  }
+
+  ProblemTpl(const CostPtr &cost,
+             const std::vector<ConstraintType> &constraints)
+      : cost_(cost), constraints_(constraints), m_nc_total(0) {
+    reset_constraint_dim_vars();
+  }
 
   /// Get a pointer to the \f$i\f$-th constraint pointer
   const ConstraintType &getConstraint(const std::size_t &i) const {
@@ -38,18 +53,8 @@ public:
   /// Get dimension of constraint \p i.
   int getConstraintDim(std::size_t i) const { return m_ncs[i]; }
 
-  std::size_t nx() const { return cost_.nx(); }
-  std::size_t ndx() const { return cost_.ndx(); }
-
-  ProblemTpl(const CostType &cost) : cost_(cost), m_nc_total(0) {
-    reset_constraint_dim_vars();
-  }
-
-  ProblemTpl(const CostType &cost,
-             const std::vector<ConstraintType> &constraints)
-      : cost_(cost), constraints_(constraints), m_nc_total(0) {
-    reset_constraint_dim_vars();
-  }
+  std::size_t nx() const { return cost().nx(); }
+  std::size_t ndx() const { return cost().ndx(); }
 
   /// @brief Add a constraint to the problem, after initialization.
   template <typename T> void addConstraint(T &&cstr) {
@@ -63,7 +68,7 @@ public:
 
   void evaluate(const ConstVectorRef &x,
                 WorkspaceTpl<Scalar> &workspace) const {
-    workspace.objectiveValue = cost_.call(x);
+    workspace.objectiveValue = cost().call(x);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
       workspace.cstrValues[i] = cstr.func()(x);
@@ -72,7 +77,7 @@ public:
 
   void computeDerivatives(const ConstVectorRef &x,
                           WorkspaceTpl<Scalar> &workspace) const {
-    cost_.computeGradient(x, workspace.objectiveGradient);
+    cost().computeGradient(x, workspace.objectiveGradient);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
       cstr.func().computeJacobian(x, workspace.cstrJacobians[i]);

@@ -197,7 +197,7 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
                                                      bool second_order) const {
   problem_->computeDerivatives(x, workspace);
   if (second_order) {
-    problem_->cost_.computeHessian(x, workspace.objectiveHessian);
+    problem_->cost().computeHessian(x, workspace.objectiveHessian);
   }
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
@@ -259,7 +259,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     //// precompute temp data
 
-    results.value = problem_->cost_.call(results.xOpt);
+    results.value = problem_->cost().call(results.xOpt);
 
     computeConstraintsAndMultipliers(results.xOpt, results.lams_opt_data,
                                      workspace);

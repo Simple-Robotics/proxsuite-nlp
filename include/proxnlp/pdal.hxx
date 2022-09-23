@@ -12,7 +12,7 @@ Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
                                       const VectorOfRef &lams,
                                       const VectorOfRef &lams_ext,
                                       std::vector<VectorRef> &tmp_cvals) const {
-  Scalar res = problem_->cost_.call(x);
+  Scalar res = problem_->cost().call(x);
   const std::size_t nc = problem_->getNumConstraints();
   for (std::size_t i = 0; i < nc; i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);

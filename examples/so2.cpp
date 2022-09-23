@@ -57,7 +57,8 @@ int main() {
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<ManifoldDifferenceToPoint<double>>(residual);
 
-  QuadraticResidualCost<double> cf(resptr, weights);
+  auto cost_fun = std::make_shared<QuadraticResidualCost<double>>(resptr, weights);
+  const auto& cf = *cost_fun;
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
@@ -67,7 +68,7 @@ int main() {
   auto eq_set = std::make_shared<Problem::EqualityType>();
   std::vector<Problem::ConstraintType> cstrs;
   cstrs.emplace_back(resptr, eq_set);
-  shared_ptr<Problem> prob(new Problem(cf, cstrs));
+  auto prob = std::make_shared<Problem>(cost_fun, cstrs);
 
   /// Test out merit functions
 

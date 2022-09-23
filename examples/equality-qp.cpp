@@ -46,7 +46,7 @@ template <int N, int M = 1> int submain() {
 
   auto res1 = std::make_shared<LinearFunctionTpl<double>>(A, b);
 
-  QuadraticDistanceCost<double> cost(space, space.neutral(), Q_);
+  auto cost = std::make_shared<QuadraticDistanceCost<double>>(space, space.neutral(), Q_);
 
   std::vector<Problem::ConstraintType> cstrs_;
   if (M > 0) {

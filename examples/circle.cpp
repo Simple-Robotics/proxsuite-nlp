@@ -44,7 +44,8 @@ int main() {
   Manifold::MatrixXs weights(ndx, ndx);
   weights.setIdentity();
 
-  QuadraticDistanceCost<double> cf(space, p0, weights);
+  auto cost_fun = std::make_shared<QuadraticDistanceCost<double>>(space, p0, weights);
+  const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
@@ -71,7 +72,7 @@ int main() {
   using CstrType = Problem::ConstraintType;
   CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
   std::vector<CstrType> cstrs{cstr1};
-  auto prob = std::make_shared<Problem>(cf, cstrs);
+  auto prob = std::make_shared<Problem>(cost_fun, cstrs);
 
   /// Test out merit functions
 
