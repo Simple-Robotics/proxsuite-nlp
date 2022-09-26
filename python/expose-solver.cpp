@@ -52,14 +52,13 @@ void exposeSolver() {
   bp::class_<Solver>(
       "Solver", "The numerical solver.",
       bp::init<const Manifold &, shared_ptr<context::Problem> &, Scalar, Scalar,
-               Scalar, VerboseLevel, Scalar, Scalar, Scalar, Scalar, Scalar,
-               bp::optional<LSOptions>>(
+               Scalar, VerboseLevel, Scalar, Scalar, Scalar, Scalar, Scalar>(
           (bp::arg("self"), bp::arg("space"), bp::arg("problem"),
            bp::arg("tol") = 1e-6, bp::arg("mu_init") = 1e-2,
            bp::arg("rho_init") = 0., bp::arg("verbose") = VerboseLevel::QUIET,
            bp::arg("mu_min") = 1e-9, bp::arg("prim_alpha") = 0.1,
            bp::arg("prim_beta") = 0.9, bp::arg("dual_alpha") = 1.,
-           bp::arg("dual_beta") = 1., bp::arg("ls_options"))))
+           bp::arg("dual_beta") = 1.)))
       .def_readwrite(
           "use_gauss_newton", &Solver::use_gauss_newton,
           "Whether to use a Gauss-Newton Hessian matrix approximation.")

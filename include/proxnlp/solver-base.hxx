@@ -155,9 +155,6 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
     }
   }
   InertiaFlag flag = OK;
-  bool print_info = verbose >= 2;
-  // if (print_info)
-  //   fmt::print(" | Inertia: {:d}+, {:d}, {:d}-", numpos, numzer, numneg);
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
   bool zer_ok = numzer == 0;
