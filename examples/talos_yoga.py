@@ -117,8 +117,8 @@ re_translation = casadi.Function("re_pos", [cq], [cdata.oMf[IDX_RE].translation]
 log = casadi.Function("log", [R, R_ref], [cpin.log3(R.T @ R_ref)])
 
 
-### ----------------------------------------------------------------------------- ###
-### OPTIMIZATION PROBLEM
+# ----------------------------------------------------------------------------- ###
+# OPTIMIZATION PROBLEM
 
 # Defining weights
 parallel_cost = 1
@@ -229,7 +229,7 @@ ineq_rg_constr_fun = CasadiFunction(
 )
 
 
-### ----------------------------------------------------------------------------- ###
+# ----------------------------------------------------------------------------- ###
 # Solver Setup
 
 cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
@@ -279,8 +279,9 @@ try:
 except KeyboardInterrupt:
     pass
 
+assert results.numiters == 22
 
-### -------------------------------------------------------------- ###
+# -------------------------------------------------------------- ###
 # Get results
 
 print("Results struct:\n{}".format(results))
