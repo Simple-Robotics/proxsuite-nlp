@@ -1,17 +1,15 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
+
+TODO: FINISH
 """
-import proxnlp
 import numpy as np
 
 import pinocchio as pin
 import pinocchio.casadi as cpin
 import casadi as cas
 
-from meshcat_utils import display_trajectory, ForceDraw
-
 from proxnlp import manifolds
-from proxnlp.constraints import create_equality_constraint, create_inequality_constraint
 from proxnlp.utils import CasadiFunction
 
 from .cartpole_utils import make_cartpole

@@ -380,15 +380,14 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     workspace.pd_step = -workspace.kktRhs;
     workspace.ldlt_.solveInPlace(workspace.pd_step);
 
-    // const std::size_t MAX_REFINEMENT_STEPS = 5;
-    // for (std::size_t n = 0; n < MAX_REFINEMENT_STEPS; n++) {
-    //   auto resdl = workspace.kktMatrix * workspace.pd_step +
-    //   workspace.kktRhs; Scalar resdl_norm = math::infty_norm(resdl); if
-    //   (resdl_norm < 1e-13)
-    //     break;
-    //   workspace.pd_step = -resdl;
-    //   workspace.ldlt_.solveInPlace(workspace.pd_step);
-    // }
+    const std::size_t MAX_REFINEMENT_STEPS = 5;
+    for (std::size_t n = 0; n < MAX_REFINEMENT_STEPS; n++) {
+      auto resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
+      Scalar resdl_norm = math::infty_norm(resdl);
+      if (resdl_norm < 1e-13)
+        break;
+      workspace.pd_step += workspace.ldlt_.solve(-resdl);
+    }
 
     //// Take the step
 

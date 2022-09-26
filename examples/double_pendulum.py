@@ -170,15 +170,14 @@ results = proxnlp.Results(pb_space.nx, prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-5
-rho_init = 1e-7
-mu_init = 0.1
+rho_init = 1e-6
+mu_init = 0.9
 solver = proxnlp.Solver(
     pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.register_callback(callback)
-solver.maxiters = 600
+solver.maxiters = 300
 solver.use_gauss_newton = True
-solver.ls_options.interp_type = proxnlp.LSInterpolation.CUBIC
 
 xu_init = pb_space.neutral()
 for t in range(nsteps + 1):
