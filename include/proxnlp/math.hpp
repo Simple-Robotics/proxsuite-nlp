@@ -1,8 +1,19 @@
 #pragma once
 
+#include "proxnlp/exceptions.hpp"
 #include <Eigen/Core>
 
+#include <cmath>
+#include <type_traits>
 #include <vector>
+
+#define PROXNLP_RAISE_IF_NAN(value)                                            \
+  if (::proxnlp::math::check_value(value))                                     \
+  proxnlp_runtime_error("Encountered NaN.\n")
+
+#define PROXNLP_RAISE_IF_NAN_NAME(value, name)                                 \
+  if (::proxnlp::math::check_value(value))                                     \
+  proxnlp_runtime_error(fmt::format("Encountered NaN for value {:s}.\n", name))
 
 namespace proxnlp {
 
@@ -62,6 +73,17 @@ template <typename Scalar> inline bool check_scalar(const Scalar value) {
 template <typename Scalar>
 bool scalar_close(const Scalar a, const Scalar b, const Scalar prec) {
   return std::abs(a - b) < prec * (1 + std::max(std::abs(a), std::abs(b)));
+}
+
+template <typename T, typename = std::enable_if_t<std::is_scalar<T>::value>>
+bool check_value(const T &x) {
+  static_assert(std::is_scalar<T>::value);
+  return check_scalar(x);
+}
+
+template <typename MatrixType>
+bool check_value(const Eigen::MatrixBase<MatrixType> &x) {
+  return (x.hasNaN() || (!x.allFinite()));
 }
 
 } // namespace math

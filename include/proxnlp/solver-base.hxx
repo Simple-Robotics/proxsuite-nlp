@@ -328,6 +328,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     }
     results.primalInfeas = math::infty_norm(results.constraint_violations_);
     Scalar inner_crit = math::infty_norm(workspace.kktRhs);
+    PROXNLP_RAISE_IF_NAN_NAME(inner_crit, "kkt_rhs");
 
     // fmt::print(
     //     " | crit={:>5.2e}, d={:>5.3g}, p={:>5.3g} (inner stop {:>5.2e})\n",
@@ -418,9 +419,12 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     }
     // fmt::print(" | alph_opt={:4.3e}\n", workspace.alpha_opt);
 
+    PROXNLP_RAISE_IF_NAN_NAME(workspace.xTrial, "xTrial");
+    PROXNLP_RAISE_IF_NAN_NAME(workspace.lamsTrial_data, "lamsTrial");
     results.xOpt = workspace.xTrial;
     results.lams_opt_data = workspace.lamsTrial_data;
     results.merit = phi_new;
+    PROXNLP_RAISE_IF_NAN_NAME(results.merit, "merit");
 
     invokeCallbacks(workspace, results);
 
