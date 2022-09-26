@@ -31,7 +31,7 @@ void exposeSolver() {
   using LSType = Linesearch<Scalar>;
   using LSOptions = LSType::Options;
   bp::class_<LSOptions>("LSOptions", "Linesearch options.",
-                        bp::init<>("Default constructor."))
+                        bp::init<>(bp::args("self"), "Default constructor."))
       .def_readwrite("armijo_c1", &LSOptions::armijo_c1)
       .def_readwrite("wolfe_c2", &LSOptions::wolfe_c2)
       .def_readwrite(
