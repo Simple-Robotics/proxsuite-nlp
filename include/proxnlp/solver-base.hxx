@@ -380,29 +380,21 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     workspace.pd_step = -workspace.kktRhs;
     workspace.ldlt_.solveInPlace(workspace.pd_step);
 
-    const std::size_t MAX_REFINEMENT_STEPS = 5;
-    for (std::size_t n = 0; n < MAX_REFINEMENT_STEPS; n++) {
-      auto resdl = workspace.kktMatrix * workspace.pd_step + workspace.kktRhs;
-      Scalar resdl_norm = math::infty_norm(resdl);
-      if (resdl_norm < 1e-13)
-        break;
-      workspace.pd_step = -resdl;
-      workspace.ldlt_.solveInPlace(workspace.pd_step);
-    }
+    // const std::size_t MAX_REFINEMENT_STEPS = 5;
+    // for (std::size_t n = 0; n < MAX_REFINEMENT_STEPS; n++) {
+    //   auto resdl = workspace.kktMatrix * workspace.pd_step +
+    //   workspace.kktRhs; Scalar resdl_norm = math::infty_norm(resdl); if
+    //   (resdl_norm < 1e-13)
+    //     break;
+    //   workspace.pd_step = -resdl;
+    //   workspace.ldlt_.solveInPlace(workspace.pd_step);
+    // }
 
     //// Take the step
 
     workspace.dmerit_dir =
         workspace.meritGradient.dot(workspace.prim_step) -
         workspace.dual_prox_err_data.dot(workspace.dual_step);
-
-    if (verbose >= 1) {
-      // auto resdl = workspace.kktMatrix * workspace.pd_step +
-      // workspace.kktRhs; fmt::print(
-      //     " | KKT res={:>.2e} | dir={:>4.3g} | cond={:>4.3g} | reg={:>.3g}",
-      //     math::infty_norm(resdl), workspace.dmerit_dir, conditioning,
-      //     delta);
-    }
 
     Scalar phi0 = results.merit;
     Scalar phi_new = 0.;

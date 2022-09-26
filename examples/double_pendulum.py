@@ -184,8 +184,13 @@ xu_init = pb_space.neutral()
 for t in range(nsteps + 1):
     xu_init[t * xspace.nx] = theta0
 lams0 = [np.zeros(cs.nr) for cs in constraints_]
-flag = solver.solve(workspace, results, xu_init, lams0)
-assert results.numiters == 296
+try:
+    flag = solver.solve(workspace, results, xu_init, lams0)
+except RuntimeError:
+    import pprint
+
+    pprint.pp(callback.storage.xs.tolist())
+    raise
 
 print("Results struct:\n{}".format(results))
 prim_errs = callback.storage.prim_infeas
