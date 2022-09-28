@@ -23,8 +23,7 @@ namespace block_chol {
 using Scalar = double;
 using MatrixRef = proxnlp::math_types<Scalar>::MatrixRef;
 
-using usize = std::size_t;
-using isize = typename std::make_signed<usize>::type;
+using isize = typename std::make_signed<std::size_t>::type;
 
 enum BlockKind {
   Zero,
@@ -126,7 +125,7 @@ struct SymbolicBlockMatrix {
       isize nnz = count_nnz();
 
       if (first_iter || nnz < best_perm_nnz) {
-        std::memcpy(best_perm, iwork, usize(n) * sizeof(isize));
+        std::memcpy(best_perm, iwork, std::size_t(n) * sizeof(isize));
         best_perm_nnz = nnz;
       }
 
@@ -238,7 +237,7 @@ struct SymbolicBlockMatrix {
     isize ncols = nrows;
 
     std::vector<bool> buf;
-    buf.resize(usize(nrows * ncols));
+    buf.resize(std::size_t(nrows * ncols));
 
     isize handled_rows = 0;
     for (isize i = 0; i < _.segments_count; ++i) {
@@ -249,15 +248,16 @@ struct SymbolicBlockMatrix {
           break;
         case Diag: {
           for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
-            buf[usize((handled_rows + ii) * ncols + handled_cols + ii)] = true;
+            buf[std::size_t((handled_rows + ii) * ncols + handled_cols + ii)] =
+                true;
           }
           break;
         }
         case TriL: {
           for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
             for (isize jj = 0; jj <= ii; ++jj) {
-              buf[usize((handled_rows + ii) * ncols + handled_cols + jj)] =
-                  true;
+              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
+                              jj)] = true;
             }
           }
           break;
@@ -265,8 +265,8 @@ struct SymbolicBlockMatrix {
         case TriU: {
           for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
             for (isize jj = ii; jj < _.segment_lens[j]; ++jj) {
-              buf[usize((handled_rows + ii) * ncols + handled_cols + jj)] =
-                  true;
+              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
+                              jj)] = true;
             }
           }
           break;
@@ -274,8 +274,8 @@ struct SymbolicBlockMatrix {
         case Dense: {
           for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
             for (isize jj = 0; jj < _.segment_lens[j]; ++jj) {
-              buf[usize((handled_rows + ii) * ncols + handled_cols + jj)] =
-                  true;
+              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
+                              jj)] = true;
             }
           }
           break;
@@ -288,7 +288,7 @@ struct SymbolicBlockMatrix {
 
     for (isize i = 0; i < nrows; ++i) {
       for (isize j = 0; j < ncols; ++j) {
-        if (buf[usize(i * ncols + j)]) {
+        if (buf[std::size_t(i * ncols + j)]) {
           std::cout << "█";
         } else {
           std::cout << "░";
