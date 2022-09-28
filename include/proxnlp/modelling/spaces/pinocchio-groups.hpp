@@ -85,4 +85,12 @@ public:
   PointType rand() const { return m_lg.random(); }
 };
 
+template <int D, typename Scalar>
+using SETpl =
+    PinocchioLieGroup<pinocchio::SpecialEuclideanOperationTpl<D, Scalar>>;
+
+template <int D, typename Scalar>
+using SOTpl =
+    PinocchioLieGroup<pinocchio::SpecialOrthogonalOperationTpl<D, Scalar>>;
+
 } // namespace proxnlp
