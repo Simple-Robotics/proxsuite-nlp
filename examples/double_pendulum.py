@@ -176,7 +176,7 @@ solver = proxnlp.Solver(
     pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.register_callback(callback)
-solver.maxiters = 300
+solver.max_iters = 300
 solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()

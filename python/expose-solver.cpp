@@ -96,7 +96,7 @@ void exposeSolver() {
            "Set the primal proximal penalty parameter.")
       .def("set_tolerance", &Solver::setTolerance, bp::args("self", "tol"),
            "Set the solver's target tolerance.")
-      .def_readwrite("maxiters", &Solver::MAX_ITERS,
+      .def_readwrite("max_iters", &Solver::MAX_ITERS,
                      "Maximum number of iterations.")
       .def_readwrite("mu_factor", &Solver::mu_factor_,
                      "Multiplier update factor.")

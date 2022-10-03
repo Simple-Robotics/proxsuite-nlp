@@ -5,6 +5,8 @@
 
 #include "proxnlp/problem-base.hpp"
 
+#include <fmt/ostream.h>
+
 namespace proxnlp {
 
 enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
@@ -53,23 +55,24 @@ template <typename _Scalar> struct ResultsTpl {
     }
   }
 
-  friend std::ostream &operator<<(std::ostream &s,
+  friend std::ostream &operator<<(std::ostream &oss,
                                   const ResultsTpl<Scalar> &self) {
-    s << "{\n"
-      << "  convergence:   " << self.converged << ",\n"
-      << "  merit:         " << self.merit << ",\n"
-      << "  value:         " << self.value << ",\n"
-      << "  num_iters:      " << self.num_iters << ",\n"
-      << "  mu:            " << self.mu << ",\n"
-      << "  rho:           " << self.rho << ",\n"
-      << "  dual_infeas:   " << self.dual_infeas << ",\n"
-      << "  primal_infeas: " << self.prim_infeas << ",\n"
-      << "  cstr_values:   " << self.constraint_violations.transpose();
+    oss << "Results {" << fmt::format("\n  convergence:   {},", self.converged)
+        << fmt::format("\n  merit:         {:.3e},", self.merit)
+        << fmt::format("\n  value:         {:.3e},", self.value)
+        << fmt::format("\n  num_iters:     {:d},", self.num_iters)
+        << fmt::format("\n  mu:            {:.3e},", self.mu)
+        << fmt::format("\n  rho:           {:.3e},", self.rho)
+        << fmt::format("\n  dual_infeas:   {:.3e},", self.dual_infeas)
+        << fmt::format("\n  primal_infeas: {:.3e},", self.prim_infeas)
+        << fmt::format("\n  cstr_values:   {}",
+                       self.constraint_violations.transpose());
     for (std::size_t i = 0; i < self.active_set.size(); i++) {
-      s << ",\n  activeSet[" << i << "]:  " << self.active_set[i].transpose();
+      oss << fmt::format("\n  activeSet[{:d}]:  {}", i,
+                         self.active_set[i].transpose());
     }
-    s << "\n}";
-    return s;
+    oss << "\n}";
+    return oss;
   }
 };
 

@@ -282,7 +282,7 @@ solver = proxnlp.Solver(
     verbose=proxnlp.VERBOSE,
 )
 solver.register_callback(callback)
-solver.maxiters = 1000
+solver.max_iters = 1000
 solver.use_gauss_newton = False
 
 xu_init = pb_space.neutral()

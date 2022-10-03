@@ -67,7 +67,7 @@ solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
 solver.solve(workspace, results, p1, lams0)
-solver.maxiters = 15
+solver.max_iters = 15
 
 
 print("Result x:  ", results.xopt)
