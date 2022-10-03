@@ -27,9 +27,9 @@ public:
   const int numdual;           // total constraint dim
 
   /// KKT iteration matrix.
-  MatrixXs kktMatrix;
+  MatrixXs kkt_matrix;
   /// KKT iteration right-hand side.
-  VectorXs kktRhs;
+  VectorXs kkt_rhs;
   /// Primal-dual step \f$\delta w = (\delta x, \delta\lambda)\f$.
   VectorXs pd_step;
   VectorRef prim_step;
@@ -42,12 +42,12 @@ public:
 
   //// Data for proximal algorithm
 
-  VectorXs xPrev;
-  VectorXs xTrial;
+  VectorXs x_prev;
+  VectorXs x_trial;
   VectorXs data_lams_prev;
-  VectorXs lamsTrial_data;
-  VectorOfRef lamsPrev;
-  VectorOfRef lamsTrial;
+  VectorXs lams_trial_data;
+  VectorOfRef lams_prev;
+  VectorOfRef lams_trial;
 
   VectorXs prox_grad;
   MatrixXs prox_hess;
@@ -55,39 +55,39 @@ public:
   /// Residuals
 
   /// Dual residual: gradient of the Lagrangian function
-  VectorXs dualResidual;
+  VectorXs dual_residual;
   VectorXs data_cstr_values;
   /// Values of each constraint
-  VectorOfRef cstrValues;
+  VectorOfRef cstr_values;
   VectorXs data_cstr_values_proj;
   /// Projected values of each constraint
-  std::vector<VectorRef> cstrValuesProj;
+  std::vector<VectorRef> cstr_values_proj;
 
   /// Objective value
-  Scalar objectiveValue;
+  Scalar objective_value;
   /// Objective function gradient.
-  VectorXs objectiveGradient;
+  VectorXs objective_gradient;
   /// Objective function Hessian.
-  MatrixXs objectiveHessian;
+  MatrixXs objective_hessian;
   /// Merit function gradient.
-  VectorXs meritGradient;
+  VectorXs merit_gradient;
 
   MatrixXs jacobians_data;
   MatrixXs hessians_data;
-  std::vector<MatrixRef> cstrJacobians;
-  std::vector<MatrixRef> cstrVectorHessianProd;
+  std::vector<MatrixRef> cstr_jacobians;
+  std::vector<MatrixRef> cstr_vector_hessian_prod;
 
   VectorXs data_lams_plus_pre;
   VectorXs data_lams_plus;
   VectorXs data_lams_pdal;
-  VectorXs dual_prox_err_data;
+  VectorXs data_dual_prox_err;
 
   /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
-  VectorOfRef lamsPlus;
+  VectorOfRef lams_plus;
   /// Pre-projected multipliers.
-  VectorOfRef lamsPlusPre;
+  VectorOfRef lams_plus_pre;
   /// Primal-dual multiplier estimates (from the pdBCL algorithm)
-  VectorOfRef lamsPDAL;
+  VectorOfRef lams_pdal;
   /// Subproblem proximal dual error.
   VectorOfRef subproblemDualErr;
 
@@ -100,63 +100,63 @@ public:
   WorkspaceTpl(const int nx, const int ndx, const Problem &prob)
       : ndx(ndx), numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
-        kktMatrix(ndx + numdual, ndx + numdual), kktRhs(ndx + numdual),
+        kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
         pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
-        ldlt_(kktMatrix), xPrev(nx), xTrial(nx), data_lams_prev(numdual),
-        lamsTrial_data(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
-        dualResidual(ndx), data_cstr_values(numdual),
-        data_cstr_values_proj(numdual), objectiveGradient(ndx),
-        objectiveHessian(ndx, ndx), meritGradient(ndx),
+        ldlt_(kkt_matrix), x_prev(nx), x_trial(nx), data_lams_prev(numdual),
+        lams_trial_data(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
+        dual_residual(ndx), data_cstr_values(numdual),
+        data_cstr_values_proj(numdual), objective_gradient(ndx),
+        objective_hessian(ndx, ndx), merit_gradient(ndx),
         jacobians_data(numdual, ndx), hessians_data((int)numblocks * ndx, ndx),
         data_lams_plus(numdual), data_lams_pdal(numdual),
-        dual_prox_err_data(numdual) {
+        data_dual_prox_err(numdual) {
     init(prob);
   }
 
   void init(const Problem &prob) {
-    kktMatrix.setZero();
-    kktRhs.setZero();
+    kkt_matrix.setZero();
+    kkt_rhs.setZero();
     pd_step.setZero();
     signature.setZero();
 
-    xPrev.setZero();
-    xTrial.setZero();
-    helpers::allocateMultipliersOrResiduals(prob, data_lams_prev, lamsPrev);
-    helpers::allocateMultipliersOrResiduals(prob, lamsTrial_data, lamsTrial);
+    x_prev.setZero();
+    x_trial.setZero();
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_prev, lams_prev);
+    helpers::allocateMultipliersOrResiduals(prob, lams_trial_data, lams_trial);
     prox_grad.setZero();
     prox_hess.setZero();
 
-    dualResidual.setZero();
+    dual_residual.setZero();
     helpers::allocateMultipliersOrResiduals(
-        prob, data_cstr_values, cstrValues); // not multipliers but same dims
+        prob, data_cstr_values, cstr_values); // not multipliers but same dims
     data_cstr_values_proj.setZero();
     helpers::allocateMultipliersOrResiduals(prob, data_cstr_values_proj,
-                                            cstrValuesProj);
+                                            cstr_values_proj);
 
-    objectiveGradient.setZero();
-    objectiveHessian.setZero();
-    meritGradient.setZero();
+    objective_gradient.setZero();
+    objective_hessian.setZero();
+    merit_gradient.setZero();
     jacobians_data.setZero();
     hessians_data.setZero();
 
     helpers::allocateMultipliersOrResiduals(prob, data_lams_plus_pre,
-                                            lamsPlusPre);
-    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus, lamsPlus);
-    helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lamsPDAL);
-    helpers::allocateMultipliersOrResiduals(prob, dual_prox_err_data,
+                                            lams_plus_pre);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus, lams_plus);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lams_pdal);
+    helpers::allocateMultipliersOrResiduals(prob, data_dual_prox_err,
                                             subproblemDualErr);
 
-    cstrJacobians.reserve(numblocks);
-    cstrVectorHessianProd.reserve(numblocks);
+    cstr_jacobians.reserve(numblocks);
+    cstr_vector_hessian_prod.reserve(numblocks);
 
     int cursor = 0;
     int nr = 0;
     for (std::size_t i = 0; i < numblocks; i++) {
       cursor = prob.getIndex(i);
       nr = prob.getConstraintDim(i);
-      cstrJacobians.emplace_back(jacobians_data.middleRows(cursor, nr));
-      cstrVectorHessianProd.emplace_back(
+      cstr_jacobians.emplace_back(jacobians_data.middleRows(cursor, nr));
+      cstr_vector_hessian_prod.emplace_back(
           hessians_data.middleRows((int)i * ndx, ndx));
     }
   }

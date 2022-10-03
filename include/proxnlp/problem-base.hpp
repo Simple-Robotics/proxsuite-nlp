@@ -66,19 +66,19 @@ public:
 
   void evaluate(const ConstVectorRef &x,
                 WorkspaceTpl<Scalar> &workspace) const {
-    workspace.objectiveValue = cost().call(x);
+    workspace.objective_value = cost().call(x);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
-      workspace.cstrValues[i] = cstr.func()(x);
+      workspace.cstr_values[i] = cstr.func()(x);
     }
   }
 
   void computeDerivatives(const ConstVectorRef &x,
                           WorkspaceTpl<Scalar> &workspace) const {
-    cost().computeGradient(x, workspace.objectiveGradient);
+    cost().computeGradient(x, workspace.objective_gradient);
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
-      cstr.func().computeJacobian(x, workspace.cstrJacobians[i]);
+      cstr.func().computeJacobian(x, workspace.cstr_jacobians[i]);
     }
   }
 

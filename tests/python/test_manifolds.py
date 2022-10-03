@@ -92,10 +92,10 @@ def test_cartesian_product():
         print(r0)
         assert r0.shape[0] == fun.nr
 
-        J_an = fun.get_jacobian(x0)
+        J_an = fun.getJacobian(x0)
 
         fun_autodiff = autodiff.FiniteDifferenceHelper(prod, fun, eps)
-        J_nd = fun_autodiff.get_jacobian(x0)
+        J_nd = fun_autodiff.getJacobian(x0)
         print(J_an)
         print(J_nd)
 

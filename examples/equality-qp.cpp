@@ -65,7 +65,7 @@ template <int N, int M = 1> int submain() {
   solver.setProxParameter(1e-8);
   solver.use_gauss_newton = true;
 
-  solver.solve(workspace, results, p1, workspace.lamsPrev);
+  solver.solve(workspace, results, p1, workspace.lams_prev);
   fmt::print("Results {}\n\n", results);
 
   return 0;

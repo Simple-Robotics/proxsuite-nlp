@@ -279,7 +279,7 @@ try:
 except KeyboardInterrupt:
     pass
 
-assert results.numiters == 22
+assert results.num_iters == 22
 
 # -------------------------------------------------------------- ###
 # Get results

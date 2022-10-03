@@ -25,7 +25,7 @@ void expose_finite_differences() {
       "Make a function into a differentiable function using"
       " finite differences.",
       bp::init<const Manifold &, const Function &, const Scalar>(
-          bp::args("self", "func", "eps")));
+          bp::args("self", "space", "func", "eps")));
 
   bp::class_<finite_difference_wrapper<Scalar, TOC2>, bp::bases<C2Function>>(
       "FiniteDifferenceHelperC2",
@@ -33,7 +33,7 @@ void expose_finite_differences() {
       "using"
       " finite differences.",
       bp::init<const Manifold &, const C1Function &, const Scalar>(
-          bp::args("self", "func", "eps")));
+          bp::args("self", "space", "func", "eps")));
 }
 
 void exposeAutodiff() { expose_finite_differences(); }

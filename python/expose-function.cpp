@@ -26,7 +26,7 @@ void exposeFunctionTypes() {
       bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("computeJacobian", bp::pure_virtual(compJac1),
            bp::args("self", "x", "Jout"))
-      .def("get_jacobian", compJac2, bp::args("self", "x"),
+      .def("getJacobian", compJac2, bp::args("self", "x"),
            "Compute and return Jacobian.");
 
   context::VHPFuncType C2Function::*compHess1 =
@@ -39,7 +39,7 @@ void exposeFunctionTypes() {
       bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("vectorHessianProduct", compHess1, &C2FunctionWrap::default_vhp,
            bp::args("self", "x", "v", "Hout"))
-      .def("get_vhp", compHess2, bp::args("self", "x", "v"),
+      .def("getVHP", compHess2, bp::args("self", "x", "v"),
            "Compute and return the vector-Hessian product.");
 
   bp::class_<ComposeFunctionTpl<context::Scalar>, bp::bases<C2Function>>(

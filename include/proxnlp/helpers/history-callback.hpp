@@ -34,15 +34,15 @@ template <typename Scalar> struct history_callback : base_callback<Scalar> {
   void call(const WorkspaceTpl<Scalar> &workspace,
             const ResultsTpl<Scalar> &results) {
     if (store_primal_dual_vars_) {
-      storage.xs.push_back(results.xOpt);
+      storage.xs.push_back(results.x_opt);
       storage.lams.push_back(results.lams_opt_data);
-      storage.lams_view.push_back(results.lamsOpt);
+      storage.lams_view.push_back(results.lams_opt);
     }
     if (store_values_)
       storage.values.push_back(results.value);
     if (store_residuals_) {
-      storage.prim_infeas.push_back(results.primalInfeas);
-      storage.dual_infeas.push_back(results.dualInfeas);
+      storage.prim_infeas.push_back(results.prim_infeas);
+      storage.dual_infeas.push_back(results.dual_infeas);
     }
     const std::size_t asize = workspace.ls_alphas.size();
     storage.ls_alphas.emplace_back(

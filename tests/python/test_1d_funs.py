@@ -66,7 +66,7 @@ def test_cubic1d(ls_strat, ls_interp_type):
     solver.ls_options.interp_type = ls_interp_type
     flag = solver.solve(ws, rs, x0, [])
     assert flag == proxnlp.ConvergenceFlag.success
-    assert rs.numiters <= 7
+    assert rs.num_iters <= 7
     print(rs)
     # obtained from wolfram
     real_sol = 10 / 3 + np.sqrt(70) / 3

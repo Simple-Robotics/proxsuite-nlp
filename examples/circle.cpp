@@ -118,7 +118,7 @@ int main() {
   auto lams0 = lams;
   solver.solve(workspace, results, p1, lams0);
   fmt::print("Results: {}\n", results);
-  fmt::print("Output point: {}\n", results.xOpt.transpose());
+  fmt::print("Output point: {}\n", results.x_opt.transpose());
   fmt::print("Target point was {}\n", p0.transpose());
 
   return 0;

@@ -122,7 +122,7 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     it_list = [1, 2, 3, 4, 5, 10, 20, 30]
-    it_list = [i for i in it_list if i < results.numiters]
+    it_list = [i for i in it_list if i < results.num_iters]
     for it in it_list:
         ls_alphas = callback.storage.ls_alphas[it].copy()
         ls_values = callback.storage.ls_values[it].copy()

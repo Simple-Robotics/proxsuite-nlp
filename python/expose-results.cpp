@@ -18,15 +18,15 @@ void exposeResults() {
       .def_readonly("converged", &Results::converged)
       .def_readonly("merit", &Results::merit, "Merit function value.")
       .def_readonly("value", &Results::value)
-      .def_readonly("xopt", &Results::xOpt)
-      .def_readonly("lamsopt", &Results::lamsOpt)
-      .def_readonly("activeset", &Results::activeSet)
-      .def_readonly("numiters", &Results::numIters)
+      .def_readonly("xopt", &Results::x_opt)
+      .def_readonly("lamsopt", &Results::lams_opt)
+      .def_readonly("activeset", &Results::active_set)
+      .def_readonly("num_iters", &Results::num_iters)
       .def_readonly("mu", &Results::mu)
       .def_readonly("rho", &Results::rho)
-      .def_readonly("dual_infeas", &Results::dualInfeas)
-      .def_readonly("primal_infeas", &Results::primalInfeas)
-      .def_readonly("constraint_errs", &Results::constraint_violations_,
+      .def_readonly("dual_infeas", &Results::dual_infeas)
+      .def_readonly("primal_infeas", &Results::prim_infeas)
+      .def_readonly("constraint_errs", &Results::constraint_violations,
                     "Constraint violations.")
       .def(bp::self_ns::str(bp::self));
 }

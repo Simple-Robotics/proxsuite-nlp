@@ -25,31 +25,31 @@ template <typename _Scalar> struct ResultsTpl {
 
   Scalar merit;
   Scalar value;
-  VectorXs xOpt;
+  VectorXs x_opt;
   VectorXs lams_opt_data;
-  VectorOfRef lamsOpt;
+  VectorOfRef lams_opt;
   /// Current active set of the algorithm.
-  std::vector<VecBool> activeSet;
-  Scalar dualInfeas = 0.;
-  Scalar primalInfeas = 0.;
+  std::vector<VecBool> active_set;
+  Scalar dual_infeas = 0.;
+  Scalar prim_infeas = 0.;
   /// Violations for each constraint
-  VectorXs constraint_violations_;
+  VectorXs constraint_violations;
 
   /// Final solver parameters
-  std::size_t numIters = 0;
+  std::size_t num_iters = 0;
   Scalar mu;
   Scalar rho;
 
   ResultsTpl(const int nx, const Problem &prob)
-      : xOpt(nx), lams_opt_data(prob.getTotalConstraintDim()),
-        constraint_violations_(prob.getNumConstraints()), numIters(0), mu(0.),
+      : x_opt(nx), lams_opt_data(prob.getTotalConstraintDim()),
+        constraint_violations(prob.getNumConstraints()), num_iters(0), mu(0.),
         rho(0.) {
-    xOpt.setZero();
-    helpers::allocateMultipliersOrResiduals(prob, lams_opt_data, lamsOpt);
-    constraint_violations_.setZero();
-    activeSet.reserve(prob.getNumConstraints());
+    x_opt.setZero();
+    helpers::allocateMultipliersOrResiduals(prob, lams_opt_data, lams_opt);
+    constraint_violations.setZero();
+    active_set.reserve(prob.getNumConstraints());
     for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
-      activeSet.push_back(VecBool::Zero(prob.getConstraint(i).func().nr()));
+      active_set.push_back(VecBool::Zero(prob.getConstraint(i).func().nr()));
     }
   }
 
@@ -59,14 +59,14 @@ template <typename _Scalar> struct ResultsTpl {
       << "  convergence:   " << self.converged << ",\n"
       << "  merit:         " << self.merit << ",\n"
       << "  value:         " << self.value << ",\n"
-      << "  numIters:      " << self.numIters << ",\n"
+      << "  num_iters:      " << self.num_iters << ",\n"
       << "  mu:            " << self.mu << ",\n"
       << "  rho:           " << self.rho << ",\n"
-      << "  dual_infeas:   " << self.dualInfeas << ",\n"
-      << "  primal_infeas: " << self.primalInfeas << ",\n"
-      << "  cstr_values:   " << self.constraint_violations_.transpose();
-    for (std::size_t i = 0; i < self.activeSet.size(); i++) {
-      s << ",\n  activeSet[" << i << "]:  " << self.activeSet[i].transpose();
+      << "  dual_infeas:   " << self.dual_infeas << ",\n"
+      << "  primal_infeas: " << self.prim_infeas << ",\n"
+      << "  cstr_values:   " << self.constraint_violations.transpose();
+    for (std::size_t i = 0; i < self.active_set.size(); i++) {
+      s << ",\n  activeSet[" << i << "]:  " << self.active_set[i].transpose();
     }
     s << "\n}";
     return s;

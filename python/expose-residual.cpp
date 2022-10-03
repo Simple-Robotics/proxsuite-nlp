@@ -23,19 +23,19 @@ void exposeResiduals() {
 
   expose_function<LinearFunctionTpl<Scalar>>(
       "LinearFunction", "Residual f(x) = Ax + b.",
-      bp::init<MatrixXs, VectorXs>(bp::args("A", "b")));
+      bp::init<MatrixXs, VectorXs>(bp::args("self", "A", "b")));
 
   expose_function<ManifoldDifferenceToPoint<Scalar>>(
       "ManifoldDifferenceToPoint", "Difference vector x (-) x0.",
       bp::init<const Manifold &, const ConstVectorRef &>(
-          bp::args("space", "target")))
+          bp::args("self", "space", "target")))
       .add_property("target", &ManifoldDifferenceToPoint<Scalar>::m_target);
 
   expose_function<LinearFunctionDifferenceToPoint<Scalar>>(
       "LinearFunctionDifferenceToPoint",
       "Linear function of the vector difference to a reference point.",
       bp::init<const Manifold &, VectorXs, MatrixXs, VectorXs>(
-          bp::args("space", "target", "A", "b")));
+          bp::args("self", "space", "target", "A", "b")));
 }
 
 } // namespace python
