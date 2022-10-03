@@ -140,62 +140,57 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
   void integrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                       VectorRef out) const {
+    assert(ndx() == out.size());
     Eigen::Index cq = 0, cv = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      const long nq = components[i]->nx();
+      const long nq = getComponent(i).nx();
+      const long nv = getComponent(i).ndx();
       auto sx = x.segment(cq, nq);
-      cq += nq;
-
-      const long nv = components[i]->ndx();
       auto sv = v.segment(cv, nv);
-      auto sout = out.segment(cv, nv);
-      cv += nv;
+
+      auto sout = out.segment(cq, nq);
 
       getComponent(i).integrate(sx, sv, sout);
+      cq += nq;
+      cv += nv;
     }
   }
 
   void difference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                        VectorRef out) const {
+    assert(ndx() == out.size());
     Eigen::Index cq = 0, cv = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      const long nq = components[i]->nx();
+      const long nq = getComponent(i).nx();
+      const long nv = getComponent(i).ndx();
       auto sx0 = x0.segment(cq, nq);
       auto sx1 = x1.segment(cq, nq);
-      cq += nq;
 
-      const long nv = components[i]->ndx();
       auto sout = out.segment(cv, nv);
-      cv += nv;
 
       getComponent(i).difference(sx0, sx1, sout);
+      cq += nq;
+      cv += nv;
     }
   }
 
   void Jintegrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                        MatrixRef Jout, int arg) const {
+    assert(ndx() == Jout.rows());
+    Jout.setZero();
     Eigen::Index cq = 0, cv = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      const long nq = components[i]->nx();
+      const long nq = getComponent(i).nx();
+      const long nv = getComponent(i).ndx();
       auto sx = x.segment(cq, nq);
-      cq += nq;
-
-      const long nv = components[i]->ndx();
       auto sv = v.segment(cv, nv);
+
       auto sJout = Jout.block(cv, cv, nv, nv);
-      cv += nv;
 
       getComponent(i).Jintegrate(sx, sv, sJout, arg);
+      cq += nq;
+      cv += nv;
     }
-    // const int nx1 = left().nx();
-    // const int nx2 = right().nx();
-    // const int ndx1 = left().ndx();
-    // const int ndx2 = right().ndx();
-    // left().Jintegrate(x.head(nx1), v.head(ndx1), Jout.topLeftCorner(ndx1,
-    // ndx1),
-    //                   arg);
-    // right().Jintegrate(x.tail(nx2), v.tail(ndx2),
-    //                    Jout.bottomRightCorner(ndx2, ndx2), arg);
   }
 
   void JintegrateTransport(const ConstVectorRef &x, const ConstVectorRef &v,
@@ -225,6 +220,8 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                         MatrixRef Jout, int arg) const {
+    assert(ndx() == Jout.rows());
+    Jout.setZero();
     Eigen::Index cq = 0, cv = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
       const long nq = components[i]->nx();
