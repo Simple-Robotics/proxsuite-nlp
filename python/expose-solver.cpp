@@ -71,7 +71,8 @@ void exposeSolver() {
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def("register_callback", &Solver::registerCallback,
            bp::args("self", "cb"), "Add a callback to the solver.")
-      .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.")
+      .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.",
+           bp::args("self"))
       .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
       .def("solve",
            (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
