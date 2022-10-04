@@ -29,7 +29,8 @@ using Constraint = ConstraintObject<double>;
 
 template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
-  Manifold space(N);
+  auto space_ = std::make_shared<Manifold>(N);
+  const Manifold &space = *space_;
   typename Manifold::PointType p1 = space.rand();
 
   Eigen::MatrixXd Qroot(N, N + 1);
@@ -47,20 +48,20 @@ template <int N, int M = 1> int submain() {
   auto res1 = std::make_shared<LinearFunctionTpl<double>>(A, b);
 
   auto cost = std::make_shared<QuadraticDistanceCost<double>>(
-      space, space.neutral(), Q_);
+      space_, space.neutral(), Q_);
 
-  std::vector<Problem::ConstraintType> cstrs_;
+  std::vector<Problem::ConstraintType> constraints;
   if (M > 0) {
-    cstrs_.emplace_back(res1, std::make_shared<EqualityType>());
+    constraints.emplace_back(res1, std::make_shared<EqualityType>());
   }
 
-  auto prob = std::make_shared<Problem>(cost, cstrs_);
+  auto problem = std::make_shared<Problem>(space_, cost, constraints);
 
   using Solver_t = SolverTpl<double>;
-  typename Solver_t::Workspace workspace(space.nx(), space.nx(), *prob);
-  typename Solver_t::Results results(space.nx(), *prob);
+  typename Solver_t::Workspace workspace(space.nx(), space.nx(), *problem);
+  typename Solver_t::Results results(space.nx(), *problem);
 
-  Solver_t solver(space, prob);
+  Solver_t solver(problem);
   solver.setPenalty(1e-4);
   solver.setProxParameter(1e-8);
   solver.use_gauss_newton = true;

@@ -11,17 +11,16 @@
 
 namespace proxnlp {
 template <typename Scalar>
-SolverTpl<Scalar>::SolverTpl(const Manifold &manifold,
-                             const shared_ptr<Problem> &prob, const Scalar tol,
+SolverTpl<Scalar>::SolverTpl(const shared_ptr<Problem> &prob, const Scalar tol,
                              const Scalar mu_init, const Scalar rho_init,
                              const VerboseLevel verbose, const Scalar mu_lower,
                              const Scalar prim_alpha, const Scalar prim_beta,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              const LSOptions ls_options)
-    : manifold(manifold), problem_(prob), merit_fun(problem_, mu_init),
-      prox_penalty(manifold, manifold.neutral(),
+    : problem_(prob), merit_fun(problem_, mu_init),
+      prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
-                       MatrixXs::Identity(manifold.ndx(), manifold.ndx())),
+                       MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
       verbose(verbose), rho_init_(rho_init), mu_init_(mu_init),
       mu_lower_(mu_lower), target_tol(tol), prim_alpha_(prim_alpha),
       prim_beta(prim_beta), dual_alpha(dual_alpha), dual_beta(dual_beta),
@@ -134,7 +133,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
 template <typename Scalar>
 typename SolverTpl<Scalar>::InertiaFlag
 SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
-  const int ndx = manifold.ndx();
+  const int ndx = manifold().ndx();
   const int numc = problem_->getTotalConstraintDim();
   const long n = signature.size();
   int numpos = 0;
@@ -181,7 +180,7 @@ void SolverTpl<Scalar>::computeConstraintsAndMultipliers(
   // project multiplier estimate
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintSetBase<Scalar> &cstr_set =
-        *problem_->getConstraint(i).m_set;
+        *problem_->getConstraint(i).set_;
     cstr_set.normalConeProjection(workspace.lams_plus_pre[i],
                                   workspace.lams_plus[i]);
   }
@@ -200,10 +199,10 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
   }
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    cstr.m_set->applyNormalConeProjectionJacobian(workspace.lams_plus_pre[i],
-                                                  workspace.cstr_jacobians[i]);
+    cstr.set_->applyNormalConeProjectionJacobian(workspace.lams_plus_pre[i],
+                                                 workspace.cstr_jacobians[i]);
 
-    bool use_vhp = (use_gauss_newton && !(cstr.m_set->disableGaussNewton())) ||
+    bool use_vhp = (use_gauss_newton && !(cstr.set_->disableGaussNewton())) ||
                    !(use_gauss_newton);
     if (second_order && use_vhp) {
       cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
@@ -220,13 +219,13 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
   }
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    cstr.m_set->setProxParameters(mu_);
+    cstr.set_->setProxParameters(mu_);
   }
 }
 
 template <typename Scalar>
 void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
-  const int ndx = manifold.ndx();
+  const int ndx = manifold().ndx();
   const long ntot = workspace.kkt_rhs.size();
   const long ndual = ntot - ndx;
   const std::size_t num_c = problem_->getNumConstraints();
@@ -242,7 +241,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
   // lambda for evaluating the merit function
   auto phi_eval = [&](const Scalar alpha) {
-    tryStep(manifold, workspace, results, alpha);
+    tryStep(manifold(), workspace, results, alpha);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
                               workspace.lams_prev, workspace.lams_plus_pre) +
            prox_penalty.call(workspace.x_trial);
@@ -302,7 +301,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     for (std::size_t i = 0; i < num_c; i++) {
       const ConstraintSetBase<Scalar> &cstr_set =
-          *problem_->getConstraint(i).m_set;
+          *problem_->getConstraint(i).set_;
       cstr_set.computeActiveSet(workspace.cstr_values[i],
                                 results.active_set[i]);
 
@@ -325,7 +324,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     results.dual_infeas = math::infty_norm(workspace.dual_residual);
     for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
       const ConstraintSetBase<Scalar> &cstr_set =
-          *problem_->getConstraint(i).m_set;
+          *problem_->getConstraint(i).set_;
       cstr_set.normalConeProjection(workspace.cstr_values[i],
                                     workspace.cstr_values_proj[i]);
       results.constraint_violations(long(i)) =
@@ -450,8 +449,8 @@ void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
 template <typename Scalar>
 void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) {
   rho_ = new_rho;
-  prox_penalty.m_weights.setZero();
-  prox_penalty.m_weights.diagonal().setConstant(rho_);
+  prox_penalty.weights_.setZero();
+  prox_penalty.weights_.diagonal().setConstant(rho_);
 }
 
 template <typename Scalar>

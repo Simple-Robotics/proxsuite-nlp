@@ -24,52 +24,52 @@ public:
   using Base = ManifoldAbstractTpl<Scalar, Options>;
   PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
-  LieGroup m_lg;
+  LieGroup lg_;
   PinocchioLieGroup() {}
-  PinocchioLieGroup(const LieGroup &lg) : m_lg(lg) {}
+  PinocchioLieGroup(const LieGroup &lg) : lg_(lg) {}
 
-  template <typename... Args> PinocchioLieGroup(Args... args) : m_lg(args...) {}
+  template <typename... Args> PinocchioLieGroup(Args... args) : lg_(args...) {}
 
-  inline int nx() const { return m_lg.nq(); }
-  inline int ndx() const { return m_lg.nv(); }
+  inline int nx() const { return lg_.nq(); }
+  inline int ndx() const { return lg_.nv(); }
 
   /// \name Implementations
 
   void integrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                       VectorRef out) const {
-    m_lg.integrate(x, v, out);
+    lg_.integrate(x, v, out);
   }
 
   void difference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                        VectorRef vout) const {
-    m_lg.difference(x0, x1, vout);
+    lg_.difference(x0, x1, vout);
   }
 
   void Jintegrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                        MatrixRef Jout, int arg) const {
     switch (arg) {
     case 0:
-      m_lg.dIntegrate_dq(x, v, Jout);
+      lg_.dIntegrate_dq(x, v, Jout);
       break;
     case 1:
-      m_lg.dIntegrate_dv(x, v, Jout);
+      lg_.dIntegrate_dv(x, v, Jout);
       break;
     }
   }
 
   void JintegrateTransport(const ConstVectorRef &x, const ConstVectorRef &v,
                            MatrixRef Jout, int arg) const {
-    m_lg.dIntegrateTransport(x, v, Jout, pin::ArgumentPosition(arg));
+    lg_.dIntegrateTransport(x, v, Jout, pin::ArgumentPosition(arg));
   }
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                         MatrixRef Jout, int arg) const {
     switch (arg) {
     case 0:
-      m_lg.dDifference(x0, x1, Jout, pin::ARG0);
+      lg_.dDifference(x0, x1, Jout, pin::ARG0);
       break;
     case 1:
-      m_lg.dDifference(x0, x1, Jout, pin::ARG1);
+      lg_.dDifference(x0, x1, Jout, pin::ARG1);
       break;
     }
   }
@@ -77,12 +77,12 @@ public:
   virtual void interpolate_impl(const ConstVectorRef &x0,
                                 const ConstVectorRef &x1, const Scalar &u,
                                 VectorRef out) const {
-    m_lg.interpolate(x0, x1, u, out);
+    lg_.interpolate(x0, x1, u, out);
   }
 
-  PointType neutral() const { return m_lg.neutral(); }
+  PointType neutral() const { return lg_.neutral(); }
 
-  PointType rand() const { return m_lg.random(); }
+  PointType rand() const { return lg_.random(); }
 };
 
 template <int D, typename Scalar>

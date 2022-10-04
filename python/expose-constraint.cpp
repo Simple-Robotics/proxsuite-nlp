@@ -15,7 +15,7 @@ namespace pp = pinocchio::python;
 template <typename T>
 void exposeSpecificConstraintSet(const char *name, const char *docstring) {
   bp::class_<T, shared_ptr<T>, bp::bases<context::ConstraintSet>>(
-      name, docstring, bp::init<>());
+      name, docstring, bp::init<>(bp::args("self")));
 }
 
 template <typename T>
@@ -55,8 +55,8 @@ void exposeConstraints() {
       bp::init<const shared_ptr<context::C2Function> &, ConstraintSetPtr>(
           bp::args("self", "func", "set")))
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
-      .def_readonly("func", &Constraint::m_func, "Underlying function.")
-      .def_readonly("set", &Constraint::m_set, "Constraint set.");
+      .def_readonly("func", &Constraint::func_, "Underlying function.")
+      .def_readonly("set", &Constraint::set_, "Constraint set.");
 
   /* Expose constraint stack */
   pp::StdVectorPythonVisitor<std::vector<Constraint>, true>::expose(

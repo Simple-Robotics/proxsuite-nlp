@@ -20,7 +20,9 @@ public:
   ComposeFunctionTpl(const shared_ptr<Base> &left,
                      const shared_ptr<Base> &right)
       : Base(right->nx(), right->ndx(), left->nr()), left_(left),
-        right_(right) {}
+        right_(right) {
+    assert(left->nx() == right->nr());
+  }
 
   ReturnType operator()(const ConstVectorRef &x) const {
     return left()(right()(x));

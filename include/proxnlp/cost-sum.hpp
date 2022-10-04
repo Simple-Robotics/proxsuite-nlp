@@ -13,24 +13,24 @@ public:
   using Base = CostFunctionBaseTpl<Scalar>;
   using BasePtr = Base const *;
 
-  std::vector<BasePtr> m_components; /// component sub-costs
-  std::vector<Scalar> m_weights;     /// cost component weights
+  std::vector<BasePtr> components_; /// component sub-costs
+  std::vector<Scalar> weights_;     /// cost component weights
 
   CostSum(int nx, int ndx) : Base(nx, ndx) {}
 
   /// Constructor with a predefined vector of components.
   CostSum(int nx, int ndx, const std::vector<BasePtr> &comps,
           const std::vector<Scalar> &weights)
-      : Base(nx, ndx), m_components(comps), m_weights(weights) {
-    assert(m_components.size() == m_weights.size());
+      : Base(nx, ndx), components_(comps), weights_(weights) {
+    assert(components_.size() == weights_.size());
   }
 
-  std::size_t numComponents() const { return m_components.size(); }
+  std::size_t numComponents() const { return components_.size(); }
 
   Scalar call(const ConstVectorRef &x) const {
     Scalar result_ = 0.;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      result_ += m_weights[i] * m_components[i]->call(x);
+      result_ += weights_[i] * components_[i]->call(x);
     }
     return result_;
   }
@@ -38,22 +38,22 @@ public:
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
     out.setZero();
     for (std::size_t i = 0; i < numComponents(); i++) {
-      out.noalias() = out + m_weights[i] * m_components[i]->computeGradient(x);
+      out.noalias() = out + weights_[i] * components_[i]->computeGradient(x);
     }
   }
 
   void computeHessian(const ConstVectorRef &x, MatrixRef out) const {
     out.setZero();
     for (std::size_t i = 0; i < numComponents(); i++) {
-      out.noalias() = out + m_weights[i] * m_components[i]->computeHessian(x);
+      out.noalias() = out + weights_[i] * components_[i]->computeHessian(x);
     }
   }
 
   /* CostSum API definition */
 
   void addComponent(const Base &comp, const Scalar w = 1.) {
-    m_components.push_back(&comp);
-    m_weights.push_back(w);
+    components_.push_back(&comp);
+    weights_.push_back(w);
   }
 
   CostSum<Scalar> &operator+=(const Base &other) {
@@ -62,10 +62,10 @@ public:
   }
 
   CostSum<Scalar> &operator+=(const CostSum<Scalar> &other) {
-    m_components.insert(m_components.end(), other.m_components.begin(),
-                        other.m_components.end());
-    m_weights.insert(m_weights.end(), other.m_weights.begin(),
-                     other.m_weights.end());
+    components_.insert(components_.end(), other.components_.begin(),
+                       other.components_.end());
+    weights_.insert(weights_.end(), other.weights_.begin(),
+                    other.weights_.end());
     return *this;
   }
 
@@ -76,7 +76,7 @@ public:
   }
 
   CostSum<Scalar> &operator*=(const Scalar rhs) {
-    for (auto &weight : m_weights) {
+    for (auto &weight : weights_) {
       weight = rhs * weight;
     }
     return *this;
@@ -89,7 +89,7 @@ public:
     ostr << "CostSum(num_components=" << nc;
     ostr << ", weights=(";
     for (std::size_t i = 0; i < nc; i++) {
-      ostr << cost.m_weights[i];
+      ostr << cost.weights_[i];
       if (i < nc - 1)
         ostr << ", ";
     }

@@ -114,16 +114,17 @@ template <typename _Scalar> struct ConstraintObject {
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
   using FunctionType = C2FunctionTpl<Scalar>;
+  using ConstraintSet = ConstraintSetBase<Scalar>;
 
-  shared_ptr<FunctionType> m_func;
-  shared_ptr<ConstraintSetBase<Scalar>> m_set;
+  shared_ptr<FunctionType> func_;
+  shared_ptr<ConstraintSet> set_;
 
-  const FunctionType &func() const { return *m_func; }
-  int nr() const { return m_func->nr(); }
+  const FunctionType &func() const { return *func_; }
+  int nr() const { return func_->nr(); }
 
   ConstraintObject(const shared_ptr<FunctionType> &func,
-                   const shared_ptr<ConstraintSetBase<Scalar>> &set)
-      : m_func(func), m_set(set) {}
+                   const shared_ptr<ConstraintSet> &set)
+      : func_(func), set_(set) {}
 };
 
 } // namespace proxnlp

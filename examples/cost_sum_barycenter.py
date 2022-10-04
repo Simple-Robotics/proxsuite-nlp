@@ -64,10 +64,10 @@ def test_cost_sum():
     sum_3 = sum_2 + dist_to_p2
     print("sum3 init:", sum_3)
 
-    prob = proxnlp.Problem(sum_3)
-    workspace = proxnlp.Workspace(space.nx, space.ndx, prob)
-    results = proxnlp.Results(space.nx, prob)
-    solver = proxnlp.Solver(space, prob, mu_init=0.1)
+    problem = proxnlp.Problem(space, sum_3)
+    workspace = proxnlp.Workspace(space.nx, space.ndx, problem)
+    results = proxnlp.Results(space.nx, problem)
+    solver = proxnlp.Solver(problem, mu_init=0.1)
     callback = proxnlp.helpers.HistoryCallback()
     solver.register_callback(callback)
     flag = solver.solve(workspace, results, p0, [])

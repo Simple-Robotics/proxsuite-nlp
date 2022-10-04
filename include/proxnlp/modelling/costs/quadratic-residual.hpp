@@ -26,20 +26,20 @@ public:
   using Base::computeHessian;
 
   /// Residual function \f$r(x)\f$ the composite cost is constructed over.
-  shared_ptr<FunctionType> m_residual;
+  shared_ptr<FunctionType> residual_;
   /// Weights \f$Q\f$
-  MatrixXs m_weights;
+  MatrixXs weights_;
   /// Slope \f$b\f$
-  VectorXs m_slope;
+  VectorXs slope_;
   /// Constant term \f$c\f$
-  Scalar m_constant;
+  Scalar constant_;
 
   QuadraticResidualCost(const shared_ptr<FunctionType> &residual,
                         const ConstMatrixRef &weights,
                         const ConstVectorRef &slope,
                         const Scalar constant = Scalar(0.))
-      : Base(residual->nx(), residual->ndx()), m_residual(residual),
-        m_weights(weights), m_slope(slope), m_constant(constant) {}
+      : Base(residual->nx(), residual->ndx()), residual_(residual),
+        weights_(weights), slope_(slope), constant_(constant) {}
 
   QuadraticResidualCost(const shared_ptr<FunctionType> &residual,
                         const ConstMatrixRef &weights,
@@ -55,24 +55,23 @@ public:
                               constant) {}
 
   Scalar call(const ConstVectorRef &x) const {
-    VectorXs err = (*m_residual)(x);
-    return Scalar(0.5) * err.dot(m_weights * err) + err.dot(m_slope) +
-           m_constant;
+    VectorXs err = (*residual_)(x);
+    return Scalar(0.5) * err.dot(weights_ * err) + err.dot(slope_) + constant_;
   }
 
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    MatrixXs Jres(m_residual->nr(), this->ndx());
-    m_residual->computeJacobian(x, Jres);
-    VectorXs err = (*m_residual)(x);
-    out = Jres.transpose() * (m_weights * err + m_slope);
+    MatrixXs Jres(residual_->nr(), this->ndx());
+    residual_->computeJacobian(x, Jres);
+    VectorXs err = (*residual_)(x);
+    out = Jres.transpose() * (weights_ * err + slope_);
   }
 
   void computeHessian(const ConstVectorRef &x, MatrixRef out) const {
-    MatrixXs Jres(m_residual->nr(), this->ndx());
-    m_residual->computeJacobian(x, Jres);
-    VectorXs err = (*m_residual)(x);
-    out = Jres.transpose() * (m_weights * Jres) +
-          m_residual->vectorHessianProduct(x, m_weights * err + m_slope);
+    MatrixXs Jres(residual_->nr(), this->ndx());
+    residual_->computeJacobian(x, Jres);
+    VectorXs err = (*residual_)(x);
+    out = Jres.transpose() * (weights_ * Jres) +
+          residual_->vectorHessianProduct(x, weights_ * err + slope_);
   }
 };
 

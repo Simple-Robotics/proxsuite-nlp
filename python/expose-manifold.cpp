@@ -38,8 +38,8 @@ exposeTangentBundle(const char *name, const char *docstring, Init init) {
 template <typename LieGroup>
 void exposeLieGroup(const char *name, const char *docstring) {
   using BoundType = PinocchioLieGroup<LieGroup>;
-  bp::class_<BoundType, bp::bases<context::Manifold>>(name, docstring,
-                                                      bp::init<>());
+  bp::class_<BoundType, bp::bases<context::Manifold>>(
+      name, docstring, bp::init<>(bp::args("self")));
 }
 #endif
 
@@ -90,7 +90,7 @@ void exposeManifold() {
   using VectorSpace = pin::VectorSpaceOperationTpl<Eigen::Dynamic, Scalar>;
   bp::class_<PinocchioLieGroup<VectorSpace>, bp::bases<Manifold>>(
       "EuclideanSpace", "Pinocchio's n-dimensional Euclidean vector space.",
-      bp::init<int>(bp::args("dim")));
+      bp::init<int>(bp::args("self", "dim")));
 
   exposeLieGroup<pin::VectorSpaceOperationTpl<1, Scalar>>(
       "R", "One-dimensional Euclidean space AKA real number line.");
@@ -117,13 +117,13 @@ void exposeManifold() {
   /* Expose tangent bundles */
 
   exposeTangentBundle<SO2>("TSO2", "Tangent bundle of the SO(2) group.")
-      .def(bp::init<>());
+      .def(bp::init<>(bp::args("self")));
   exposeTangentBundle<SO3>("TSO3", "Tangent bundle of the SO(3) group.")
-      .def(bp::init<>());
+      .def(bp::init<>(bp::args("self")));
   exposeTangentBundle<SE2>("TSE2", "Tangent bundle of the SE(2) group.")
-      .def(bp::init<>());
+      .def(bp::init<>(bp::args("self")));
   exposeTangentBundle<SE3>("TSE3", "Tangent bundle of the SE(3) group.")
-      .def(bp::init<>());
+      .def(bp::init<>(bp::args("self")));
 
   /* Groups associated w/ Pinocchio models */
   using Multibody = MultibodyConfiguration<Scalar>;

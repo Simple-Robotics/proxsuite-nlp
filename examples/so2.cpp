@@ -20,8 +20,9 @@ using Manifold = PinocchioLieGroup<SO2>;
 using Problem = ProblemTpl<double>;
 
 int main() {
-  Manifold space;
-  SO2 lg = space.m_lg;
+  auto space_ = std::make_shared<Manifold>();
+  const Manifold &space = *space_;
+  SO2 lg = space.lg_;
   Manifold::PointType neut = lg.neutral();
   Manifold::PointType p0 = lg.random(); // target
   Manifold::PointType p1 = lg.random();
@@ -52,7 +53,7 @@ int main() {
   Manifold::MatrixXs weights(ndx, ndx);
   weights.setIdentity();
 
-  ManifoldDifferenceToPoint<double> residual(space, p0);
+  ManifoldDifferenceToPoint<double> residual(space_, p0);
   fmt::print("residual val: {}\n", residual(p1));
   fmt::print("residual Jac: {}\n", residual.computeJacobian(p1));
   auto resptr = std::make_shared<ManifoldDifferenceToPoint<double>>(residual);
@@ -69,7 +70,7 @@ int main() {
   auto eq_set = std::make_shared<Problem::EqualityType>();
   std::vector<Problem::ConstraintType> cstrs;
   cstrs.emplace_back(resptr, eq_set);
-  auto prob = std::make_shared<Problem>(cost_fun, cstrs);
+  auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
 
   /// Test out merit functions
 

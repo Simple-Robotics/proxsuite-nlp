@@ -21,20 +21,29 @@ public:
   using EqualityType = EqualityConstraint<Scalar>;
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
-  using CostPtr = shared_ptr<CostType>;
+  using Manifold = ManifoldAbstractTpl<Scalar>;
 
-  /// The cost functional
-  CostPtr cost_;
+  /// The working manifold \f$M\f$.
+  shared_ptr<Manifold> manifold_;
+  /// The cost function.
+  shared_ptr<CostType> cost_;
+  /// The set of constraints.
+  std::vector<ConstraintType> constraints_;
 
   const CostType &cost() const { return *cost_; }
+  const Manifold &manifold() const { return *manifold_; }
 
-  ProblemTpl(const CostPtr &cost) : cost_(cost), m_nc_total(0) {
+  ProblemTpl(const shared_ptr<Manifold> &manifold,
+             const shared_ptr<CostType> &cost,
+             const std::vector<ConstraintType> &constraints)
+      : manifold_(manifold), cost_(cost), constraints_(constraints),
+        nc_total_(0) {
     reset_constraint_dim_vars();
   }
 
-  ProblemTpl(const CostPtr &cost,
-             const std::vector<ConstraintType> &constraints)
-      : cost_(cost), constraints_(constraints), m_nc_total(0) {
+  ProblemTpl(const shared_ptr<Manifold> &manifold,
+             const shared_ptr<CostType> &cost)
+      : ProblemTpl(manifold, cost, {}) {
     reset_constraint_dim_vars();
   }
 
@@ -46,10 +55,10 @@ public:
   /// @brief Get the number of constraint blocks.
   std::size_t getNumConstraints() const { return constraints_.size(); }
 
-  int getTotalConstraintDim() const { return m_nc_total; }
+  int getTotalConstraintDim() const { return nc_total_; }
 
   /// Get dimension of constraint \p i.
-  int getConstraintDim(std::size_t i) const { return m_ncs[i]; }
+  int getConstraintDim(std::size_t i) const { return ncs_[i]; }
 
   std::size_t nx() const { return cost().nx(); }
   std::size_t ndx() const { return cost().ndx(); }
@@ -60,9 +69,9 @@ public:
     reset_constraint_dim_vars();
   }
 
-  std::vector<int> getIndices() const { return m_indices; }
+  std::vector<int> getIndices() const { return indices_; }
 
-  int getIndex(std::size_t i) const { return m_indices[i]; }
+  int getIndex(std::size_t i) const { return indices_[i]; }
 
   void evaluate(const ConstVectorRef &x,
                 WorkspaceTpl<Scalar> &workspace) const {
@@ -83,27 +92,25 @@ public:
   }
 
 protected:
-  /// Vector of constraints.
-  std::vector<ConstraintType> constraints_;
   /// Total number of constraints
-  int m_nc_total;
-  std::vector<int> m_ncs;
-  std::vector<int> m_indices;
+  int nc_total_;
+  std::vector<int> ncs_;
+  std::vector<int> indices_;
 
   /// Set values of const data members for constraint dimensions
   void reset_constraint_dim_vars() {
-    m_ncs.clear();
-    m_indices.clear();
+    ncs_.clear();
+    indices_.clear();
     int cursor = 0;
     int nr = 0;
     for (std::size_t i = 0; i < constraints_.size(); i++) {
       const ConstraintType &cstr = constraints_[i];
       nr = cstr.func().nr();
-      m_ncs.push_back(nr);
-      m_indices.push_back(cursor);
+      ncs_.push_back(nr);
+      indices_.push_back(cursor);
       cursor += nr;
     }
-    m_nc_total = cursor;
+    nc_total_ = cursor;
   }
 };
 

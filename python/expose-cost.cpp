@@ -76,11 +76,11 @@ void exposeCost() {
       "CostSum", "Sum of cost functions.",
       bp::init<int, int, const std::vector<CostSum_t::BasePtr> &,
                const std::vector<context::Scalar> &>(
-          bp::args("nx", "ndx", "components", "weights")))
-      .def(bp::init<int, int>(bp::args("nx", "ndx")))
+          bp::args("self", "nx", "ndx", "components", "weights")))
+      .def(bp::init<int, int>(bp::args("self", "nx", "ndx")))
       .add_property("num_components", &CostSum_t::numComponents,
                     "Number of components.")
-      .def_readonly("weights", &CostSum_t::m_weights)
+      .def_readonly("weights", &CostSum_t::weights_)
       .def("add_component", &CostSum_t::addComponent,
            ((bp::arg("self"), bp::arg("comp"), bp::arg("w") = 1.)),
            "Add a component to the cost.")
@@ -114,13 +114,17 @@ void exposeCost() {
       "QuadraticDistanceCost",
       "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the "
       "manifold.",
-      bp::init<const Manifold &, const VectorXs &, const MatrixXs &>(
-          bp::args("space", "target", "weights")))
-      .def(bp::init<const Manifold &, const VectorXs &>(
-          bp::args("space", "target")))
+      bp::init<const shared_ptr<Manifold> &, const VectorXs &,
+               const MatrixXs &>(
+          bp::args("self", "space", "target", "weights")))
+      .def(bp::init<const shared_ptr<Manifold> &, const VectorXs &>(
+          bp::args("self", "space", "target")))
+      .def(bp::init<const shared_ptr<Manifold> &>(
+          "Constructor which uses the neutral element of the space.",
+          bp::args("self", "space")))
       .def("update_target",
            &QuadraticDistanceCost<context::Scalar>::updateTarget,
-           bp::args("new_target"));
+           bp::args("self", "new_target"));
 }
 
 } // namespace python

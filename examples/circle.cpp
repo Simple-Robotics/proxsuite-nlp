@@ -18,7 +18,8 @@ using Problem = ProblemTpl<double>;
 
 int main() {
   constexpr int dim = 2;
-  Manifold space(dim);
+  auto space_ = std::make_shared<Manifold>(dim);
+  const Manifold &space = *space_;
   const int nx = space.nx();
   Manifold::PointType p0(nx); // target
   p0 << -.4, .7;
@@ -45,14 +46,14 @@ int main() {
   weights.setIdentity();
 
   auto cost_fun =
-      std::make_shared<QuadraticDistanceCost<double>>(space, p0, weights);
+      std::make_shared<QuadraticDistanceCost<double>>(space_, p0, weights);
   const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
 
   using DistResType = ManifoldDifferenceToPoint<double>;
-  auto resptr = std::make_shared<DistResType>(space, space.neutral());
+  auto resptr = std::make_shared<DistResType>(space_, space.neutral());
   const auto &residual = *resptr;
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
@@ -73,7 +74,7 @@ int main() {
   using CstrType = Problem::ConstraintType;
   CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
   std::vector<CstrType> cstrs{cstr1};
-  auto prob = std::make_shared<Problem>(cost_fun, cstrs);
+  auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
 
   /// Test out merit functions
 
@@ -110,7 +111,7 @@ int main() {
   WorkspaceTpl<double> workspace(space.nx(), space.ndx(), *prob);
   ResultsTpl<double> results(space.nx(), *prob);
 
-  SolverTpl<double> solver(space, prob);
+  SolverTpl<double> solver(prob);
   solver.verbose = VerboseLevel::VERY;
   solver.setPenalty(1. / 50);
   solver.use_gauss_newton = true;

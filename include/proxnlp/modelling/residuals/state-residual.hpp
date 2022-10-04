@@ -1,6 +1,6 @@
 /**
  * @file    Implements a function which is the residual between two points on
- * the manifold, obtained by the manifold retraction op.
+ * the space, obtained by the space retraction op.
  */
 #pragma once
 
@@ -10,8 +10,8 @@
 namespace proxnlp {
 
 /**
- * Constraint function to be equal to a given element of a manifold.
- * This is templated on the manifold.
+ * Constraint function to be equal to a given element of a space.
+ * This is templated on the space.
  */
 template <typename _Scalar>
 struct ManifoldDifferenceToPoint : C2FunctionTpl<_Scalar> {
@@ -22,25 +22,24 @@ public:
   using Base = C2FunctionTpl<Scalar>;
   using Base::operator();
   using Base::computeJacobian;
-  using M = ManifoldAbstractTpl<Scalar>;
+  using Manifold = ManifoldAbstractTpl<Scalar>;
 
-  /// Target point on the manifold.
-  typename M::PointType m_target;
+  /// Target point on the space.
+  typename Manifold::PointType target_;
+  shared_ptr<Manifold> space_;
 
-  ManifoldDifferenceToPoint(const M &manifold, const ConstVectorRef &target)
-      : Base(manifold.nx(), manifold.ndx(), manifold.ndx()), m_target(target),
-        m_manifold(manifold) {}
+  ManifoldDifferenceToPoint(const shared_ptr<Manifold> &space,
+                            const ConstVectorRef &target)
+      : Base(space->nx(), space->ndx(), space->ndx()), target_(target),
+        space_(space) {}
 
   ReturnType operator()(const ConstVectorRef &x) const {
-    return m_manifold.difference(m_target, x);
+    return space_->difference(target_, x);
   }
 
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const {
-    m_manifold.Jdifference(m_target, x, Jout, 1);
+    space_->Jdifference(target_, x, Jout, 1);
   }
-
-private:
-  const M &m_manifold;
 };
 
 } // namespace proxnlp

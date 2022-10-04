@@ -30,8 +30,8 @@ def test_quad1d(ls_strat, ls_interp_type):
     fs = utils.CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
-    problem = proxnlp.Problem(cost_fun)
-    solver = proxnlp.Solver(space, problem, 1e-5)
+    problem = proxnlp.Problem(space, cost_fun)
+    solver = proxnlp.Solver(problem, 1e-5)
     ws = proxnlp.Workspace(nx, nx, problem)
     rs = proxnlp.Results(nx, problem)
     solver.ls_strat = ls_strat
@@ -57,8 +57,8 @@ def test_cubic1d(ls_strat, ls_interp_type):
     fs = utils.CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
-    problem = proxnlp.Problem(cost_fun)
-    solver = proxnlp.Solver(space, problem, 1e-5)
+    problem = proxnlp.Problem(space, cost_fun)
+    solver = proxnlp.Solver(problem, 1e-5)
     ws = proxnlp.Workspace(nx, nx, problem)
     rs = proxnlp.Results(nx, problem)
     x0 = np.array([1.0])

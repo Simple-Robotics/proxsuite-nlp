@@ -161,7 +161,7 @@ bound_constraint = proxnlp.constraints.create_inequality_constraint(
 constraints_ = []
 constraints_.append(dynamical_constraint)
 constraints_.append(bound_constraint)
-prob = proxnlp.Problem(cost_fun, constraints_)
+prob = proxnlp.Problem(pb_space, cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
@@ -173,7 +173,7 @@ tol = 1e-5
 rho_init = 1e-6
 mu_init = 0.9
 solver = proxnlp.Solver(
-    pb_space, prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
+    prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.register_callback(callback)
 solver.max_iters = 300

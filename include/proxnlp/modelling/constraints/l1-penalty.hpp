@@ -20,22 +20,22 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
   using ActiveType = typename Base::ActiveType;
   using FunctionType = typename Base::FunctionType;
 
-  Scalar m_mu;
+  Scalar mu_;
 
   Scalar evaluate(const ConstVectorRef &zproj) const {
     return zproj.lpNorm<1>();
   }
 
   ReturnType projection(const ConstVectorRef &z) const {
-    return z.array().sign() * (z.abs().array() - m_mu).max(Scalar(0.));
+    return z.array().sign() * (z.abs().array() - mu_).max(Scalar(0.));
   }
 
   void computeActiveSet(const ConstVectorRef &z,
                         Eigen::Ref<ActiveType> out) const {
-    out = (z.abs().array() - m_mu) <= Scalar(0.);
+    out = (z.abs().array() - mu_) <= Scalar(0.);
   }
 
-  void setProxParameters(const Scalar mu) { m_mu = mu; };
+  void setProxParameters(const Scalar mu) { mu_ = mu; };
 };
 
 } // namespace proxnlp

@@ -52,14 +52,14 @@ cstrs_ = [
     create_inequality_constraint(res3),
 ]
 
-prob = proxnlp.Problem(cost_, cstrs_)
-results = proxnlp.Results(nx, prob)
-workspace = proxnlp.Workspace(nx, nx, prob)
+problem = proxnlp.Problem(space, cost_, cstrs_)
+results = proxnlp.Results(nx, problem)
+workspace = proxnlp.Workspace(nx, nx, problem)
 
 mu_init = 0.01
 rho_init = 0.0
 solver = proxnlp.Solver(
-    space, prob, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
+    problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
 solver.use_gauss_newton = True
 callback = proxnlp.helpers.HistoryCallback()

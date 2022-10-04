@@ -27,14 +27,14 @@ void exposeResiduals() {
 
   expose_function<ManifoldDifferenceToPoint<Scalar>>(
       "ManifoldDifferenceToPoint", "Difference vector x (-) x0.",
-      bp::init<const Manifold &, const ConstVectorRef &>(
+      bp::init<const shared_ptr<Manifold> &, const ConstVectorRef &>(
           bp::args("self", "space", "target")))
-      .add_property("target", &ManifoldDifferenceToPoint<Scalar>::m_target);
+      .add_property("target", &ManifoldDifferenceToPoint<Scalar>::target_);
 
   expose_function<LinearFunctionDifferenceToPoint<Scalar>>(
       "LinearFunctionDifferenceToPoint",
       "Linear function of the vector difference to a reference point.",
-      bp::init<const Manifold &, VectorXs, MatrixXs, VectorXs>(
+      bp::init<const shared_ptr<Manifold> &, VectorXs, MatrixXs, VectorXs>(
           bp::args("self", "space", "target", "A", "b")));
 }
 

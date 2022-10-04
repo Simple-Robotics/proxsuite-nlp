@@ -38,15 +38,17 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
   using Base = ComposeFunctionTpl<Scalar>;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
-  using M = ManifoldAbstractTpl<Scalar>;
+  using Manifold = ManifoldAbstractTpl<Scalar>;
 
-  LinearFunctionDifferenceToPoint(const M &manifold,
+  LinearFunctionDifferenceToPoint(const shared_ptr<Manifold> &space,
                                   const ConstVectorRef &target,
                                   const ConstMatrixRef &A,
                                   const ConstVectorRef &b)
       : Base(std::make_shared<LinearFunctionTpl<Scalar>>(A, b),
-             std::make_shared<ManifoldDifferenceToPoint<Scalar>>(manifold,
-                                                                 target)) {}
+             std::make_shared<ManifoldDifferenceToPoint<Scalar>>(space,
+                                                                 target)) {
+    proxnlp_dim_check(target, space->nx());
+  }
 };
 
 } // namespace proxnlp

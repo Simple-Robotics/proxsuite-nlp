@@ -30,7 +30,6 @@ public:
   using LSOptions = typename Linesearch<Scalar>::Options;
 
   /// Manifold on which to optimize.
-  const Manifold &manifold;
   shared_ptr<Problem> problem_;
   /// Merit function.
   PDALFunction<Scalar> merit_fun;
@@ -91,15 +90,16 @@ public:
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   std::vector<CallbackPtr> callbacks_;
 
-  SolverTpl(const Manifold &manifold, const shared_ptr<Problem> &prob,
-            const Scalar tol = 1e-6, const Scalar mu_eq_init = 1e-2,
-            const Scalar rho_init = 0., const VerboseLevel verbose = QUIET,
-            const Scalar mu_lower = 1e-9, const Scalar prim_alpha = 0.1,
-            const Scalar prim_beta = 0.9, const Scalar dual_alpha = 1.,
-            const Scalar dual_beta = 1.,
+  SolverTpl(const shared_ptr<Problem> &prob, const Scalar tol = 1e-6,
+            const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
+            const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
+            const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,
+            const Scalar dual_alpha = 1., const Scalar dual_beta = 1.,
             const LSOptions ls_options = LSOptions());
 
   enum InertiaFlag { OK = 0, BAD = 1, ZEROS = 2 };
+
+  const Manifold &manifold() const { return *problem_->manifold_; }
 
   /**
    * @brief Solve the problem.

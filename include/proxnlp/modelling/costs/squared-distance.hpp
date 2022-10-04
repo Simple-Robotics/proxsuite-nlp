@@ -6,7 +6,7 @@
 namespace proxnlp {
 
 /** @brief    Weighted quadratic distance \f$\frac{1}{2}\|x\ominus
- * \bar{x}\|^2_W\f$ on a manifold.
+ * \bar{x}\|^2_W\f$ on a space.
  *
  *  @details  This function subclasses from QuadraticResidualCost and
  *            provides a convenient constructor. It uses
@@ -18,22 +18,26 @@ struct QuadraticDistanceCost : QuadraticResidualCost<_Scalar> {
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using FunctionType = ManifoldDifferenceToPoint<Scalar>;
-  using M = ManifoldAbstractTpl<Scalar>;
+  using Manifold = ManifoldAbstractTpl<Scalar>;
   using Base = QuadraticResidualCost<Scalar>;
-  using Base::m_residual;
-  using Base::m_weights;
+  using Base::residual_;
+  using Base::weights_;
 
-  QuadraticDistanceCost(const M &manifold, const ConstVectorRef &target,
+  QuadraticDistanceCost(const shared_ptr<Manifold> &space,
+                        const ConstVectorRef &target,
                         const ConstMatrixRef &weights)
-      : Base(std::make_shared<FunctionType>(manifold, target), weights) {}
+      : Base(std::make_shared<FunctionType>(space, target), weights) {}
 
-  QuadraticDistanceCost(const M &manifold, const ConstVectorRef &target)
-      : QuadraticDistanceCost(
-            manifold, target,
-            MatrixXs::Identity(manifold.ndx(), manifold.ndx())) {}
+  QuadraticDistanceCost(const shared_ptr<Manifold> &space,
+                        const ConstVectorRef &target)
+      : QuadraticDistanceCost(space, target,
+                              MatrixXs::Identity(space->ndx(), space->ndx())) {}
+
+  QuadraticDistanceCost(const shared_ptr<Manifold> &space)
+      : QuadraticDistanceCost(space, space->neutral()) {}
 
   void updateTarget(const ConstVectorRef &x) {
-    std::static_pointer_cast<FunctionType>(m_residual)->m_target = x;
+    std::static_pointer_cast<FunctionType>(residual_)->target_ = x;
   }
 };
 

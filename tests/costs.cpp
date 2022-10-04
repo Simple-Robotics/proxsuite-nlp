@@ -16,13 +16,14 @@ namespace utf = boost::unit_test;
 using SE2 = PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>>;
 
 BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
-  SE2 space;
+  auto space_ = std::make_shared<SE2>();
+  const SE2 &space = *space_;
   auto x0 = space.neutral();
   auto x1 = space.rand();
   auto x2 = space.rand();
 
-  QuadraticDistanceCost<double> cost1(space, x0);
-  QuadraticDistanceCost<double> cost2(space, x1);
+  QuadraticDistanceCost<double> cost1(space_, x0);
+  QuadraticDistanceCost<double> cost2(space_, x1);
   CostSum<double> cost_sum = cost1 + cost2;
 
   BOOST_CHECK_EQUAL(cost_sum.call(x2), cost1.call(x2) + cost2.call(x2));

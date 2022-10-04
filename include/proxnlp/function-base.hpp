@@ -10,28 +10,28 @@ namespace proxnlp {
  */
 template <typename _Scalar> struct BaseFunctionTpl : math_types<_Scalar> {
 protected:
-  const int m_nx;
-  const int m_ndx;
-  const int m_nr;
+  int nx_;
+  int ndx_;
+  int nr_;
 
 public:
   using Scalar = _Scalar;
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
+  BaseFunctionTpl(const int nx, const int ndx, const int nr)
+      : nx_(nx), ndx_(ndx), nr_(nr) {}
+
   /// @brief      Evaluate the residual at a given point x.
   virtual ReturnType operator()(const ConstVectorRef &x) const = 0;
-
-  BaseFunctionTpl(const int nx, const int ndx, const int nr)
-      : m_nx(nx), m_ndx(ndx), m_nr(nr) {}
 
   virtual ~BaseFunctionTpl() = default;
 
   /// Get function input vector size (representation of manifold).
-  int nx() const { return m_nx; }
+  int nx() const { return nx_; }
   /// Get input manifold's tangent space dimension.
-  int ndx() const { return m_ndx; }
+  int ndx() const { return ndx_; }
   /// Get function codimension.
-  int nr() const { return m_nr; }
+  int nr() const { return nr_; }
 };
 
 /** @brief  Differentiable function, with method for the Jacobian.
@@ -43,10 +43,10 @@ public:
   using Base = BaseFunctionTpl<_Scalar>;
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
-  Base &toBase() { return static_cast<Base &>(*this); }
-
   C1FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
+
+  Base &toBase() { return static_cast<Base &>(*this); }
 
   /// @brief      Jacobian matrix of the constraint function.
   virtual void computeJacobian(const ConstVectorRef &x,
@@ -73,10 +73,10 @@ public:
   using Base = C1FunctionTpl<_Scalar>;
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
-  Base &toC1() { return static_cast<Base &>(*this); }
-
   C2FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
+
+  Base &toC1() { return static_cast<Base &>(*this); }
 
   /// @brief      Vector-hessian product.
   virtual void vectorHessianProduct(const ConstVectorRef &,

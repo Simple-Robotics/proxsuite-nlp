@@ -9,7 +9,7 @@ class TestClass:
     cost.add_component(
         proxnlp.costs.QuadraticDistanceCost(space, space.neutral(), np.zeros((1, 1)))
     )
-    problem = proxnlp.Problem(cost, [])
+    problem = proxnlp.Problem(space, cost, [])
 
     def test_print_options(self):
         options = proxnlp.LSOptions()
@@ -23,7 +23,7 @@ class TestClass:
         print(res)
 
     def test_print_solver(self):
-        solver = proxnlp.Solver(self.space, self.problem)
+        solver = proxnlp.Solver(self.problem)
         print(solver)
 
 
