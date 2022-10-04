@@ -161,19 +161,19 @@ bound_constraint = proxnlp.constraints.create_inequality_constraint(
 constraints_ = []
 constraints_.append(dynamical_constraint)
 constraints_.append(bound_constraint)
-prob = proxnlp.Problem(pb_space, cost_fun, constraints_)
+problem = proxnlp.Problem(pb_space, cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
-print("No. of constraints:", prob.total_constraint_dim)
-workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
-results = proxnlp.Results(pb_space.nx, prob)
+print("No. of constraints:", problem.total_constraint_dim)
+workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, problem)
+results = proxnlp.Results(pb_space.nx, problem)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-5
 rho_init = 1e-6
 mu_init = 0.9
 solver = proxnlp.Solver(
-    prob, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
+    problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.register_callback(callback)
 solver.max_iters = 300
@@ -205,7 +205,6 @@ vs_opt = xs_opt[:, model.nq :]
 
 # Plotting
 
-plt.style.use("seaborn-ticks")
 plt.rcParams["lines.linewidth"] = 1.0
 plt.rcParams["axes.linewidth"] = 1.0
 
