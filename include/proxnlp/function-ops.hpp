@@ -17,21 +17,25 @@ public:
 
   PROXNLP_FUNCTION_TYPEDEFS(Scalar);
 
-  ComposeFunctionTpl(const Base &left, const Base &right)
-      : Base(right.nx(), right.ndx(), left.nr()), left(left), right(right) {}
+  ComposeFunctionTpl(const shared_ptr<Base> &left,
+                     const shared_ptr<Base> &right)
+      : Base(right->nx(), right->ndx(), left->nr()), left_(left),
+        right_(right) {}
 
   ReturnType operator()(const ConstVectorRef &x) const {
-    return left(right(x));
+    return left()(right()(x));
   }
 
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const {
-    left.computeJacobian(right(x), Jout);
-    Jout = Jout * right.computeJacobian(x);
+    left().computeJacobian(right()(x), Jout);
+    Jout = Jout * right().computeJacobian(x);
   }
 
 private:
-  const Base &left;
-  const Base &right;
+  shared_ptr<const Base> left_;
+  shared_ptr<const Base> right_;
+  const Base &left() const { return *left_; }
+  const Base &right() const { return *right_; }
 };
 
 /// @brief    Compose two function objects.
@@ -39,8 +43,9 @@ private:
 /// @return   ComposeFunctionTpl object representing the composition of @p left
 /// and @p right.
 template <typename Scalar>
-ComposeFunctionTpl<Scalar> compose(const C2FunctionTpl<Scalar> &left,
-                                   const C2FunctionTpl<Scalar> &right) {
+ComposeFunctionTpl<Scalar>
+compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
+        const shared_ptr<C2FunctionTpl<Scalar>> &right) {
   return ComposeFunctionTpl<Scalar>(left, right);
 }
 

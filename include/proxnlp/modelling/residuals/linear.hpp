@@ -44,8 +44,9 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
                                   const ConstVectorRef &target,
                                   const ConstMatrixRef &A,
                                   const ConstVectorRef &b)
-      : Base(LinearFunctionTpl<Scalar>(A, b),
-             ManifoldDifferenceToPoint<Scalar>(manifold, target)) {}
+      : Base(std::make_shared<LinearFunctionTpl<Scalar>>(A, b),
+             std::make_shared<ManifoldDifferenceToPoint<Scalar>>(manifold,
+                                                                 target)) {}
 };
 
 } // namespace proxnlp

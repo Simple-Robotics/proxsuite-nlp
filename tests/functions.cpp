@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_compose) {
   A.setRandom();
   b.setRandom();
   using ResType = LinearFunctionTpl<double>;
-  ResType res1(A, b);
+  auto res1 = std::make_shared<ResType>(A, b);
 
   Vector_t x0;
   x0.setOnes();
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_compose) {
   BOOST_CHECK(J_.isApprox(A * A));
 
   auto v0 = res2(x0);
-  auto v1_manual = res1(res1(x0));
+  auto v1_manual = (*res1)((*res1)(x0));
   fmt::print("f(f(x0)):  {}\nshould be: {}\n", v0.transpose(),
              v1_manual.transpose());
   BOOST_CHECK(v1_manual.isApprox(v0));

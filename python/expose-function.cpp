@@ -44,7 +44,7 @@ void exposeFunctionTypes() {
 
   bp::class_<ComposeFunctionTpl<context::Scalar>, bp::bases<C2Function>>(
       "ComposeFunction", "Composition of two functions.",
-      bp::init<const C2Function &, const C2Function &>(
+      bp::init<const shared_ptr<C2Function> &, const shared_ptr<C2Function> &>(
           bp::args("self", "left", "right")));
 
   bp::def("compose", &::proxnlp::compose<context::Scalar>,
