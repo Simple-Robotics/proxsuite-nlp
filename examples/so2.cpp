@@ -2,18 +2,14 @@
  * Optimize a quadratic function on a circle, or on a disk.
  *
  */
-#include "proxnlp/cost-function.hpp"
-#include "proxnlp/merit-function-base.hpp"
-#include "proxnlp/pdal.hpp"
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxnlp/solver-base.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
-
-using fmt::format;
 
 using namespace proxnlp;
 using Manifold = PinocchioLieGroup<SO2>;
@@ -22,31 +18,19 @@ using Problem = ProblemTpl<double>;
 int main() {
   auto space_ = std::make_shared<Manifold>();
   const Manifold &space = *space_;
-  SO2 lg = space.lg_;
-  Manifold::PointType neut = lg.neutral();
-  Manifold::PointType p0 = lg.random(); // target
-  Manifold::PointType p1 = lg.random();
+  Manifold::PointType p0 = space.rand(); // target
+  Manifold::PointType p1 = space.rand();
+  Manifold::PointType neut = space.neutral();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
-  Manifold::TangentVectorType th0(1), th1(1);
-  th0.setZero();
-  th1.setZero();
-  space.difference(neut, p0, th0);
-  space.difference(neut, p1, th1);
-
-  fmt::print("Angles:\n\tth0={}\n\tth1={}\n", th0, th1);
 
   const int ndx = space.ndx();
-  Manifold::TangentVectorType d(ndx);
-  d.setZero();
   Manifold::MatrixXs J0(ndx, ndx), J1(ndx, ndx);
   J0.setZero();
   J1.setZero();
 
-  space.difference(p0, p1, d);
   space.Jdifference(p0, p1, J0, 0);
   space.Jdifference(p0, p1, J1, 1);
-  fmt::print("{} << p1 (-) p0\n", d);
   fmt::print("J0 = {}\n", J0);
   fmt::print("J1 = {}\n", J1);
 
@@ -67,7 +51,7 @@ int main() {
 
   /// DEFINE A PROBLEM
 
-  auto eq_set = std::make_shared<Problem::EqualityType>();
+  auto eq_set = std::make_shared<EqualityConstraint<double>>();
   std::vector<Problem::ConstraintType> cstrs;
   cstrs.emplace_back(resptr, eq_set);
   auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
@@ -79,14 +63,9 @@ int main() {
   Problem::MatrixXs hess(space.ndx(), space.ndx());
   hess.setZero();
 
-  EvalObjective<double> merit_fun(prob);
-  fmt::print("eval merit fun :  M={}\n", merit_fun(p1));
-
   // PDAL FUNCTION
-  fmt::print("  LAGR FUNC TEST\n");
+  fmt::print("pdAL function test\n");
 
-  PDALFunction<double> pdmerit(prob, 0.01);
-  auto lagr = pdmerit.lagrangian_;
   Problem::VectorXs lams_data;
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
@@ -95,13 +74,12 @@ int main() {
              "1st mul = {}\n",
              lams.size(), lams[0]);
 
-  // lagrangian
-  fmt::print("\tL(p0) = {}\n", lagr(p0, lams));
-  fmt::print("\tL(p1) = {}\n", lagr(p1, lams));
-  lagr.computeGradient(p0, lams, grad);
-  fmt::print("\tgradL(p0) = {}\n", grad);
-  lagr.computeGradient(p1, lams, grad);
-  fmt::print("\tgradL(p1) = {}\n", grad);
+  SolverTpl<double> solver(prob, 0.01);
+  WorkspaceTpl<double> ws(*prob);
+  ResultsTpl<double> rs(*prob);
+  solver.solve(ws, rs, space.rand());
+
+  fmt::print("Results: {}\n", rs);
 
   return 0;
 }

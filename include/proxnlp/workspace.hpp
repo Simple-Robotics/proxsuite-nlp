@@ -12,19 +12,19 @@ namespace proxnlp {
 /** Workspace class, which holds the necessary intermediary data
  * for the solver to function.
  */
-template <typename _Scalar> struct WorkspaceTpl {
+template <typename Scalar> struct WorkspaceTpl {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
 
   /// Newton iteration variables
 
-  const int ndx;
-  const std::size_t numblocks; // number of constraint blocks
-  const int numdual;           // total constraint dim
+  int nx;
+  int ndx;
+  std::size_t numblocks; // number of constraint blocks
+  int numdual;           // total constraint dim
 
   /// KKT iteration matrix.
   MatrixXs kkt_matrix;
@@ -97,8 +97,8 @@ public:
   /// Merit function derivative in descent direction
   Scalar dmerit_dir = 0.;
 
-  WorkspaceTpl(const int nx, const int ndx, const Problem &prob)
-      : ndx(ndx), numblocks(prob.getNumConstraints()),
+  WorkspaceTpl(const Problem &prob)
+      : nx(prob.nx()), ndx(prob.ndx()), numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
         kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
         pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),

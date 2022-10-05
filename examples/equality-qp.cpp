@@ -58,8 +58,8 @@ template <int N, int M = 1> int submain() {
   auto problem = std::make_shared<Problem>(space_, cost, constraints);
 
   using Solver_t = SolverTpl<double>;
-  typename Solver_t::Workspace workspace(space.nx(), space.nx(), *problem);
-  typename Solver_t::Results results(space.nx(), *problem);
+  typename Solver_t::Workspace workspace(*problem);
+  typename Solver_t::Results results(*problem);
 
   Solver_t solver(problem);
   solver.setPenalty(1e-4);
@@ -67,7 +67,7 @@ template <int N, int M = 1> int submain() {
   solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lams_prev);
-  fmt::print("Results {}\n\n", results);
+  fmt::print("{}\n", results);
 
   return 0;
 }

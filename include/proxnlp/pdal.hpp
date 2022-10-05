@@ -1,11 +1,7 @@
 #pragma once
 
 #include "proxnlp/fwd.hpp"
-#include "proxnlp/lagrangian.hpp"
-
-#include "proxnlp/workspace.hpp"
-
-#include <vector>
+#include "proxnlp/merit-function-base.hpp"
 
 namespace proxnlp {
 
@@ -27,12 +23,10 @@ public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
-  using LagrangianType = LagrangianFunction<Scalar>;
 
   shared_ptr<Problem> problem_;
-  LagrangianType lagrangian_;
   /// Generalized pdAL dual penalty param
-  const Scalar gamma_ = 1.;
+  Scalar gamma_ = 1.;
 
   PDALFunction(shared_ptr<Problem> prob, const Scalar mu);
 
@@ -40,7 +34,7 @@ public:
    *  @brief Compute the first-order multiplier estimates.
    */
   void computeFirstOrderMultipliers(const ConstVectorRef &x,
-                                    const VectorOfRef &lams_ext,
+                                    const std::vector<VectorRef> &lams_ext,
                                     std::vector<VectorRef> &lams_cache,
                                     std::vector<VectorRef> &out) const;
 

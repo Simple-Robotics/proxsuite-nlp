@@ -5,8 +5,6 @@
 #include "proxnlp/constraint-base.hpp"
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 
-#include <vector>
-
 namespace proxnlp {
 
 template <typename _Scalar> struct ProblemTpl {
@@ -17,8 +15,6 @@ public:
   /// Generic constraint type
   using ConstraintType = ConstraintObject<Scalar>;
   using ConstraintPtr = shared_ptr<ConstraintType>;
-  /// Equality constraint type
-  using EqualityType = EqualityConstraint<Scalar>;
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
@@ -60,8 +56,8 @@ public:
   /// Get dimension of constraint \p i.
   int getConstraintDim(std::size_t i) const { return ncs_[i]; }
 
-  std::size_t nx() const { return cost().nx(); }
-  std::size_t ndx() const { return cost().ndx(); }
+  std::size_t nx() const { return manifold_->nx(); }
+  std::size_t ndx() const { return manifold_->ndx(); }
 
   /// @brief Add a constraint to the problem, after initialization.
   template <typename T> void addConstraint(T &&cstr) {
@@ -115,6 +111,7 @@ protected:
 };
 
 namespace helpers {
+
 /// @brief   Allocate a set of multipliers (or residuals) for a given problem
 /// instance.
 template <typename Scalar>

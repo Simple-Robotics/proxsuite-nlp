@@ -12,9 +12,8 @@ void exposeResults() {
       .value("success", ConvergenceFlag::SUCCESS)
       .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED);
 
-  bp::class_<Results>(
-      "Results", "Results holder struct.",
-      bp::init<int, context::Problem &>(bp::args("self", "nx", "problem")))
+  bp::class_<Results>("Results", "Results holder struct.",
+                      bp::init<context::Problem &>(bp::args("self", "problem")))
       .def_readonly("converged", &Results::converged)
       .def_readonly("merit", &Results::merit, "Merit function value.")
       .def_readonly("value", &Results::value)

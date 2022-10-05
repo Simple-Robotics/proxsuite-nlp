@@ -10,7 +10,6 @@
 #include "proxnlp/math.hpp"
 #include <type_traits>
 
-#include <vector>
 #include <algorithm>
 #include <numeric>
 

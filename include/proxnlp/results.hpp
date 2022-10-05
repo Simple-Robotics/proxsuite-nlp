@@ -42,11 +42,11 @@ template <typename _Scalar> struct ResultsTpl {
   Scalar mu;
   Scalar rho;
 
-  ResultsTpl(const int nx, const Problem &prob)
-      : x_opt(nx), lams_opt_data(prob.getTotalConstraintDim()),
+  ResultsTpl(const Problem &prob)
+      : x_opt(prob.manifold_->neutral()),
+        lams_opt_data(prob.getTotalConstraintDim()),
         constraint_violations(prob.getNumConstraints()), num_iters(0), mu(0.),
         rho(0.) {
-    x_opt.setZero();
     helpers::allocateMultipliersOrResiduals(prob, lams_opt_data, lams_opt);
     constraint_violations.setZero();
     active_set.reserve(prob.getNumConstraints());

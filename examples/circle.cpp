@@ -9,6 +9,7 @@
 #include "proxnlp/modelling/costs/quadratic-residual.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 #include "proxnlp/solver-base.hpp"
+#include "proxnlp/lagrangian.hpp"
 
 #include "example-base.hpp"
 
@@ -83,14 +84,11 @@ int main() {
   Problem::MatrixXs hess(space.ndx(), space.ndx());
   hess.setZero();
 
-  EvalObjective<double> merit_fun(prob);
-  fmt::print("eval merit fun:  M={}\n", merit_fun(p1));
-
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
   PDALFunction<double> pdmerit(prob, 0.01);
-  LagrangianFunction<double> &lagr = pdmerit.lagrangian_;
+  LagrangianFunction<double> lagr(prob);
   Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
@@ -99,8 +97,8 @@ int main() {
              lams[0]);
 
   // lagrangian
-  fmt::print("\tL(p0) = {}\n", lagr(p0, lams));
-  fmt::print("\tL(p1) = {}\n", lagr(p1, lams));
+  fmt::print("\tL(p0) = {}\n", lagr.evaluate(p0, lams));
+  fmt::print("\tL(p1) = {}\n", lagr.evaluate(p1, lams));
   lagr.computeGradient(p0, lams, grad);
   fmt::print("\tgradL(p0) = {}\n", grad.transpose());
   lagr.computeGradient(p1, lams, grad);
@@ -108,8 +106,8 @@ int main() {
 
   // gradient of merit fun
 
-  WorkspaceTpl<double> workspace(space.nx(), space.ndx(), *prob);
-  ResultsTpl<double> results(space.nx(), *prob);
+  WorkspaceTpl<double> workspace(*prob);
+  ResultsTpl<double> results(*prob);
 
   SolverTpl<double> solver(prob);
   solver.verbose = VerboseLevel::VERY;

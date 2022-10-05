@@ -251,8 +251,8 @@ prob = proxnlp.Problem(cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
-workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
-results = proxnlp.Results(pb_space.nx, prob)
+workspace = proxnlp.Workspace(prob)
+results = proxnlp.Results(prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-6

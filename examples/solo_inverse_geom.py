@@ -30,7 +30,7 @@ from proxnlp.utils import CasadiFunction
 
 plt.style.use("seaborn")
 
-### LOAD AND DISPLAY SOLO12
+# LOAD AND DISPLAY SOLO12
 robot = robex.load("solo12")
 model = robot.model
 cmodel = cpin.Model(model)
@@ -54,7 +54,7 @@ try:
     viz.initViewer()
     viz.loadViewerModel()
     viz.display(robot.q0)
-except:
+except Exception:
     viz = None
 
 
@@ -83,15 +83,6 @@ def vizGround(viz, elevation, space, name="ground", color=[1.0, 1.0, 0.6, 1.0]):
     colors = np.array([color] * npts)
     assert colors.shape[1] == 4
     drawer.draw_point_cloud(xyz_g, colors, prefix)
-    # gv = viz.viewer.gui
-    # for i,x in enumerate(np.arange(-1,1,space)):
-    #     gv.deleteNode(f'world/pinocchio/visuals/{name}_cx{i}',True)
-    #     gv.addCurve(f'world/pinocchio/visuals/{name}_cx{i}',
-    #                 [ [x,y,elevation([x,y])] for y in np.arange(-1,1,space) ], color)
-    # for i,y in enumerate(np.arange(-1,1,space)):
-    #     gv.deleteNode(f'world/pinocchio/visuals/{name}_cy{i}',True)
-    #     gv.addCurve(f'world/pinocchio/visuals/{name}_cy{i}',
-    #                 [ [x,y,elevation([x,y])] for x in np.arange(-1,1,space) ], color)
 
 
 if viz is not None:
@@ -108,7 +99,7 @@ mass = sum([y.mass for y in model.inertias])
 grav = np.linalg.norm(model.gravity.linear)
 
 
-### ---------------------------------------------------------------------- ###
+# ---------------------------------------------------------------------- ###
 
 # Build utility functions
 cq = casadi.SX.sym("q", model.nq, 1)
@@ -170,8 +161,8 @@ def compute_cost(q_ref, fs):
     return cost
 
 
-### -------------------------------------------------------------------------------------------- ###
-### PROBLEM --- IPOPT
+# -------------------------------------------------------------------------------------------- ###
+# PROBLEM --- IPOPT
 
 TOLERANCE = 1e-6
 opti = casadi.Opti()
@@ -193,7 +184,7 @@ opti.subject_to(
 )  # Sum of torques around COM is 0
 
 
-### SOLVE
+# SOLVE
 p_opts = {}
 s_opts = {
     "tol": 1.0,
@@ -216,7 +207,7 @@ if viz is not None:
     viz.display(qopt_ipopt)
 
 
-### Problem PROXNLP
+# Problem PROXNLP
 
 xspace = MultibodyPhaseSpace(model)
 pb_space = VectorSpace(4 * 3 + (xspace.ndx))
@@ -248,7 +239,7 @@ ineq_fun = CasadiFunction(
     use_hessian=True,
 )
 
-### Solver setup
+# Solver setup
 
 cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
 eq_constr1_ = proxnlp.constraints.create_equality_constraint(eq_fun)
@@ -260,19 +251,19 @@ constraints.append(eq_constr1_)
 constraints.append(ineq_constr1_)
 constraints.append(ineq_constr2_)
 
-prob = proxnlp.Problem(pb_space, cost_fun_, constraints)
+problem = proxnlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
-print("No. of constraints:", prob.total_constraint_dim)
-workspace = proxnlp.Workspace(pb_space.nx, pb_space.ndx, prob)
-results = proxnlp.Results(pb_space.nx, prob)
+print("No. of constraints:", problem.total_constraint_dim)
+workspace = proxnlp.Workspace(problem)
+results = proxnlp.Results(problem)
 
 callback = proxnlp.helpers.HistoryCallback()
 rho_init = 1e-8
 mu_init = 1e-2
 
 solver = proxnlp.Solver(
-    prob,
+    problem,
     mu_init=mu_init,
     rho_init=rho_init,
     tol=TOLERANCE,

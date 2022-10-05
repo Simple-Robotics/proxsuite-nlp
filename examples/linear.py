@@ -53,8 +53,8 @@ print("Target :", x_target)
 problem = proxnlp.Problem(cost_, [cstr1])
 
 
-results = proxnlp.Results(nx, problem)
-workspace = proxnlp.Workspace(nx, nx, problem)
+results = proxnlp.Results(problem)
+workspace = proxnlp.Workspace(problem)
 
 
 class DumbCallback(proxnlp.helpers.BaseCallback):
@@ -101,8 +101,8 @@ plt.scatter(
     zorder=2
 )
 plt.legend()
-plt.title("Trajectory of optimization")
 
+plt.title("Iterates")
 plt.subplot(122)
 values_ = cb.storage.values.tolist()
 plt.plot(range(1, len(values_) + 1), cb.storage.values.tolist())
@@ -111,10 +111,3 @@ plt.yscale("log")
 plt.title("Problem cost")
 
 plt.show()
-
-
-print(" TEST VERBOSE ")
-results = proxnlp.Results(nx, problem)
-workspace = proxnlp.Workspace(nx, nx, problem)
-solver2 = proxnlp.Solver(space, problem, mu_init=1e-6, verbose=proxnlp.VERBOSE)
-solver2.solve(workspace, results, x_init, lams0)

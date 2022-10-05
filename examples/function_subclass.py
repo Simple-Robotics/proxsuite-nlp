@@ -122,8 +122,8 @@ plot_fun()
 
 # prob = proxnlp.Problem(cs)
 prob = proxnlp.Problem(cs, [cstr])
-ws = proxnlp.Workspace(nx, nx, prob)
-rs = proxnlp.Results(nx, prob)
+ws = proxnlp.Workspace(prob)
+rs = proxnlp.Results(prob)
 
 solver = proxnlp.Solver(space, prob)
 x0 = np.array([2.0, 2.0])

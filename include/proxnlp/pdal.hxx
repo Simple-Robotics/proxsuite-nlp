@@ -5,7 +5,7 @@
 namespace proxnlp {
 template <typename Scalar>
 PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu)
-    : problem_(prob), lagrangian_(prob), mu_penal_(mu) {}
+    : problem_(prob), mu_penal_(mu) {}
 
 template <typename Scalar>
 Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
@@ -28,7 +28,7 @@ Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
 
 template <typename Scalar>
 void PDALFunction<Scalar>::computeFirstOrderMultipliers(
-    const ConstVectorRef &x, const VectorOfRef &lams_ext,
+    const ConstVectorRef &x, const std::vector<VectorRef> &lams_ext,
     std::vector<VectorRef> &lams_cache, std::vector<VectorRef> &out) const {
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);

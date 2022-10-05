@@ -6,9 +6,9 @@ namespace proxnlp {
 namespace python {
 void exposeWorkspace() {
   using context::Scalar;
-  bp::class_<context::Workspace>("Workspace", "SolverTpl workspace.",
-                                 bp::init<int, int, const context::Problem &>(
-                                     bp::args("self", "nx", "ndx", "problem")))
+  bp::class_<context::Workspace>(
+      "Workspace", "SolverTpl workspace.",
+      bp::init<const context::Problem &>(bp::args("self", "problem")))
       .def_readonly("kkt_matrix", &context::Workspace::kkt_matrix,
                     "KKT matrix buffer.")
       .def_readonly("kkt_rhs", &context::Workspace::kkt_rhs,

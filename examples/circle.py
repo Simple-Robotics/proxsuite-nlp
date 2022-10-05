@@ -53,8 +53,8 @@ cstrs_ = [
 ]
 
 problem = proxnlp.Problem(space, cost_, cstrs_)
-results = proxnlp.Results(nx, problem)
-workspace = proxnlp.Workspace(nx, nx, problem)
+results = proxnlp.Results(problem)
+workspace = proxnlp.Workspace(problem)
 
 mu_init = 0.01
 rho_init = 0.0
