@@ -11,7 +11,7 @@
 
 namespace proxnlp {
 template <typename Scalar>
-SolverTpl<Scalar>::SolverTpl(const shared_ptr<Problem> &prob, const Scalar tol,
+SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const Scalar mu_init, const Scalar rho_init,
                              const VerboseLevel verbose, const Scalar mu_lower,
                              const Scalar prim_alpha, const Scalar prim_beta,

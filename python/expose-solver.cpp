@@ -9,6 +9,7 @@ void exposeSolver() {
   using context::Scalar;
   using Solver = context::Solver;
   using context::ConstVectorRef;
+  using context::Problem;
   using context::VectorRef;
 
   bp::enum_<VerboseLevel>("VerboseLevel", "Verbose level for the solver.")
@@ -51,8 +52,8 @@ void exposeSolver() {
 
   bp::class_<Solver>(
       "Solver", "The numerical solver.",
-      bp::init<shared_ptr<context::Problem> &, Scalar, Scalar, Scalar,
-               VerboseLevel, Scalar, Scalar, Scalar, Scalar, Scalar>(
+      bp::init<shared_ptr<Problem>, Scalar, Scalar, Scalar, VerboseLevel,
+               Scalar, Scalar, Scalar, Scalar, Scalar>(
           (bp::arg("self"), bp::arg("problem"), bp::arg("tol") = 1e-6,
            bp::arg("mu_init") = 1e-2, bp::arg("rho_init") = 0.,
            bp::arg("verbose") = VerboseLevel::QUIET, bp::arg("mu_min") = 1e-9,

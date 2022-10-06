@@ -29,16 +29,14 @@ public:
   const CostType &cost() const { return *cost_; }
   const Manifold &manifold() const { return *manifold_; }
 
-  ProblemTpl(const shared_ptr<Manifold> &manifold,
-             const shared_ptr<CostType> &cost,
+  ProblemTpl(shared_ptr<Manifold> manifold, shared_ptr<CostType> cost,
              const std::vector<ConstraintType> &constraints)
       : manifold_(manifold), cost_(cost), constraints_(constraints),
         nc_total_(0) {
     reset_constraint_dim_vars();
   }
 
-  ProblemTpl(const shared_ptr<Manifold> &manifold,
-             const shared_ptr<CostType> &cost)
+  ProblemTpl(shared_ptr<Manifold> manifold, shared_ptr<CostType> cost)
       : ProblemTpl(manifold, cost, {}) {
     reset_constraint_dim_vars();
   }

@@ -9,14 +9,12 @@ void exposeProblem() {
   using context::Manifold;
   using context::Problem;
 
-  using CostPtr = shared_ptr<context::Cost>;
-
   bp::class_<Problem, shared_ptr<Problem>>(
       "Problem", "Problem definition class.",
-      bp::init<const shared_ptr<Manifold> &, const CostPtr &,
+      bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>,
                const std::vector<Constraint> &>(
           bp::args("self", "space", "cost", "constraints")))
-      .def(bp::init<const shared_ptr<Manifold> &, const CostPtr &>(
+      .def(bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>>(
           bp::args("self", "space", "cost")))
       .def_readwrite("cost", &Problem::cost_, "The cost function instance.")
       .def_readwrite("manifold", &Problem::manifold_, "Problem manifold.")

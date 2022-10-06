@@ -90,7 +90,7 @@ public:
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   std::vector<CallbackPtr> callbacks_;
 
-  SolverTpl(const shared_ptr<Problem> &prob, const Scalar tol = 1e-6,
+  SolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
             const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
             const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
             const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,

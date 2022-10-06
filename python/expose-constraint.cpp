@@ -20,8 +20,7 @@ void exposeSpecificConstraintSet(const char *name, const char *docstring) {
 
 template <typename T>
 context::Constraint make_constraint(const shared_ptr<context::C2Function> &f) {
-  shared_ptr<context::ConstraintSet> s(new T());
-  return context::Constraint(f, s);
+  return context::Constraint(f, std::make_shared<T>());
 }
 
 /// @todo Expose properly using pure_virtual, to allow overriding from Python
@@ -54,7 +53,7 @@ void exposeConstraints() {
 
   bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",
-      bp::init<shared_ptr<C2Function>, shared_ptr<Constraint>>(
+      bp::init<shared_ptr<C2Function>, shared_ptr<ConstraintSet>>(
           bp::args("self", "func", "set")))
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
       .def_readonly("func", &Constraint::func_, "Underlying function.")
