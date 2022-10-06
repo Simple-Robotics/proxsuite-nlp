@@ -444,11 +444,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
 template <typename Scalar>
 void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
-  if (new_mu >= mu_upper_) {
-    proxnlp_runtime_error(
-        fmt::format("new value of mu ({:.3e}) larger than upper bound {:.3e}",
-                    new_mu, mu_upper_));
-  }
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
   merit_fun.setPenalty(mu_);
