@@ -29,24 +29,25 @@ void exposeSolver() {
       .value("QUADRATIC", LSInterpolation::QUADRATIC)
       .value("CUBIC", LSInterpolation::CUBIC);
 
-  using LSType = Linesearch<Scalar>;
-  using LSOptions = LSType::Options;
-  bp::class_<LSOptions>("LSOptions", "Linesearch options.",
-                        bp::init<>(bp::args("self"), "Default constructor."))
-      .def_readwrite("armijo_c1", &LSOptions::armijo_c1)
-      .def_readwrite("wolfe_c2", &LSOptions::wolfe_c2)
+  using LinesearchOptions = Linesearch<Scalar>::Options;
+  bp::class_<LinesearchOptions>(
+      "LinesearchOptions", "Linesearch options.",
+      bp::init<>(bp::args("self"), "Default constructor."))
+      .def_readwrite("armijo_c1", &LinesearchOptions::armijo_c1)
+      .def_readwrite("wolfe_c2", &LinesearchOptions::wolfe_c2)
       .def_readwrite(
-          "dphi_thresh", &LSOptions::dphi_thresh,
+          "dphi_thresh", &LinesearchOptions::dphi_thresh,
           "Threshold on the derivative at the initial point; the linesearch "
           "will be early-terminated if the derivative is below this threshold.")
-      .def_readwrite("alpha_min", &LSOptions::alpha_min, "Minimum step size.")
-      .def_readwrite("max_num_steps", &LSOptions::max_num_steps)
-      .def_readwrite("verbosity", &LSOptions::verbosity)
-      .def_readwrite("interp_type", &LSOptions::interp_type,
+      .def_readwrite("alpha_min", &LinesearchOptions::alpha_min,
+                     "Minimum step size.")
+      .def_readwrite("max_num_steps", &LinesearchOptions::max_num_steps)
+      .def_readwrite("verbosity", &LinesearchOptions::verbosity)
+      .def_readwrite("interp_type", &LinesearchOptions::interp_type,
                      "Interpolation type: bisection, quadratic or cubic.")
-      .def_readwrite("contraction_min", &LSOptions::contraction_min,
+      .def_readwrite("contraction_min", &LinesearchOptions::contraction_min,
                      "Minimum step contraction.")
-      .def_readwrite("contraction_max", &LSOptions::contraction_max,
+      .def_readwrite("contraction_max", &LinesearchOptions::contraction_max,
                      "Maximum step contraction.")
       .def(bp::self_ns::str(bp::self));
 
@@ -66,10 +67,7 @@ void exposeSolver() {
       .def_readwrite(
           "use_gauss_newton", &Solver::use_gauss_newton,
           "Whether to use a Gauss-Newton Hessian matrix approximation.")
-      .def_readwrite("record_linesearch_process",
-                     &Solver::record_linesearch_process)
       .def_readwrite("ls_strat", &Solver::ls_strat)
-      .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def("register_callback", &Solver::registerCallback,
            bp::args("self", "cb"), "Add a callback to the solver.")
       .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.",
@@ -95,23 +93,42 @@ void exposeSolver() {
                Solver::solve,
            bp::args("self", "workspace", "results", "x0"),
            "Run the solver (without initial multiplier guess).")
-      .def("set_penalty", &Solver::setPenalty, bp::args("self", "mu"),
+      .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
-      .def("set_prox_param", &Solver::setProxParameter, bp::args("self", "rho"),
+      .def("setProxParameter", &Solver::setProxParameter,
+           bp::args("self", "rho"),
            "Set the primal proximal penalty parameter.")
-      .def("set_tolerance", &Solver::setTolerance, bp::args("self", "tol"),
-           "Set the solver's target tolerance.")
-      .def_readwrite("max_iters", &Solver::MAX_ITERS,
-                     "Maximum number of iterations.")
-      .def_readwrite("mu_factor", &Solver::mu_factor_,
+      .def_readwrite("mu_init", &Solver::mu_init_,
+                     "Initial AL parameter value.")
+      .def_readwrite("rho_init", &Solver::rho_init_,
+                     "Initial proximal parameter value.")
+      .def_readwrite(
+          "mu_lower", &Solver::mu_lower_,
+          "Lower bound :math:`\\underline{\\mu} > 0` for the AL parameter.")
+      .def_readwrite("mu_upper", &Solver::mu_upper_,
+                     "Upper bound :math:`\\bar{\\mu}` for the AL parameter. "
+                     "The tolerances for "
+                     "each subproblem will be updated as :math:`\\eta^0 (\\mu "
+                     "/ \\bar{\\mu})^\\gamma`")
+      // BCL parameters
+      .def_readwrite("target_tol", &Solver::target_tol, "Target tolerance.")
+      .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
+      .def_readwrite("max_iters", &Solver::max_iters,
+                     "Maximum number of iterations.");
+
+  using BCLType = BCLParams<Scalar>;
+  bp::class_<BCLType>("BCLParams",
+                      "Parameters for the bound-constrained Lagrangian (BCL) "
+                      "penalty update strategy.",
+                      bp::init<>(bp::args("self")))
+      .def_readwrite("prim_alpha", &BCLType::prim_alpha)
+      .def_readwrite("prim_beta", &BCLType::prim_beta)
+      .def_readwrite("dual_alpha", &BCLType::dual_alpha)
+      .def_readwrite("dual_beta", &BCLType::dual_beta)
+      .def_readwrite("mu_factor", &BCLType::mu_update_factor,
                      "Multiplier update factor.")
-      .def_readwrite("rho_factor", &Solver::rho_factor_,
-                     "Proximal penalty update factor.")
-      .def_readonly("prim_alpha", &Solver::prim_alpha_)
-      .def_readonly("prim_beta", &Solver::prim_beta)
-      .def_readonly("dual_alpha", &Solver::dual_alpha)
-      .def_readonly("dual_beta", &Solver::dual_beta)
-      .def_readonly("mu_min", &Solver::mu_lower_);
+      .def_readwrite("rho_factor", &BCLType::rho_update_factor,
+                     "Proximal penalty update factor.");
 }
 } // namespace python
 } // namespace proxnlp

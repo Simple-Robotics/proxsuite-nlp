@@ -12,14 +12,14 @@ class TestClass:
     problem = proxnlp.Problem(space, cost, [])
 
     def test_print_options(self):
-        options = proxnlp.LSOptions()
+        options = proxnlp.LinesearchOptions()
         print(options)
 
     def test_print_sum_cost(self):
         print(self.cost)
 
     def test_print_results(self):
-        res = proxnlp.Results(1, self.problem)
+        res = proxnlp.Results(self.problem)
         print(res)
 
     def test_print_solver(self):

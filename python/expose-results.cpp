@@ -8,7 +8,6 @@ void exposeResults() {
   using context::Results;
 
   bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
-      .value("uninit", ConvergenceFlag::UNINIT)
       .value("success", ConvergenceFlag::SUCCESS)
       .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED);
 
@@ -24,7 +23,7 @@ void exposeResults() {
       .def_readonly("mu", &Results::mu)
       .def_readonly("rho", &Results::rho)
       .def_readonly("dual_infeas", &Results::dual_infeas)
-      .def_readonly("primal_infeas", &Results::prim_infeas)
+      .def_readonly("prim_infeas", &Results::prim_infeas)
       .def_readonly("constraint_errs", &Results::constraint_violations,
                     "Constraint violations.")
       .def(bp::self_ns::str(bp::self));

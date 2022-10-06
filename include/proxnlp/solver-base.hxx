@@ -16,14 +16,14 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const VerboseLevel verbose, const Scalar mu_lower,
                              const Scalar prim_alpha, const Scalar prim_beta,
                              const Scalar dual_alpha, const Scalar dual_beta,
-                             const LSOptions ls_options)
+                             const LinesearchOptions ls_options)
     : problem_(prob), merit_fun(problem_, mu_init),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
       verbose(verbose), rho_init_(rho_init), mu_init_(mu_init),
-      mu_lower_(mu_lower), target_tol(tol), prim_alpha_(prim_alpha),
-      prim_beta(prim_beta), dual_alpha(dual_alpha), dual_beta(dual_beta),
+      mu_lower_(mu_lower),
+      target_tol(tol), bcl_params{prim_alpha, prim_beta, dual_alpha, dual_beta},
       ls_options(ls_options) {}
 
 template <typename Scalar>
@@ -60,6 +60,9 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   if (verbose == 0)
     logger.active = false;
 
+  setPenalty(mu_init_);
+  setProxParameter(rho_init_);
+
   // init variables
   results.x_opt = x0;
   workspace.x_prev = x0;
@@ -73,13 +76,13 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   fmt::color outer_col = fmt::color::white;
 
   std::size_t i = 0;
-  while (results.num_iters < MAX_ITERS) {
+  while (results.num_iters < max_iters) {
     results.mu = mu_;
     results.rho = rho_;
     if (logger.active) {
       fmt::print(fmt::emphasis::bold | fmt::fg(outer_col),
                  "[AL iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n", i,
-                 inner_tol, prim_tol, mu_);
+                 inner_tol_, prim_tol_, mu_);
     }
     if (results.num_iters == 0) {
       logger.start();
@@ -90,7 +93,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
     workspace.x_prev = results.x_opt;
     prox_penalty.updateTarget(workspace.x_prev);
 
-    if (results.prim_infeas < prim_tol) {
+    if (results.prim_infeas < prim_tol_) {
       outer_col = fmt::color::lime_green;
       acceptMultipliers(workspace);
       if ((results.prim_infeas < target_tol) &&
@@ -105,8 +108,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
       updatePenalty();
       updateToleranceFailure();
     }
-    // safeguard tolerances
-    inner_tol = std::max(inner_tol, inner_tol_min);
+    setProxParameter(rho_ * bcl_params.rho_update_factor);
 
     i++;
   }
@@ -155,17 +157,17 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
           "Matrix signature should only have Os, 1s, and -1s.");
     }
   }
-  InertiaFlag flag = OK;
+  InertiaFlag flag = INERTIA_OK;
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
   bool zer_ok = numzer == 0;
   if (!(pos_ok && neg_ok && zer_ok)) {
     if (!zer_ok)
-      flag = ZEROS;
+      flag = INERTIA_HAS_ZEROS;
     else
-      flag = BAD;
+      flag = INERTIA_BAD;
   } else {
-    flag = OK;
+    flag = INERTIA_OK;
   }
   return flag;
 }
@@ -215,7 +217,7 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
   if (mu_ == mu_lower_) {
     setPenalty(mu_init_);
   } else {
-    setPenalty(std::max(mu_ * mu_factor_, mu_lower_));
+    setPenalty(std::max(mu_ * bcl_params.mu_update_factor, mu_lower_));
   }
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
@@ -248,7 +250,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   };
 
   std::size_t k;
-  for (k = 0; k < MAX_ITERS; k++) {
+  for (k = 0; k < max_iters; k++) {
 
     //// precompute temp data
 
@@ -335,14 +337,15 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
     bool outer_cond = (results.prim_infeas <= target_tol &&
                        results.dual_infeas <= target_tol);
-    if ((inner_crit <= inner_tol) || outer_cond) {
+    if ((inner_crit <= inner_tol_) || outer_cond) {
       return;
     }
 
     /* Compute the step */
     delta = DELTA_INIT;
-    InertiaFlag is_inertia_correct = BAD;
-    while (!(is_inertia_correct == OK) && delta <= DELTA_MAX) {
+    InertiaFlag is_inertia_correct = INERTIA_BAD;
+
+    while (!(is_inertia_correct == INERTIA_OK) && delta <= DELTA_MAX) {
       if (delta > 0.) {
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
       }
@@ -354,7 +357,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
       is_inertia_correct = checkInertia(workspace.signature);
       old_delta = delta;
 
-      if (is_inertia_correct == OK) {
+      if (is_inertia_correct == INERTIA_OK) {
         delta_last = delta;
         break;
       } else if (delta == 0.) {
@@ -427,13 +430,13 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     logger.log(record);
 
     results.num_iters++;
-    if (results.num_iters >= MAX_ITERS) {
+    if (results.num_iters >= max_iters) {
       results.converged = ConvergenceFlag::MAX_ITERS_REACHED;
       break;
     }
   }
 
-  if (results.num_iters >= MAX_ITERS)
+  if (results.num_iters >= max_iters)
     results.converged = ConvergenceFlag::MAX_ITERS_REACHED;
 
   return;
@@ -441,13 +444,18 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
 
 template <typename Scalar>
 void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
+  if (new_mu >= mu_upper_) {
+    proxnlp_runtime_error(
+        fmt::format("new value of mu ({:.3e}) larger than upper bound {:.3e}",
+                    new_mu, mu_upper_));
+  }
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
   merit_fun.setPenalty(mu_);
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) {
+void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) noexcept {
   rho_ = new_rho;
   prox_penalty.weights_.setZero();
   prox_penalty.weights_.diagonal().setConstant(rho_);
@@ -455,14 +463,22 @@ void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) {
 
 template <typename Scalar>
 void SolverTpl<Scalar>::updateToleranceFailure() noexcept {
-  prim_tol = prim_tol0 * std::pow(mu_, prim_alpha_);
-  inner_tol = inner_tol0 * std::pow(mu_, dual_alpha);
+  prim_tol_ = prim_tol0 * std::pow(mu_, bcl_params.prim_alpha);
+  inner_tol_ = inner_tol0 * std::pow(mu_, bcl_params.dual_alpha);
+  tolerancePostUpdate();
 }
 
 template <typename Scalar>
 void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
-  prim_tol = prim_tol * std::pow(mu_, prim_beta);
-  inner_tol = inner_tol * std::pow(mu_, dual_beta);
+  prim_tol_ = prim_tol_ * std::pow(mu_ / mu_upper_, bcl_params.prim_beta);
+  inner_tol_ = inner_tol_ * std::pow(mu_ / mu_upper_, bcl_params.dual_beta);
+  tolerancePostUpdate();
+}
+
+template <typename Scalar>
+void SolverTpl<Scalar>::tolerancePostUpdate() noexcept {
+  inner_tol_ = std::max(inner_tol_, inner_tol_min);
+  prim_tol_ = std::max(prim_tol_, target_tol);
 }
 
 template <typename Scalar>

@@ -170,7 +170,7 @@ results = proxnlp.Results(problem)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-5
-rho_init = 1e-6
+rho_init = 1e-8
 mu_init = 0.9
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE

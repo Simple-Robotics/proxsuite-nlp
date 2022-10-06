@@ -9,7 +9,7 @@
 
 namespace proxnlp {
 
-enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
+enum ConvergenceFlag { SUCCESS = 0, MAX_ITERS_REACHED = 1 };
 
 /**
  * @brief   Results struct, holding the returned data from the solver.
@@ -23,7 +23,7 @@ template <typename _Scalar> struct ResultsTpl {
   using Problem = ProblemTpl<Scalar>;
   using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-  ConvergenceFlag converged = ConvergenceFlag::UNINIT;
+  ConvergenceFlag converged = SUCCESS;
 
   Scalar merit;
   Scalar value;
@@ -64,7 +64,7 @@ template <typename _Scalar> struct ResultsTpl {
         << fmt::format("\n  mu:            {:.3e},", self.mu)
         << fmt::format("\n  rho:           {:.3e},", self.rho)
         << fmt::format("\n  dual_infeas:   {:.3e},", self.dual_infeas)
-        << fmt::format("\n  primal_infeas: {:.3e},", self.prim_infeas)
+        << fmt::format("\n  prim_infeas:   {:.3e},", self.prim_infeas)
         << fmt::format("\n  cstr_values:   {}",
                        self.constraint_violations.transpose());
     for (std::size_t i = 0; i < self.active_set.size(); i++) {

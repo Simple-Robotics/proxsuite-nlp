@@ -11,6 +11,7 @@
 #include "proxnlp/results.hpp"
 #include "proxnlp/helpers-base.hpp"
 #include "proxnlp/logger.hpp"
+#include "proxnlp/bcl-params.hpp"
 
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
@@ -22,12 +23,13 @@ public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
-
   using Workspace = WorkspaceTpl<Scalar>;
   using Results = ResultsTpl<Scalar>;
-
   using Manifold = ManifoldAbstractTpl<Scalar>;
-  using LSOptions = typename Linesearch<Scalar>::Options;
+  using LinesearchOptions = typename Linesearch<Scalar>::Options;
+  using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
+
+  enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
 
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
@@ -36,44 +38,44 @@ public:
   /// Proximal regularization penalty.
   QuadraticDistanceCost<Scalar> prox_penalty;
 
-  //// Other settings
+  /// Level of verbosity of the solver.
+  VerboseLevel verbose = QUIET;
+  /// Use a Gauss-Newton approximation for the Lagrangian Hessian.
+  bool use_gauss_newton = false;
 
-  VerboseLevel verbose = QUIET; // Level of verbosity of the solver.
-  bool use_gauss_newton =
-      false; // Use a Gauss-Newton approximation for the Lagrangian Hessian.
-  bool record_linesearch_process = false;
-
+  /// Linesearch strategy.
   LinesearchStrategy ls_strat = ARMIJO;
 
-  //// Algo params which evolve
+  //// Algorithm proximal parameters
 
-  const Scalar inner_tol0 = 1.;
-  const Scalar prim_tol0 = 1.;
-  Scalar inner_tol = inner_tol0;
-  Scalar prim_tol = prim_tol0;
-  Scalar rho_init_;                // Initial primal proximal penalty parameter.
-  Scalar rho_ = rho_init_;         // Primal proximal penalty parameter.
-  Scalar mu_init_;                 // Initial penalty parameter.
-  Scalar mu_ = mu_init_;           // Penalty parameter.
-  Scalar mu_inv_ = 1. / mu_;       // Inverse penalty parameter.
-  Scalar mu_factor_ = 0.1;         // Penalty update multiplicative factor.
-  Scalar rho_factor_ = mu_factor_; // Primal penalty update factor.
-
-  const Scalar inner_tol_min =
-      1e-9;                // Lower safeguard for the subproblem tolerance.
+  Scalar inner_tol0 = 1.;
+  Scalar prim_tol0 = 1.;
+  Scalar inner_tol_ = inner_tol0;
+  Scalar prim_tol_ = prim_tol0;
+  Scalar rho_init_; // Initial primal proximal penalty parameter.
+  Scalar mu_init_;  // Initial penalty parameter.
+private:
+  Scalar rho_ = rho_init_;   // Primal proximal penalty parameter.
+  Scalar mu_ = mu_init_;     // Penalty parameter.
+  Scalar mu_inv_ = 1. / mu_; // Inverse penalty parameter.
+public:
+  Scalar inner_tol_min = 1e-9; // Lower safeguard for the subproblem tolerance.
+  Scalar mu_upper_ = 1.;
   Scalar mu_lower_ = 1e-9; // Lower safeguard for the penalty parameter.
 
-  //// Algo hyperparams
+  /// BCL strategy parameters.
+  BCLParams<Scalar> bcl_params;
 
-  Scalar target_tol;        // Target tolerance for the problem.
-  const Scalar prim_alpha_; // BCL failure scaling (primal)
-  const Scalar prim_beta;   // BCL success scaling (primal)
-  const Scalar dual_alpha;  // BCL failure scaling (dual)
-  const Scalar dual_beta;   // BCL success scaling (dual)
+  /// Linesearch options.
+  LinesearchOptions ls_options;
 
-  LSOptions ls_options; // Linesearch options.
+  /// Target tolerance for the problem.
+  Scalar target_tol;
 
+  /// Logger.
   BaseLogger logger{};
+
+  //// Parameters for the inertia-correcting strategy.
 
   const Scalar del_inc_k = 8.;
   const Scalar del_inc_big = 100.;
@@ -84,10 +86,10 @@ public:
   const Scalar DELTA_NONZERO_INIT = 1e-4;
   const Scalar DELTA_INIT = 0.;
 
-  std::size_t MAX_ITERS = 100;
+  /// Solver maximum number of iterations.
+  std::size_t max_iters = 100;
 
   /// Callbacks
-  using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   std::vector<CallbackPtr> callbacks_;
 
   SolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
@@ -95,9 +97,7 @@ public:
             const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
             const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,
             const Scalar dual_alpha = 1., const Scalar dual_beta = 1.,
-            const LSOptions ls_options = LSOptions());
-
-  enum InertiaFlag { OK = 0, BAD = 1, ZEROS = 2 };
+            const LinesearchOptions ls_options = LinesearchOptions());
 
   const Manifold &manifold() const { return *problem_->manifold_; }
 
@@ -131,9 +131,6 @@ public:
   ConvergenceFlag solve(Workspace &workspace, Results &results,
                         const ConstVectorRef &x0);
 
-  /// Set solver convergence threshold.
-  void setTolerance(const Scalar tol) noexcept { target_tol = tol; }
-
   void solveInner(Workspace &workspace, Results &results);
 
   /// Update penalty parameter using the provided factor (with a safeguard
@@ -145,7 +142,7 @@ public:
   void setPenalty(const Scalar &new_mu) noexcept;
 
   /// Set proximal penalty parameter.
-  void setProxParameter(const Scalar &new_rho);
+  void setProxParameter(const Scalar &new_rho) noexcept;
 
   /// @brief    Add a callback to the solver instance.
   inline void registerCallback(const CallbackPtr &cb) noexcept {
@@ -168,6 +165,8 @@ public:
    * iterate (good primal feasibility)
    */
   void updateToleranceSuccess() noexcept;
+
+  inline void tolerancePostUpdate() noexcept;
 
   /// @brief  Accept Lagrange multiplier estimates.
   void acceptMultipliers(Workspace &workspace) const {
