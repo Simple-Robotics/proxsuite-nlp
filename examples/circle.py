@@ -6,7 +6,7 @@ import proxnlp
 from proxnlp.residuals import ManifoldDifferenceToPoint
 from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
 from proxnlp.manifolds import VectorSpace
-from proxnlp.constraints import create_inequality_constraint
+from proxnlp.constraints import createInequalityConstraint
 
 import matplotlib.pyplot as plt
 
@@ -47,9 +47,9 @@ res3 = QuadraticResidualCost(
 )
 
 cstrs_ = [
-    create_inequality_constraint(res1),
-    create_inequality_constraint(res2),
-    create_inequality_constraint(res3),
+    createInequalityConstraint(res1),
+    createInequalityConstraint(res2),
+    createInequalityConstraint(res3),
 ]
 
 problem = proxnlp.Problem(space, cost_, cstrs_)

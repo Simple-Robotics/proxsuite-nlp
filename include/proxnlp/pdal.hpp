@@ -30,14 +30,6 @@ public:
 
   PDALFunction(shared_ptr<Problem> prob, const Scalar mu);
 
-  /**
-   *  @brief Compute the first-order multiplier estimates.
-   */
-  void computeFirstOrderMultipliers(const ConstVectorRef &x,
-                                    const std::vector<VectorRef> &lams_ext,
-                                    std::vector<VectorRef> &lams_cache,
-                                    std::vector<VectorRef> &out) const;
-
   Scalar evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
                   const VectorOfRef &lams_ext,
                   std::vector<VectorRef> &lams_cache) const;

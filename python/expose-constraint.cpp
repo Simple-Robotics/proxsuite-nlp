@@ -26,11 +26,13 @@ context::Constraint make_constraint(const shared_ptr<context::C2Function> &f) {
 
 /// @todo Expose properly using pure_virtual, to allow overriding from Python
 void exposeConstraints() {
+  using context::C2Function;
+  using context::Constraint;
   using context::ConstraintSet;
   using context::Scalar;
   using ConstraintSetPtr = shared_ptr<ConstraintSet>;
-  using context::Constraint;
-  bp::class_<ConstraintSet, ConstraintSetPtr, boost::noncopyable>(
+
+  bp::class_<ConstraintSet, boost::noncopyable>(
       "ConstraintSetBase",
       "Base class for constraint sets or nonsmooth penalties.", bp::no_init)
       .def("evaluate", &ConstraintSet::evaluate, bp::args("self", "z"),
@@ -38,21 +40,21 @@ void exposeConstraints() {
            "on the projection/prox map of :math:`z`.")
       .def("projection", &ConstraintSet::projection,
            bp::args("self", "z", "zout"))
-      .def("normal_cone_proj", &ConstraintSet::normalConeProjection,
+      .def("normalConeProjection", &ConstraintSet::normalConeProjection,
            bp::args("self", "z", "zout"))
-      .def("apply_jacobian", &ConstraintSet::applyProjectionJacobian,
+      .def("applyJacobian", &ConstraintSet::applyProjectionJacobian,
            bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
-      .def("apply_normal_jacobian",
+      .def("applyNormalJacobian",
            &ConstraintSet::applyNormalConeProjectionJacobian,
            bp::args("self", "z", "Jout"),
            "Apply the normal cone projection Jacobian.")
-      .def("compute_active_set", &ConstraintSet::computeActiveSet,
+      .def("computeActiveSet", &ConstraintSet::computeActiveSet,
            bp::args("self", "z", "out"))
       .def(bp::self == bp::self);
 
   bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",
-      bp::init<const shared_ptr<context::C2Function> &, ConstraintSetPtr>(
+      bp::init<shared_ptr<C2Function>, shared_ptr<Constraint>>(
           bp::args("self", "func", "set")))
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
       .def_readonly("func", &Constraint::func_, "Underlying function.")
@@ -69,11 +71,11 @@ void exposeConstraints() {
       "NegativeOrthant",
       "Cast a function into a negative inequality constraint h(x) \\leq 0");
 
-  bp::def("create_equality_constraint",
+  bp::def("createEqualityConstraint",
           &make_constraint<EqualityConstraint<Scalar>>,
           "Convenience function to create an equality constraint from a "
           "C2Function.");
-  bp::def("create_inequality_constraint",
+  bp::def("createInequalityConstraint",
           &make_constraint<NegativeOrthant<Scalar>>,
           "Convenience function to create an inequality constraint from a "
           "C2Function.");

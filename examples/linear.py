@@ -6,7 +6,7 @@ import proxnlp
 from proxnlp.residuals import LinearFunction
 from proxnlp.costs import QuadraticDistanceCost
 from proxnlp.manifolds import EuclideanSpace
-from proxnlp.constraints import create_equality_constraint, create_inequality_constraint
+from proxnlp.constraints import createEqualityConstraint, createInequalityConstraint
 
 import matplotlib.pyplot as plt
 
@@ -41,8 +41,8 @@ print("Residual ndx:", resdl.ndx)
 print("Residual nr :", resdl.nr)
 
 
-cstr1 = create_equality_constraint(resdl)
-cstr2 = create_inequality_constraint(resdl)
+cstr1 = createEqualityConstraint(resdl)
+cstr2 = createInequalityConstraint(resdl)
 
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10

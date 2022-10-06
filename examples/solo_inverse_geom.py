@@ -242,9 +242,9 @@ ineq_fun = CasadiFunction(
 # Solver setup
 
 cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
-eq_constr1_ = proxnlp.constraints.create_equality_constraint(eq_fun)
-ineq_constr1_ = proxnlp.constraints.create_inequality_constraint(fc_fun)
-ineq_constr2_ = proxnlp.constraints.create_inequality_constraint(ineq_fun)
+eq_constr1_ = proxnlp.constraints.createEqualityConstraint(eq_fun)
+ineq_constr1_ = proxnlp.constraints.createInequalityConstraint(fc_fun)
+ineq_constr2_ = proxnlp.constraints.createInequalityConstraint(ineq_fun)
 
 constraints = []
 constraints.append(eq_constr1_)

@@ -8,7 +8,7 @@ import numpy as np
 import casadi as cas
 
 from proxnlp.residuals import LinearFunction
-from proxnlp.constraints import create_equality_constraint
+from proxnlp.constraints import createEqualityConstraint
 from proxnlp.manifolds import EuclideanSpace
 
 
@@ -75,7 +75,7 @@ space = EuclideanSpace(nx)
 x1 = space.rand()
 
 sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.0]))
-cstr = create_equality_constraint(sum_to_one_res)
+cstr = createEqualityConstraint(sum_to_one_res)
 
 x0 = np.array([1.0, 2.0])
 print("Diff func:")

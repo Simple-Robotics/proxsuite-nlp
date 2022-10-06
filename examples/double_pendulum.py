@@ -151,10 +151,10 @@ class MultipleShootingProblem:
 
 probdef = MultipleShootingProblem(x0, xtarget)
 cost_fun = proxnlp.costs.CostFromFunction(probdef.cost_fun)
-dynamical_constraint = proxnlp.constraints.create_equality_constraint(
+dynamical_constraint = proxnlp.constraints.createEqualityConstraint(
     probdef.dynamics_fun
 )
-bound_constraint = proxnlp.constraints.create_inequality_constraint(
+bound_constraint = proxnlp.constraints.createInequalityConstraint(
     probdef.control_bound_fun
 )
 

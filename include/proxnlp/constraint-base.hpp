@@ -122,8 +122,7 @@ template <typename _Scalar> struct ConstraintObject {
   const FunctionType &func() const { return *func_; }
   int nr() const { return func_->nr(); }
 
-  ConstraintObject(const shared_ptr<FunctionType> &func,
-                   const shared_ptr<ConstraintSet> &set)
+  ConstraintObject(shared_ptr<FunctionType> func, shared_ptr<ConstraintSet> set)
       : func_(func), set_(set) {}
 };
 

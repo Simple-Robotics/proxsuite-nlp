@@ -19,22 +19,10 @@ Scalar PDALFunction<Scalar>::evaluate(const ConstVectorRef &x,
     tmp_cvals[i] = cstr.func()(x) + mu_penal_ * lams_ext[i];
     res +=
         computeMoreauEnvelope(*cstr.set_, tmp_cvals[i], tmp_cvals[i], mu_inv_);
-    res += -static_cast<Scalar>(0.5) * mu_penal_ * lams_ext[i].squaredNorm();
     res += gamma_ * static_cast<Scalar>(0.5) * mu_inv_ *
            (tmp_cvals[i] - mu_penal_ * lams[i]).squaredNorm();
   }
   return res;
-}
-
-template <typename Scalar>
-void PDALFunction<Scalar>::computeFirstOrderMultipliers(
-    const ConstVectorRef &x, const std::vector<VectorRef> &lams_ext,
-    std::vector<VectorRef> &lams_cache, std::vector<VectorRef> &out) const {
-  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    lams_cache[i] = lams_ext[i] + mu_inv_ + cstr.func()(x);
-    cstr.set_->normalConeProjection(lams_cache[i], out[i]);
-  }
 }
 
 template <typename Scalar>
