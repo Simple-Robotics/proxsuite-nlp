@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <type_traits>
+#include <limits>
 #include <vector>
 
 #define PROXNLP_RAISE_IF_NAN(value)                                            \
@@ -71,7 +72,8 @@ template <typename Scalar> inline bool check_scalar(const Scalar value) {
  * precision @p prec.
  */
 template <typename Scalar>
-bool scalar_close(const Scalar a, const Scalar b, const Scalar prec) {
+bool scalar_close(const Scalar a, const Scalar b,
+                  const Scalar prec = std::numeric_limits<Scalar>::epsilon()) {
   return std::abs(a - b) < prec * (1 + std::max(std::abs(a), std::abs(b)));
 }
 
