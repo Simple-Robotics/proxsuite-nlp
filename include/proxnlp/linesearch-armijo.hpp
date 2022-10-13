@@ -5,6 +5,8 @@
 #include "proxnlp/linesearch-base.hpp"
 #include "proxnlp/exceptions.hpp"
 
+#include <Eigen/QR>
+
 namespace proxnlp {
 
 /// @brief Polynomials represented by their coefficients in decreasing order of
@@ -13,7 +15,7 @@ template <typename T> struct PolynomialTpl {
   using VectorXs = typename math_types<T>::VectorXs;
   VectorXs coeffs;
   PolynomialTpl() {}
-  PolynomialTpl(const VectorXs &c) : coeffs(c) {}
+  PolynomialTpl(const Eigen::Ref<const VectorXs> &c) : coeffs(c) {}
   /// @brief Polynomial degree (number of coefficients minus one).
   std::size_t degree() const { return coeffs.size() - 1; }
   inline T evaluate(T a) const {
@@ -44,11 +46,11 @@ public:
   using VectorXs = typename math_types<Scalar>::VectorXs;
   using Base::options;
 
-  ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
+  ArmijoLinesearch(const typename Base::Options &options)
+      : Base(options), lu(alph_mat) {}
 
   template <typename Fn>
-  Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0,
-             Scalar &alpha_try) const {
+  Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0, Scalar &alpha_try) {
     auto eval_sample_nograd = [&](const Scalar a) {
       return FunctionSample{a, phi(a)};
     };
@@ -114,13 +116,20 @@ public:
     return latest.phi;
   }
 
+  using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
+  using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
+  Matrix2s alph_mat;
+  Vector2s alph_rhs;
+  Vector2s coeffs_cubic_interpolant;
+  Eigen::HouseholderQR<Eigen::Ref<Matrix2s>> lu;
+
   /// Propose a new candidate step size through safeguarded interpolation
   Scalar minimize_interpolant(LSInterpolation strat,
                               const std::vector<FunctionSample> &samples,
-                              Scalar min_step_size,
-                              Scalar max_step_size) const {
+                              Scalar min_step_size, Scalar max_step_size) {
     Scalar anext = 0.0;
     Polynomial interpol;
+    VectorXs &coeffs = interpol.coeffs;
 
     assert(samples.size() >= 2);
     const FunctionSample &lowerbound = samples[0];
@@ -137,7 +146,7 @@ public:
       const FunctionSample &cand0 = samples[1];
       Scalar a = (cand0.phi - phi0 - cand0.alpha * dphi0) /
                  (cand0.alpha * cand0.alpha);
-      VectorXs coeffs(3);
+      coeffs.conservativeResize(3);
       coeffs << a, dphi0, phi0;
       interpol = Polynomial(coeffs);
       assert(interpol.degree() == 2);
@@ -145,31 +154,30 @@ public:
       break;
     }
     case LSInterpolation::CUBIC: {
-      using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
-      using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
-      Matrix2s alph_mat;
-      Vector2s alph_rhs;
-      Vector2s coeffs_cubic_interpolant;
 
       const FunctionSample &cand0 = samples[1];
       const FunctionSample &cand1 = samples[2];
       const Scalar &a0 = cand0.alpha;
       const Scalar &a1 = cand1.alpha;
-      alph_mat(0, 0) = a0 * a0;
-      alph_mat(0, 1) = -a1 * a1;
-      alph_mat(1, 0) = -a0 * a0 * a0;
-      alph_mat(1, 1) = a1 * a1 * a1;
-
-      const Scalar mat_denom = a0 * a0 * a1 * a1 * (a1 - a0);
-      alph_mat /= mat_denom;
+      // alph_mat(0, 0) = a0 * a0;
+      // alph_mat(0, 1) = -a1 * a1;
+      // alph_mat(1, 0) = -a0 * a0 * a0;
+      // alph_mat(1, 1) = a1 * a1 * a1;
+      alph_mat(0, 0) = a0 * a0 * a0;
+      alph_mat(0, 1) = a0 * a0;
+      alph_mat(1, 0) = a1 * a1 * a1;
+      alph_mat(1, 1) = a1 * a1;
 
       alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
       alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
-      coeffs_cubic_interpolant = alph_mat * alph_rhs;
+
+      lu.compute(alph_mat);
+      coeffs_cubic_interpolant = lu.solve(alph_rhs);
+      // coeffs_cubic_interpolant = alph_mat * alph_rhs;
 
       const Scalar c3 = coeffs_cubic_interpolant(0);
       const Scalar c2 = coeffs_cubic_interpolant(1);
-      VectorXs coeffs(4);
+      coeffs.conservativeResize(4);
       coeffs << c3, c2, dphi0, phi0;
       interpol = Polynomial(coeffs);
       assert(interpol.degree() == 3);
