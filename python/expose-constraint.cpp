@@ -1,8 +1,11 @@
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #include "proxnlp/python/fwd.hpp"
 #include "proxnlp/constraint-base.hpp"
 
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
+#include "proxnlp/modelling/constraints/l1-penalty.hpp"
+#include "proxnlp/modelling/constraints/box-constraint.hpp"
 
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/bindings/python/utils/std-vector.hpp>
@@ -29,7 +32,6 @@ void exposeConstraints() {
   using context::Constraint;
   using context::ConstraintSet;
   using context::Scalar;
-  using ConstraintSetPtr = shared_ptr<ConstraintSet>;
 
   bp::class_<ConstraintSet, boost::noncopyable>(
       "ConstraintSetBase",
@@ -69,6 +71,15 @@ void exposeConstraints() {
   exposeSpecificConstraintSet<NegativeOrthant<Scalar>>(
       "NegativeOrthant",
       "Cast a function into a negative inequality constraint h(x) \\leq 0");
+
+  exposeSpecificConstraintSet<L1Penalty<Scalar>>("L1Penalty",
+                                                 "1-norm penalty function.");
+
+  bp::class_<BoxConstraintTpl<Scalar>, bp::bases<Constraint>>(
+      "BoxConstraint",
+      "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.",
+      bp::init<context::ConstVectorRef, context::ConstVectorRef>(
+          bp::args("self", "lower_limit", "upper_limit")));
 
   bp::def("createEqualityConstraint",
           &make_constraint<EqualityConstraint<Scalar>>,

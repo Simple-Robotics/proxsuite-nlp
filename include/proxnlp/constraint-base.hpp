@@ -1,6 +1,6 @@
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/manifold-base.hpp"
 #include "proxnlp/function-base.hpp"
 
 namespace proxnlp {
@@ -23,6 +23,7 @@ public:
 
   /// Provided the image @p zproj by the proximal/projection map, evaluate the
   /// nonsmooth penalty or constraint set indicator function.
+  /// @note This will be 0 for projection operators.
   virtual Scalar evaluate(const ConstVectorRef & /*zproj*/) const { return 0.; }
 
   /**
@@ -36,12 +37,16 @@ public:
   /**
    * Compute projection of @p z onto the normal cone to the set.
    * The default implementation is just $\f\mathrm{id} - P\f$.
+   *
+   * @param[in]   z     Input vector
+   * @param[out]  zout  Output projection on the normal projection
    */
   virtual void normalConeProjection(const ConstVectorRef &z,
-                                    VectorRef zout) const;
+                                    VectorRef zout) const = 0;
 
   /**
    * Apply the jacobian of the constraint set projection operator.
+   *
    * @param[in]  z     Input vector (multiplier estimate)
    * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
    * and returned.

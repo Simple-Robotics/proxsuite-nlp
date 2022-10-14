@@ -1,3 +1,4 @@
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxnlp/constraint-base.hpp"
@@ -18,21 +19,29 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
 
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
-  using FunctionType = typename Base::FunctionType;
 
   Scalar mu_;
 
   Scalar evaluate(const ConstVectorRef &zproj) const {
-    return zproj.lpNorm<1>();
+    return zproj.template lpNorm<1>();
   }
 
-  ReturnType projection(const ConstVectorRef &z) const {
-    return z.array().sign() * (z.abs().array() - mu_).max(Scalar(0.));
+  decltype(auto) projection_impl(const ConstVectorRef &z) const {
+    return z.array().sign() *
+           (z.array().abs() - mu_).max(static_cast<Scalar>(0.));
+  }
+
+  void projection(const ConstVectorRef &z, VectorRef zout) const {
+    zout = projection_impl(z);
+  }
+
+  void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
+    zout = z - projection_impl(z).matrix();
   }
 
   void computeActiveSet(const ConstVectorRef &z,
                         Eigen::Ref<ActiveType> out) const {
-    out = (z.abs().array() - mu_) <= Scalar(0.);
+    out = (z.array().abs() - mu_) <= static_cast<Scalar>(0.);
   }
 
   void setProxParameters(const Scalar mu) { mu_ = mu; };

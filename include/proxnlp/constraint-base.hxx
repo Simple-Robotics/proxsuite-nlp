@@ -1,13 +1,7 @@
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
 namespace proxnlp {
-template <typename Scalar>
-void ConstraintSetBase<Scalar>::normalConeProjection(const ConstVectorRef &z,
-                                                     VectorRef zout) const {
-  VectorXs tmp(z.size());
-  projection(z, tmp);
-  zout = z - tmp;
-}
 
 template <typename Scalar>
 void ConstraintSetBase<Scalar>::applyProjectionJacobian(const ConstVectorRef &z,

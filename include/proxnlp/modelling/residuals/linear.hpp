@@ -22,6 +22,9 @@ template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   LinearFunctionTpl(const ConstMatrixRef &A, const ConstVectorRef &b)
       : Base((int)A.cols(), (int)A.cols(), (int)A.rows()), mat(A), b(b) {}
 
+  LinearFunctionTpl(const ConstMatrixRef &A)
+      : LinearFunctionTpl(A, VectorXs::Zero(A.rows())) {}
+
   ReturnType operator()(const ConstVectorRef &x) const { return mat * x + b; }
 
   void computeJacobian(const ConstVectorRef &, MatrixRef Jout) const {

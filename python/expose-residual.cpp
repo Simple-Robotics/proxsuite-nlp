@@ -15,6 +15,7 @@ expose_function(const char *name, const char *docstring, Init init) {
 
 /// Expose some residual functions
 void exposeResiduals() {
+  using context::ConstMatrixRef;
   using context::ConstVectorRef;
   using context::Manifold;
   using context::MatrixXs;
@@ -23,7 +24,8 @@ void exposeResiduals() {
 
   expose_function<LinearFunctionTpl<Scalar>>(
       "LinearFunction", "Residual f(x) = Ax + b.",
-      bp::init<MatrixXs, VectorXs>(bp::args("self", "A", "b")));
+      bp::init<ConstMatrixRef, ConstVectorRef>(bp::args("self", "A", "b")))
+      .def(bp::init<ConstMatrixRef>(bp::args("self", "A")));
 
   expose_function<ManifoldDifferenceToPoint<Scalar>>(
       "ManifoldDifferenceToPoint", "Difference vector x (-) x0.",

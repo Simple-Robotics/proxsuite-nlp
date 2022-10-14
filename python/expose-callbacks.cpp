@@ -38,7 +38,7 @@ void exposeCallbacks() {
                           &helpers::history_callback<Scalar>::storage);
 
     bp::class_<history_storage_t, shared_ptr<history_storage_t>>(
-        "_history_storage")
+        "history_storage")
         .def_readonly("xs", &history_storage_t::xs)
         .def_readonly("lams", &history_storage_t::lams)
         .def_readonly("values", &history_storage_t::values)

@@ -1,5 +1,6 @@
 INPUT                   = @CMAKE_SOURCE_DIR@/doc \
-                          @CMAKE_SOURCE_DIR@/src \
+                          @CMAKE_SOURCE_DIR@/include \
+                          @CMAKE_SOURCE_DIR@/python \
                           @CMAKE_SOURCE_DIR@/README.md
 
 RECURSIVE               = YES
@@ -62,4 +63,3 @@ USE_MDFILE_AS_MAINPAGE  = README.md
 BUILTIN_STL_SUPPORT     = YES
 HAVE_DOT                = YES
 DOT_IMAGE_FORMAT        = SVG
-DOT_TRANSPARENT         = YES
