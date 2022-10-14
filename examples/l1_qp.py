@@ -52,4 +52,7 @@ def soft_thresh(x, lbda):
     return out
 
 
-print("Soft thresh of target:", soft_thresh(target, w_x_scalar))
+sf = soft_thresh(target, w_x_scalar)
+print("Soft thresh of target:", sf)
+
+assert np.allclose(rs.xopt, sf)
