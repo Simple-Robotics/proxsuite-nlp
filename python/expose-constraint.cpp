@@ -17,7 +17,7 @@ namespace pp = pinocchio::python;
 
 template <typename T>
 void exposeSpecificConstraintSet(const char *name, const char *docstring) {
-  bp::class_<T, shared_ptr<T>, bp::bases<context::ConstraintSet>>(
+  bp::class_<T, bp::bases<context::ConstraintSet>>(
       name, docstring, bp::init<>(bp::args("self")));
 }
 
@@ -75,7 +75,7 @@ void exposeConstraints() {
   exposeSpecificConstraintSet<L1Penalty<Scalar>>("L1Penalty",
                                                  "1-norm penalty function.");
 
-  bp::class_<BoxConstraintTpl<Scalar>, bp::bases<Constraint>>(
+  bp::class_<BoxConstraintTpl<Scalar>, bp::bases<ConstraintSet>>(
       "BoxConstraint",
       "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.",
       bp::init<context::ConstVectorRef, context::ConstVectorRef>(
