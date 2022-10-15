@@ -74,8 +74,10 @@ public:
   MatrixXs hessians_data;
   std::vector<MatrixRef> cstr_jacobians;
   std::vector<MatrixRef> cstr_vector_hessian_prod;
+  MatrixXs jacobians_proj_data;
+  std::vector<MatrixRef> cstr_jacobians_proj;
 
-  VectorXs data_lams_plus_pre;
+  VectorXs data_shift_cstr_values;
   VectorXs data_lams_plus;
   VectorXs data_lams_pdal;
   VectorXs data_dual_prox_err;
@@ -83,7 +85,7 @@ public:
   /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
   VectorOfRef lams_plus;
   /// Pre-projected multipliers.
-  VectorOfRef lams_plus_pre;
+  VectorOfRef shift_cstr_values;
   /// Primal-dual multiplier estimates (from the pdBCL algorithm)
   VectorOfRef lams_pdal;
   /// Subproblem proximal dual error.
@@ -138,8 +140,8 @@ public:
     jacobians_data.setZero();
     hessians_data.setZero();
 
-    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus_pre,
-                                            lams_plus_pre);
+    helpers::allocateMultipliersOrResiduals(prob, data_shift_cstr_values,
+                                            shift_cstr_values);
     helpers::allocateMultipliersOrResiduals(prob, data_lams_plus, lams_plus);
     helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lams_pdal);
     helpers::allocateMultipliersOrResiduals(prob, data_dual_prox_err,
@@ -148,12 +150,16 @@ public:
     cstr_jacobians.reserve(numblocks);
     cstr_vector_hessian_prod.reserve(numblocks);
 
+    jacobians_proj_data = jacobians_data;
+
     int cursor = 0;
     int nr = 0;
     for (std::size_t i = 0; i < numblocks; i++) {
       cursor = prob.getIndex(i);
       nr = prob.getConstraintDim(i);
       cstr_jacobians.emplace_back(jacobians_data.middleRows(cursor, nr));
+      cstr_jacobians_proj.emplace_back(
+          jacobians_proj_data.middleRows(cursor, nr));
       cstr_vector_hessian_prod.emplace_back(
           hessians_data.middleRows((int)i * ndx, ndx));
     }

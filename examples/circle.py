@@ -69,6 +69,7 @@ lams0 = [np.zeros(cs.nr) for cs in cstrs_]
 solver.solve(workspace, results, p1, lams0)
 solver.max_iters = 15
 
+print("Complementarity:", workspace.cstr_values[0] * results.lamsopt[0])
 
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
@@ -88,9 +89,11 @@ if __name__ == "__main__":
     )
     # left,right,bottom,up
 
-    fig, axes = plt.subplots(2, 1, gridspec_kw={"height_ratios": [3, 1]})
+    fig: plt.Figure = plt.figure()
     fig.set_size_inches(6.4, 6.4)
-    ax = axes[0]
+    gs = fig.add_gridspec(2, 2, height_ratios=[2, 1])
+
+    ax = fig.add_subplot(gs[0, :])
     ax.plot(*xs_.T, marker=".", markersize=2, alpha=0.7, color="b")
     ax.scatter(*xs_[-1], s=12, c="tab:red", marker="o", label="$x^*$", zorder=2)
     circ_alpha = 0.3
@@ -115,10 +118,17 @@ if __name__ == "__main__":
     ax.set_title("Optimization trajectory")
     ax.legend()
 
-    axes[1].plot(callback.storage.alphas, marker=".")
-    axes[1].set_title("Step lengths $\\alpha_k$")
-    axes[1].set_yscale("log", base=2)
+    ax = fig.add_subplot(gs[1, 0])
+    ax.plot(callback.storage.alphas, marker=".")
+    ax.set_title("Step lengths $\\alpha_k$")
+    ax.set_yscale("log", base=2)
     plt.grid(True, which="both", axis="y", ls="--")
+
+    ax = fig.add_subplot(gs[1, 1])
+    ax.plot(callback.storage.prim_infeas)
+    ax.set_title("Primal infeasibility")
+    ax.set_yscale("log")
+
     plt.tight_layout()
 
     it_list = [1, 2, 3, 4, 5, 10, 20, 30]
