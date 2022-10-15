@@ -247,7 +247,7 @@ constraints.append(ineq_constr1_)
 constraints.append(ineq_constr2_)
 constraints.append(ineq_constr3_)
 
-prob = proxnlp.Problem(cost_fun_, constraints)
+prob = proxnlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
@@ -260,7 +260,6 @@ rho_init = 1e-10
 mu_init = 0.01
 
 solver = proxnlp.Solver(
-    pb_space,
     prob,
     mu_init=mu_init,
     rho_init=rho_init,
