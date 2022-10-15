@@ -9,7 +9,8 @@ namespace proxnlp {
  * @brief   Base constraint set type.
  *
  * @details Constraint sets can be the negative or positive orthant, the
- * \f$\{0\}\f$ singleton, cones, etc...
+ * \f$\{0\}\f$ singleton, cones, etc... The expected inputs are constraint
+ * values or shifted constraint values (as in ALM-type algorithms).
  */
 template <typename _Scalar> struct ConstraintSetBase {
 public:
@@ -21,9 +22,11 @@ public:
   /// for Gauss Newton.
   virtual bool disableGaussNewton() const { return true; }
 
-  /// Provided the image @p zproj by the proximal/projection map, evaluate the
-  /// nonsmooth penalty or constraint set indicator function.
-  /// @note This will be 0 for projection operators.
+  /**
+   * Provided the image @p zproj by the proximal/projection map, evaluate the
+   * nonsmooth penalty or constraint set indicator function.
+   * @note This will be 0 for projection operators.
+   */
   virtual Scalar evaluate(const ConstVectorRef & /*zproj*/) const { return 0.; }
 
   /**
@@ -35,8 +38,8 @@ public:
   virtual void projection(const ConstVectorRef &z, VectorRef zout) const = 0;
 
   /**
-   * Compute projection of @p z onto the normal cone to the set.
-   * The default implementation is just $\f\mathrm{id} - P\f$.
+   * @brief Compute projection of @p z onto the normal cone to the set. The
+   * default implementation is just $\f\mathrm{id} - P\f$.
    *
    * @param[in]   z     Input vector
    * @param[out]  zout  Output projection on the normal projection
@@ -45,7 +48,8 @@ public:
                                     VectorRef zout) const = 0;
 
   /**
-   * Apply the jacobian of the constraint set projection operator.
+   * Apply the jacobian of the constraint set projection operator. This carries
+   * out the product \f$ \partial\prox . J \f$.
    *
    * @param[in]  z     Input vector (multiplier estimate)
    * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
@@ -56,6 +60,7 @@ public:
 
   /**
    * Apply the jacobian of the projection on the normal cone.
+   *
    * @param[in]  z     Input vector
    * @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which
    * will be modified in place. The modification should be a row-wise operation.
@@ -68,6 +73,7 @@ public:
   virtual void setProxParameters(const Scalar){};
 
   /// Compute the active set of the constraint.
+  /// Active means the Jacobian of the proximal operator is nonzero.
   virtual void computeActiveSet(const ConstVectorRef &z,
                                 Eigen::Ref<ActiveType> out) const = 0;
 
