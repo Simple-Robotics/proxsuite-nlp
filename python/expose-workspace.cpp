@@ -13,6 +13,7 @@ void exposeWorkspace() {
                     "KKT matrix buffer.")
       .def_readonly("kkt_rhs", &context::Workspace::kkt_rhs,
                     "KKT system right-hand side buffer.")
+      .def_readonly("data_cstr_values", &context::Workspace::data_cstr_values)
       .def_readonly("cstr_values", &context::Workspace::cstr_values,
                     "Vector constraint residuals.")
       .def_readonly("cstr_values_proj", &context::Workspace::cstr_values_proj,
