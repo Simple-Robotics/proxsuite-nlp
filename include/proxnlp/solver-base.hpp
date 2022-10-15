@@ -28,6 +28,7 @@ public:
   using Manifold = ManifoldAbstractTpl<Scalar>;
   using LinesearchOptions = typename Linesearch<Scalar>::Options;
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
+  using ConstraintSet = ConstraintSetBase<Scalar>;
 
   enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
 
@@ -84,7 +85,7 @@ public:
   const Scalar DELTA_MIN = 1e-14; // Minimum nonzero regularization strength.
   const Scalar DELTA_MAX = 1e6;   // Maximum regularization strength.
   const Scalar DELTA_NONZERO_INIT = 1e-4;
-  const Scalar DELTA_INIT = 0.;
+  Scalar DELTA_INIT = 0.;
 
   /// Solver maximum number of iterations.
   std::size_t max_iters = 100;
@@ -177,16 +178,19 @@ public:
    * Evaluate the problem data, as well as the proximal/projection operators,
    * and the first-order & primal-dual multiplier estimates.
    *
-   * @param workspace Problem workspace.
+   * @param x               Primal variable
+   * @param inner_lams_data Inner (SQP) dual variables
+   * @param workspace       Problem workspace.
    */
-  void computeConstraintsAndMultipliers(const ConstVectorRef &x,
-                                        const ConstVectorRef &lams_data,
-                                        Workspace &workspace) const;
+  void computeMultipliers(const ConstVectorRef &x,
+                          const ConstVectorRef &inner_lams_data,
+                          Workspace &workspace) const;
 
   /**
    * Evaluate the derivatives (cost gradient, Hessian, constraint Jacobians,
    * vector-Hessian products) of the problem data.
    *
+   * @param x         Primal variable
    * @param workspace Problem workspace.
    * @param second_order Whether to compute the second-order information; set to
    * false for e.g. linesearch.
@@ -198,6 +202,7 @@ public:
   /**
    * Take a trial step.
    *
+   * @param manifold  Working space/manifold
    * @param workspace Workspace
    * @param results   Contains the previous primal-dual point
    * @param alpha     Step size

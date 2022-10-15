@@ -114,7 +114,9 @@ void exposeSolver() {
       .def_readwrite("target_tol", &Solver::target_tol, "Target tolerance.")
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def_readwrite("max_iters", &Solver::max_iters,
-                     "Maximum number of iterations.");
+                     "Maximum number of iterations.")
+      .def_readwrite("reg_init", &Solver::DELTA_INIT,
+                     "Initial regularization.");
 
   using BCLType = BCLParams<Scalar>;
   bp::class_<BCLType>("BCLParams",
