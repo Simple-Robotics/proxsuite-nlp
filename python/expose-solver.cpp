@@ -23,6 +23,12 @@ void exposeSolver() {
       "Linesearch strategy. Only Armijo linesearch is implemented for now.")
       .value("ARMIJO", LinesearchStrategy::ARMIJO);
 
+  bp::enum_<HessianApprox>("HessianApprox",
+                           "Type of approximation of the Lagrangian Hessian.")
+      .value("HESSIAN_EXACT", HessianApprox::EXACT)
+      .value("HESSIAN_GAUSS_NEWTON", HessianApprox::GAUSS_NEWTON)
+      .export_values();
+
   bp::enum_<LSInterpolation>("LSInterpolation",
                              "Linesearch interpolation scheme.")
       .value("BISECTION", LSInterpolation::BISECTION)
@@ -64,9 +70,7 @@ void exposeSolver() {
                     bp::make_function(&Solver::manifold,
                                       bp::return_internal_reference<>()),
                     "The solver's working manifold.")
-      .def_readwrite(
-          "use_gauss_newton", &Solver::use_gauss_newton,
-          "Whether to use a Gauss-Newton Hessian matrix approximation.")
+      .def_readwrite("hess_approx", &Solver::hess_approx)
       .def_readwrite("ls_strat", &Solver::ls_strat)
       .def("register_callback", &Solver::registerCallback,
            bp::args("self", "cb"), "Add a callback to the solver.")
@@ -111,6 +115,7 @@ void exposeSolver() {
                      "each subproblem will be updated as :math:`\\eta^0 (\\mu "
                      "/ \\bar{\\mu})^\\gamma`")
       // BCL parameters
+      .def_readwrite("bcl_params", &Solver::bcl_params, "BCL parameters.")
       .def_readwrite("target_tol", &Solver::target_tol, "Target tolerance.")
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def_readwrite("max_iters", &Solver::max_iters,

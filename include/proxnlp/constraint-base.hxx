@@ -27,7 +27,7 @@ void ConstraintSetBase<Scalar>::applyNormalConeProjectionJacobian(
   computeActiveSet(z, active_set);
   for (int i = 0; i < nr; i++) {
     /// inactive constraint -> normal cone projection is zero
-    if (not active_set(i)) {
+    if (!active_set(i)) {
       Jout.row(i).setZero();
     }
   }

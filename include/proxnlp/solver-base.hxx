@@ -174,8 +174,7 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
 
 template <typename Scalar>
 void SolverTpl<Scalar>::computeMultipliers(
-    const ConstVectorRef &x, const ConstVectorRef &inner_lams_data,
-    Workspace &workspace) const {
+    const ConstVectorRef &inner_lams_data, Workspace &workspace) const {
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * workspace.data_lams_prev;
   // project multiplier estimate
@@ -206,8 +205,8 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
     cstr.set_->applyNormalConeProjectionJacobian(
         workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
 
-    bool use_vhp = (use_gauss_newton && !(cstr.set_->disableGaussNewton())) ||
-                   !(use_gauss_newton);
+    bool use_vhp = !cstr.set_->disableGaussNewton() ||
+                   (hess_approx == HessianApprox::EXACT);
     if (second_order && use_vhp) {
       cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
                                        workspace.cstr_vector_hessian_prod[i]);
@@ -243,7 +242,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   auto phi_eval = [&](const Scalar alpha) {
     tryStep(manifold(), workspace, results, alpha);
     problem_->evaluate(workspace.x_trial, workspace);
-    computeMultipliers(workspace.x_trial, workspace.lams_trial_data, workspace);
+    computeMultipliers(workspace.lams_trial_data, workspace);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
                               workspace.shift_cstr_values) +
            prox_penalty.call(workspace.x_trial);
@@ -256,7 +255,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     results.value = problem_->cost().call(results.x_opt);
 
     problem_->evaluate(results.x_opt, workspace);
-    computeMultipliers(results.x_opt, results.lams_opt_data, workspace);
+    computeMultipliers(results.lams_opt_data, workspace);
     computeConstraintDerivatives(results.x_opt, workspace, true);
 
     results.merit = merit_fun.evaluate(results.x_opt, results.lams_opt,
@@ -341,8 +340,8 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     }
     for (std::size_t i = 0; i < num_c; i++) {
       const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
-      bool use_vhp = (use_gauss_newton && !cstr_set.disableGaussNewton()) ||
-                     !use_gauss_newton;
+      bool use_vhp = !cstr_set.disableGaussNewton() ||
+                     (hess_approx == HessianApprox::EXACT);
       if (use_vhp) {
         workspace.kkt_matrix.topLeftCorner(ndx, ndx) +=
             workspace.cstr_vector_hessian_prod[i];
@@ -409,7 +408,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     Scalar phi0 = results.merit;
     Scalar phi_new = 0.;
     switch (ls_strat) {
-    case ARMIJO: {
+    case LinesearchStrategy::ARMIJO: {
       phi_new = ArmijoLinesearch<Scalar>(ls_options)
                     .run(phi_eval, results.merit, workspace.dmerit_dir,
                          workspace.alpha_opt);
@@ -444,9 +443,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
       break;
     }
   }
-
-  if (results.num_iters >= max_iters)
-    results.converged = ConvergenceFlag::MAX_ITERS_REACHED;
 
   return;
 }

@@ -18,6 +18,15 @@
 #include "proxnlp/linesearch-base.hpp"
 
 namespace proxnlp {
+
+enum class HessianApprox {
+  /// Exact Hessian construction from provided function Hessians
+  EXACT,
+  /// Gauss-Newton (or rather SCQP) approximation
+  GAUSS_NEWTON,
+  // BFGS
+};
+
 template <typename _Scalar> class SolverTpl {
 public:
   using Scalar = _Scalar;
@@ -42,10 +51,9 @@ public:
   /// Level of verbosity of the solver.
   VerboseLevel verbose = QUIET;
   /// Use a Gauss-Newton approximation for the Lagrangian Hessian.
-  bool use_gauss_newton = false;
-
+  HessianApprox hess_approx = HessianApprox::GAUSS_NEWTON;
   /// Linesearch strategy.
-  LinesearchStrategy ls_strat = ARMIJO;
+  LinesearchStrategy ls_strat = LinesearchStrategy::ARMIJO;
 
   //// Algorithm proximal parameters
 
@@ -178,12 +186,10 @@ public:
    * Evaluate the problem data, as well as the proximal/projection operators,
    * and the first-order & primal-dual multiplier estimates.
    *
-   * @param x               Primal variable
    * @param inner_lams_data Inner (SQP) dual variables
    * @param workspace       Problem workspace.
    */
-  void computeMultipliers(const ConstVectorRef &x,
-                          const ConstVectorRef &inner_lams_data,
+  void computeMultipliers(const ConstVectorRef &inner_lams_data,
                           Workspace &workspace) const;
 
   /**

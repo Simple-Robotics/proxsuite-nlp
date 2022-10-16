@@ -268,7 +268,6 @@ solver = proxnlp.Solver(
 )
 solver.register_callback(callback)
 solver.max_iters = 50
-solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
 lams0 = [np.zeros(cs.nr) for cs in constraints]

@@ -12,8 +12,9 @@ import pprint
 
 
 space = manifolds.R2()
+np.random.seed(0)
 target = np.random.randn(space.nx)
-w_x_scalar = 1.1
+w_x_scalar = 1.0
 w_x = np.eye(space.ndx) * w_x_scalar
 print("TARGET:", target)
 print("weights:\n{}".format(w_x))
@@ -24,22 +25,34 @@ lin_fun = proxnlp.residuals.LinearFunction(A)
 assert np.allclose(A @ target, lin_fun(target))
 low = np.array([-0.5, -1.0])
 # pset = constraints.BoxConstraint(low, -low)
-# pset = constraints.NegativeOrthant()
 pset = constraints.L1Penalty()
 penalty = constraints.ConstraintObject(lin_fun, pset)
 
 problem = proxnlp.Problem(space, rcost, [penalty])
 
 tol = 1e-4
-mu_init = 0.01
-solver = proxnlp.Solver(problem, tol, mu_init)
+mu_init = 0.1
+rho_init = 1e-6
+solver = proxnlp.Solver(problem, tol, mu_init, rho_init)
 solver.verbose = proxnlp.VERBOSE
-solver.max_iters = 40
+solver.hess_approx = proxnlp.HESSIAN_EXACT
+solver.max_iters = 20
 
 ws = proxnlp.Workspace(problem)
 rs = proxnlp.Results(problem)
 
-x0 = target.copy()
+
+def soft_thresh(x, lbda):
+    mask = np.abs(x) <= lbda
+    out = x - lbda * np.sign(x)
+    out[mask] = 0.0
+    return out
+
+
+sol = soft_thresh(target, 1 / w_x_scalar)
+# x0 = target.copy()
+x0 = sol.copy()
+
 cb = HistoryCallback()
 solver.register_callback(cb)
 flag = solver.solve(ws, rs, x0)
@@ -51,26 +64,16 @@ print("lopt:", rs.lamsopt.tolist())
 print("cerrs:", rs.constraint_errs.tolist())
 print("cstr_val:")
 pprint.pp(ws.cstr_values.tolist())
+print("Soft thresh of target:", sol)
 
 cbstore: HistoryCallback.history_storage = cb.storage
 prim_infeas = cbstore.prim_infeas
 print("Infeas:")
 pprint.pp(prim_infeas.tolist())
 
-
-def soft_thresh(x, lbda):
-    mask = np.abs(x) <= lbda
-    out = x - lbda * np.sign(x)
-    out[mask] = 0.0
-    return out
-
-
 print("Dual residual:", ws.dual_residuals)
 print("Jacobian:\n{}".format(ws.jacobians_data))
 print("active set:", rs.activeset.tolist())
-
-sol = soft_thresh(target, 1 / w_x_scalar)
-print("Soft thresh of target:", sol)
 
 
 plt.figure()

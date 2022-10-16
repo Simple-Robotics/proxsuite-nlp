@@ -64,7 +64,6 @@ template <int N, int M = 1> int submain() {
   Solver_t solver(problem);
   solver.setPenalty(1e-4);
   solver.setProxParameter(1e-8);
-  solver.use_gauss_newton = true;
 
   solver.solve(workspace, results, p1, workspace.lams_prev);
   fmt::print("{}\n", results);

@@ -112,7 +112,6 @@ int main() {
   SolverTpl<double> solver(prob);
   solver.verbose = VerboseLevel::VERY;
   solver.setPenalty(1. / 50);
-  solver.use_gauss_newton = true;
 
   auto lams0 = lams;
   solver.solve(workspace, results, p1, lams0);

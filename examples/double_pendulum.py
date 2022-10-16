@@ -177,7 +177,6 @@ solver = proxnlp.Solver(
 )
 solver.register_callback(callback)
 solver.max_iters = 300
-solver.use_gauss_newton = True
 
 xu_init = pb_space.neutral()
 for t in range(nsteps + 1):
