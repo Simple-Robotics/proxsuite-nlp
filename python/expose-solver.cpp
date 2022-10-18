@@ -125,6 +125,8 @@ void exposeSolver() {
       .def_readwrite("bcl_params", &Solver::bcl_params, "BCL parameters.")
       .def_readwrite("target_tol", &Solver::target_tol, "Target tolerance.")
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
+      .def_readwrite("mul_update_mode", &Solver::mul_up_mode,
+                     "Type of multiplier update.")
       .def_readwrite("max_iters", &Solver::max_iters,
                      "Maximum number of iterations.")
       .def_readwrite("reg_init", &Solver::DELTA_INIT,
