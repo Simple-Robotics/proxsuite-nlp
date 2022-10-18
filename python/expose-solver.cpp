@@ -29,6 +29,13 @@ void exposeSolver() {
       .value("HESSIAN_GAUSS_NEWTON", HessianApprox::GAUSS_NEWTON)
       .export_values();
 
+  bp::enum_<MultiplierUpdateMode>("MultiplierUpdateMode",
+                                  "Type of multiplier update.")
+      .value("MUL_NEWTON", MultiplierUpdateMode::NEWTON)
+      .value("MUL_PRIMAL", MultiplierUpdateMode::PRIMAL)
+      .value("MUL_PRIMAL_DUAL", MultiplierUpdateMode::PRIMAL_DUAL)
+      .export_values();
+
   bp::enum_<LSInterpolation>("LSInterpolation",
                              "Linesearch interpolation scheme.")
       .value("BISECTION", LSInterpolation::BISECTION)

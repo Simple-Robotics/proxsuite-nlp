@@ -36,6 +36,7 @@ rho_init = 1e-6
 solver = proxnlp.Solver(problem, tol, mu_init, rho_init)
 solver.verbose = proxnlp.VERBOSE
 solver.hess_approx = proxnlp.HESSIAN_EXACT
+solver.ls_options.alpha_min = 0.5
 solver.max_iters = 20
 
 ws = proxnlp.Workspace(problem)

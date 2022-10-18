@@ -95,7 +95,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
 
     if (results.prim_infeas < prim_tol_) {
       outer_col = fmt::color::lime_green;
-      acceptMultipliers(workspace);
+      acceptMultipliers(results, workspace);
       if ((results.prim_infeas < target_tol) &&
           (results.dual_infeas < target_tol)) {
         // terminate algorithm
@@ -173,6 +173,24 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
 }
 
 template <typename Scalar>
+void SolverTpl<Scalar>::acceptMultipliers(const Results &results,
+                                          Workspace &workspace) const {
+  switch (mul_up_mode) {
+  case MultiplierUpdateMode::NEWTON:
+    workspace.data_lams_prev = results.lams_opt_data;
+    break;
+  case MultiplierUpdateMode::PRIMAL:
+    workspace.data_lams_prev = workspace.data_lams_plus;
+    break;
+  case MultiplierUpdateMode::PRIMAL_DUAL:
+    workspace.data_lams_prev = workspace.data_lams_pdal;
+    break;
+  default:
+    break;
+  }
+}
+
+template <typename Scalar>
 void SolverTpl<Scalar>::computeMultipliers(
     const ConstVectorRef &inner_lams_data, Workspace &workspace) const {
   workspace.data_shift_cstr_values =
@@ -182,12 +200,13 @@ void SolverTpl<Scalar>::computeMultipliers(
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
     // apply proximal op to shifted constraint
     cstr_set.normalConeProjection(workspace.shift_cstr_values[i],
-                                  workspace.lams_plus[i]);
+                                  workspace.cstr_values_proj[i]);
   }
-  workspace.data_lams_plus *= mu_inv_;
+  workspace.data_lams_plus = mu_inv_ * workspace.data_cstr_values_proj;
   workspace.data_dual_prox_err =
       mu_ * (workspace.data_lams_plus - inner_lams_data);
-  workspace.data_lams_pdal = 2 * workspace.data_lams_plus - inner_lams_data;
+  workspace.data_lams_pdal =
+      (1. + merit_fun.gamma_) * workspace.data_lams_plus - inner_lams_data;
 }
 
 /// Compute problem derivatives
@@ -236,7 +255,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   Scalar old_delta = 0.;
   Scalar conditioning = 0;
 
-  merit_fun.setPenalty(mu_);
+  merit_fun.gamma_ = 0.;
 
   // lambda for evaluating the merit function
   auto phi_eval = [&](const Scalar alpha) {
@@ -244,7 +263,8 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     problem_->evaluate(workspace.x_trial, workspace);
     computeMultipliers(workspace.lams_trial_data, workspace);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
-                              workspace.shift_cstr_values) +
+                              workspace.shift_cstr_values,
+                              workspace.cstr_values_proj) +
            prox_penalty.call(workspace.x_trial);
   };
 
@@ -259,7 +279,8 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     computeConstraintDerivatives(results.x_opt, workspace, true);
 
     results.merit = merit_fun.evaluate(results.x_opt, results.lams_opt,
-                                       workspace.shift_cstr_values);
+                                       workspace.shift_cstr_values,
+                                       workspace.cstr_values_proj);
     if (rho_ > 0.) {
       results.merit += prox_penalty.call(results.x_opt);
       prox_penalty.computeGradient(results.x_opt, workspace.prox_grad);

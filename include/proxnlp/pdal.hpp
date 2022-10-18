@@ -31,7 +31,8 @@ public:
   PDALFunction(shared_ptr<Problem> prob, const Scalar mu);
 
   Scalar evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
-                  const std::vector<VectorRef> &shift_cvals) const;
+                  const std::vector<VectorRef> &shift_cvals,
+                  std::vector<VectorRef> &proj_cvals) const;
 
   /// @brief  Set the merit function penalty parameter.
   void setPenalty(const Scalar &new_mu) noexcept;

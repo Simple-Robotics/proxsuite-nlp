@@ -19,6 +19,8 @@
 
 namespace proxnlp {
 
+enum class MultiplierUpdateMode { NEWTON, PRIMAL, PRIMAL_DUAL };
+
 enum class HessianApprox {
   /// Exact Hessian construction from provided function Hessians
   EXACT,
@@ -54,6 +56,7 @@ public:
   HessianApprox hess_approx = HessianApprox::GAUSS_NEWTON;
   /// Linesearch strategy.
   LinesearchStrategy ls_strat = LinesearchStrategy::ARMIJO;
+  MultiplierUpdateMode mul_up_mode = MultiplierUpdateMode::NEWTON;
 
   //// Algorithm proximal parameters
 
@@ -178,9 +181,7 @@ public:
   inline void tolerancePostUpdate() noexcept;
 
   /// @brief  Accept Lagrange multiplier estimates.
-  void acceptMultipliers(Workspace &workspace) const {
-    workspace.data_lams_prev = workspace.data_lams_pdal;
-  }
+  void acceptMultipliers(const Results &results, Workspace &workspace) const;
 
   /**
    * Evaluate the problem data, as well as the proximal/projection operators,
