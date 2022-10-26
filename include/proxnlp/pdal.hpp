@@ -25,23 +25,25 @@ public:
   using Problem = ProblemTpl<Scalar>;
 
   shared_ptr<Problem> problem_;
-  /// Generalized pdAL dual penalty param
-  Scalar gamma_ = 1.;
-
-  PDALFunction(shared_ptr<Problem> prob, const Scalar mu);
-
-  Scalar evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
-                  const std::vector<VectorRef> &shift_cvals,
-                  std::vector<VectorRef> &proj_cvals) const;
-
-  /// @brief  Set the merit function penalty parameter.
-  void setPenalty(const Scalar &new_mu) noexcept;
 
 protected:
   /// AL penalty parameter
-  Scalar mu_penal_;
+  Scalar mu_;
   /// Reciprocal penalty parameter
-  Scalar mu_inv_ = 1. / mu_penal_;
+  Scalar mu_inv_ = 1. / mu_;
+
+public:
+  /// Generalized pdAL dual penalty param
+  Scalar gamma_;
+
+  PDALFunction(shared_ptr<Problem> prob, const Scalar mu, const Scalar gamma);
+
+  Scalar evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
+                  const std::vector<VectorRef> &shift_cvals,
+                  const std::vector<VectorRef> &proj_cvals) const;
+
+  /// @brief  Set the merit function penalty parameter.
+  void setPenalty(const Scalar &new_mu) noexcept;
 };
 
 } // namespace proxnlp

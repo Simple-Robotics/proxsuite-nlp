@@ -4,24 +4,24 @@
 
 namespace proxnlp {
 template <typename Scalar>
-PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu)
-    : problem_(prob), mu_penal_(mu) {}
+PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu,
+                                   const Scalar gamma)
+    : problem_(prob), mu_(mu), gamma_(gamma) {}
 
 template <typename Scalar>
 Scalar
 PDALFunction<Scalar>::evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
                                const std::vector<VectorRef> &shift_cvals,
-                               std::vector<VectorRef> &proj_cvals) const {
+                               const std::vector<VectorRef> &proj_cvals) const {
   Scalar res = problem_->cost().call(x);
   const std::size_t nc = problem_->getNumConstraints();
   for (std::size_t i = 0; i < nc; i++) {
     const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    auto &tmp_proj = proj_cvals[i];
-    tmp_proj = shift_cvals[i];
-    res += computeMoreauEnvelope(*cstr.set_, shift_cvals[i], tmp_proj, mu_inv_);
+    res += cstr.set_->evaluateMoreauEnvelope(shift_cvals[i], proj_cvals[i],
+                                             mu_inv_);
     if (gamma_ > 0.) {
       res += 0.5 * gamma_ * mu_inv_ *
-             (tmp_proj - mu_penal_ * lams[i]).squaredNorm();
+             (proj_cvals[i] - mu_ * lams[i]).squaredNorm();
     }
   }
   return res;
@@ -29,7 +29,7 @@ PDALFunction<Scalar>::evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
 
 template <typename Scalar>
 void PDALFunction<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
-  mu_penal_ = new_mu;
+  mu_ = new_mu;
   mu_inv_ = 1. / new_mu;
 };
 

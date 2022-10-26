@@ -9,7 +9,7 @@
 
 namespace proxnlp {
 
-enum ConvergenceFlag { SUCCESS = 0, MAX_ITERS_REACHED = 1 };
+enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
 
 /**
  * @brief   Results struct, holding the returned data from the solver.
@@ -32,7 +32,9 @@ template <typename _Scalar> struct ResultsTpl {
   VectorOfRef lams_opt;
   /// Current active set of the algorithm.
   std::vector<VecBool> active_set;
+  /// Dual infeasibility error
   Scalar dual_infeas = 0.;
+  /// Primal infeasibility error
   Scalar prim_infeas = 0.;
   /// Violations for each constraint
   VectorXs constraint_violations;

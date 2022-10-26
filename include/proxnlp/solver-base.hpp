@@ -100,6 +100,7 @@ public:
 
   /// Solver maximum number of iterations.
   std::size_t max_iters = 100;
+  std::size_t max_al_iters = 100;
 
   /// Callbacks
   std::vector<CallbackPtr> callbacks_;
@@ -143,7 +144,7 @@ public:
   ConvergenceFlag solve(Workspace &workspace, Results &results,
                         const ConstVectorRef &x0);
 
-  void solveInner(Workspace &workspace, Results &results);
+  void innerLoop(Workspace &workspace, Results &results);
 
   /// Update penalty parameter using the provided factor (with a safeguard
   /// SolverTpl::mu_lower).
@@ -184,7 +185,7 @@ public:
   inline void tolerancePostUpdate() noexcept;
 
   /// @brief  Accept Lagrange multiplier estimates.
-  void acceptMultipliers(const Results &results, Workspace &workspace) const;
+  void acceptMultipliers(Results &results, Workspace &workspace) const;
 
   /**
    * Evaluate the problem data, as well as the proximal/projection operators,
@@ -208,6 +209,14 @@ public:
   void computeConstraintDerivatives(const ConstVectorRef &x,
                                     Workspace &workspace,
                                     bool second_order) const;
+
+  /**
+   * Compute the primal residuals at the current primal-dual pair \f$(x,
+   * \lambda^+)\f$, where the multipliers are chosen to be the predicted next
+   * ALM iterate.
+   *
+   */
+  void computePrimalResiduals(Workspace &workspace, Results &results) const;
 
   /**
    * Take a trial step.

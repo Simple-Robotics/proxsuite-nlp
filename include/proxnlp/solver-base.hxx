@@ -72,11 +72,12 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   updateToleranceFailure();
 
   results.num_iters = 0;
+  results.converged = ConvergenceFlag::UNINIT;
 
   fmt::color outer_col = fmt::color::white;
 
   std::size_t i = 0;
-  while (results.num_iters < max_iters) {
+  while ((results.num_iters < max_iters) && (i < max_al_iters)) {
     results.mu = mu_;
     results.rho = rho_;
     if (logger.active) {
@@ -87,7 +88,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
     if (results.num_iters == 0) {
       logger.start();
     }
-    solveInner(workspace, results);
+    innerLoop(workspace, results);
 
     // accept new primal iterate
     workspace.x_prev = results.x_opt;
@@ -96,9 +97,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
     if (results.prim_infeas < prim_tol_) {
       outer_col = fmt::color::lime_green;
       acceptMultipliers(results, workspace);
-      if ((results.prim_infeas < target_tol) &&
-          (results.dual_infeas < target_tol)) {
-        // terminate algorithm
+      if (std::max(results.prim_infeas, results.dual_infeas) < target_tol) {
         results.converged = ConvergenceFlag::SUCCESS;
         break;
       }
@@ -209,7 +208,6 @@ void SolverTpl<Scalar>::computeMultipliers(
       (1. + merit_fun.gamma_) * workspace.data_lams_plus - inner_lams_data;
 }
 
-/// Compute problem derivatives
 template <typename Scalar>
 void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
                                                      Workspace &workspace,
@@ -233,6 +231,25 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
   }
 }
 
+template <typename Scalar>
+void SolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
+                                               Results &results) const {
+  workspace.data_shift_cstr_values =
+      workspace.data_cstr_values + mu_ * results.data_lams_opt;
+
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    auto displ_cstr = workspace.shift_cstr_values[i];
+    // apply proximal operator
+    cstr_set.projection(displ_cstr, displ_cstr);
+
+    auto cstr_prox_err = workspace.cstr_values[i] - displ_cstr;
+    results.constraint_violations(long(i)) = math::infty_norm(cstr_prox_err);
+    fmt::print("cstr_viol={}\n", cstr_prox_err.transpose());
+  }
+  results.prim_infeas = math::infty_norm(results.constraint_violations);
+}
+
 template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
   if (mu_ == mu_lower_) {
     setPenalty(mu_init_);
@@ -242,7 +259,7 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
+void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
   const int ndx = manifold().ndx();
   const long ntot = workspace.kkt_rhs.size();
   const long ndual = ntot - ndx;
@@ -254,8 +271,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
   Scalar delta = delta_last;
   Scalar old_delta = 0.;
   Scalar conditioning = 0;
-
-  merit_fun.gamma_ = 0.;
+  Scalar phi_new = 0.;
 
   // lambda for evaluating the merit function
   auto phi_eval = [&](const Scalar alpha) {
@@ -286,8 +302,6 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
       prox_penalty.computeGradient(results.x_opt, workspace.prox_grad);
       prox_penalty.computeHessian(results.x_opt, workspace.prox_hess);
     }
-
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.prox_grad, "prox_grad");
 
     //// fill in KKT RHS
     workspace.kkt_rhs.setZero();
@@ -321,6 +335,7 @@ void SolverTpl<Scalar>::solveInner(Workspace &workspace, Results &results) {
     if (rho_ > 0.)
       workspace.dual_residual -= workspace.prox_grad;
 
+    computePrimalResiduals(workspace, results);
     results.dual_infeas = math::infty_norm(workspace.dual_residual);
     for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
       const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
