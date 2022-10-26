@@ -35,7 +35,7 @@ template <typename Scalar> struct history_callback : base_callback<Scalar> {
             const ResultsTpl<Scalar> &results) {
     if (store_primal_dual_vars_) {
       storage.xs.push_back(results.x_opt);
-      storage.lams.push_back(results.lams_opt_data);
+      storage.lams.push_back(results.data_lams_opt);
       storage.lams_view.push_back(results.lams_opt);
     }
     if (store_values_)

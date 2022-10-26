@@ -28,7 +28,7 @@ template <typename _Scalar> struct ResultsTpl {
   Scalar merit;
   Scalar value;
   VectorXs x_opt;
-  VectorXs lams_opt_data;
+  VectorXs data_lams_opt;
   VectorOfRef lams_opt;
   /// Current active set of the algorithm.
   std::vector<VecBool> active_set;
@@ -46,10 +46,10 @@ template <typename _Scalar> struct ResultsTpl {
 
   ResultsTpl(const Problem &prob)
       : x_opt(prob.manifold_->neutral()),
-        lams_opt_data(prob.getTotalConstraintDim()),
+        data_lams_opt(prob.getTotalConstraintDim()),
         constraint_violations(prob.getNumConstraints()), num_iters(0), mu(0.),
         rho(0.) {
-    helpers::allocateMultipliersOrResiduals(prob, lams_opt_data, lams_opt);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_opt, lams_opt);
     constraint_violations.setZero();
     active_set.reserve(prob.getNumConstraints());
     for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
