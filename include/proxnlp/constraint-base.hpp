@@ -80,42 +80,36 @@ public:
   virtual ~ConstraintSetBase<Scalar>() = default;
 
   bool operator==(const ConstraintSetBase<Scalar> &rhs) { return this == &rhs; }
+
+  /**
+   * @brief Evaluate the Moreau envelope with parameter @p mu for the given
+   * contraint set or nonsmooth penalty \f$P\f$ at point @p zin.
+   *
+   * @details    The envelope is
+   *              \f[ P(\prox_{P/\mu}(z)) + \frac{1}{2\mu} \| z -
+   * \prox_{P/\mu}(z)
+   * \|^2. \f]
+   *
+   * @param cstr_set  The constraint set/nonsmooth penalty.
+   * @param zin    		The input.
+   * @param zproj     Projection of the input to the normal.
+   * @param inv_mu    The inverse penalty parameter.
+   */
+  Scalar evaluateMoreauEnvelope(const ConstVectorRef &zin,
+                                const ConstVectorRef &zproj,
+                                const Scalar inv_mu) const {
+    Scalar res = evaluate(zin - zproj);
+    res += static_cast<Scalar>(0.5) * inv_mu * zproj.squaredNorm();
+    return res;
+  }
+
+  /// @copybrief evaluateMoreauEnvelope(). This variant evaluates the prox map.
+  Scalar computeMoreauEnvelope(const ConstVectorRef &zin, VectorRef zprojout,
+                               const Scalar inv_mu) const {
+    normalConeProjection(zin, zprojout);
+    return evaluateMoreauEnvelope(zin, zprojout, inv_mu);
+  }
 };
-
-/**
- * @brief Evaluate the Moreau envelope with parameter @p mu for the given
- * contraint set or nonsmooth penalty \f$P\f$ at point @p zin.
- *
- * @details    The envelope is
- *              \f[ P(\prox_{P/\mu}(z)) + \frac{1}{2\mu} \| z - \prox_{P/\mu}(z)
- * \|^2. \f]
- *
- * @param cstr_set  The constraint set/nonsmooth penalty.
- * @param zin    		The input.
- * @param zproj     Projection of the input to the normal.
- * @param inv_mu    The inverse penalty parameter.
- */
-template <typename Scalar>
-Scalar
-evaluateMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
-                       const typename math_types<Scalar>::ConstVectorRef &zin,
-                       const typename math_types<Scalar>::ConstVectorRef &zproj,
-                       const Scalar inv_mu) {
-  Scalar res = cstr_set.evaluate(zin - zproj);
-  res += static_cast<Scalar>(0.5) * inv_mu * zproj.squaredNorm();
-  return res;
-}
-
-/// @copybrief evaluateMoreauEnvelope(). This variant evaluates the prox map.
-template <typename Scalar>
-Scalar
-computeMoreauEnvelope(const ConstraintSetBase<Scalar> &cstr_set,
-                      const typename math_types<Scalar>::ConstVectorRef &zin,
-                      typename math_types<Scalar>::VectorRef zprojout,
-                      const Scalar inv_mu) {
-  cstr_set.normalConeProjection(zin, zprojout);
-  return evaluateMoreauEnvelope(cstr_set, zin, zprojout, inv_mu);
-}
 
 /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
  *
