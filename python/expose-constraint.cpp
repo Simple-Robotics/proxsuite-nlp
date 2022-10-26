@@ -51,6 +51,11 @@ void exposeConstraints() {
            "Apply the normal cone projection Jacobian.")
       .def("computeActiveSet", &ConstraintSet::computeActiveSet,
            bp::args("self", "z", "out"))
+      .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
+           bp::args("self", "zin", "zproj", "inv_mu"),
+           "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
+      .def("setProxParameters", &ConstraintSet::setProxParameters,
+           bp::args("self", "mu"), "Set proximal parameter.")
       .def(bp::self == bp::self);
 
   bp::class_<Constraint>(
@@ -79,7 +84,9 @@ void exposeConstraints() {
       "BoxConstraint",
       "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.",
       bp::init<context::ConstVectorRef, context::ConstVectorRef>(
-          bp::args("self", "lower_limit", "upper_limit")));
+          bp::args("self", "lower_limit", "upper_limit")))
+      .def_readwrite("upper_limit", &BoxConstraintTpl<Scalar>::upper_limit)
+      .def_readwrite("lower_limit", &BoxConstraintTpl<Scalar>::lower_limit);
 
   bp::def("createEqualityConstraint",
           &make_constraint<EqualityConstraint<Scalar>>,
@@ -89,10 +96,6 @@ void exposeConstraints() {
           &make_constraint<NegativeOrthant<Scalar>>,
           "Convenience function to create an inequality constraint from a "
           "C2Function.");
-
-  bp::def("evaluateMoreauEnvelope", &evaluateMoreauEnvelope<Scalar>,
-          bp::args("cstr_set", "zin", "zproj", "inv_mu"),
-          "Evaluate the Moreau envelope with parameter :math:`\\mu`.");
 }
 
 } // namespace python
