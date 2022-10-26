@@ -87,7 +87,6 @@ int main() {
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  PDALFunction<double> pdmerit(prob, 0.01);
   LagrangianFunction<double> lagr(prob);
   Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
