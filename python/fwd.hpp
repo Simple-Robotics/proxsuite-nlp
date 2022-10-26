@@ -10,6 +10,7 @@
 
 namespace proxnlp {
 
+/// @brief Python bindings.
 namespace python {
 namespace bp = boost::python;
 
