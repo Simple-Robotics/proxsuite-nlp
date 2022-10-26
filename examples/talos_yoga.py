@@ -256,8 +256,8 @@ results = proxnlp.Results(prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-6
-rho_init = 1e-10
-mu_init = 0.01
+rho_init = 1e-8
+mu_init = 0.001
 
 solver = proxnlp.Solver(
     prob,
@@ -277,7 +277,7 @@ try:
 except KeyboardInterrupt:
     pass
 
-assert results.num_iters == 22
+assert results.num_iters <= 24
 
 # -------------------------------------------------------------- ###
 # Get results

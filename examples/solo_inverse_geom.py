@@ -1,5 +1,6 @@
 """
 Inverse kinematics with friction cone constraint.
+We compare PROXNLP with the solver IPOPT.
 
 min Dq, f || q - q0 ||**2 + || f ||**2
 
@@ -259,7 +260,7 @@ workspace = proxnlp.Workspace(problem)
 results = proxnlp.Results(problem)
 
 callback = proxnlp.helpers.HistoryCallback()
-rho_init = 1e-8
+rho_init = 1e-12
 mu_init = 1e-2
 
 solver = proxnlp.Solver(
@@ -282,6 +283,7 @@ try:
 except KeyboardInterrupt:
     pass
 
+print(results)
 dxus_opt = results.xopt
 dxs_opt_flat = dxus_opt[: xspace.nx]
 dqs_opt = dxs_opt_flat[: model.nv]
@@ -306,20 +308,22 @@ print("\nDifference between the solutions")
 for i, (fipopt, fproxnlp) in enumerate(zip(f_opt_ipopt, f_opt_proxnlp)):
     print("F_" + str(i) + " difference:\t", fipopt - fproxnlp)
 
-plt.figure(figsize=(12, 6), dpi=90)
-plt.subplot(1, 2, 1)
+fig, axes = plt.subplots(1, 2, sharey=True, figsize=(12, 6), dpi=90)
+plt.sca(axes[0])
 plt.title("IPOPT Residuals")
 plt.semilogy(du_ipopt, marker=".")
 plt.semilogy(pr_ipopt, marker=".")
 ylims = plt.ylim()
 plt.legend(["dual", "primal"])
 
-plt.subplot(1, 2, 2)
+plt.sca(axes[1])
 plt.title("proxnlp Residuals")
 plt.semilogy(du_proxnlp, marker=".")
 plt.semilogy(pr_proxnlp, marker=".")
 ylims = (min(ylims[0], plt.ylim()[0]), max(ylims[1], plt.ylim()[1]))
 plt.ylim(*ylims)
 plt.legend(["dual", "primal"])
+
+axes[0].set_ylim(*ylims)
 
 plt.show()
