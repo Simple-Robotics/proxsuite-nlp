@@ -80,6 +80,7 @@ if __name__ == "__main__":
     plt.rcParams["lines.linewidth"] = 1.0
 
     xs_ = np.stack(callback.storage.xs.tolist())
+    xs_ = np.insert(xs_, 0, p1, axis=0)
 
     bound_xs = (
         np.min(xs_[:, 0]),
