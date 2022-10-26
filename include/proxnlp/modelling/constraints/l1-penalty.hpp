@@ -36,7 +36,7 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
   }
 
   void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
-    zout = z - projection_impl(z).matrix();
+    zout = z.cwiseMin(mu_).cwiseMax(-mu_);
   }
 
   void computeActiveSet(const ConstVectorRef &z,
