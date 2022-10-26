@@ -106,6 +106,8 @@ void exposeSolver() {
            "Run the solver (without initial multiplier guess).")
       .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
+      .def("setDualPenalty", &Solver::setDualPenalty, bp::args("self", "gamma"),
+           "Set the dual variable penalty for the linesearch merit function.")
       .def("setProxParameter", &Solver::setProxParameter,
            bp::args("self", "rho"),
            "Set the primal proximal penalty parameter.")

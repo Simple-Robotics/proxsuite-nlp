@@ -149,6 +149,9 @@ public:
   /// SolverTpl::mu_lower).
   inline void updatePenalty();
 
+  /// @brief Set the dual penalty weight for the merit function.
+  void setDualPenalty(const Scalar gamma) { merit_fun.gamma_ = gamma; }
+
   /// @brief Set penalty parameter, its inverse and update the merit function.
   /// @param new_mu The new penalty parameter.
   void setPenalty(const Scalar &new_mu) noexcept;
