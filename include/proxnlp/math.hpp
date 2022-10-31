@@ -79,7 +79,7 @@ bool scalar_close(const Scalar a, const Scalar b,
 
 template <typename T, typename = std::enable_if_t<std::is_scalar<T>::value>>
 bool check_value(const T &x) {
-  static_assert(std::is_scalar<T>::value);
+  static_assert(std::is_scalar<T>::value, "Parameter T should be scalar.");
   return check_scalar(x);
 }
 

@@ -2,7 +2,8 @@
 
 #include "proxnlp/function-base.hpp"
 
-namespace proxnlp::python {
+namespace proxnlp {
+namespace python {
 
 struct FunctionWrap : context::Function, bp::wrapper<context::Function> {
 public:
@@ -67,4 +68,5 @@ struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
   }
 };
 
-} // namespace proxnlp::python
+} // namespace python
+} // namespace proxnlp
