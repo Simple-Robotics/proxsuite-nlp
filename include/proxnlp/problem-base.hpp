@@ -70,6 +70,8 @@ public:
   void evaluate(const ConstVectorRef &x,
                 WorkspaceTpl<Scalar> &workspace) const {
     workspace.objective_value = cost().call(x);
+
+#pragma omp parallel for
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
       workspace.cstr_values[i] = cstr.func()(x);
@@ -79,6 +81,8 @@ public:
   void computeDerivatives(const ConstVectorRef &x,
                           WorkspaceTpl<Scalar> &workspace) const {
     cost().computeGradient(x, workspace.objective_gradient);
+
+#pragma omp parallel for
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintType &cstr = constraints_[i];
       cstr.func().computeJacobian(x, workspace.cstr_jacobians[i]);
