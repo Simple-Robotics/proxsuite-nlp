@@ -48,8 +48,8 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
   template <typename U, typename V>
   CartesianProductTpl(const U &left, const V &right) {
-    static_assert(!std::is_pointer<U>::value);
-    static_assert(!std::is_pointer<V>::value);
+    static_assert(!std::is_pointer<U>::value, "U should be pointer type.");
+    static_assert(!std::is_pointer<V>::value, "V should be pointer type.");
     components.push_back(std::make_shared<U>(left));
     components.push_back(std::make_shared<V>(right));
   }

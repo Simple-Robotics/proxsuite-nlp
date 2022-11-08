@@ -28,7 +28,7 @@ EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
 # Do not show source files
 EXCLUDE_PATTERNS        = *.hxx
 
-INCLUDE_PATH            = @PROJECT_BINARY_DIR@/include
+INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/include
 
 EXCLUDE_SYMLINKS        = YES
 
@@ -56,9 +56,7 @@ MATHJAX_FORMAT          = SVG
 
 SOURCE_BROWSER          = YES
 
-DISABLE_INDEX           = NO
 ALPHABETICAL_INDEX      = YES
-FULL_SIDEBAR            = NO
 
 USE_MDFILE_AS_MAINPAGE  = README.md
 
