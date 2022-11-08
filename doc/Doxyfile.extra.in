@@ -38,6 +38,7 @@ EXTRA_PACKAGES          = {bm,stmaryrd}
 FORMULA_MACROFILE       = @PROJECT_SOURCE_DIR@/doc/macros.inc
 
 GENERATE_TREEVIEW       = YES
+GENERATE_LATEX          = NO
 
 VERBATIM_HEADERS        = YES
 
