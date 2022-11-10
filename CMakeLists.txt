@@ -112,7 +112,7 @@ endif(BUILD_PYTHON_INTERFACE)
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
   ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
-  add_definitions(-DPROXNLP_WITH_PINOCCHIO_SUPPORT)
+  add_definitions(-DPROXNLP_WITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # --- MAIN LIBRARY ----------------------------------------
