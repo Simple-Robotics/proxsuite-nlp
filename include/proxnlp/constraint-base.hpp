@@ -15,7 +15,7 @@ namespace proxnlp {
 template <typename _Scalar> struct ConstraintSetBase {
 public:
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
   /// Do not use the vector-Hessian product in the Hessian
@@ -116,7 +116,7 @@ public:
  */
 template <typename _Scalar> struct ConstraintObject {
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using FunctionType = C2FunctionTpl<Scalar>;
   using ConstraintSet = ConstraintSetBase<Scalar>;

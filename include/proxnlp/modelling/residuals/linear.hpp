@@ -11,7 +11,7 @@ namespace proxnlp {
  */
 template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = C2FunctionTpl<Scalar>;
   using Base::computeJacobian;
@@ -25,7 +25,7 @@ template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   LinearFunctionTpl(const ConstMatrixRef &A)
       : LinearFunctionTpl(A, VectorXs::Zero(A.rows())) {}
 
-  ReturnType operator()(const ConstVectorRef &x) const { return mat * x + b; }
+  VectorXs operator()(const ConstVectorRef &x) const { return mat * x + b; }
 
   void computeJacobian(const ConstVectorRef &, MatrixRef Jout) const {
     Jout = mat;

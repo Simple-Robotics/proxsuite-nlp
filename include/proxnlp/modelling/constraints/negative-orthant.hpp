@@ -17,7 +17,7 @@ namespace proxnlp {
 template <typename _Scalar>
 struct NegativeOrthant : ConstraintSetBase<_Scalar> {
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;

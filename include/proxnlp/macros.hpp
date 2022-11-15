@@ -18,6 +18,9 @@
 
 #define PROXNLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj)
 
-#define PROXNLP_FUNCTION_TYPEDEFS(Scalar)                                      \
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);                                            \
-  using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>
+#ifdef PROXNLP_EIGEN_CHECK_MALLOC
+#define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)                                    \
+  ::Eigen::internal::set_is_malloc_allowed(allowed)
+#else
+#define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)
+#endif

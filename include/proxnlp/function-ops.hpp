@@ -15,7 +15,7 @@ public:
   using Base::computeJacobian;
   using Base::vectorHessianProduct;
 
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   ComposeFunctionTpl(const shared_ptr<Base> &left,
                      const shared_ptr<Base> &right)
@@ -24,7 +24,7 @@ public:
     assert(left->nx() == right->nr());
   }
 
-  ReturnType operator()(const ConstVectorRef &x) const {
+  VectorXs operator()(const ConstVectorRef &x) const {
     return left()(right()(x));
   }
 

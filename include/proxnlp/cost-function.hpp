@@ -18,7 +18,7 @@ template <typename _Scalar>
 struct CostFunctionBaseTpl : public C2FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = C2FunctionTpl<Scalar>;
 
   CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
@@ -48,8 +48,8 @@ public:
 
   /* Implement C2FunctionTpl interface. */
 
-  ReturnType operator()(const ConstVectorRef &x) const {
-    ReturnType out(1, 1);
+  VectorXs operator()(const ConstVectorRef &x) const {
+    VectorXs out(1, 1);
     out << call(x);
     return out;
   }
@@ -86,7 +86,7 @@ private:
 
 public:
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /** @brief    Constructor.
    *  @details  This defines an implicit conversion from the C2FunctionTpl type.

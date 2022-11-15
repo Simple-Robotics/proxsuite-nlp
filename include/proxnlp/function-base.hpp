@@ -16,13 +16,13 @@ protected:
 
 public:
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   BaseFunctionTpl(const int nx, const int ndx, const int nr)
       : nx_(nx), ndx_(ndx), nr_(nr) {}
 
   /// @brief      Evaluate the residual at a given point x.
-  virtual ReturnType operator()(const ConstVectorRef &x) const = 0;
+  virtual VectorXs operator()(const ConstVectorRef &x) const = 0;
 
   virtual ~BaseFunctionTpl() = default;
 
@@ -41,7 +41,7 @@ struct C1FunctionTpl : public BaseFunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = BaseFunctionTpl<_Scalar>;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   C1FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
@@ -71,7 +71,7 @@ struct C2FunctionTpl : public C1FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = C1FunctionTpl<_Scalar>;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   C2FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}

@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(finite_diff)
 
 using namespace proxnlp;
 
-PROXNLP_FUNCTION_TYPEDEFS(double);
+PROXNLP_DYNAMIC_TYPEDEFS(double);
 static const double fd_eps = 1e-4;
 static const double prec = std::sqrt(fd_eps);
 
@@ -26,8 +26,8 @@ struct MyFuncType : C1FunctionTpl<double> {
 
   VectorXs refpt;
 
-  ReturnType operator()(const ConstVectorRef &x) const {
-    ReturnType out(1);
+  VectorXs operator()(const ConstVectorRef &x) const {
+    VectorXs out(1);
     VectorXs err = space.difference(x, refpt);
     out << 1. / 3. * std::pow(err.lpNorm<3>(), 3);
     return out;

@@ -28,7 +28,7 @@ struct finite_difference_impl;
 
 template <typename Scalar>
 struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using FuncType = BaseFunctionTpl<Scalar>;
   using Base = C1FunctionTpl<Scalar>;
   using Base::computeJacobian;
@@ -59,7 +59,7 @@ struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
 
 template <typename Scalar>
 struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar> {
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using FuncType = C1FunctionTpl<Scalar>;
   using Base = C2FunctionTpl<Scalar>;
   using Base::vectorHessianProduct;
@@ -114,13 +114,13 @@ struct finite_difference_wrapper<_Scalar, TOC1>
   using Base = internal::finite_difference_impl<Scalar, TOC1>;
   using Base::computeJacobian;
 
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
                             const InputType &func, const Scalar fd_eps)
       : OutType(func.nx(), func.ndx(), func.nr()), Base(space, func, fd_eps) {}
 
-  ReturnType operator()(const ConstVectorRef &x) const { return this->func(x); }
+  VectorXs operator()(const ConstVectorRef &x) const { return this->func(x); }
 };
 
 /** @brief    Approximate the second derivatives of a given function using
@@ -143,7 +143,7 @@ struct finite_difference_wrapper<_Scalar, TOC2>
   using Base1::computeJacobian;
   using Base2::vectorHessianProduct;
 
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
                             const InputType &func, const Scalar fd_eps)
@@ -151,7 +151,7 @@ struct finite_difference_wrapper<_Scalar, TOC2>
         OutType(func.nx(), func.ndx(), func.nr()), Base1(space, func, fd_eps),
         Base2(space, func, fd_eps) {}
 
-  ReturnType operator()(const ConstVectorRef &x) const override {
+  VectorXs operator()(const ConstVectorRef &x) const override {
     return static_cast<const Base1 &>(*this).func(x);
   }
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const override {

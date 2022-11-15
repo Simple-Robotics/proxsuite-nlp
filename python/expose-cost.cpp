@@ -13,7 +13,7 @@ namespace python {
 namespace internal {
 
 struct CostWrapper : context::Cost, bp::wrapper<context::Cost> {
-  PROXNLP_FUNCTION_TYPEDEFS(context::Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
   CostWrapper(const int nx, const int ndx) : context::Cost(nx, ndx) {}
 

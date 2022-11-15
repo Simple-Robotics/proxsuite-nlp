@@ -17,7 +17,7 @@ template <typename _Scalar>
 struct ManifoldDifferenceToPoint : C2FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_FUNCTION_TYPEDEFS(Scalar);
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = C2FunctionTpl<Scalar>;
   using Base::operator();
@@ -33,7 +33,7 @@ public:
       : Base(space->nx(), space->ndx(), space->ndx()), target_(target),
         space_(space) {}
 
-  ReturnType operator()(const ConstVectorRef &x) const {
+  VectorXs operator()(const ConstVectorRef &x) const {
     return space_->difference(target_, x);
   }
 
