@@ -84,13 +84,6 @@ public:
                                     MatrixRef Hout) const {
     Hout.setZero();
   }
-
-  MatrixXs vectorHessianProduct(const ConstVectorRef &x,
-                                const ConstVectorRef &v) const {
-    MatrixXs J(this->ndx(), this->ndx());
-    vectorHessianProduct(x, v, J);
-    return J;
-  }
 };
 
 } // namespace proxnlp

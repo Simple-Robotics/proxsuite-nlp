@@ -102,6 +102,8 @@ public:
   /// Merit function derivative in descent direction
   Scalar dmerit_dir = 0.;
 
+  VectorXs tmp_dx_scaled;
+
   WorkspaceTpl(const Problem &prob)
       : nx(prob.nx()), ndx(prob.ndx()), numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
@@ -115,7 +117,7 @@ public:
         objective_hessian(ndx, ndx), merit_gradient(ndx),
         data_jacobians(numdual, ndx), data_hessians((int)numblocks * ndx, ndx),
         data_lams_plus(numdual), data_lams_pdal(numdual),
-        data_dual_prox_err(numdual) {
+        data_dual_prox_err(numdual), tmp_dx_scaled(ndx) {
     init(prob);
   }
 
@@ -151,6 +153,7 @@ public:
     helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lams_pdal);
     helpers::allocateMultipliersOrResiduals(prob, data_dual_prox_err,
                                             subproblem_dual_err);
+    tmp_dx_scaled.setZero();
 
     cstr_jacobians.reserve(numblocks);
     cstr_vector_hessian_prod.reserve(numblocks);

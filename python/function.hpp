@@ -56,15 +56,21 @@ struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
     Hout.resize(this->ndx(), this->ndx());
     if (bp::override f = this->get_override("vectorHessianProduct")) {
       f(x, v, Hout);
-      return;
     } else {
-      return context::C2Function::vectorHessianProduct(x, v, Hout);
+      context::C2Function::vectorHessianProduct(x, v, Hout);
     }
+  }
+
+  MatrixXs getVHP(const ConstVectorRef &x, const ConstVectorRef &v) const {
+    using context::MatrixXs;
+    MatrixXs Hout(this->ndx_, this->ndx_);
+    this->vectorHessianProduct(x, v, Hout);
+    return Hout;
   }
 
   void default_vhp(const ConstVectorRef &x, const ConstVectorRef &v,
                    MatrixRef Hout) const {
-    return context::C2Function::vectorHessianProduct(x, v, Hout);
+    context::C2Function::vectorHessianProduct(x, v, Hout);
   }
 };
 

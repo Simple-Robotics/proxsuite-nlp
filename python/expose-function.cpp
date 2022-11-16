@@ -7,6 +7,7 @@ namespace python {
 void exposeFunctionTypes() {
   using context::C1Function;
   using context::C2Function;
+  using context::ConstVectorRef;
   using context::Function;
 
   bp::class_<FunctionWrap, boost::noncopyable>(
@@ -29,17 +30,12 @@ void exposeFunctionTypes() {
       .def("getJacobian", compJac2, bp::args("self", "x"),
            "Compute and return Jacobian.");
 
-  context::VHPFuncType C2Function::*compHess1 =
-      &C2Function::vectorHessianProduct;
-  context::VHPFuncRetType C2Function::*compHess2 =
-      &C2Function::vectorHessianProduct;
-
   bp::class_<C2FunctionWrap, bp::bases<C1Function>, boost::noncopyable>(
       "C2Function", "Base class for twice-differentiable functions.",
       bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
-      .def("vectorHessianProduct", compHess1, &C2FunctionWrap::default_vhp,
-           bp::args("self", "x", "v", "Hout"))
-      .def("getVHP", compHess2, bp::args("self", "x", "v"),
+      .def("vectorHessianProduct", &C2Function::vectorHessianProduct,
+           &C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))
+      .def("getVHP", &C2FunctionWrap::getVHP, bp::args("self", "x", "v"),
            "Compute and return the vector-Hessian product.");
 
   bp::class_<ComposeFunctionTpl<context::Scalar>, bp::bases<C2Function>>(

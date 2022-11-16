@@ -67,7 +67,9 @@ BOOST_AUTO_TEST_CASE(test1) {
   v0.setOnes();
 
   finite_difference_wrapper<double, TOC2> fdfun2(space, fun, fd_eps);
-  fmt::print("Hessian:\n{}\n", fdfun2.vectorHessianProduct(x0, v0));
+  MatrixXs H0(nx, nx);
+  fdfun2.vectorHessianProduct(x0, v0, H0);
+  fmt::print("Hessian:\n{}\n", H0);
 }
 
 #ifdef PROXNLP_WITH_PINOCCHIO

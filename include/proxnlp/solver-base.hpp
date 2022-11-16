@@ -221,13 +221,11 @@ public:
   /**
    * Take a trial step.
    *
-   * @param manifold  Working space/manifold
    * @param workspace Workspace
    * @param results   Contains the previous primal-dual point
    * @param alpha     Step size
    */
-  static void tryStep(const Manifold &manifold, Workspace &workspace,
-                      const Results &results, Scalar alpha);
+  void tryStep(Workspace &workspace, const Results &results, Scalar alpha);
 
   void invokeCallbacks(Workspace &workspace, Results &results) {
     for (auto cb : callbacks_) {
