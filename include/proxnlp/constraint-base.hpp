@@ -129,6 +129,10 @@ template <typename _Scalar> struct ConstraintObject {
 
   ConstraintObject(shared_ptr<FunctionType> func, shared_ptr<ConstraintSet> set)
       : func_(func), set_(set) {}
+
+  bool operator==(const ConstraintObject &other) {
+    return (func_ == other.func_) && (set_ && other.set_);
+  }
 };
 
 } // namespace proxnlp

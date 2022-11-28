@@ -1,19 +1,15 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #include "proxnlp/python/fwd.hpp"
-#include "proxnlp/constraint-base.hpp"
 
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 #include "proxnlp/modelling/constraints/l1-penalty.hpp"
 #include "proxnlp/modelling/constraints/box-constraint.hpp"
 
-#include <pinocchio/fwd.hpp>
-#include <pinocchio/bindings/python/utils/std-vector.hpp>
+#include <eigenpy/std-vector.hpp>
 
 namespace proxnlp {
 namespace python {
-
-namespace pp = pinocchio::python;
 
 template <typename T>
 void exposeSpecificConstraintSet(const char *name, const char *docstring) {
@@ -67,8 +63,8 @@ void exposeConstraints() {
       .def_readonly("set", &Constraint::set_, "Constraint set.");
 
   /* Expose constraint stack */
-  pp::StdVectorPythonVisitor<std::vector<Constraint>, true>::expose(
-      "StdVec_Constraint");
+  eigenpy::StdVectorPythonVisitor<std::vector<context::Constraint>,
+                                  true>::expose("StdVec_ConstraintObject");
 
   exposeSpecificConstraintSet<EqualityConstraint<Scalar>>(
       "EqualityConstraintSet", "Cast a function into an equality constraint");
