@@ -31,7 +31,8 @@ import example_robot_data as robex
 
 import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace
-from proxnlp.utils import CasadiFunction, plot_pd_errs
+from proxnlp.utils import plot_pd_errs
+from proxnlp.casadi_utils import CasadiFunction
 import meshcat_utils as msu
 
 import matplotlib.pyplot as plt

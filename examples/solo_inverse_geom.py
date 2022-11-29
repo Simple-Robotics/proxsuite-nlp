@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
-from proxnlp.utils import CasadiFunction
+from proxnlp.casadi_utils import CasadiFunction
 
 plt.style.use("seaborn")
 

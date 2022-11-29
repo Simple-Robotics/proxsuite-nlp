@@ -4,6 +4,8 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 from .pyproxnlp import *
 from .pyproxnlp import __version__
 
+from . import utils
+
 
 def __process():
     import sys

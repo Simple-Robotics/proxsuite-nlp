@@ -68,6 +68,7 @@ endforeach(pyheader)
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PYLIB_NAME}_PYFILES
     __init__.py
+    casadi_utils.py
     utils.py)
 
 foreach(pyfile ${${PYLIB_NAME}_PYFILES})

@@ -16,7 +16,8 @@ import example_robot_data as erd
 import matplotlib.pyplot as plt
 
 from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
-from proxnlp.utils import CasadiFunction, plot_pd_errs
+from proxnlp.utils import plot_pd_errs
+from proxnlp.casadi_utils import CasadiFunction
 
 from tap import Tap
 
