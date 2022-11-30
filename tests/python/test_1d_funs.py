@@ -1,5 +1,6 @@
 import proxnlp
-from proxnlp import manifolds, utils, costs
+from proxnlp import manifolds, costs
+from proxnlp.casadi_utils import CasadiFunction
 import casadi as cas
 import numpy as np
 import pytest
@@ -27,7 +28,7 @@ def test_quad1d(ls_strat, ls_interp_type):
     a = 0.01
     b = -0.53
     f = x_sm**2 * a + b * x_sm
-    fs = utils.CasadiFunction(1, 1, f, x_sm, True)
+    fs = CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
@@ -54,7 +55,7 @@ def test_cubic1d(ls_strat, ls_interp_type):
     c = 10
     d = -24
     f = x_sm**3 + b * x_sm**2 + c * x_sm + d
-    fs = utils.CasadiFunction(1, 1, f, x_sm, True)
+    fs = CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
