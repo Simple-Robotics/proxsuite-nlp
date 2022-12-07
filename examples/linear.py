@@ -30,8 +30,6 @@ print("x1:", x1, "resdl(x1):", resdl(x1))
 J1 = np.zeros((nres, nx))
 J2 = np.zeros((nres, nx))
 resdl.computeJacobian(x0, J1)
-print(A)
-print(J1)
 assert np.allclose(J1, A)
 assert np.allclose(resdl(x0), 0.0)
 assert np.allclose(resdl(np.zeros_like(x0)), b)
@@ -47,30 +45,22 @@ cstr2 = createInequalityConstraint(resdl)
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10
 cost_ = QuadraticDistanceCost(space, x_target, np.eye(nx))
-problem = proxnlp.Problem(cost_)
+problem = proxnlp.Problem(space, cost_)
 print("Problem:", problem)
 print("Target :", x_target)
-problem = proxnlp.Problem(cost_, [cstr1])
+problem = proxnlp.Problem(space, cost_, [cstr1])
 
 
 results = proxnlp.Results(problem)
 workspace = proxnlp.Workspace(problem)
 
-
-class DumbCallback(proxnlp.helpers.BaseCallback):
-    def __init__(self):
-        pass
-
-    def call(self):
-        print("Calling dumb callback!")
-
-
 cb = proxnlp.helpers.HistoryCallback()
-cb2 = DumbCallback()
 
-solver = proxnlp.Solver(space, problem)
+tol = 1e-6
+mu_init = 1e-4
+solver = proxnlp.Solver(problem, tol, mu_init)
 solver.register_callback(cb)
-# solver.register_callback(cb2)
+
 x_init = np.random.randn(nx) * 10
 lams0 = [np.random.randn(resdl.nr)]
 solver.solve(workspace, results, x_init, lams0)
