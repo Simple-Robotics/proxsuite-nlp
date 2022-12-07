@@ -297,15 +297,6 @@ struct SymbolicBlockMatrix {
 };
 
 namespace backend {
-template <typename M> auto ref(M &mat) noexcept -> MatrixRef {
-  static_assert(M::InnerStrideAtCompileTime == 1, ".");
-  return mat;
-}
-
-auto ref_submatrix(MatrixRef a, isize i, isize j, isize nrows,
-                   isize ncols) noexcept -> MatrixRef {
-  return a.block(i, j, nrows, ncols);
-}
 
 void ldlt_in_place_unblocked(MatrixRef a) {
   isize n = a.rows();
@@ -345,9 +336,10 @@ void ldlt_in_place_recursive(MatrixRef const &a) {
     isize bs = (n + 1) / 2;
     isize rem = n - bs;
 
-    auto l00 = backend::ref_submatrix(a, 0, 0, bs, bs);
-    auto l10 = backend::ref_submatrix(a, bs, 0, rem, bs);
-    auto l11 = backend::ref_submatrix(a, bs, bs, rem, rem);
+    auto a_mut = a.const_cast_derived();
+    MatrixRef l00 = a_mut.block(0, 0, bs, bs);
+    MatrixRef l10 = a_mut.block(bs, 0, rem, bs);
+    MatrixRef l11 = a_mut.block(bs, bs, rem, rem);
 
     backend::ldlt_in_place_recursive(l00);
     auto d0 = l00.diagonal();
@@ -356,7 +348,7 @@ void ldlt_in_place_recursive(MatrixRef const &a) {
         .template triangularView<Eigen::UnitUpper>()
         .template solveInPlace<Eigen::OnTheRight>(l10);
 
-    auto work = backend::ref_submatrix(a, 0, rem, rem, bs);
+    MatrixRef work = a_mut.block(0, rem, rem, bs);
     work = l10;
     l10 = l10 * d0.asDiagonal().inverse();
 
@@ -714,11 +706,12 @@ struct BlockMatrix {
     auto structure_00 = structure(0, 0);
     auto bs = structure._.segment_lens[0];
     auto rem = n - bs;
-    auto l00 = backend::ref_submatrix(storage, 0, 0, bs, bs);
-    auto l11 = backend::ref_submatrix(storage, bs, bs, rem, rem);
+    auto store_mut = storage.const_cast_derived();
+    MatrixRef l00 = store_mut.block(0, 0, bs, bs);
+    MatrixRef l11 = store_mut.block(bs, bs, rem, rem);
     auto d0 = l00.diagonal();
 
-    auto work = backend::ref_submatrix(storage, 0, rem, rem, bs);
+    MatrixRef work = store_mut.block(0, rem, rem, bs);
 
     switch (structure_00) {
     case Zero:
@@ -734,8 +727,8 @@ struct BlockMatrix {
 
       for (isize i = 1; i < nblocks; ++i) {
         auto bsi = structure._.segment_lens[i];
-        auto li0 = backend::ref_submatrix(storage, offset, 0, bsi, bs);
-        auto li0_copy = backend::ref_submatrix(work, offset - bs, 0, bsi, bs);
+        MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
+        MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
         switch (structure(i, 0)) {
         case Diag:
@@ -772,8 +765,8 @@ struct BlockMatrix {
 
       for (isize i = 1; i < nblocks; ++i) {
         auto bsi = structure._.segment_lens[i];
-        auto li0 = backend::ref_submatrix(storage, offset, 0, bsi, bs);
-        auto li0_copy = backend::ref_submatrix(work, offset - bs, 0, bsi, bs);
+        MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
+        MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
         switch (structure(i, 0)) {
         case TriL:
@@ -808,11 +801,10 @@ struct BlockMatrix {
     isize offset_i = bs;
     for (isize i = 1; i < nblocks; ++i) {
       auto bsi = structure._.segment_lens[i];
-      auto li0 = backend::ref_submatrix(storage, offset_i, 0, bsi, bs);
-      auto li0_prev = backend::ref_submatrix(work, offset_i - bs, 0, bsi, bs);
+      MatrixRef li0 = store_mut.block(offset_i, 0, bsi, bs);
+      MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
 
-      auto target_ii =
-          backend::ref_submatrix(storage, offset_i, offset_i, bsi, bsi);
+      MatrixRef target_ii = store_mut.block(offset_i, offset_i, bsi, bsi);
 
       // target_ii -= li0 * li0_prev.Scalar;
       backend::gemmt(target_ii, li0, li0_prev, structure(i, 0), structure(i, 0),
@@ -823,9 +815,8 @@ struct BlockMatrix {
         // target_ji -= lj0 * li0_prev.Scalar
 
         auto bsj = structure._.segment_lens[j];
-        auto lj0 = backend::ref_submatrix(storage, offset_j, 0, bsj, bs);
-        auto target_ji =
-            backend::ref_submatrix(storage, offset_j, offset_i, bsj, bsi);
+        MatrixRef lj0 = store_mut.block(offset_j, 0, bsj, bs);
+        MatrixRef target_ji = store_mut.block(offset_j, offset_i, bsj, bsi);
 
         backend::gemmt(target_ji, lj0, li0_prev, structure(j, 0),
                        structure(i, 0), Scalar(-1));

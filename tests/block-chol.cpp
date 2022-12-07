@@ -12,6 +12,9 @@ using block_chol::MatrixRef;
 using block_chol::Scalar;
 using block_chol::SymbolicBlockMatrix;
 
+using MatrixXs = MatrixRef::PlainMatrix;
+using VectorXs = math_types<Scalar>::VectorXs;
+
 constexpr isize n = 3;
 
 // clang-format off
@@ -26,8 +29,8 @@ isize row_segments[n] = {16, 32, 32};
 
 SymbolicBlockMatrix mat{{data, row_segments, n, n}};
 
-auto a = []() -> typename MatrixRef::PlainMatrix {
-  typename MatrixRef::PlainMatrix mat(80, 80);
+auto a = []() -> MatrixXs {
+  MatrixXs mat(80, 80);
   mat.setZero();
 
   mat.block(0, 0, 16, 16).diagonal().setRandom();
@@ -41,11 +44,12 @@ auto a = []() -> typename MatrixRef::PlainMatrix {
   return mat;
 }();
 
+VectorXs rhs = VectorXs::Random(80);
+
 void bm_blocked(benchmark::State &s) {
   auto l = a;
   for (auto _ : s) {
     l = a;
-
     BlockMatrix l_block{MatrixRef(l), mat};
     l_block.ldlt_in_place();
   }
@@ -60,11 +64,11 @@ void bm_unblocked(benchmark::State &s) {
   }
 }
 
-BENCHMARK(bm_unblocked);
-BENCHMARK(bm_blocked);
+auto unit = benchmark::kMicrosecond;
+BENCHMARK(bm_unblocked)->Unit(unit);
+BENCHMARK(bm_blocked)->Unit(unit);
 
 int main(int argc, char **argv) {
-  using block_chol::backend::ref;
 
   fmt::print("Input matrix pattern:\n");
   mat.dump();
@@ -85,8 +89,8 @@ int main(int argc, char **argv) {
     isize copy_row_segments[n];
     SymbolicBlockMatrix copy_mat{{copy_data, copy_row_segments, n, n}};
 
-    BlockMatrix a_block_permuted{ref(l0), copy_mat};
-    BlockMatrix a_block_unpermuted{ref(a), mat};
+    BlockMatrix a_block_permuted{l0, copy_mat};
+    BlockMatrix a_block_unpermuted{a, mat};
     a_block_permuted.permute(a_block_unpermuted, best_perm);
 
     copy_mat.llt_in_place();
@@ -100,11 +104,11 @@ int main(int argc, char **argv) {
     isize copy_row_segments[n];
     SymbolicBlockMatrix copy_mat{{copy_data, copy_row_segments, n, n}};
 
-    BlockMatrix a_block_permuted{ref(l1), copy_mat};
-    BlockMatrix a_block_unpermuted{ref(a), mat};
+    BlockMatrix a_block_permuted{l1, copy_mat};
+    BlockMatrix a_block_unpermuted{a, mat};
     a_block_permuted.permute(a_block_unpermuted, best_perm);
 
-    block_chol::backend::ldlt_in_place(ref(l1));
+    block_chol::backend::ldlt_in_place(l1);
     l1.template triangularView<Eigen::StrictlyUpper>().setZero();
   }
 
