@@ -12,11 +12,11 @@
 
 #define PROXNLP_RAISE_IF_NAN(value)                                            \
   if (::proxnlp::math::check_value(value))                                     \
-  proxnlp_runtime_error("Encountered NaN.\n")
+  PROXNLP_RUNTIME_ERROR("Encountered NaN.\n")
 
 #define PROXNLP_RAISE_IF_NAN_NAME(value, name)                                 \
   if (::proxnlp::math::check_value(value))                                     \
-  proxnlp_runtime_error(fmt::format("Encountered NaN for value {:s}.\n", name))
+  PROXNLP_RUNTIME_ERROR(fmt::format("Encountered NaN for value {:s}.\n", name))
 
 /// Macro typedefs for dynamic-sized vectors/matrices, used for cost funcs,
 /// merit funcs because we don't CRTP them and virtual members funcs can't be

@@ -36,7 +36,7 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
   int nr = 0;
   const std::size_t numc = problem_->getNumConstraints();
   if (numc != lams0.size()) {
-    proxnlp_runtime_error("Specified number of constraints is not the same "
+    PROXNLP_RUNTIME_ERROR("Specified number of constraints is not the same "
                           "as the provided number of multipliers!");
   }
   for (std::size_t i = 0; i < numc; i++) {
@@ -153,7 +153,7 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
       numneg++;
       break;
     default:
-      proxnlp_runtime_error(
+      PROXNLP_RUNTIME_ERROR(
           "Matrix signature should only have Os, 1s, and -1s.");
     }
   }
@@ -443,7 +443,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       break;
     }
     default:
-      proxnlp_runtime_error("Unrecognized linesearch alternative.\n");
+      PROXNLP_RUNTIME_ERROR("Unrecognized linesearch alternative.\n");
       break;
     }
 

@@ -108,7 +108,7 @@ public:
           break;
         }
         default:
-          proxnlp_runtime_error(
+          PROXNLP_RUNTIME_ERROR(
               "Unrecognized interpolation type in this context.\n");
           break;
         }
