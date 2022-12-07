@@ -1,4 +1,5 @@
-/// @file linesearch-base.hpp
+/// @file linesearch-armijo.hpp
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 /// @brief  Implements a basic Armijo back-tracking strategy.
 #pragma once
 

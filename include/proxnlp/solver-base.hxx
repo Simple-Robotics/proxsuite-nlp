@@ -1,5 +1,6 @@
-// @file solver-base.hxx
-/// Implementations for the prox solver.
+/// @file
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @brief     Implementations for the prox solver.
 #pragma once
 
 #include "proxnlp/solver-base.hpp"

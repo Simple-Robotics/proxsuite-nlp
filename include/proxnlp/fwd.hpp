@@ -1,6 +1,6 @@
-/**
- * @file    Forward declarations and configuration macros.
- */
+/// @file
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @brief     Forward declarations and configuration macros.
 #pragma once
 
 #ifdef EIGEN_DEFAULT_IO_FORMAT

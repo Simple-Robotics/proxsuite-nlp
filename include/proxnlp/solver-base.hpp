@@ -1,7 +1,5 @@
-/**
- * @file solver-base.hpp
- * @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
- */
+/// @file
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxnlp/fwd.hpp"

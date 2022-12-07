@@ -1,4 +1,5 @@
 /// @file linesearch-base.hpp
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 /// @brief  Base structs for linesearch algorithms.
 #pragma once
 

@@ -1,5 +1,6 @@
-/** @file Base definitions for function classes.
- */
+/// @file
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @brief     Base definitions for function classes.
 #pragma once
 
 #include "proxnlp/fwd.hpp"

@@ -1,9 +1,9 @@
-// Basis for merit functions.
+/// @file
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @brief     Basis for merit functions.
 #pragma once
 
 #include "proxnlp/problem-base.hpp"
-
-#include "proxnlp/fwd.hpp"
 
 namespace proxnlp {
 
