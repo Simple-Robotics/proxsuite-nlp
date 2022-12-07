@@ -20,8 +20,9 @@ namespace block_chol {
 using Scalar = double;
 using MatrixRef = proxnlp::math_types<Scalar>::MatrixRef;
 
-using isize = typename std::make_signed<std::size_t>::type;
+using isize = std::int64_t;
 
+/// Kind of matrix block: zeros, diagonal, lower/upper triangular or dense.
 enum BlockKind {
   Zero,
   Diag,
@@ -30,29 +31,14 @@ enum BlockKind {
   Dense,
 };
 
-auto trans(BlockKind a) noexcept -> BlockKind {
-  if (a == TriL) {
-    return TriU;
-  }
-  if (a == TriU) {
-    return TriL;
-  }
-  return a;
-}
+/// BlockKind of the transpose of a matrix.
+BlockKind trans(BlockKind a) noexcept;
 
-auto add(BlockKind a, BlockKind b) noexcept -> BlockKind {
-  if (a == Dense || b == Dense || int(a) + int(b) == int(TriL) + int(TriU)) {
-    return Dense;
-  }
-  return std::max(a, b);
-}
+/// BlockKind of the addition of two matrices - given by their BlockKind.
+BlockKind add(BlockKind a, BlockKind b) noexcept;
 
-auto mul(BlockKind a, BlockKind b) noexcept -> BlockKind {
-  if (a == Zero || b == Zero) {
-    return Zero;
-  }
-  return block_chol::add(a, b);
-}
+/// BlockKind of the product of two matrices.
+BlockKind mul(BlockKind a, BlockKind b) noexcept;
 
 struct SymbolicBlockMatrix {
   struct Raw {
@@ -64,25 +50,22 @@ struct SymbolicBlockMatrix {
 
   SymbolicBlockMatrix /* NOLINT */ (Raw raw) noexcept : _{raw} {}
 
-  auto nsegments() const noexcept -> isize { return _.segments_count; }
-  auto ptr(isize i, isize j) const noexcept -> BlockKind * {
+  isize nsegments() const noexcept { return _.segments_count; }
+  BlockKind *ptr(isize i, isize j) const noexcept {
     return _.data + (i + j * _.outer_stride);
   }
-  auto submatrix(isize i, isize n) const noexcept -> SymbolicBlockMatrix {
 
-    return {
-        Raw{
-            ptr(i, i),
-            _.segment_lens + i,
-            n,
-            _.outer_stride,
-        },
-    };
+  /// Get the symbolic submatrix starting from the block in position (i, i).
+  SymbolicBlockMatrix submatrix(isize i, isize n) const noexcept {
+    return {Raw{
+        ptr(i, i),
+        _.segment_lens + i,
+        n,
+        _.outer_stride,
+    }};
   }
-  auto operator()(isize i, isize j) const noexcept -> BlockKind & {
 
-    return *ptr(i, j);
-  }
+  BlockKind &operator()(isize i, isize j) const noexcept { return *ptr(i, j); }
 
   void deep_copy(SymbolicBlockMatrix in,
                  isize const *perm = nullptr) const noexcept {
@@ -105,7 +88,8 @@ struct SymbolicBlockMatrix {
     }
   }
 
-  // work has length `in.nsegments()`
+  /// Brute-force search of the best permutation possible in the block matrix.
+  /// work has length `in.nsegments()`
   void brute_force_best_permutation(SymbolicBlockMatrix in, isize *best_perm,
                                     isize *iwork) const {
     isize n = in.nsegments();
@@ -224,77 +208,9 @@ struct SymbolicBlockMatrix {
 
     submatrix(1, n - 1).llt_in_place();
   }
-
-  void dump() const noexcept {
-    isize nrows = 0;
-    for (isize i = 0; i < _.segments_count; ++i) {
-      nrows += _.segment_lens[i];
-    }
-
-    isize ncols = nrows;
-
-    std::vector<bool> buf;
-    buf.resize(std::size_t(nrows * ncols));
-
-    isize handled_rows = 0;
-    for (isize i = 0; i < _.segments_count; ++i) {
-      isize handled_cols = 0;
-      for (isize j = 0; j < _.segments_count; ++j) {
-        switch ((*this)(i, j)) {
-        case Zero:
-          break;
-        case Diag: {
-          for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
-            buf[std::size_t((handled_rows + ii) * ncols + handled_cols + ii)] =
-                true;
-          }
-          break;
-        }
-        case TriL: {
-          for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
-            for (isize jj = 0; jj <= ii; ++jj) {
-              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
-                              jj)] = true;
-            }
-          }
-          break;
-        }
-        case TriU: {
-          for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
-            for (isize jj = ii; jj < _.segment_lens[j]; ++jj) {
-              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
-                              jj)] = true;
-            }
-          }
-          break;
-        }
-        case Dense: {
-          for (isize ii = 0; ii < _.segment_lens[i]; ++ii) {
-            for (isize jj = 0; jj < _.segment_lens[j]; ++jj) {
-              buf[std::size_t((handled_rows + ii) * ncols + handled_cols +
-                              jj)] = true;
-            }
-          }
-          break;
-        }
-        }
-        handled_cols += _.segment_lens[j];
-      }
-      handled_rows += _.segment_lens[i];
-    }
-
-    for (isize i = 0; i < nrows; ++i) {
-      for (isize j = 0; j < ncols; ++j) {
-        if (buf[std::size_t(i * ncols + j)]) {
-          std::cout << "█";
-        } else {
-          std::cout << "░";
-        }
-      }
-      std::cout << '\n';
-    }
-  }
 };
+
+void dump(const SymbolicBlockMatrix &smat) noexcept;
 
 namespace backend {
 

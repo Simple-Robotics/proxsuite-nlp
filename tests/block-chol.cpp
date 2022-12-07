@@ -71,7 +71,7 @@ BENCHMARK(bm_blocked)->Unit(unit);
 int main(int argc, char **argv) {
 
   fmt::print("Input matrix pattern:\n");
-  mat.dump();
+  block_chol::dump(mat);
 
   isize best_perm[n];
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
   fmt::print("Err: {:g}\n", (l0 - l1).norm());
 
   mat.llt_in_place();
-  mat.dump();
+  block_chol::dump(mat);
 
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
