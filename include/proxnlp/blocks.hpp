@@ -1,4 +1,4 @@
-/// @file blocks.hpp
+/// @file
 /// @author Sarah El-Kazdadi
 /// @brief Routines for block-sparse (notably, KKT-type) matrix LDLT
 /// factorisation.
@@ -6,6 +6,7 @@
 #pragma once
 
 #include "proxnlp/math.hpp"
+#include <Eigen/Cholesky>
 #include <type_traits>
 
 #include <algorithm>
@@ -18,7 +19,8 @@ namespace proxnlp {
 namespace block_chol {
 
 using Scalar = double;
-using MatrixRef = proxnlp::math_types<Scalar>::MatrixRef;
+using MatrixRef = math_types<Scalar>::MatrixRef;
+using VectorRef = math_types<Scalar>::VectorRef;
 
 using isize = std::int64_t;
 
@@ -41,181 +43,49 @@ BlockKind add(BlockKind a, BlockKind b) noexcept;
 BlockKind mul(BlockKind a, BlockKind b) noexcept;
 
 struct SymbolicBlockMatrix {
-  struct Raw {
-    BlockKind *data;
-    isize *segment_lens;
-    isize segments_count;
-    isize outer_stride;
-  } _;
+  BlockKind *data;
+  isize *segment_lens;
+  isize segments_count;
+  isize outer_stride;
 
-  SymbolicBlockMatrix /* NOLINT */ (Raw raw) noexcept : _{raw} {}
-
-  isize nsegments() const noexcept { return _.segments_count; }
+  isize nsegments() const noexcept { return segments_count; }
+  isize size() const noexcept { return segments_count * outer_stride; }
   BlockKind *ptr(isize i, isize j) const noexcept {
-    return _.data + (i + j * _.outer_stride);
+    return data + (i + j * outer_stride);
   }
 
   /// Get the symbolic submatrix starting from the block in position (i, i).
-  SymbolicBlockMatrix submatrix(isize i, isize n) const noexcept {
-    return {Raw{
-        ptr(i, i),
-        _.segment_lens + i,
-        n,
-        _.outer_stride,
-    }};
-  }
-
+  SymbolicBlockMatrix submatrix(isize i, isize n) const noexcept;
   BlockKind &operator()(isize i, isize j) const noexcept { return *ptr(i, j); }
 
-  void deep_copy(SymbolicBlockMatrix in,
-                 isize const *perm = nullptr) const noexcept {
-    auto self = *this;
-
-    isize n = self.nsegments();
-
-    for (isize i = 0; i < n; ++i) {
-      self._.segment_lens[i] =
-          in._.segment_lens[(perm != nullptr) ? perm[i] : i];
-    }
-    for (isize i = 0; i < n; ++i) {
-      for (isize j = 0; j < n; ++j) {
-        if (perm == nullptr) {
-          self(i, j) = in(i, j);
-        } else {
-          self(i, j) = in(perm[i], perm[j]);
-        }
-      }
-    }
-  }
+  /// Deep copy of the struct, possibily with a permutation.
+  void deep_copy(SymbolicBlockMatrix const &in,
+                 isize const *perm = nullptr) const noexcept;
 
   /// Brute-force search of the best permutation possible in the block matrix.
   /// work has length `in.nsegments()`
-  void brute_force_best_permutation(SymbolicBlockMatrix in, isize *best_perm,
-                                    isize *iwork) const {
-    isize n = in.nsegments();
-    std::iota(iwork, iwork + n, isize(0));
-
-    bool first_iter = true;
-    isize best_perm_nnz = 0;
-
-    // find best permutation
-    do {
-      deep_copy(in, iwork);
-      llt_in_place();
-
-      isize nnz = count_nnz();
-
-      if (first_iter || nnz < best_perm_nnz) {
-        std::memcpy(best_perm, iwork, std::size_t(n) * sizeof(isize));
-        best_perm_nnz = nnz;
-      }
-
-      first_iter = false;
-    } while (std::next_permutation(iwork, iwork + n));
-  }
-
-  auto count_nnz() const noexcept -> isize {
-    auto self = *this;
-    isize nnz = 0;
-    isize n = nsegments();
-
-    for (isize i = 0; i < n; ++i) {
-      for (isize j = 0; j < n; ++j) {
-        switch (self(i, j)) {
-        case Zero:
-          break;
-        case Diag: {
-          nnz += self._.segment_lens[i];
-          break;
-        }
-        case TriL:
-        case TriU: {
-          isize k = self._.segment_lens[i];
-          nnz += (k * (k + 1)) / 2;
-          break;
-        }
-        case Dense: {
-          nnz += self._.segment_lens[i] * self._.segment_lens[j];
-        }
-        }
-      }
-    }
-    return nnz;
-  }
-
-  void llt_in_place() const noexcept {
-    // assume `*this` is symmetric
-    if (_.segments_count == 0) {
-      return;
-    }
-
-    auto self = *this;
-
-    isize n = _.segments_count;
-
-    // zero triu part
-    for (isize j = 1; j < n; ++j) {
-      self(0, j) = BlockKind::Zero;
-    }
-
-    switch (self(0, 0)) {
-    case TriL:
-    case TriU:
-    case Zero:
-      std::terminate();
-    case Dense: {
-      self(0, 0) = TriL;
-      for (isize i = 1; i < n; ++i) {
-        switch (self(i, 0)) {
-        case Zero:
-        case Diag: {
-          self(i, 0) = TriU;
-          break;
-        }
-        case TriL: {
-          self(i, 0) = Dense;
-          break;
-        }
-        case TriU:
-        case Dense:
-          break;
-        }
-      }
-    }
-    case Diag: {
-      // l00 unchanged
-      // l10 unchanged
-    }
-    }
-
-    // update l11
-    for (isize i = 1; i < n; ++i) {
-      self(i, i) =
-          block_chol::add(self(i, i),
-                          block_chol::mul( //
-                              self(i, 0), block_chol::trans(self(i, 0))));
-
-      for (isize j = i + 1; j < n; ++j) {
-
-        self(i, j) =
-            block_chol::add(self(i, j),
-                            block_chol::mul( //
-                                self(i, 0), block_chol::trans(self(j, 0))));
-
-        self(j, i) = block_chol::trans(self(i, j));
-      }
-    }
-
-    submatrix(1, n - 1).llt_in_place();
-  }
+  Eigen::ComputationInfo
+  brute_force_best_permutation(SymbolicBlockMatrix const &in, isize *best_perm,
+                               isize *iwork) const;
+  isize count_nnz() const noexcept;
+  bool llt_in_place() const noexcept;
 };
 
-void dump(const SymbolicBlockMatrix &smat) noexcept;
+void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
+
+/// @brief    Compute the best block-permutation.
+/// @returns  best_perm The output permutation.
+void find_permutation(const SymbolicBlockMatrix &mat, isize *best_perm);
 
 namespace backend {
 
-void ldlt_in_place_unblocked(MatrixRef a) {
+/// At the end of the execution, \param a contains
+/// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
+/// More precisely: a stores L -sans its diagonal which is all ones.
+/// The diagonal of \param a contains the diagonal matrix \f$D\f$.
+inline void ldlt_in_place_unblocked(MatrixRef a) {
   isize n = a.rows();
+  assert(n == diag.size());
   if (n == 0) {
     return;
   }
@@ -244,7 +114,7 @@ void ldlt_in_place_unblocked(MatrixRef a) {
   }
 }
 
-void ldlt_in_place_recursive(MatrixRef const &a) {
+inline void ldlt_in_place_recursive(MatrixRef const &a) {
   isize n = a.rows();
   if (n <= 128) {
     backend::ldlt_in_place_unblocked(a);
@@ -274,7 +144,45 @@ void ldlt_in_place_recursive(MatrixRef const &a) {
   }
 }
 
-void ldlt_in_place(MatrixRef const &a) { ldlt_in_place_recursive(a); }
+/// A recursive, in-place implementation of the LDLT decomposition.
+/// To be applied to dense blocks.
+inline void dense_ldlt_in_place(MatrixRef a) { ldlt_in_place_recursive(a); }
+
+using Eigen::internal::LDLT_Traits;
+
+/// Taking the decomposed LDLT matrix \param mat, solve the original linear
+/// system.
+inline bool dense_ldlt_solve_in_place(MatrixRef const &mat, MatrixRef b) {
+  typedef LDLT_Traits<MatrixRef, Eigen::Lower> Traits;
+  Traits::getL(mat).solveInPlace(b);
+
+  using std::abs;
+  Eigen::Diagonal<const MatrixRef>::RealReturnType vecD(mat.diagonal());
+  const Scalar tol = std::numeric_limits<Scalar>::min();
+  for (isize i = 0; i < vecD.size(); ++i) {
+    if (abs(vecD(i)) > tol)
+      b.row(i) /= vecD(i);
+    else
+      b.row(i).setZero();
+  }
+
+  Traits::getU(mat).solveInPlace(b);
+  return true;
+}
+
+inline MatrixRef::PlainMatrix dense_ldlt_reconstruct(MatrixRef const &mat) {
+  typedef LDLT_Traits<MatrixRef, Eigen::Lower> Traits;
+  MatrixRef::PlainMatrix res(mat.rows(), mat.cols());
+
+  res.setIdentity();
+  res = Traits::getU(mat) * res;
+
+  auto vecD = mat.diagonal();
+  res = vecD.asDiagonal() * res;
+
+  res = Traits::getL(mat) * res;
+  return res;
+}
 
 template <BlockKind LHS, BlockKind RHS> struct GemmT;
 
@@ -458,8 +366,9 @@ template <> struct GemmT<Dense, Dense> {
   }
 };
 
-void gemmt(MatrixRef const &dst, MatrixRef const &lhs, MatrixRef const &rhs,
-           BlockKind lhs_kind, BlockKind rhs_kind, Scalar alpha) {
+inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
+                  MatrixRef const &rhs, BlockKind lhs_kind, BlockKind rhs_kind,
+                  Scalar alpha) {
   // dst += alpha * lhs * rhs.Scalar
   switch (lhs_kind) {
   case Zero: {
@@ -581,20 +490,20 @@ struct BlockMatrix {
 
     isize out_offset_i = 0;
     for (isize i = 0; i < nblocks; ++i) {
-      auto bsi = structure._.segment_lens[i];
+      auto bsi = structure.segment_lens[i];
 
       isize in_offset_i = 0;
       for (isize ii = 0; ii < perm[i]; ++ii) {
-        in_offset_i += in.structure._.segment_lens[ii];
+        in_offset_i += in.structure.segment_lens[ii];
       }
 
       isize out_offset_j = 0;
       for (isize j = 0; j < nblocks; ++j) {
-        auto bsj = structure._.segment_lens[j];
+        auto bsj = structure.segment_lens[j];
 
         isize in_offset_j = 0;
         for (isize jj = 0; jj < perm[j]; ++jj) {
-          in_offset_j += in.structure._.segment_lens[jj];
+          in_offset_j += in.structure.segment_lens[jj];
         }
 
         for (isize i_inner = 0; i_inner < bsi; ++i_inner) {
@@ -611,16 +520,16 @@ struct BlockMatrix {
     }
   }
 
-  void ldlt_in_place_impl() const {
+  bool ldlt_in_place_impl() const {
 
     isize nblocks = structure.nsegments();
     isize n = storage.rows();
     if (nblocks == 0) {
-      return;
+      return true;
     }
 
     auto structure_00 = structure(0, 0);
-    auto bs = structure._.segment_lens[0];
+    auto bs = structure.segment_lens[0];
     auto rem = n - bs;
     auto store_mut = storage.const_cast_derived();
     MatrixRef l00 = store_mut.block(0, 0, bs, bs);
@@ -633,23 +542,23 @@ struct BlockMatrix {
     case Zero:
     case TriU:
     case Dense:
-      std::terminate();
+      return false;
 
     case TriL: {
       // compute l00
-      backend::ldlt_in_place(l00);
+      backend::dense_ldlt_in_place(l00);
 
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        auto bsi = structure._.segment_lens[i];
+        auto bsi = structure.segment_lens[i];
         MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
         switch (structure(i, 0)) {
         case Diag:
         case TriL:
-          std::terminate();
+          return false;
         case TriU: {
           auto li0_u = li0.template triangularView<Eigen::Upper>();
           // PERF: replace li0.Scalar by li0_tl
@@ -680,13 +589,13 @@ struct BlockMatrix {
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        auto bsi = structure._.segment_lens[i];
+        auto bsi = structure.segment_lens[i];
         MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
         switch (structure(i, 0)) {
         case TriL:
-          std::terminate();
+          return false;
         case Diag: {
           auto li0_d = li0.diagonal();
           li0_copy.diagonal() = li0_d;
@@ -716,7 +625,7 @@ struct BlockMatrix {
 
     isize offset_i = bs;
     for (isize i = 1; i < nblocks; ++i) {
-      auto bsi = structure._.segment_lens[i];
+      auto bsi = structure.segment_lens[i];
       MatrixRef li0 = store_mut.block(offset_i, 0, bsi, bs);
       MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
 
@@ -730,7 +639,7 @@ struct BlockMatrix {
       for (isize j = i + 1; j < nblocks; ++j) {
         // target_ji -= lj0 * li0_prev.Scalar
 
-        auto bsj = structure._.segment_lens[j];
+        auto bsj = structure.segment_lens[j];
         MatrixRef lj0 = store_mut.block(offset_j, 0, bsj, bs);
         MatrixRef target_ji = store_mut.block(offset_j, offset_i, bsj, bsi);
 
@@ -743,14 +652,16 @@ struct BlockMatrix {
       offset_i += bsi;
     }
 
-    BlockMatrix{
+    return BlockMatrix{
         l11,
         structure.submatrix(1, nblocks - 1),
     }
         .ldlt_in_place_impl();
   }
 
-  void ldlt_in_place() { ldlt_in_place_impl(); }
+  Eigen::ComputationInfo ldlt_in_place() {
+    return ldlt_in_place_impl() ? Eigen::Success : Eigen::NumericalIssue;
+  }
 };
 
 } // namespace block_chol

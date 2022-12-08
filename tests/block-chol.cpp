@@ -1,8 +1,12 @@
 #include "proxnlp/blocks.hpp"
 
 #include <benchmark/benchmark.h>
+#define BOOST_TEST_NO_MAIN
+#include <boost/test/unit_test.hpp>
 
-#include <fmt/core.h>
+#include <fmt/ostream.h>
+
+namespace utf = boost::unit_test;
 
 using namespace proxnlp;
 using block_chol::BlockKind;
@@ -25,101 +29,152 @@ BlockKind data[n * n] = {
 };
 // clang-format on
 
-isize row_segments[n] = {16, 32, 32};
+isize row_segments[n] = {4, 8, 8};
+isize size = []() -> isize {
+  isize r = 0;
+  for (std::size_t i = 0; i < n; ++i)
+    r += row_segments[i];
 
-SymbolicBlockMatrix mat{{data, row_segments, n, n}};
+  return r;
+}();
 
-auto a = []() -> MatrixXs {
-  MatrixXs mat(80, 80);
+SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
+
+MatrixXs mat = []() -> MatrixXs {
+  MatrixXs mat(size, size);
   mat.setZero();
 
-  mat.block(0, 0, 16, 16).diagonal().setRandom();
+  isize rs0 = row_segments[0];
+  isize rs1 = row_segments[1];
+  isize rs2 = row_segments[2];
+  isize idx0 = 0;
+  isize idx1 = rs0;
+  isize idx2 = rs0 + rs1;
 
-  mat.block(16, 0, 32, 32).setZero();
-  mat.block(16, 16, 32, 32).setRandom();
+  mat.block(idx0, idx0, rs0, rs0).diagonal().setRandom();
 
-  mat.block(48, 0, 32, 32).setRandom();
-  mat.block(48, 16, 32, 32).diagonal().setRandom();
-  mat.block(48, 48, 32, 32).diagonal().setRandom();
+  mat.block(idx1, idx0, rs1, rs0).setZero();
+  mat.block(idx1, idx1, rs1, rs1).setRandom();
+
+  mat.block(idx2, idx0, rs2, rs0).setRandom();
+  mat.block(idx2, idx1, rs2, rs1).diagonal().setRandom();
+  mat.block(idx2, idx2, rs2, rs2).diagonal().setRandom();
+  mat = mat.selfadjointView<Eigen::Lower>();
   return mat;
 }();
 
-VectorXs rhs = VectorXs::Random(80);
+VectorXs rhs = VectorXs::Random(size);
 
-void bm_blocked(benchmark::State &s) {
-  auto l = a;
+static void bm_blocked(benchmark::State &s) {
+  auto l = mat;
   for (auto _ : s) {
-    l = a;
-    BlockMatrix l_block{MatrixRef(l), mat};
+    l = mat;
+    BlockMatrix l_block{l, sym_mat};
     l_block.ldlt_in_place();
   }
 }
 
-void bm_unblocked(benchmark::State &s) {
-  auto l = a;
+static void bm_unblocked(benchmark::State &s) {
+  auto l = mat;
   for (auto _ : s) {
-    l = a;
-    block_chol::backend::ldlt_in_place(MatrixRef(l));
-    l.template triangularView<Eigen::StrictlyUpper>().setZero();
+    l = mat;
+    block_chol::backend::dense_ldlt_in_place(l);
+    benchmark::DoNotOptimize(l);
+  }
+}
+
+static void bm_eigen_ldlt(benchmark::State &s) {
+  auto l = mat;
+  for (auto _ : s) {
+    l = mat;
+    Eigen::LDLT<MatrixXs> ldlt(l);
+    benchmark::DoNotOptimize(ldlt);
   }
 }
 
 auto unit = benchmark::kMicrosecond;
 BENCHMARK(bm_unblocked)->Unit(unit);
 BENCHMARK(bm_blocked)->Unit(unit);
+BENCHMARK(bm_eigen_ldlt)->Unit(unit);
 
-int main(int argc, char **argv) {
+auto l0 = mat;
+auto l1 = mat;
 
-  fmt::print("Input matrix pattern:\n");
-  block_chol::dump(mat);
+struct ldlt_fixture {
+  ldlt_fixture() : ldlt(mat) { sol_eig = ldlt.solve(rhs); }
+  ~ldlt_fixture() = default;
+
+  Eigen::LDLT<MatrixXs> ldlt;
+  MatrixXs sol_eig;
+};
+
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
+  MatrixXs reconstr = ldlt.reconstructedMatrix();
+  BOOST_CHECK(reconstr.isApprox(mat));
+  BOOST_CHECK((mat * sol_eig).isApprox(rhs));
+}
+
+BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
 
   isize best_perm[n];
+  std::iota(best_perm, best_perm + n, isize(0));
 
-  {
-    BlockKind copy_data[n * n];
-    isize copy_row_segments[n];
-    isize work[n];
-    SymbolicBlockMatrix copy_mat{{copy_data, copy_row_segments, n, n}};
-    copy_mat.brute_force_best_permutation(mat, best_perm, work);
-  }
+  // dense LDLT
 
-  auto l0 = a;
-  {
-    BlockKind copy_data[n * n];
-    isize copy_row_segments[n];
-    SymbolicBlockMatrix copy_mat{{copy_data, copy_row_segments, n, n}};
+  BlockKind copy_data[n * n];
+  isize copy_row_segments[n];
+  SymbolicBlockMatrix copy_mat{copy_data, copy_row_segments, n, n};
 
-    BlockMatrix a_block_permuted{l0, copy_mat};
-    BlockMatrix a_block_unpermuted{a, mat};
-    a_block_permuted.permute(a_block_unpermuted, best_perm);
+  BlockMatrix a_block_permuted{l1, copy_mat};
+  BlockMatrix a_block_unpermuted{mat, sym_mat};
+  a_block_permuted.permute(a_block_unpermuted, best_perm);
 
-    copy_mat.llt_in_place();
-    a_block_permuted.ldlt_in_place();
-    l0.template triangularView<Eigen::StrictlyUpper>().setZero();
-  }
+  block_chol::backend::dense_ldlt_in_place(l1);
 
-  auto l1 = a;
-  {
-    BlockKind copy_data[n * n];
-    isize copy_row_segments[n];
-    SymbolicBlockMatrix copy_mat{{copy_data, copy_row_segments, n, n}};
+  MatrixXs reconstruct_l1 = block_chol::backend::dense_ldlt_reconstruct(l1);
+  BOOST_CHECK(mat.isApprox(reconstruct_l1));
 
-    BlockMatrix a_block_permuted{l1, copy_mat};
-    BlockMatrix a_block_unpermuted{a, mat};
-    a_block_permuted.permute(a_block_unpermuted, best_perm);
+  // now perform solve
+  MatrixXs sol1 = rhs;
+  block_chol::backend::dense_ldlt_solve_in_place(l1, sol1);
 
-    block_chol::backend::ldlt_in_place(l1);
-    l1.template triangularView<Eigen::StrictlyUpper>().setZero();
-  }
+  BOOST_CHECK(sol1.isApprox(sol_eig));
+  BOOST_CHECK(rhs.isApprox(mat * sol1));
+}
 
-  fmt::print("Err: {:g}\n", (l0 - l1).norm());
+BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
+  fmt::print("Input matrix pattern:\n");
+  block_chol::print_sparsity_pattern(sym_mat);
 
-  mat.llt_in_place();
-  block_chol::dump(mat);
+  isize best_perm[n];
+  std::iota(best_perm, best_perm + n, isize(0));
+
+  BlockKind copy_data[n * n];
+  isize copy_row_segments[n];
+  SymbolicBlockMatrix copy_sym_mat{copy_data, copy_row_segments, n, n};
+
+  BlockMatrix a_block_permuted{l0, copy_sym_mat};
+  BlockMatrix a_block_unpermuted{mat, sym_mat};
+  a_block_permuted.permute(a_block_unpermuted, best_perm);
+
+  copy_sym_mat.llt_in_place();
+  Eigen::ComputationInfo info = a_block_permuted.ldlt_in_place();
+  BOOST_CHECK(info == Eigen::Success);
+
+  sym_mat.llt_in_place();
+  fmt::print("Resulting sparsity after pivoting:\n");
+  block_chol::print_sparsity_pattern(sym_mat);
+}
+
+int main(int argc, char **argv) {
+  // call default test initialization function
+  // see Boost.Test docs:
+  // https://www.boost.org/doc/libs/1_80_0/libs/test/doc/html/boost_test/adv_scenarios/shared_lib_customizations/entry_point.html
+  int tests_result = utf::unit_test_main(&init_unit_test, argc, argv);
 
   benchmark::Initialize(&argc, argv);
-  if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
-    return 1;
-  }
+  // run benchmarks
   benchmark::RunSpecifiedBenchmarks();
+
+  return tests_result;
 }
