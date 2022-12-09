@@ -1,37 +1,19 @@
-#include "proxnlp/math.hpp"
-#include <type_traits>
+#pragma once
 
-namespace proxnlp {
-
-namespace block_chol {
-
-namespace backend {
-
-using Scalar = double;
 using Stride = Eigen::OuterStride<Eigen::Dynamic>;
-using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-using MatrixRef = Eigen::Ref<Matrix>;
+using Matrix = MatrixRef::PlainMatrix;
 using MatrixMap = Eigen::Map<Matrix, Eigen::Unaligned, Stride>;
 
-using usize = decltype(sizeof(0));
-using isize = typename std::make_signed<usize>::type;
-static constexpr usize ALIGN = 64;
+static constexpr std::size_t ALIGN = 64;
 static constexpr isize RECURSION_THRESHOLD = 16;
-
-enum BlockKind {
-  Zero,
-  Diag,
-  TriL,
-  TriU,
-  Dense,
-};
 
 template <BlockKind LHS, BlockKind RHS> struct GemmT;
 template <BlockKind LHS> struct GemmTLower;
 
 // cases where one of the operands is zero
 template <BlockKind RHS> struct GemmT<Zero, RHS> {
-  static void fn(MatrixRef /*lhs*/, MatrixRef /*rhs*/, Scalar /*alpha*/) {}
+  static void fn(MatrixRef /*dst*/, MatrixRef /*lhs*/, MatrixRef /*rhs*/,
+                 Scalar /*alpha*/) {}
 };
 template <BlockKind LHS> struct GemmT<LHS, Zero> {
   static void fn(MatrixRef /*dst*/, MatrixRef /*lhs*/, MatrixRef /*rhs*/,
@@ -164,9 +146,9 @@ template <> struct GemmT<TriL, TriL> {
 
     fn(dst00, lhs00, rhs00, alpha);
     dst01.noalias() +=
-        alpha * (lhs00.triangularView<Eigen::Lower>() * rhs10.transpose());
+        lhs00.triangularView<Eigen::Lower>() * (alpha * rhs10.transpose());
     dst10.noalias() +=
-        alpha * (lhs10 * rhs00.transpose().triangularView<Eigen::Upper>());
+        (alpha * lhs10) * rhs00.transpose().triangularView<Eigen::Upper>();
     dst11.noalias() += alpha * (lhs10 * rhs10.transpose());
     fn(dst11, lhs11, rhs11, alpha);
   }
@@ -218,7 +200,7 @@ template <> struct GemmTLower<TriL> {
 
     fn(dst00, lhs00, rhs00, alpha);
     dst10.noalias() +=
-        alpha * (lhs10 * rhs00.transpose().triangularView<Eigen::Upper>());
+        (alpha * lhs10) * rhs00.transpose().triangularView<Eigen::Upper>();
     dst11.noalias() += alpha * (lhs10 * rhs10.transpose());
     fn(dst11, lhs11, rhs11, alpha);
   }
@@ -271,9 +253,9 @@ template <> struct GemmT<TriL, TriU> {
 
     fn(dst00, lhs00, rhs00, alpha);
     dst10.noalias() +=
-        alpha * (lhs10 * rhs00.transpose().triangularView<Eigen::Lower>());
+        (alpha * lhs10) * rhs00.transpose().triangularView<Eigen::Lower>();
     dst10.noalias() +=
-        alpha * (lhs11.triangularView<Eigen::Lower>() * rhs01.transpose());
+        lhs11.triangularView<Eigen::Lower>() * (alpha * rhs01.transpose());
     fn(dst11, lhs11, rhs11, alpha);
   }
 };
@@ -349,9 +331,9 @@ template <> struct GemmT<TriU, TriL> {
 
     fn(dst00, lhs00, rhs00, alpha);
     dst01.noalias() +=
-        alpha * (lhs00.triangularView<Eigen::Upper>() * rhs10.transpose());
+        lhs00.triangularView<Eigen::Upper>() * (alpha * rhs10.transpose());
     dst01.noalias() +=
-        alpha * (lhs01 * rhs11.transpose().triangularView<Eigen::Upper>());
+        (alpha * lhs01) * rhs11.transpose().triangularView<Eigen::Upper>();
     fn(dst11, lhs11, rhs11, alpha);
   }
 };
@@ -405,9 +387,9 @@ template <> struct GemmT<TriU, TriU> {
     fn(dst00, lhs00, rhs00, alpha);
     dst00.noalias() += alpha * (lhs01 * rhs01.transpose());
     dst01.noalias() +=
-        alpha * (lhs01 * rhs11.transpose().triangularView<Eigen::Lower>());
+        (alpha * lhs01) * rhs11.transpose().triangularView<Eigen::Lower>();
     dst10.noalias() +=
-        alpha * (lhs11.triangularView<Eigen::Upper>() * rhs01.transpose());
+        lhs11.triangularView<Eigen::Upper>() * (alpha * rhs01.transpose());
     fn(dst11, lhs11, rhs11, alpha);
   }
 };
@@ -461,7 +443,7 @@ template <> struct GemmTLower<TriU> {
     fn(dst00, lhs00, rhs00, alpha);
     dst00.noalias() += alpha * (lhs01 * rhs01.transpose());
     dst10.noalias() +=
-        alpha * (lhs11.triangularView<Eigen::Upper>() * rhs01.transpose());
+        lhs11.triangularView<Eigen::Upper>() * (alpha * rhs01.transpose());
     fn(dst11, lhs11, rhs11, alpha);
   }
 };
@@ -470,7 +452,7 @@ template <> struct GemmT<TriU, Dense> {
   // dst is dense
   static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
     dst.noalias() +=
-        alpha * (lhs.template triangularView<Eigen::Upper>() * rhs.transpose());
+        lhs.template triangularView<Eigen::Upper>() * (alpha * rhs.transpose());
   }
 };
 
@@ -484,14 +466,14 @@ template <> struct GemmT<Dense, Diag> {
 template <> struct GemmT<Dense, TriL> {
   static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
     dst.noalias() +=
-        alpha * (lhs * rhs.transpose().triangularView<Eigen::Upper>());
+        (alpha * lhs) * rhs.transpose().triangularView<Eigen::Upper>();
   }
 };
 
 template <> struct GemmT<Dense, TriU> {
   static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
     dst.noalias() +=
-        alpha * (lhs * rhs.transpose().triangularView<Eigen::Lower>());
+        (alpha * lhs) * rhs.transpose().triangularView<Eigen::Lower>();
   }
 };
 
@@ -505,7 +487,3 @@ template <> struct GemmT<Dense, Dense> {
     dst.noalias() += alpha * (lhs * rhs.transpose());
   }
 };
-
-} // namespace backend
-} // namespace block_chol
-} // namespace proxnlp

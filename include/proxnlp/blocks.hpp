@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include "linalg/block-kind.h"
 
 #include <iostream>
 
@@ -20,27 +21,10 @@ namespace block_chol {
 
 using Scalar = double;
 using MatrixRef = math_types<Scalar>::MatrixRef;
+using ConstMatrixRef = math_types<Scalar>::ConstMatrixRef;
 using VectorRef = math_types<Scalar>::VectorRef;
 
 using isize = std::int64_t;
-
-/// Kind of matrix block: zeros, diagonal, lower/upper triangular or dense.
-enum BlockKind {
-  Zero,
-  Diag,
-  TriL,
-  TriU,
-  Dense,
-};
-
-/// BlockKind of the transpose of a matrix.
-BlockKind trans(BlockKind a) noexcept;
-
-/// BlockKind of the addition of two matrices - given by their BlockKind.
-BlockKind add(BlockKind a, BlockKind b) noexcept;
-
-/// BlockKind of the product of two matrices.
-BlockKind mul(BlockKind a, BlockKind b) noexcept;
 
 struct SymbolicBlockMatrix {
   BlockKind *data;
@@ -152,12 +136,12 @@ using Eigen::internal::LDLT_Traits;
 
 /// Taking the decomposed LDLT matrix \param mat, solve the original linear
 /// system.
-inline bool dense_ldlt_solve_in_place(MatrixRef const &mat, MatrixRef b) {
-  typedef LDLT_Traits<MatrixRef, Eigen::Lower> Traits;
+inline bool dense_ldlt_solve_in_place(ConstMatrixRef const &mat, MatrixRef b) {
+  typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
   Traits::getL(mat).solveInPlace(b);
 
   using std::abs;
-  Eigen::Diagonal<const MatrixRef>::RealReturnType vecD(mat.diagonal());
+  Eigen::Diagonal<const ConstMatrixRef>::RealReturnType vecD(mat.diagonal());
   const Scalar tol = std::numeric_limits<Scalar>::min();
   for (isize i = 0; i < vecD.size(); ++i) {
     if (abs(vecD(i)) > tol)
@@ -170,8 +154,9 @@ inline bool dense_ldlt_solve_in_place(MatrixRef const &mat, MatrixRef b) {
   return true;
 }
 
-inline MatrixRef::PlainMatrix dense_ldlt_reconstruct(MatrixRef const &mat) {
-  typedef LDLT_Traits<MatrixRef, Eigen::Lower> Traits;
+inline MatrixRef::PlainMatrix
+dense_ldlt_reconstruct(ConstMatrixRef const &mat) {
+  typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
   MatrixRef::PlainMatrix res(mat.rows(), mat.cols());
 
   res.setIdentity();
@@ -183,6 +168,8 @@ inline MatrixRef::PlainMatrix dense_ldlt_reconstruct(MatrixRef const &mat) {
   res = Traits::getL(mat) * res;
   return res;
 }
+
+#if true
 
 template <BlockKind LHS, BlockKind RHS> struct GemmT;
 
@@ -365,6 +352,11 @@ template <> struct GemmT<Dense, Dense> {
     dst.noalias() += alpha * lhs * rhs.transpose();
   }
 };
+#else
+
+#include "linalg/gemmt.h"
+
+#endif
 
 inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
                   MatrixRef const &rhs, BlockKind lhs_kind, BlockKind rhs_kind,
@@ -475,13 +467,47 @@ inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
 }
 } // namespace backend
 
+struct DenseLDLT {
+  using Matrix = MatrixRef::PlainMatrix;
+  Matrix m_matrix;
+  bool permutate = false;
+  DenseLDLT() = default;
+  DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
+  DenseLDLT(MatrixRef a) : m_matrix(a) {
+    backend::dense_ldlt_in_place(m_matrix);
+  }
+
+  void compute(MatrixRef a) {
+    m_matrix = a;
+    backend::dense_ldlt_in_place(m_matrix);
+  }
+
+  void solveInPlace(MatrixRef b) {
+    backend::dense_ldlt_solve_in_place(m_matrix, b);
+  }
+
+  Matrix reconstructedMatrix() {
+    return backend::dense_ldlt_reconstruct(m_matrix);
+  }
+};
+
 /// @brief Block matrix data structure with LDLT algos.
-struct BlockMatrix {
+struct BlockLDLT {
+  using Traits = backend::LDLT_Traits<MatrixRef, Eigen::Lower>;
+  using Matrix = MatrixRef::PlainMatrix;
 
   MatrixRef storage;
   SymbolicBlockMatrix structure;
 
-  void permute(BlockMatrix in, isize const *perm) const {
+  Matrix reconstructedMatrix() {
+    return backend::dense_ldlt_reconstruct(storage);
+  }
+
+  bool solveInPlace(MatrixRef b) const {
+    return backend::dense_ldlt_solve_in_place(storage, b);
+  }
+
+  void permute(BlockLDLT in, isize const *perm) const {
     auto mat = this->storage;
 
     structure.deep_copy(in.structure, perm);
@@ -652,7 +678,7 @@ struct BlockMatrix {
       offset_i += bsi;
     }
 
-    return BlockMatrix{
+    return BlockLDLT{
         l11,
         structure.submatrix(1, nblocks - 1),
     }

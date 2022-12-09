@@ -10,7 +10,8 @@ namespace utf = boost::unit_test;
 
 using namespace proxnlp;
 using block_chol::BlockKind;
-using block_chol::BlockMatrix;
+using block_chol::BlockLDLT;
+using block_chol::DenseLDLT;
 using block_chol::isize;
 using block_chol::MatrixRef;
 using block_chol::Scalar;
@@ -29,7 +30,7 @@ BlockKind data[n * n] = {
 };
 // clang-format on
 
-isize row_segments[n] = {4, 8, 8};
+isize row_segments[n] = {8, 16, 16};
 isize size = []() -> isize {
   isize r = 0;
   for (std::size_t i = 0; i < n; ++i)
@@ -69,25 +70,20 @@ static void bm_blocked(benchmark::State &s) {
   auto l = mat;
   for (auto _ : s) {
     l = mat;
-    BlockMatrix l_block{l, sym_mat};
+    BlockLDLT l_block{l, sym_mat};
     l_block.ldlt_in_place();
   }
 }
 
 static void bm_unblocked(benchmark::State &s) {
-  auto l = mat;
   for (auto _ : s) {
-    l = mat;
-    block_chol::backend::dense_ldlt_in_place(l);
-    benchmark::DoNotOptimize(l);
+    DenseLDLT dense_ldlt(mat);
   }
 }
 
 static void bm_eigen_ldlt(benchmark::State &s) {
-  auto l = mat;
   for (auto _ : s) {
-    l = mat;
-    Eigen::LDLT<MatrixXs> ldlt(l);
+    Eigen::LDLT<MatrixXs> ldlt(mat);
     benchmark::DoNotOptimize(ldlt);
   }
 }
@@ -111,7 +107,7 @@ struct ldlt_fixture {
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
   MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));
-  BOOST_CHECK((mat * sol_eig).isApprox(rhs));
+  BOOST_CHECK(rhs.isApprox(mat * sol_eig));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
@@ -125,21 +121,20 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   isize copy_row_segments[n];
   SymbolicBlockMatrix copy_mat{copy_data, copy_row_segments, n, n};
 
-  BlockMatrix a_block_permuted{l1, copy_mat};
-  BlockMatrix a_block_unpermuted{mat, sym_mat};
+  BlockLDLT a_block_permuted{l1, copy_mat};
+  BlockLDLT a_block_unpermuted{mat, sym_mat};
   a_block_permuted.permute(a_block_unpermuted, best_perm);
 
-  block_chol::backend::dense_ldlt_in_place(l1);
+  DenseLDLT dense_ldlt(l1);
 
-  MatrixXs reconstruct_l1 = block_chol::backend::dense_ldlt_reconstruct(l1);
-  BOOST_CHECK(mat.isApprox(reconstruct_l1));
+  MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
+  BOOST_CHECK(reconstr.isApprox(mat));
 
-  // now perform solve
-  MatrixXs sol1 = rhs;
-  block_chol::backend::dense_ldlt_solve_in_place(l1, sol1);
+  MatrixXs sol_dense = rhs;
+  dense_ldlt.solveInPlace(sol_dense);
 
-  BOOST_CHECK(sol1.isApprox(sol_eig));
-  BOOST_CHECK(rhs.isApprox(mat * sol1));
+  BOOST_CHECK(sol_dense.isApprox(sol_eig));
+  BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
@@ -153,17 +148,29 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   isize copy_row_segments[n];
   SymbolicBlockMatrix copy_sym_mat{copy_data, copy_row_segments, n, n};
 
-  BlockMatrix a_block_permuted{l0, copy_sym_mat};
-  BlockMatrix a_block_unpermuted{mat, sym_mat};
-  a_block_permuted.permute(a_block_unpermuted, best_perm);
+  BlockLDLT block_permuted{l0, copy_sym_mat};
+  BlockLDLT block_unpermuted{mat, sym_mat};
+  block_permuted.permute(block_unpermuted, best_perm);
 
   copy_sym_mat.llt_in_place();
-  Eigen::ComputationInfo info = a_block_permuted.ldlt_in_place();
+  Eigen::ComputationInfo info = block_permuted.ldlt_in_place();
   BOOST_CHECK(info == Eigen::Success);
 
   sym_mat.llt_in_place();
   fmt::print("Resulting sparsity after pivoting:\n");
   block_chol::print_sparsity_pattern(sym_mat);
+
+  MatrixXs reconstr = block_permuted.reconstructedMatrix();
+  BOOST_CHECK(reconstr.isApprox(mat));
+
+  constexpr Scalar prec = 1e-10;
+
+  MatrixXs sol_block = rhs;
+  block_permuted.solveInPlace(sol_block);
+  Scalar err = (sol_block - sol_eig).lpNorm<-1>();
+  fmt::print("err = {:.5e}\n", err);
+  BOOST_CHECK(sol_block.isApprox(sol_eig, prec));
+  BOOST_CHECK(rhs.isApprox(mat * sol_block, prec));
 }
 
 int main(int argc, char **argv) {
