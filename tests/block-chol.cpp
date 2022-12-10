@@ -30,18 +30,11 @@ BlockKind data[n * n] = {
 };
 // clang-format on
 
-isize row_segments[n] = {8, 16, 16};
-isize size = []() -> isize {
-  isize r = 0;
+MatrixXs get_block_mat(isize *row_segments) {
+  isize size = 0;
   for (std::size_t i = 0; i < n; ++i)
-    r += row_segments[i];
+    size += row_segments[i];
 
-  return r;
-}();
-
-SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
-
-MatrixXs mat = []() -> MatrixXs {
   MatrixXs mat(size, size);
   mat.setZero();
 
@@ -62,7 +55,13 @@ MatrixXs mat = []() -> MatrixXs {
   mat.block(idx2, idx2, rs2, rs2).diagonal().setRandom();
   mat = mat.selfadjointView<Eigen::Lower>();
   return mat;
-}();
+}
+
+isize row_segments[n] = {8, 16, 16};
+MatrixXs mat = get_block_mat(row_segments);
+isize size = mat.cols();
+
+SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
 
 VectorXs rhs = VectorXs::Random(size);
 
