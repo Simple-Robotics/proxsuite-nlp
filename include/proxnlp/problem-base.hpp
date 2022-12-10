@@ -56,8 +56,8 @@ public:
   /// Get dimension of constraint \p i.
   int getConstraintDim(std::size_t i) const { return ncs_[i]; }
 
-  std::size_t nx() const { return manifold_->nx(); }
-  std::size_t ndx() const { return manifold_->ndx(); }
+  int nx() const { return manifold_->nx(); }
+  int ndx() const { return manifold_->ndx(); }
 
   /// @brief Add a constraint to the problem, after initialization.
   template <typename T> void addConstraint(T &&cstr) {
