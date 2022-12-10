@@ -384,8 +384,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
       }
       workspace.ldlt_.compute(workspace.kkt_matrix);
-      workspace.signature.array() =
-          workspace.ldlt_.vectorD().array().sign().template cast<int>();
+      auto vecD(workspace.ldlt_.vectorD());
+      workspace.signature.array() = vecD.array().sign().template cast<int>();
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
       is_inertia_correct = checkInertia(workspace.signature);
       old_delta = delta;

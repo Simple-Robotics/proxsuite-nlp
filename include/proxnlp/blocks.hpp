@@ -489,6 +489,8 @@ struct DenseLDLT {
   Matrix reconstructedMatrix() {
     return backend::dense_ldlt_reconstruct(m_matrix);
   }
+
+  Eigen::Diagonal<const Matrix> vectorD() const { return m_matrix.diagonal(); }
 };
 
 /// @brief Block matrix data structure with LDLT algos.

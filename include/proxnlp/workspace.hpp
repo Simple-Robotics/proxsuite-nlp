@@ -5,6 +5,9 @@
 #include "proxnlp/problem-base.hpp"
 
 #include <Eigen/Cholesky>
+#ifdef PROXNLP_CUSTOM_LDLT
+#include "proxnlp/blocks.hpp"
+#endif
 
 namespace proxnlp {
 
@@ -39,7 +42,11 @@ public:
   Eigen::VectorXi signature;
 
   /// LDLT storage
+#ifdef PROXNLP_CUSTOM_LDLT
+  block_chol::DenseLDLT ldlt_;
+#else
   Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
+#endif
 
   //// Data for proximal algorithm
 
@@ -106,7 +113,8 @@ public:
   VectorXs tmp_dx_scaled;
 
   WorkspaceTpl(const Problem &prob)
-      : nx(prob.nx()), ndx(prob.ndx()), numblocks(prob.getNumConstraints()),
+      : nx(long(prob.nx())), ndx(long(prob.ndx())),
+        numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
         kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
         kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
