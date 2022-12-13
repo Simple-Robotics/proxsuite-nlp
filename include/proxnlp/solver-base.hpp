@@ -54,7 +54,11 @@ public:
   HessianApprox hess_approx = HessianApprox::GAUSS_NEWTON;
   /// Linesearch strategy.
   LinesearchStrategy ls_strat = LinesearchStrategy::ARMIJO;
-  MultiplierUpdateMode mul_up_mode = MultiplierUpdateMode::NEWTON;
+  MultiplierUpdateMode mul_update_mode = MultiplierUpdateMode::NEWTON;
+
+  /// linear algebra opts
+  std::size_t max_refinemment_steps_ = 5;
+  Scalar kkt_tolerance_ = 1e-13;
 
   //// Algorithm proximal parameters
 
@@ -143,6 +147,9 @@ public:
                         const ConstVectorRef &x0);
 
   void innerLoop(Workspace &workspace, Results &results);
+
+  /// Iterative refinement of the KKT linear system.
+  PROXNLP_INLINE bool iterativeRefinement(Workspace &workspace) const;
 
   /// Update penalty parameter using the provided factor (with a safeguard
   /// SolverTpl::mu_lower).

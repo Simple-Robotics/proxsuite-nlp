@@ -13,3 +13,5 @@
 #else
 #define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)
 #endif
+
+#define PROXNLP_INLINE inline __attribute__((always_inline))

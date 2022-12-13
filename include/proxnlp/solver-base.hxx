@@ -168,7 +168,7 @@ SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
 template <typename Scalar>
 void SolverTpl<Scalar>::acceptMultipliers(Results &results,
                                           Workspace &workspace) const {
-  switch (mul_up_mode) {
+  switch (mul_update_mode) {
   case MultiplierUpdateMode::NEWTON:
     workspace.data_lams_prev = results.data_lams_opt;
     break;
@@ -405,21 +405,9 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     workspace.pd_step = -workspace.kkt_rhs;
     workspace.ldlt_.solveInPlace(workspace.pd_step);
+    iterativeRefinement(workspace);
 
     PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
-
-    const std::size_t MAX_REFINEMENT_STEPS = 5;
-    for (std::size_t n = 0; n < MAX_REFINEMENT_STEPS; n++) {
-      workspace.kkt_err = workspace.kkt_rhs;
-      workspace.kkt_err.noalias() += workspace.kkt_matrix * workspace.pd_step;
-      workspace.kkt_err *= -1.;
-      Scalar resdl_norm = math::infty_norm(workspace.kkt_err);
-      if (resdl_norm < 1e-13)
-        break;
-      workspace.ldlt_.solveInPlace(workspace.kkt_err);
-      workspace.pd_step += workspace.kkt_err;
-    }
-    PROXNLP_EIGEN_ALLOW_MALLOC(true);
 
     //// Take the step
 
@@ -473,6 +461,19 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
   }
 
   return;
+}
+
+template <typename Scalar>
+bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
+  for (std::size_t n = 0; n < max_refinemment_steps_; n++) {
+    workspace.kkt_err = -workspace.kkt_rhs;
+    workspace.kkt_err.noalias() -= workspace.kkt_matrix * workspace.pd_step;
+    if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
+      return true;
+    workspace.ldlt_.solveInPlace(workspace.kkt_err);
+    workspace.pd_step += workspace.kkt_err;
+  }
+  return false;
 }
 
 template <typename Scalar>
