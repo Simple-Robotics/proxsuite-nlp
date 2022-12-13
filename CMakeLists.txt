@@ -64,7 +64,7 @@ endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
-  add_definitions(-DPROXNLP_EIGEN_CHECK_MALLOC)
+  add_compile_definitions(PROXNLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
@@ -87,6 +87,8 @@ endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
   ADD_PROJECT_DEPENDENCY(OpenMP REQUIRED)
+  add_compile_definitions(PROXNLP_MULTITHREADING)
+  link_libraries(OpenMP::OpenMP_CXX)
 endif(BUILD_WITH_OPENMP_SUPPORT)
 
 set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
@@ -112,11 +114,11 @@ endif(BUILD_PYTHON_INTERFACE)
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
   ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
-  add_definitions(-DPROXNLP_WITH_PINOCCHIO)
+  add_compile_definitions(PROXNLP_WITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 if(USE_CUSTOM_LDLT)
-  add_definitions(-DPROXNLP_CUSTOM_LDLT)
+  add_compile_definitions(PROXNLP_CUSTOM_LDLT)
 endif(USE_CUSTOM_LDLT)
 
 # --- MAIN LIBRARY ----------------------------------------

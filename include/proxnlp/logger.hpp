@@ -40,7 +40,7 @@ struct BaseLogger {
 
   const std::string join_str = "｜";
 
-  void start() {
+  void start() const {
     if (!active)
       return;
     static constexpr char fstr[] = "{:^{}s}";
@@ -52,7 +52,7 @@ struct BaseLogger {
     fmt::print(fmt::emphasis::bold, "{}\n", fmt::join(v, join_str));
   }
 
-  template <typename T> void log(const T &values) {
+  void log(const LogRecord &values) const {
     if (!active)
       return;
     std::vector<std::string> v;
