@@ -11,7 +11,7 @@
 
 #include <algorithm>
 #include <numeric>
-#include "linalg/block-kind.h"
+#include "linalg/block-kind.hpp"
 
 #include <iostream>
 
@@ -354,7 +354,7 @@ template <> struct GemmT<Dense, Dense> {
 };
 #else
 
-#include "linalg/gemmt.h"
+#include "linalg/gemmt.hpp"
 
 #endif
 
@@ -472,8 +472,8 @@ struct DenseLDLT {
   Matrix m_matrix;
   bool permutate = false;
   DenseLDLT() = default;
-  DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
-  DenseLDLT(MatrixRef a) : m_matrix(a) {
+  explicit DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
+  explicit DenseLDLT(MatrixRef a) : m_matrix(a) {
     backend::dense_ldlt_in_place(m_matrix);
   }
 
