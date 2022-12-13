@@ -36,8 +36,9 @@ from proxnlp.casadi_utils import CasadiFunction
 import meshcat_utils as msu
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-plt.style.use("seaborn")
+sns.set_style("whitegrid")
 
 # Load the model both in pinocchio and pinocchio casadi
 robot = robex.load("talos")

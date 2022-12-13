@@ -24,12 +24,13 @@ import casadi
 import numpy as np
 import example_robot_data as robex
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
 from proxnlp.casadi_utils import CasadiFunction
 
-plt.style.use("seaborn")
+sns.set_style("whitegrid")
 
 # LOAD AND DISPLAY SOLO12
 robot = robex.load("solo12")

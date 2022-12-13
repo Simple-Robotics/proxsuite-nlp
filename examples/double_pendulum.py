@@ -191,7 +191,7 @@ except RuntimeError:
     pprint.pp(callback.storage.xs.tolist())
     raise
 
-print("Results struct:\n{}".format(results))
+print(results)
 prim_errs = callback.storage.prim_infeas
 dual_errs = callback.storage.dual_infeas
 
