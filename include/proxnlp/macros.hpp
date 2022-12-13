@@ -14,4 +14,10 @@
 #define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)
 #endif
 
+/// @brief Entering performance-critical code.
+#define PROXNLP_NOMALLOC_BEGIN PROXNLP_EIGEN_ALLOW_MALLOC(false)
+
+/// @brief Exiting performance-critical code.
+#define PROXNLP_NOMALLOC_END PROXNLP_EIGEN_ALLOW_MALLOC(true)
+
 #define PROXNLP_INLINE inline __attribute__((always_inline))

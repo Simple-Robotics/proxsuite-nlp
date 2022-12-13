@@ -187,7 +187,7 @@ void SolverTpl<Scalar>::acceptMultipliers(Results &results,
 template <typename Scalar>
 void SolverTpl<Scalar>::computeMultipliers(
     const ConstVectorRef &inner_lams_data, Workspace &workspace) const {
-  PROXNLP_EIGEN_ALLOW_MALLOC(false);
+  PROXNLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * workspace.data_lams_prev;
   // project multiplier estimate
@@ -202,7 +202,7 @@ void SolverTpl<Scalar>::computeMultipliers(
       mu_ * (workspace.data_lams_plus - inner_lams_data);
   workspace.data_lams_pdal = workspace.data_lams_plus +
                              merit_fun.gamma_ * workspace.data_dual_prox_err;
-  PROXNLP_EIGEN_ALLOW_MALLOC(true);
+  PROXNLP_NOMALLOC_END;
 }
 
 template <typename Scalar>
@@ -231,7 +231,7 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
 template <typename Scalar>
 void SolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
                                                Results &results) const {
-  PROXNLP_EIGEN_ALLOW_MALLOC(false);
+  PROXNLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * results.data_lams_opt;
 
@@ -245,7 +245,7 @@ void SolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
     results.constraint_violations(long(i)) = math::infty_norm(cstr_prox_err);
   }
   results.prim_infeas = math::infty_norm(results.constraint_violations);
-  PROXNLP_EIGEN_ALLOW_MALLOC(true);
+  PROXNLP_NOMALLOC_END;
 }
 
 template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
@@ -302,7 +302,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       prox_penalty.computeHessian(results.x_opt, workspace.prox_hess);
     }
 
-    PROXNLP_EIGEN_ALLOW_MALLOC(false);
+    PROXNLP_NOMALLOC_BEGIN;
     //// fill in KKT RHS
     workspace.kkt_rhs.setZero();
 
@@ -324,7 +324,6 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       workspace.kkt_rhs.head(ndx) += workspace.prox_grad;
       workspace.merit_gradient += workspace.prox_grad;
     }
-    PROXNLP_EIGEN_ALLOW_MALLOC(true);
 
     PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_rhs, "kkt_rhs");
     PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_matrix, "kkt_matrix");
@@ -344,7 +343,6 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     // fill in KKT matrix
 
-    PROXNLP_EIGEN_ALLOW_MALLOC(false);
     workspace.kkt_matrix.setZero();
     workspace.kkt_matrix.topLeftCorner(ndx, ndx) = workspace.objective_hessian;
     workspace.kkt_matrix.topRightCorner(ndx, ndual) =
@@ -373,9 +371,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     InertiaFlag is_inertia_correct = INERTIA_BAD;
 
     while (!(is_inertia_correct == INERTIA_OK) && delta <= DELTA_MAX) {
-      if (delta > 0.) {
+      if (delta > 0.)
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
-      }
       workspace.ldlt_.compute(workspace.kkt_matrix);
       auto vecD(workspace.ldlt_.vectorD());
       workspace.signature.array() = vecD.array().sign().template cast<int>();
@@ -388,18 +385,16 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
         break;
       } else if (delta == 0.) {
         // check if previous was zero
-        if (delta_last == 0.) {
+        if (delta_last == 0.)
           delta = DELTA_NONZERO_INIT; // try a set nonzero value
-        } else {
+        else
           delta = std::max(DELTA_MIN, del_dec_k * delta_last);
-        }
       } else {
         // check previous; decide increase factor
-        if (delta_last == 0.) {
+        if (delta_last == 0.)
           delta *= del_inc_big;
-        } else {
+        else
           delta *= del_inc_k;
-        }
       }
     }
 
@@ -407,6 +402,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.ldlt_.solveInPlace(workspace.pd_step);
     iterativeRefinement(workspace);
 
+    PROXNLP_NOMALLOC_END;
     PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
 
     //// Take the step
@@ -517,12 +513,12 @@ void SolverTpl<Scalar>::tolerancePostUpdate() noexcept {
 template <typename Scalar>
 void SolverTpl<Scalar>::tryStep(Workspace &workspace, const Results &results,
                                 Scalar alpha) {
-  PROXNLP_EIGEN_ALLOW_MALLOC(false);
+  PROXNLP_NOMALLOC_BEGIN;
   workspace.tmp_dx_scaled = alpha * workspace.prim_step;
   manifold().integrate(results.x_opt, workspace.tmp_dx_scaled,
                        workspace.x_trial);
   workspace.data_lams_trial =
       results.data_lams_opt + alpha * workspace.dual_step;
-  PROXNLP_EIGEN_ALLOW_MALLOC(true);
+  PROXNLP_NOMALLOC_END;
 }
 } // namespace proxnlp

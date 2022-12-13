@@ -63,12 +63,12 @@ public:
   Scalar call(const ConstVectorRef &x) const {
     PROXNLP_EIGEN_CONST_CAST(VectorXs, err) = (*residual_)(x);
 
-    PROXNLP_EIGEN_ALLOW_MALLOC(false);
+    PROXNLP_NOMALLOC_BEGIN;
 
     PROXNLP_EIGEN_CONST_CAST(VectorXs, tmp_w_err).noalias() = weights_ * err;
     Scalar res = Scalar(0.5) * err.dot(tmp_w_err) + err.dot(slope_) + constant_;
 
-    PROXNLP_EIGEN_ALLOW_MALLOC(true);
+    PROXNLP_NOMALLOC_END;
 
     return res;
   }
