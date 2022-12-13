@@ -40,6 +40,7 @@ template <typename _Scalar> struct ResultsTpl {
 
   /// Final solver parameters
   std::size_t num_iters = 0;
+  std::size_t al_iters = 0;
   Scalar mu;
   Scalar rho;
 

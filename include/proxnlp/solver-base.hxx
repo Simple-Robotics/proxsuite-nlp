@@ -72,21 +72,16 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
 
   updateToleranceFailure();
 
-  results.num_iters = 0;
   results.converged = ConvergenceFlag::UNINIT;
 
-  fmt::color outer_col = fmt::color::white;
-
-  std::size_t i = 0;
-  while ((results.num_iters < max_iters) && (i < max_al_iters)) {
+  std::size_t &i = results.num_iters;
+  std::size_t &al_iter = results.al_iters;
+  i = 0;
+  al_iter = 0;
+  while ((i < max_iters) && (al_iter < max_al_iters)) {
     results.mu = mu_;
     results.rho = rho_;
-    if (logger.active) {
-      fmt::print(fmt::emphasis::bold | fmt::fg(outer_col),
-                 "[AL iter {:>2d}] omega={:.3g}, eta={:.3g}, mu={:g}\n", i,
-                 inner_tol_, prim_tol_, mu_);
-    }
-    if (results.num_iters == 0) {
+    if (i == 0) {
       logger.start();
     }
     innerLoop(workspace, results);
@@ -96,21 +91,19 @@ ConvergenceFlag SolverTpl<Scalar>::solve(Workspace &workspace, Results &results,
     prox_penalty.updateTarget(workspace.x_prev);
 
     if (results.prim_infeas < prim_tol_) {
-      outer_col = fmt::color::lime_green;
       acceptMultipliers(results, workspace);
-      if (std::max(results.prim_infeas, results.dual_infeas) < target_tol) {
-        results.converged = ConvergenceFlag::SUCCESS;
-        break;
-      }
       updateToleranceSuccess();
     } else {
-      outer_col = fmt::color::orange_red;
       updatePenalty();
       updateToleranceFailure();
     }
+    if (std::max(results.prim_infeas, results.dual_infeas) < target_tol) {
+      results.converged = ConvergenceFlag::SUCCESS;
+      break;
+    }
     setProxParameter(rho_ * bcl_params.rho_update_factor);
 
-    i++;
+    al_iter++;
   }
 
   if (results.converged == SUCCESS)
@@ -467,7 +460,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
                      delta,
                      dphi0,
                      results.merit,
-                     phi_new - phi0};
+                     phi_new - phi0,
+                     results.al_iters};
 
     logger.log(record);
 

@@ -98,7 +98,7 @@ public:
 
   /// Solver maximum number of iterations.
   std::size_t max_iters = 100;
-  std::size_t max_al_iters = 100;
+  std::size_t max_al_iters = 1000;
 
   /// Callbacks
   std::vector<CallbackPtr> callbacks_;
