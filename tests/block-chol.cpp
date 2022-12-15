@@ -70,7 +70,7 @@ static void bm_blocked(benchmark::State &s) {
   for (auto _ : s) {
     l = mat;
     BlockLDLT l_block{l, sym_mat};
-    l_block.ldlt_in_place();
+    l_block.compute(l);
   }
 }
 
@@ -115,15 +115,6 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   std::iota(best_perm, best_perm + n, isize(0));
 
   // dense LDLT
-
-  BlockKind copy_data[n * n];
-  isize copy_row_segments[n];
-  SymbolicBlockMatrix copy_mat{copy_data, copy_row_segments, n, n};
-
-  BlockLDLT a_block_permuted{l1, copy_mat};
-  BlockLDLT a_block_unpermuted{mat, sym_mat};
-  a_block_permuted.permute(a_block_unpermuted, best_perm);
-
   DenseLDLT dense_ldlt(l1);
 
   MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
@@ -147,12 +138,13 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   isize copy_row_segments[n];
   SymbolicBlockMatrix copy_sym_mat{copy_data, copy_row_segments, n, n};
 
-  BlockLDLT block_permuted{l0, copy_sym_mat};
-  BlockLDLT block_unpermuted{mat, sym_mat};
+  BlockLDLT block_permuted(l0, copy_sym_mat);
+  BlockLDLT block_unpermuted(mat, sym_mat);
   block_permuted.permute(block_unpermuted, best_perm);
 
   copy_sym_mat.llt_in_place();
-  Eigen::ComputationInfo info = block_permuted.ldlt_in_place();
+  block_permuted.compute(mat);
+  Eigen::ComputationInfo info = block_permuted.info();
   BOOST_CHECK(info == Eigen::Success);
 
   sym_mat.llt_in_place();

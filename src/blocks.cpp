@@ -253,18 +253,5 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
   }
 }
 
-void find_permutation(const SymbolicBlockMatrix &mat, isize *best_perm) {
-  std::size_t n = std::size_t(mat.nsegments());
-  std::size_t size = std::size_t(mat.size());
-  auto copy_data = new BlockKind[size];
-  auto copy_segments = new isize[n];
-
-  // create a copy as a workspace
-  SymbolicBlockMatrix copy_mat{copy_data, copy_segments, isize(n), isize(n)};
-
-  isize *iwork = new isize[n];
-  copy_mat.brute_force_best_permutation(mat, best_perm, iwork);
-}
-
 } // namespace block_chol
 } // namespace proxnlp

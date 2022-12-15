@@ -52,14 +52,17 @@ struct SymbolicBlockMatrix {
   brute_force_best_permutation(SymbolicBlockMatrix const &in, isize *best_perm,
                                isize *iwork) const;
   isize count_nnz() const noexcept;
+  /// Perform symbolic block-wise LLT decomposition;
+  /// the output sparsity pattern should be that of the matrix \f$L\f$
+  /// of the Cholesky decomposition.
   bool llt_in_place() const noexcept;
 };
 
 void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
 
-/// @brief    Compute the best block-permutation.
-/// @returns  best_perm The output permutation.
-void find_permutation(const SymbolicBlockMatrix &mat, isize *best_perm);
+
+
+
 
 namespace backend {
 
@@ -468,8 +471,8 @@ inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
 } // namespace backend
 
 struct DenseLDLT {
-  using Matrix = MatrixRef::PlainMatrix;
-  Matrix m_matrix;
+  using MatrixXs = MatrixRef::PlainMatrix;
+  MatrixXs m_matrix;
   bool permutate = false;
   DenseLDLT() = default;
   explicit DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
@@ -477,67 +480,84 @@ struct DenseLDLT {
     backend::dense_ldlt_in_place(m_matrix);
   }
 
-  void compute(MatrixRef a) {
+  DenseLDLT &compute(MatrixRef a) {
     m_matrix = a;
     backend::dense_ldlt_in_place(m_matrix);
+    return *this;
   }
 
-  void solveInPlace(MatrixRef b) {
+  void solveInPlace(MatrixRef b) const {
     backend::dense_ldlt_solve_in_place(m_matrix, b);
   }
 
-  Matrix reconstructedMatrix() {
+  MatrixXs reconstructedMatrix() const {
     return backend::dense_ldlt_reconstruct(m_matrix);
   }
 
-  Eigen::Diagonal<const Matrix> vectorD() const { return m_matrix.diagonal(); }
+  Eigen::Diagonal<const MatrixXs> vectorD() const {
+    return m_matrix.diagonal();
+  }
 };
 
 /// @brief Block matrix data structure with LDLT algos.
 struct BlockLDLT {
   using Traits = backend::LDLT_Traits<MatrixRef, Eigen::Lower>;
-  using Matrix = MatrixRef::PlainMatrix;
+  using MatrixXs = MatrixRef::PlainMatrix;
 
-  MatrixRef storage;
-  SymbolicBlockMatrix structure;
+  MatrixRef m_matrix;
+  SymbolicBlockMatrix m_structure;
+  Eigen::ComputationInfo m_info;
 
-  Matrix reconstructedMatrix() {
-    return backend::dense_ldlt_reconstruct(storage);
+  // BlockLDLT() = default;
+  // explicit BlockLDLT(isize size)
+  //   : storage(size, size), structure()
+  // {}
+
+  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix structure)
+      : m_matrix(mat), m_structure(structure) {}
+
+  void setStructure(SymbolicBlockMatrix structure) { m_structure = structure; }
+
+  Eigen::ComputationInfo info() const { return m_info; }
+
+  MatrixXs reconstructedMatrix() const {
+    return backend::dense_ldlt_reconstruct(m_matrix);
   }
 
+  /// TODO: make block-sparse variant of solveInPlace()
   bool solveInPlace(MatrixRef b) const {
-    return backend::dense_ldlt_solve_in_place(storage, b);
+    return backend::dense_ldlt_solve_in_place(m_matrix, b);
   }
 
-  void permute(BlockLDLT in, isize const *perm) const {
-    auto mat = this->storage;
+  void permute(BlockLDLT in, isize const *perm) {
+    MatrixRef mat(m_matrix);
 
-    structure.deep_copy(in.structure, perm);
+    m_structure.deep_copy(in.m_structure, perm);
 
-    isize nblocks = in.structure.nsegments();
+    isize nblocks = in.m_structure.nsegments();
 
     isize out_offset_i = 0;
     for (isize i = 0; i < nblocks; ++i) {
-      auto bsi = structure.segment_lens[i];
+      isize bsi = m_structure.segment_lens[i];
 
       isize in_offset_i = 0;
       for (isize ii = 0; ii < perm[i]; ++ii) {
-        in_offset_i += in.structure.segment_lens[ii];
+        in_offset_i += in.m_structure.segment_lens[ii];
       }
 
       isize out_offset_j = 0;
       for (isize j = 0; j < nblocks; ++j) {
-        auto bsj = structure.segment_lens[j];
+        isize bsj = m_structure.segment_lens[j];
 
         isize in_offset_j = 0;
         for (isize jj = 0; jj < perm[j]; ++jj) {
-          in_offset_j += in.structure.segment_lens[jj];
+          in_offset_j += in.m_structure.segment_lens[jj];
         }
 
         for (isize i_inner = 0; i_inner < bsi; ++i_inner) {
           for (isize j_inner = 0; j_inner < bsj; ++j_inner) {
             mat(out_offset_i + i_inner, out_offset_j + j_inner) =
-                in.storage(in_offset_i + i_inner, in_offset_j + j_inner);
+                in.m_matrix(in_offset_i + i_inner, in_offset_j + j_inner);
           }
         }
 
@@ -548,18 +568,18 @@ struct BlockLDLT {
     }
   }
 
-  bool ldlt_in_place_impl() const {
+  bool ldlt_in_place_impl() {
 
-    isize nblocks = structure.nsegments();
-    isize n = storage.rows();
+    isize nblocks = m_structure.nsegments();
+    isize n = m_matrix.rows();
     if (nblocks == 0) {
       return true;
     }
 
-    auto structure_00 = structure(0, 0);
-    auto bs = structure.segment_lens[0];
-    auto rem = n - bs;
-    auto store_mut = storage.const_cast_derived();
+    BlockKind &structure_00 = m_structure(0, 0);
+    isize bs = m_structure.segment_lens[0];
+    isize rem = n - bs;
+    MatrixRef store_mut = m_matrix.const_cast_derived();
     MatrixRef l00 = store_mut.block(0, 0, bs, bs);
     MatrixRef l11 = store_mut.block(bs, bs, rem, rem);
     auto d0 = l00.diagonal();
@@ -579,11 +599,11 @@ struct BlockLDLT {
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        auto bsi = structure.segment_lens[i];
+        isize bsi = m_structure.segment_lens[i];
         MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
-        switch (structure(i, 0)) {
+        switch (m_structure(i, 0)) {
         case Diag:
         case TriL:
           return false;
@@ -617,11 +637,11 @@ struct BlockLDLT {
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        auto bsi = structure.segment_lens[i];
+        isize bsi = m_structure.segment_lens[i];
         MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
-        switch (structure(i, 0)) {
+        switch (m_structure(i, 0)) {
         case TriL:
           return false;
         case Diag: {
@@ -653,26 +673,26 @@ struct BlockLDLT {
 
     isize offset_i = bs;
     for (isize i = 1; i < nblocks; ++i) {
-      auto bsi = structure.segment_lens[i];
+      isize bsi = m_structure.segment_lens[i];
       MatrixRef li0 = store_mut.block(offset_i, 0, bsi, bs);
       MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
 
       MatrixRef target_ii = store_mut.block(offset_i, offset_i, bsi, bsi);
 
       // target_ii -= li0 * li0_prev.Scalar;
-      backend::gemmt(target_ii, li0, li0_prev, structure(i, 0), structure(i, 0),
-                     Scalar(-1));
+      backend::gemmt(target_ii, li0, li0_prev, m_structure(i, 0),
+                     m_structure(i, 0), Scalar(-1));
 
       isize offset_j = offset_i + bsi;
       for (isize j = i + 1; j < nblocks; ++j) {
         // target_ji -= lj0 * li0_prev.Scalar
 
-        auto bsj = structure.segment_lens[j];
+        isize bsj = m_structure.segment_lens[j];
         MatrixRef lj0 = store_mut.block(offset_j, 0, bsj, bs);
         MatrixRef target_ji = store_mut.block(offset_j, offset_i, bsj, bsi);
 
-        backend::gemmt(target_ji, lj0, li0_prev, structure(j, 0),
-                       structure(i, 0), Scalar(-1));
+        backend::gemmt(target_ji, lj0, li0_prev, m_structure(j, 0),
+                       m_structure(i, 0), Scalar(-1));
 
         offset_j += bsj;
       }
@@ -682,13 +702,16 @@ struct BlockLDLT {
 
     return BlockLDLT{
         l11,
-        structure.submatrix(1, nblocks - 1),
+        m_structure.submatrix(1, nblocks - 1),
     }
         .ldlt_in_place_impl();
   }
 
-  Eigen::ComputationInfo ldlt_in_place() {
-    return ldlt_in_place_impl() ? Eigen::Success : Eigen::NumericalIssue;
+  BlockLDLT &compute(MatrixRef mat) {
+    m_matrix = mat;
+    m_info = ldlt_in_place_impl() ? Eigen::Success : Eigen::NumericalIssue;
+
+    return *this;
   }
 };
 
