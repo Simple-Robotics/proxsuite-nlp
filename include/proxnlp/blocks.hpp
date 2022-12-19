@@ -13,8 +13,6 @@
 #include <numeric>
 #include "linalg/block-kind.hpp"
 
-#include <iostream>
-
 namespace proxnlp {
 /// @brief	Block-wise Cholesky and LDLT factorisation routines.
 namespace block_chol {
@@ -166,19 +164,14 @@ inline bool dense_ldlt_solve_in_place(ConstMatrixRef const &mat, MatrixRef b) {
   return true;
 }
 
-inline MatrixRef::PlainMatrix
-dense_ldlt_reconstruct(ConstMatrixRef const &mat) {
+inline void dense_ldlt_reconstruct(ConstMatrixRef const &mat, MatrixRef res) {
   typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
-  MatrixRef::PlainMatrix res(mat.rows(), mat.cols());
-
-  res.setIdentity();
   res = Traits::getU(mat) * res;
 
   auto vecD = mat.diagonal();
   res = vecD.asDiagonal() * res;
 
   res = Traits::getL(mat) * res;
-  return res;
 }
 
 #if true
@@ -500,7 +493,10 @@ struct DenseLDLT {
   }
 
   MatrixXs reconstructedMatrix() const {
-    return backend::dense_ldlt_reconstruct(m_matrix);
+    MatrixXs res(m_matrix.rows(), m_matrix.cols());
+    res.setIdentity();
+    backend::dense_ldlt_reconstruct(m_matrix, res);
+    return res;
   }
 
   Eigen::Diagonal<const MatrixXs> vectorD() const {
@@ -541,7 +537,12 @@ public:
   inline const PermutationType &permutP() const { return m_permutation; }
 
   MatrixXs reconstructedMatrix() const {
-    return backend::dense_ldlt_reconstruct(m_matrix);
+    MatrixXs res(m_matrix.rows(), m_matrix.cols());
+    res = permutP().transpose();
+    res.setIdentity();
+    backend::dense_ldlt_reconstruct(m_matrix, res);
+    res = permutP() * res;
+    return res;
   }
 
   /// TODO: make block-sparse variant of solveInPlace()
