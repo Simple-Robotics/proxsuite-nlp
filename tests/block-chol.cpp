@@ -20,17 +20,9 @@ using block_chol::SymbolicBlockMatrix;
 using MatrixXs = MatrixRef::PlainMatrix;
 using VectorXs = math_types<Scalar>::VectorXs;
 
-constexpr isize n = 3;
-
-// clang-format off
-BlockKind data[n * n] = {
-    BlockKind::Diag,  BlockKind::Zero,  BlockKind::Dense,
-    BlockKind::Zero,  BlockKind::Dense, BlockKind::Diag,
-    BlockKind::Dense, BlockKind::Diag,  BlockKind::Diag,
-};
-// clang-format on
-
-MatrixXs get_block_mat(isize *row_segments) {
+MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
+  isize *row_segments = sym.segment_lens;
+  auto n = std::size_t(sym.nsegments());
   isize size = 0;
   for (std::size_t i = 0; i < n; ++i)
     size += row_segments[i];
@@ -38,30 +30,53 @@ MatrixXs get_block_mat(isize *row_segments) {
   MatrixXs mat(size, size);
   mat.setZero();
 
-  isize rs0 = row_segments[0];
-  isize rs1 = row_segments[1];
-  isize rs2 = row_segments[2];
-  isize idx0 = 0;
-  isize idx1 = rs0;
-  isize idx2 = rs0 + rs1;
-
-  mat.block(idx0, idx0, rs0, rs0).diagonal().setRandom();
-
-  mat.block(idx1, idx0, rs1, rs0).setZero();
-  mat.block(idx1, idx1, rs1, rs1).setRandom();
-
-  mat.block(idx2, idx0, rs2, rs0).setRandom();
-  mat.block(idx2, idx1, rs2, rs1).diagonal().setRandom();
-  mat.block(idx2, idx2, rs2, rs2).diagonal().setRandom();
+  isize startRow = 0;
+  isize startCol = 0;
+  for (unsigned i = 0; i < n; ++i) {
+    isize blockRows = row_segments[i];
+    startCol = 0;
+    for (unsigned j = 0; j <= i; ++j) {
+      isize blockCols = row_segments[j];
+      const BlockKind kind = sym(i, j);
+      fmt::print("Filling in block ({}, {}, {}, {}), kind = {}\n", startRow,
+                 startCol, blockRows, blockCols, kind);
+      auto block = mat.block(startRow, startCol, blockRows, blockCols);
+      switch (kind) {
+      case BlockKind::Zero:
+        block.setZero();
+        break;
+      case BlockKind::Dense:
+        block.diagonal(0).setConstant(2.);
+        block.diagonal(1).setConstant(-1.);
+        block.diagonal(-1).setConstant(-1.);
+        break;
+      case BlockKind::Diag:
+        block.diagonal().setRandom();
+      default:
+        break;
+      }
+      startCol += blockCols;
+    }
+    startRow += blockRows;
+  }
   mat = mat.selfadjointView<Eigen::Lower>();
   return mat;
 }
 
-isize row_segments[n] = {8, 16, 16};
-MatrixXs mat = get_block_mat(row_segments);
-isize size = mat.cols();
+constexpr isize n = 2;
 
+// clang-format off
+BlockKind data[n * n] = {
+    BlockKind::Diag,  BlockKind::Dense,
+    BlockKind::Dense, BlockKind::Diag,
+};
+// clang-format on
+
+// isize row_segments[n] = {8, 16, 16};
+isize row_segments[n] = {4, 8};
 SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
+MatrixXs mat = get_block_matrix(sym_mat);
+isize size = mat.cols();
 
 VectorXs rhs = VectorXs::Random(size);
 
@@ -92,9 +107,6 @@ BENCHMARK(bm_unblocked)->Unit(unit);
 BENCHMARK(bm_blocked)->Unit(unit);
 BENCHMARK(bm_eigen_ldlt)->Unit(unit);
 
-auto l0 = mat;
-auto l1 = mat;
-
 struct ldlt_fixture {
   ldlt_fixture() : ldlt(mat) { sol_eig = ldlt.solve(rhs); }
   ~ldlt_fixture() = default;
@@ -110,12 +122,8 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
-
-  isize best_perm[n];
-  std::iota(best_perm, best_perm + n, isize(0));
-
   // dense LDLT
-  DenseLDLT dense_ldlt(l1);
+  DenseLDLT dense_ldlt(mat);
 
   MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));
@@ -123,6 +131,8 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   MatrixXs sol_dense = rhs;
   dense_ldlt.solveInPlace(sol_dense);
 
+  Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
+  fmt::print("Dense err = {:.5e}\n", dense_err);
   BOOST_CHECK(sol_dense.isApprox(sol_eig));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 }
@@ -131,37 +141,38 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   fmt::print("Input matrix pattern:\n");
   block_chol::print_sparsity_pattern(sym_mat);
 
-  isize best_perm[n];
-  std::iota(best_perm, best_perm + n, isize(0));
+  auto l0 = mat;
+  auto l1 = mat;
+  BlockLDLT block_permuted(l0, sym_mat);
+  BlockLDLT block_unpermuted(l1, sym_mat);
+  std::vector<isize> best_perm(n);
+  std::iota(best_perm.begin(), best_perm.end(), isize(0));
+  block_permuted.performAnalysis();
+  // block_permuted.permute(block_unpermuted, best_perm.data());
 
-  BlockKind copy_data[n * n];
-  isize copy_row_segments[n];
-  SymbolicBlockMatrix copy_sym_mat{copy_data, copy_row_segments, n, n};
+  fmt::print("block_permuted.structure():\n");
+  block_chol::print_sparsity_pattern(block_permuted.structure());
 
-  BlockLDLT block_permuted(l0, copy_sym_mat);
-  BlockLDLT block_unpermuted(mat, sym_mat);
-  block_permuted.permute(block_unpermuted, best_perm);
 
-  copy_sym_mat.llt_in_place();
-  block_permuted.compute(mat);
+  block_permuted.compute(l1);
   Eigen::ComputationInfo info = block_permuted.info();
-  BOOST_CHECK(info == Eigen::Success);
+  BOOST_REQUIRE(info == Eigen::Success);
 
   sym_mat.llt_in_place();
-  fmt::print("Resulting sparsity after pivoting:\n");
+  fmt::print("Unpermuted LLT :\n");
   block_chol::print_sparsity_pattern(sym_mat);
 
   MatrixXs reconstr = block_permuted.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));
-
-  constexpr Scalar prec = 1e-10;
+  auto reconstr_err = math::infty_norm(reconstr - mat);
+  fmt::print("Block reconstr err = {:.5e}\n", reconstr_err);
 
   MatrixXs sol_block = rhs;
   block_permuted.solveInPlace(sol_block);
-  Scalar err = (sol_block - sol_eig).lpNorm<-1>();
+  Scalar err = math::infty_norm(sol_block - sol_eig);
   fmt::print("err = {:.5e}\n", err);
-  BOOST_CHECK(sol_block.isApprox(sol_eig, prec));
-  BOOST_CHECK(rhs.isApprox(mat * sol_block, prec));
+  BOOST_CHECK(sol_block.isApprox(sol_eig));
+  BOOST_CHECK(rhs.isApprox(mat * sol_block));
 }
 
 int main(int argc, char **argv) {
