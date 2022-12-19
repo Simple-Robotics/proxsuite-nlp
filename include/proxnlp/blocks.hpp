@@ -78,10 +78,10 @@ namespace backend {
 /// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
 /// More precisely: a stores L -sans its diagonal which is all ones.
 /// The diagonal of @param a contains the diagonal matrix @f$D@f$.
-inline void ldlt_in_place_unblocked(MatrixRef a) {
-  isize n = a.rows();
+inline bool ldlt_in_place_unblocked(MatrixRef a) {
+  const isize n = a.rows();
   if (n == 0) {
-    return;
+    return true;
   }
 
   isize j = 0;
@@ -94,10 +94,10 @@ inline void ldlt_in_place_unblocked(MatrixRef a) {
     a(j, j) -= work.dot(l10);
 
     if (j + 1 == n) {
-      return;
+      return true;
     }
 
-    isize rem = n - j - 1;
+    const isize rem = n - j - 1;
 
     auto l20 = a.bottomLeftCorner(rem, j);
     auto l21 = a.col(j).tail(rem);
@@ -108,10 +108,12 @@ inline void ldlt_in_place_unblocked(MatrixRef a) {
   }
 }
 
-inline void ldlt_in_place_recursive(MatrixRef const &a) {
+/// A recursive, in-place implementation of the LDLT decomposition.
+/// To be applied to dense blocks.
+inline bool dense_ldlt_in_place(MatrixRef const &a) {
   isize n = a.rows();
   if (n <= 128) {
-    backend::ldlt_in_place_unblocked(a);
+    return backend::ldlt_in_place_unblocked(a);
   } else {
     isize bs = (n + 1) / 2;
     isize rem = n - bs;
@@ -121,7 +123,7 @@ inline void ldlt_in_place_recursive(MatrixRef const &a) {
     MatrixRef l10 = a_mut.block(bs, 0, rem, bs);
     MatrixRef l11 = a_mut.block(bs, bs, rem, rem);
 
-    backend::ldlt_in_place_recursive(l00);
+    backend::dense_ldlt_in_place(l00);
     auto d0 = l00.diagonal();
 
     l00.transpose()
@@ -134,13 +136,9 @@ inline void ldlt_in_place_recursive(MatrixRef const &a) {
 
     l11.template triangularView<Eigen::Lower>() -= l10 * work.transpose();
 
-    backend::ldlt_in_place_recursive(l11);
+    return backend::dense_ldlt_in_place(l11);
   }
 }
-
-/// A recursive, in-place implementation of the LDLT decomposition.
-/// To be applied to dense blocks.
-inline void dense_ldlt_in_place(MatrixRef a) { ldlt_in_place_recursive(a); }
 
 using Eigen::internal::LDLT_Traits;
 
@@ -474,19 +472,24 @@ inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
 
 struct DenseLDLT {
   using MatrixXs = MatrixRef::PlainMatrix;
-  MatrixXs m_matrix;
-  bool permutate = false;
+
   DenseLDLT() = default;
   explicit DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
   explicit DenseLDLT(MatrixRef a) : m_matrix(a) {
-    backend::dense_ldlt_in_place(m_matrix);
+    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
+                                                    : Eigen::NumericalIssue;
   }
 
   DenseLDLT &compute(MatrixRef a) {
     m_matrix = a;
-    backend::dense_ldlt_in_place(m_matrix);
+    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
+                                                    : Eigen::NumericalIssue;
     return *this;
   }
+
+  const MatrixXs &matrixLDLT() const { return m_matrix; }
+
+  Eigen::ComputationInfo info() const { return m_info; }
 
   void solveInPlace(MatrixRef b) const {
     backend::dense_ldlt_solve_in_place(m_matrix, b);
@@ -502,6 +505,11 @@ struct DenseLDLT {
   Eigen::Diagonal<const MatrixXs> vectorD() const {
     return m_matrix.diagonal();
   }
+
+protected:
+  MatrixXs m_matrix;
+  Eigen::ComputationInfo m_info;
+  bool permutate = false;
 };
 
 /// @brief Block matrix data structure with LDLT algos.
