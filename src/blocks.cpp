@@ -1,5 +1,7 @@
 #include "proxnlp/blocks.hpp"
 
+#include <iostream>
+
 namespace proxnlp {
 namespace block_chol {
 
@@ -39,28 +41,34 @@ SymbolicBlockMatrix SymbolicBlockMatrix::submatrix(isize i,
   };
 }
 
-void SymbolicBlockMatrix::deep_copy(SymbolicBlockMatrix const &in,
-                                    isize const *perm) const noexcept {
-  auto self = *this;
+SymbolicBlockMatrix SymbolicBlockMatrix::copy() const {
+  BlockKind *data = new BlockKind[std::size_t(segments_count * outer_stride)];
+  isize *segment_lens = new isize[std::size_t(segments_count)];
+  SymbolicBlockMatrix out{data, segment_lens, segments_count, outer_stride};
+  symbolic_deep_copy(*this, out);
+  return out;
+}
 
-  isize n = self.nsegments();
+void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
+                        isize const *perm) noexcept {
+  const isize n = out.nsegments();
 
   for (isize i = 0; i < n; ++i) {
-    self.segment_lens[i] = in.segment_lens[(perm != nullptr) ? perm[i] : i];
+    out.segment_lens[i] = in.segment_lens[(perm != nullptr) ? perm[i] : i];
   }
   for (isize i = 0; i < n; ++i) {
     for (isize j = 0; j < n; ++j) {
       if (perm == nullptr) {
-        self(i, j) = in(i, j);
+        out(i, j) = in(i, j);
       } else {
-        self(i, j) = in(perm[i], perm[j]);
+        out(i, j) = in(perm[i], perm[j]);
       }
     }
   }
 }
 
 Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
-    SymbolicBlockMatrix const &in, isize *best_perm, isize *iwork) const {
+    SymbolicBlockMatrix const &in, isize *best_perm, isize *iwork) {
   isize n = in.nsegments();
   std::iota(iwork, iwork + n, isize(0));
 
@@ -69,7 +77,7 @@ Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
 
   // find best permutation
   do {
-    deep_copy(in, iwork);
+    symbolic_deep_copy(in, *this, iwork);
     if (!llt_in_place()) {
       return Eigen::NumericalIssue;
     }
@@ -87,7 +95,7 @@ Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
 }
 
 isize SymbolicBlockMatrix::count_nnz() const noexcept {
-  auto self = *this;
+  auto &self = *this;
   isize nnz = 0;
   isize n = nsegments();
 
@@ -121,7 +129,7 @@ bool SymbolicBlockMatrix::llt_in_place() const noexcept {
     return true;
   }
 
-  auto self = *this;
+  auto &self = *this;
 
   isize n = segments_count;
 

@@ -16,7 +16,7 @@
 #include <iostream>
 
 namespace proxnlp {
-/// @brief	Block-wise Cholesky or LDLT factorisation routines.
+/// @brief	Block-wise Cholesky and LDLT factorisation routines.
 namespace block_chol {
 
 using Scalar = double;
@@ -32,25 +32,34 @@ struct SymbolicBlockMatrix {
   isize segments_count;
   isize outer_stride;
 
+  SymbolicBlockMatrix() = delete;
+  /// Shallow copy constructor.
+  SymbolicBlockMatrix(SymbolicBlockMatrix const &other) = default;
+  SymbolicBlockMatrix &operator=(SymbolicBlockMatrix const &other) = delete;
+
+  /// Deep copy.
+  SymbolicBlockMatrix copy() const;
+
   isize nsegments() const noexcept { return segments_count; }
   isize size() const noexcept { return segments_count * outer_stride; }
   BlockKind *ptr(isize i, isize j) const noexcept {
     return data + (i + j * outer_stride);
   }
 
-  /// Get the symbolic submatrix starting from the block in position (i, i).
+  /// Get the symbolic submatrix of size (n, n) starting from the block in
+  /// position (i, i).
   SymbolicBlockMatrix submatrix(isize i, isize n) const noexcept;
+  /// Get a reference to the block in position (i, j).
   BlockKind &operator()(isize i, isize j) const noexcept { return *ptr(i, j); }
 
-  /// Deep copy of the struct, possibily with a permutation.
-  void deep_copy(SymbolicBlockMatrix const &in,
-                 isize const *perm = nullptr) const noexcept;
-
-  /// Brute-force search of the best permutation possible in the block matrix.
-  /// work has length `in.nsegments()`
+  /// Brute-force search of the best permutation possible in the block matrix,
+  /// with respect to the final sparsity of the LLT decomposition.
+  /// The struct instance *this will be the result.
+  /// @param in    the input matrix to analyze.
+  /// @param iwork workspace; has length `in.nsegments()`.
   Eigen::ComputationInfo
   brute_force_best_permutation(SymbolicBlockMatrix const &in, isize *best_perm,
-                               isize *iwork) const;
+                               isize *iwork);
   isize count_nnz() const noexcept;
   /// Perform symbolic block-wise LLT decomposition;
   /// the output sparsity pattern should be that of the matrix \f$L\f$
@@ -58,21 +67,21 @@ struct SymbolicBlockMatrix {
   bool llt_in_place() const noexcept;
 };
 
+/// TODO: print triangles for triangular blocks
 void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
 
-
-
-
+/// Deep copy of a SymbolicBlockMatrix, possibily with a permutation.
+void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
+                        isize const *perm = nullptr) noexcept;
 
 namespace backend {
 
-/// At the end of the execution, \param a contains
+/// At the end of the execution, @param a contains
 /// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
 /// More precisely: a stores L -sans its diagonal which is all ones.
-/// The diagonal of \param a contains the diagonal matrix \f$D\f$.
+/// The diagonal of @param a contains the diagonal matrix @f$D@f$.
 inline void ldlt_in_place_unblocked(MatrixRef a) {
   isize n = a.rows();
-  assert(n == diag.size());
   if (n == 0) {
     return;
   }
@@ -137,7 +146,7 @@ inline void dense_ldlt_in_place(MatrixRef a) { ldlt_in_place_recursive(a); }
 
 using Eigen::internal::LDLT_Traits;
 
-/// Taking the decomposed LDLT matrix \param mat, solve the original linear
+/// Taking the decomposed LDLT matrix @param mat, solve the original linear
 /// system.
 inline bool dense_ldlt_solve_in_place(ConstMatrixRef const &mat, MatrixRef b) {
   typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
@@ -500,25 +509,36 @@ struct DenseLDLT {
 };
 
 /// @brief Block matrix data structure with LDLT algos.
+/// @details  This struct owns the data of the SymbolicBlockMatrix given as
+/// input.
 struct BlockLDLT {
   using Traits = backend::LDLT_Traits<MatrixRef, Eigen::Lower>;
   using MatrixXs = MatrixRef::PlainMatrix;
+  using PermutationType =
+      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
 
+protected:
   MatrixRef m_matrix;
   SymbolicBlockMatrix m_structure;
+  PermutationType m_permutation;
   Eigen::ComputationInfo m_info;
 
-  // BlockLDLT() = default;
-  // explicit BlockLDLT(isize size)
-  //   : storage(size, size), structure()
-  // {}
-
-  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix structure)
-      : m_matrix(mat), m_structure(structure) {}
-
-  void setStructure(SymbolicBlockMatrix structure) { m_structure = structure; }
+public:
+  /// Constructor: copies the input matrix @p mat and symbolic
+  /// block pattern @p structure.
+  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
+      : m_matrix(mat), m_structure(structure.copy()),
+        m_permutation(mat.rows()) {}
 
   Eigen::ComputationInfo info() const { return m_info; }
+
+  /// @returns a reference to the symbolic representation of the block-matrix.
+  inline const SymbolicBlockMatrix &structure() const { return m_structure; }
+
+  /// Analyze and factorize the block structure.
+  inline bool performAnalysis() const { return m_structure.llt_in_place(); }
+
+  inline const PermutationType &permutP() const { return m_permutation; }
 
   MatrixXs reconstructedMatrix() const {
     return backend::dense_ldlt_reconstruct(m_matrix);
@@ -529,10 +549,10 @@ struct BlockLDLT {
     return backend::dense_ldlt_solve_in_place(m_matrix, b);
   }
 
-  void permute(BlockLDLT in, isize const *perm) {
-    MatrixRef mat(m_matrix);
+  MatrixXs matrixLDLT() const { return m_matrix; }
 
-    m_structure.deep_copy(in.m_structure, perm);
+  void permute(const BlockLDLT &in, isize const *perm) {
+    symbolic_deep_copy(in.m_structure, m_structure, perm);
 
     isize nblocks = in.m_structure.nsegments();
 
@@ -556,7 +576,7 @@ struct BlockLDLT {
 
         for (isize i_inner = 0; i_inner < bsi; ++i_inner) {
           for (isize j_inner = 0; j_inner < bsj; ++j_inner) {
-            mat(out_offset_i + i_inner, out_offset_j + j_inner) =
+            m_matrix(out_offset_i + i_inner, out_offset_j + j_inner) =
                 in.m_matrix(in_offset_i + i_inner, in_offset_j + j_inner);
           }
         }
@@ -568,15 +588,14 @@ struct BlockLDLT {
     }
   }
 
+  /// @returns bool whether the decomposition was successful.
   bool ldlt_in_place_impl() {
-
-    isize nblocks = m_structure.nsegments();
-    isize n = m_matrix.rows();
+    const isize nblocks = m_structure.nsegments();
+    const isize n = m_matrix.rows();
     if (nblocks == 0) {
       return true;
     }
 
-    BlockKind &structure_00 = m_structure(0, 0);
     isize bs = m_structure.segment_lens[0];
     isize rem = n - bs;
     MatrixRef store_mut = m_matrix.const_cast_derived();
@@ -586,7 +605,7 @@ struct BlockLDLT {
 
     MatrixRef work = store_mut.block(0, rem, rem, bs);
 
-    switch (structure_00) {
+    switch (m_structure(0, 0)) {
     case Zero:
     case TriU:
     case Dense:
