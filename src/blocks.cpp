@@ -1,3 +1,7 @@
+/// @file
+/// @author Sarah El-Kazdadi
+/// @author Wilson Jallet
+/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #include "proxnlp/blocks.hpp"
 
 #include <iostream>
@@ -7,8 +11,16 @@ namespace block_chol {
 
 /// BlockKind of the transpose of a matrix.
 BlockKind trans(BlockKind a) noexcept {
-  if ((a == TriL) || (a == TriU)) {
+  switch (a) {
+  case TriL:
     return TriU;
+    break;
+  case TriU:
+    return TriL;
+    break;
+  default:
+    return a;
+    break;
   }
   return a;
 }
@@ -33,12 +45,7 @@ BlockKind mul(BlockKind a, BlockKind b) noexcept {
 
 SymbolicBlockMatrix SymbolicBlockMatrix::submatrix(isize i,
                                                    isize n) const noexcept {
-  return {
-      ptr(i, i),
-      segment_lens + i,
-      n,
-      outer_stride,
-  };
+  return {ptr(i, i), segment_lens + i, n, outer_stride, performed_llt};
 }
 
 SymbolicBlockMatrix SymbolicBlockMatrix::copy() const {
@@ -65,6 +72,7 @@ void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
       }
     }
   }
+  out.performed_llt = in.performed_llt;
 }
 
 Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
@@ -78,6 +86,7 @@ Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
   // find best permutation
   do {
     symbolic_deep_copy(in, *this, iwork);
+    performed_llt = false;
     if (!llt_in_place()) {
       return Eigen::NumericalIssue;
     }
@@ -92,6 +101,19 @@ Eigen::ComputationInfo SymbolicBlockMatrix::brute_force_best_permutation(
     first_iter = false;
   } while (std::next_permutation(iwork, iwork + n));
   return Eigen::Success;
+}
+
+bool SymbolicBlockMatrix::check_if_symmetric() const noexcept {
+  const isize n = nsegments();
+  const auto &self = *this;
+  for (isize i = 0; i < n; ++i) {
+    for (isize j = 0; j < i; j++) {
+      if (self(i, j) != self(j, i)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 isize SymbolicBlockMatrix::count_nnz() const noexcept {
@@ -123,10 +145,11 @@ isize SymbolicBlockMatrix::count_nnz() const noexcept {
   return nnz;
 }
 
-bool SymbolicBlockMatrix::llt_in_place() const noexcept {
+bool SymbolicBlockMatrix::llt_in_place() noexcept {
   // assume `*this` is symmetric
   if (segments_count == 0) {
-    return true;
+    performed_llt = true;
+    return performed_llt;
   }
 
   auto &self = *this;
@@ -186,7 +209,8 @@ bool SymbolicBlockMatrix::llt_in_place() const noexcept {
     }
   }
 
-  return submatrix(1, n - 1).llt_in_place();
+  performed_llt = submatrix(1, n - 1).llt_in_place();
+  return performed_llt;
 }
 
 /* UTILS */
@@ -199,8 +223,8 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
 
   isize ncols = nrows;
 
-  std::vector<bool> buf;
-  buf.resize(std::size_t(nrows * ncols));
+  Eigen::Matrix<bool, -1, -1> buf(nrows, ncols);
+  buf.setConstant(false);
 
   isize handled_rows = 0;
   for (isize i = 0; i < smat.segments_count; ++i) {
@@ -210,17 +234,15 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
       case Zero:
         break;
       case Diag: {
-        for (isize ii = 0; ii < smat.segment_lens[i]; ++ii) {
-          buf[std::size_t((handled_rows + ii) * ncols + handled_cols + ii)] =
-              true;
-        }
+        auto blk = buf.block(handled_rows, handled_cols, smat.segment_lens[i],
+                             smat.segment_lens[j]);
+        blk.diagonal().setConstant(true);
         break;
       }
       case TriL: {
         for (isize ii = 0; ii < smat.segment_lens[i]; ++ii) {
           for (isize jj = 0; jj <= ii; ++jj) {
-            buf[std::size_t((handled_rows + ii) * ncols + handled_cols + jj)] =
-                true;
+            buf(handled_rows + ii, handled_cols + jj) = true;
           }
         }
         break;
@@ -228,19 +250,15 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
       case TriU: {
         for (isize ii = 0; ii < smat.segment_lens[i]; ++ii) {
           for (isize jj = ii; jj < smat.segment_lens[j]; ++jj) {
-            buf[std::size_t((handled_rows + ii) * ncols + handled_cols + jj)] =
-                true;
+            buf(handled_rows + ii, handled_cols + jj) = true;
           }
         }
         break;
       }
       case Dense: {
-        for (isize ii = 0; ii < smat.segment_lens[i]; ++ii) {
-          for (isize jj = 0; jj < smat.segment_lens[j]; ++jj) {
-            buf[std::size_t((handled_rows + ii) * ncols + handled_cols + jj)] =
-                true;
-          }
-        }
+        auto blk = buf.block(handled_rows, handled_cols, smat.segment_lens[i],
+                             smat.segment_lens[j]);
+        blk.setConstant(true);
         break;
       }
       }
@@ -251,10 +269,10 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
 
   for (isize i = 0; i < nrows; ++i) {
     for (isize j = 0; j < ncols; ++j) {
-      if (buf[std::size_t(i * ncols + j)]) {
-        std::cout << "█";
+      if (buf(i, j)) {
+        std::cout << "██";
       } else {
-        std::cout << "░";
+        std::cout << "░░";
       }
     }
     std::cout << '\n';

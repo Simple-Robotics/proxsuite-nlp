@@ -1,5 +1,6 @@
 /// @file
 /// @author Sarah El-Kazdadi
+/// @author Wilson Jallet
 /// @brief Routines for block-sparse (notably, KKT-type) matrix LDLT
 /// factorisation.
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
@@ -29,6 +30,9 @@ struct SymbolicBlockMatrix {
   isize *segment_lens;
   isize segments_count;
   isize outer_stride;
+  /// Flag stating whether the block structure was successfully analyzed.
+  /// This should be checked when attempting to factorize.
+  bool performed_llt = false;
 
   SymbolicBlockMatrix() = delete;
   /// Shallow copy constructor.
@@ -58,11 +62,12 @@ struct SymbolicBlockMatrix {
   Eigen::ComputationInfo
   brute_force_best_permutation(SymbolicBlockMatrix const &in, isize *best_perm,
                                isize *iwork);
+  bool check_if_symmetric() const noexcept;
   isize count_nnz() const noexcept;
   /// Perform symbolic block-wise LLT decomposition;
   /// the output sparsity pattern should be that of the matrix \f$L\f$
   /// of the Cholesky decomposition.
-  bool llt_in_place() const noexcept;
+  bool llt_in_place() noexcept;
 };
 
 /// TODO: print triangles for triangular blocks
@@ -80,7 +85,7 @@ namespace backend {
 /// The diagonal of @param a contains the diagonal matrix @f$D@f$.
 inline bool ldlt_in_place_unblocked(MatrixRef a) {
   const isize n = a.rows();
-  if (n == 0) {
+  if (n <= 1) {
     return true;
   }
 
@@ -174,190 +179,11 @@ inline void dense_ldlt_reconstruct(ConstMatrixRef const &mat, MatrixRef res) {
 
 #if true
 
-template <BlockKind LHS, BlockKind RHS> struct GemmT;
+#include "linalg/gemmt-v1.hpp"
 
-template <BlockKind LHS> struct GemmT<LHS, Zero> {
-  static void fn(MatrixRef const & /*dst*/, MatrixRef const & /*lhs*/,
-                 MatrixRef const & /*rhs*/, Scalar /*alpha*/) {}
-};
-template <BlockKind RHS> struct GemmT<Zero, RHS> {
-  static void fn(MatrixRef const & /*dst*/, MatrixRef const & /*lhs*/,
-                 MatrixRef const & /*rhs*/, Scalar /*alpha*/) {}
-};
-template <> struct GemmT<Zero, Zero> {
-  static void fn(MatrixRef const & /*dst*/, MatrixRef const & /*lhs*/,
-                 MatrixRef const & /*rhs*/, Scalar /*alpha*/) {}
-};
-
-template <> struct GemmT<Diag, Diag> {
-  // dst is diagonal
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.diagonal() +=
-        alpha * lhs.diagonal().cwiseProduct(rhs.transpose().diagonal());
-  }
-};
-
-template <> struct GemmT<Diag, TriL> {
-  // dst is triu
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // dst.template triangularView<Eigen::Upper>() +=
-    // 		alpha * (lhs.diagonal().asDiagonal() *
-    //              rhs.template triangularView<Eigen::Lower>().transpose());
-
-    isize n = dst.cols();
-
-    for (isize j = 0; j < n; ++j) {
-      dst.col(j).head(j + 1) += alpha * lhs.diagonal().cwiseProduct(
-                                            rhs.transpose().col(j).head(j + 1));
-    }
-  }
-};
-
-template <> struct GemmT<Diag, TriU> {
-  // dst is tril
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.diagonal().asDiagonal() *
-    //              rhs.template triangularView<Eigen::Upper>().transpose());
-
-    isize m = dst.rows();
-    isize n = dst.cols();
-
-    for (isize j = 0; j < n; ++j) {
-      dst.col(j).tail(m - j) += alpha * lhs.diagonal().cwiseProduct(
-                                            rhs.transpose().col(j).tail(m - j));
-    }
-  }
-};
-
-template <> struct GemmT<Diag, Dense> {
-  // dst is dense
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst += alpha * (lhs.diagonal().asDiagonal() * rhs.transpose());
-  }
-};
-
-template <> struct GemmT<TriL, Diag> {
-  // dst is tril
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Lower>() *
-    //              rhs.diagonal().asDiagonal());
-
-    isize m = dst.rows();
-    isize n = dst.cols();
-
-    for (isize j = 0; j < n; ++j) {
-      dst.col(j).tail(m - j) += (alpha * rhs(j, j)) * lhs.col(j).tail(m - j);
-    }
-  }
-};
-
-template <> struct GemmT<TriL, TriL> {
-  // dst is dense
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // PERF
-    // dst += alpha * (lhs.template triangularView<Eigen::Lower>() *
-    //                 rhs.transpose().template triangularView<Eigen::Upper>());
-    dst.noalias() +=
-        alpha * (lhs * rhs.transpose().template triangularView<Eigen::Upper>());
-  }
-};
-
-template <> struct GemmT<TriL, TriU> {
-  // dst is tril
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // PERF
-    // dst += alpha * (lhs.template triangularView<Eigen::Lower>() *
-    //                 rhs.transpose().template triangularView<Eigen::Lower>());
-    dst.triangularView<Eigen::Lower>() +=
-        alpha * (lhs * rhs.transpose().template triangularView<Eigen::Lower>());
-  }
-};
-
-template <> struct GemmT<TriL, Dense> {
-  // dst is dense
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() +=
-        lhs.template triangularView<Eigen::Lower>() * (alpha * rhs.transpose());
-  }
-};
-
-template <> struct GemmT<TriU, Diag> {
-  // dst is triu
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Lower>() *
-    //              rhs.diagonal().asDiagonal());
-
-    isize n = dst.cols();
-
-    for (isize j = 0; j < n; ++j) {
-      dst.col(j).head(j + 1) += (alpha * rhs(j, j)) * lhs.col(j).head(j + 1);
-    }
-  }
-};
-
-template <> struct GemmT<TriU, TriL> {
-  // dst is triu
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // PERF
-    // dst.template triangularView<Eigen::Upper>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Upper>() *
-    //              rhs.transpose().triangularView<Eigen::Upper>());
-    dst.template triangularView<Eigen::Upper>() +=
-        alpha * (lhs * rhs.transpose().triangularView<Eigen::Upper>());
-  }
-};
-
-template <> struct GemmT<TriU, TriU> {
-  // dst is dense
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    // PERF
-    // dst.noalias() += alpha * (lhs.template triangularView<Eigen::Upper>() *
-    //                           rhs.transpose().template
-    //                           triangularView<Eigen::Lower>());
-    dst.noalias() +=
-        alpha * (lhs * rhs.transpose().template triangularView<Eigen::Lower>());
-  }
-};
-
-template <> struct GemmT<TriU, Dense> {
-  // dst is dense
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() += (lhs.template triangularView<Eigen::Upper>() *
-                      (alpha * rhs.transpose()));
-  }
-};
-
-template <> struct GemmT<Dense, Diag> {
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() += alpha * (lhs * rhs.transpose().diagonal().asDiagonal());
-  }
-};
-
-template <> struct GemmT<Dense, TriL> {
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() +=
-        alpha * (lhs * rhs.transpose().triangularView<Eigen::Upper>());
-  }
-};
-
-template <> struct GemmT<Dense, TriU> {
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() +=
-        alpha * (lhs * rhs.transpose().triangularView<Eigen::Lower>());
-  }
-};
-
-template <> struct GemmT<Dense, Dense> {
-  static void fn(MatrixRef dst, MatrixRef lhs, MatrixRef rhs, Scalar alpha) {
-    dst.noalias() += alpha * lhs * rhs.transpose();
-  }
-};
 #else
 
-#include "linalg/gemmt.hpp"
+#include "linalg/gemmt-v2.hpp"
 
 #endif
 
@@ -470,6 +296,7 @@ inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
 }
 } // namespace backend
 
+/// @brief  A fast, recursive divide-and-conquer LDLT algorithm.
 struct DenseLDLT {
   using MatrixXs = MatrixRef::PlainMatrix;
 
@@ -480,8 +307,8 @@ struct DenseLDLT {
                                                     : Eigen::NumericalIssue;
   }
 
-  DenseLDLT &compute(MatrixRef a) {
-    m_matrix = a;
+  DenseLDLT &compute(MatrixRef mat) {
+    m_matrix = mat;
     m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
                                                     : Eigen::NumericalIssue;
     return *this;
@@ -512,109 +339,37 @@ protected:
   bool permutate = false;
 };
 
-/// @brief Block matrix data structure with LDLT algos.
-/// @details  This struct owns the data of the SymbolicBlockMatrix given as
-/// input.
-struct BlockLDLT {
-  using Traits = backend::LDLT_Traits<MatrixRef, Eigen::Lower>;
+namespace backend {
+
+/// Implementation struct for the recursive block LDLT algorithm.
+struct block_impl {
   using MatrixXs = MatrixRef::PlainMatrix;
-  using PermutationType =
-      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
-
-protected:
-  MatrixRef m_matrix;
-  SymbolicBlockMatrix m_structure;
-  PermutationType m_permutation;
-  Eigen::ComputationInfo m_info;
-
-public:
-  /// Constructor: copies the input matrix @p mat and symbolic
-  /// block pattern @p structure.
-  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
-      : m_matrix(mat), m_structure(structure.copy()),
-        m_permutation(mat.rows()) {}
-
-  Eigen::ComputationInfo info() const { return m_info; }
-
-  /// @returns a reference to the symbolic representation of the block-matrix.
-  inline const SymbolicBlockMatrix &structure() const { return m_structure; }
-
-  /// Analyze and factorize the block structure.
-  inline bool performAnalysis() const { return m_structure.llt_in_place(); }
-
-  inline const PermutationType &permutP() const { return m_permutation; }
-
-  MatrixXs reconstructedMatrix() const {
-    MatrixXs res(m_matrix.rows(), m_matrix.cols());
-    res = permutP().transpose();
-    res.setIdentity();
-    backend::dense_ldlt_reconstruct(m_matrix, res);
-    res = permutP() * res;
-    return res;
-  }
-
-  /// TODO: make block-sparse variant of solveInPlace()
-  bool solveInPlace(MatrixRef b) const {
-    return backend::dense_ldlt_solve_in_place(m_matrix, b);
-  }
-
-  MatrixXs matrixLDLT() const { return m_matrix; }
-
-  void permute(const BlockLDLT &in, isize const *perm) {
-    symbolic_deep_copy(in.m_structure, m_structure, perm);
-
-    isize nblocks = in.m_structure.nsegments();
-
-    isize out_offset_i = 0;
-    for (isize i = 0; i < nblocks; ++i) {
-      isize bsi = m_structure.segment_lens[i];
-
-      isize in_offset_i = 0;
-      for (isize ii = 0; ii < perm[i]; ++ii) {
-        in_offset_i += in.m_structure.segment_lens[ii];
-      }
-
-      isize out_offset_j = 0;
-      for (isize j = 0; j < nblocks; ++j) {
-        isize bsj = m_structure.segment_lens[j];
-
-        isize in_offset_j = 0;
-        for (isize jj = 0; jj < perm[j]; ++jj) {
-          in_offset_j += in.m_structure.segment_lens[jj];
-        }
-
-        for (isize i_inner = 0; i_inner < bsi; ++i_inner) {
-          for (isize j_inner = 0; j_inner < bsj; ++j_inner) {
-            m_matrix(out_offset_i + i_inner, out_offset_j + j_inner) =
-                in.m_matrix(in_offset_i + i_inner, in_offset_j + j_inner);
-          }
-        }
-
-        out_offset_j += bsj;
-      }
-
-      out_offset_i += bsi;
-    }
-  }
-
+  MatrixRef mat;
+  SymbolicBlockMatrix sym_structure;
   /// @returns bool whether the decomposition was successful.
   bool ldlt_in_place_impl() {
-    const isize nblocks = m_structure.nsegments();
-    const isize n = m_matrix.rows();
-    if (nblocks == 0) {
+    if (!sym_structure.performed_llt) {
+      assert(false && "Block structure was not analyzed yet.");
+      return false;
+    }
+    const isize nblocks = sym_structure.nsegments();
+    const isize n = mat.rows();
+    if ((nblocks == 0) || (n <= 1)) {
       return true;
     }
 
-    isize bs = m_structure.segment_lens[0];
-    isize rem = n - bs;
-    MatrixRef store_mut = m_matrix.const_cast_derived();
-    MatrixRef l00 = store_mut.block(0, 0, bs, bs);
-    MatrixRef l11 = store_mut.block(bs, bs, rem, rem);
+    const isize bs = sym_structure.segment_lens[0];
+    const isize rem = n - bs;
+    MatrixRef l00 = mat.block(0, 0, bs, bs);
+    MatrixRef l11 = mat.block(bs, bs, rem, rem);
     auto d0 = l00.diagonal();
 
-    MatrixRef work = store_mut.block(0, rem, rem, bs);
+    // temp workspace -> upper triangle of matrix, filled with "garbage"
+    /// TODO: FIX ALLOCATION HERE, USING work CREATES ALIASING LATER IN CALL TO
+    /// GEMMT
+    MatrixXs work = mat.block(0, rem, rem, bs);
 
-    switch (m_structure(0, 0)) {
+    switch (sym_structure(0, 0)) {
     case Zero:
     case TriU:
     case Dense:
@@ -627,11 +382,11 @@ public:
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        isize bsi = m_structure.segment_lens[i];
-        MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
+        const isize bsi = sym_structure.segment_lens[i];
+        MatrixRef li0 = mat.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
-        switch (m_structure(i, 0)) {
+        switch (sym_structure(i, 0)) {
         case Diag:
         case TriL:
           return false;
@@ -656,6 +411,7 @@ public:
         case Zero:
           break;
         }
+        offset += bsi;
       }
 
       break;
@@ -665,11 +421,11 @@ public:
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
-        isize bsi = m_structure.segment_lens[i];
-        MatrixRef li0 = store_mut.block(offset, 0, bsi, bs);
+        const isize bsi = sym_structure.segment_lens[i];
+        MatrixRef li0 = mat.block(offset, 0, bsi, bs);
         MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
 
-        switch (m_structure(i, 0)) {
+        switch (sym_structure(i, 0)) {
         case TriL:
           return false;
         case Diag: {
@@ -701,26 +457,28 @@ public:
 
     isize offset_i = bs;
     for (isize i = 1; i < nblocks; ++i) {
-      isize bsi = m_structure.segment_lens[i];
-      MatrixRef li0 = store_mut.block(offset_i, 0, bsi, bs);
-      MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
+      const isize bsi = sym_structure.segment_lens[i];
+      const MatrixRef li0 = mat.block(offset_i, 0, bsi, bs);
+      const MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
 
-      MatrixRef target_ii = store_mut.block(offset_i, offset_i, bsi, bsi);
+      /// WARNING: target_ii CONTAINS LAST ROW OF "WORK"
+      MatrixRef target_ii = mat.block(offset_i, offset_i, bsi, bsi);
 
-      // target_ii -= li0 * li0_prev.Scalar;
-      backend::gemmt(target_ii, li0, li0_prev, m_structure(i, 0),
-                     m_structure(i, 0), Scalar(-1));
+      // target_ii -= li0 * li0_prev.T;
+      /// TODO: FIX ALIASING HERE, target_ii CONTAINS COEFFS FROM li0_prev
+      backend::gemmt(target_ii, li0, li0_prev, sym_structure(i, 0),
+                     sym_structure(i, 0), Scalar(-1));
 
       isize offset_j = offset_i + bsi;
       for (isize j = i + 1; j < nblocks; ++j) {
-        // target_ji -= lj0 * li0_prev.Scalar
+        // target_ji -= lj0 * li0_prev.T;
 
-        isize bsj = m_structure.segment_lens[j];
-        MatrixRef lj0 = store_mut.block(offset_j, 0, bsj, bs);
-        MatrixRef target_ji = store_mut.block(offset_j, offset_i, bsj, bsi);
+        isize bsj = sym_structure.segment_lens[j];
+        const MatrixRef lj0 = mat.block(offset_j, 0, bsj, bs);
+        MatrixRef target_ji = mat.block(offset_j, offset_i, bsj, bsi);
 
-        backend::gemmt(target_ji, lj0, li0_prev, m_structure(j, 0),
-                       m_structure(i, 0), Scalar(-1));
+        backend::gemmt(target_ji, lj0, li0_prev, sym_structure(j, 0),
+                       sym_structure(i, 0), Scalar(-1));
 
         offset_j += bsj;
       }
@@ -728,16 +486,173 @@ public:
       offset_i += bsi;
     }
 
-    return BlockLDLT{
+    return block_impl{
         l11,
-        m_structure.submatrix(1, nblocks - 1),
+        sym_structure.submatrix(1, nblocks - 1),
     }
         .ldlt_in_place_impl();
+  }
+};
+
+} // namespace backend
+
+/// @brief Block sparsity-aware LDLT factorization algorithm.
+/// @details  This struct owns the data of the SymbolicBlockMatrix given as
+/// input.
+/// The member function findSparsifyingPermutation() uses a heuristic
+/// (for now a brute-force search) to find a sparsity-maximizing permutation of
+/// the blocks in the input matrix.
+/// updateBlockPermutMatrix() updates the permutation matrix according to the
+/// stored block-wise permutation indices. Calling permute() will perform the
+/// permutation on the input matrix.
+///
+/// @warning  The underlying block-wise structure is assumed to be invariant
+/// over the lifetime of this object when calling compute(). A change
+/// of structure should lead to recalculating the expected sparsity pattern of
+/// the factorization, and even recomputing the sparsity-optimal permutation.
+struct BlockLDLT {
+  using MatrixXs = MatrixRef::PlainMatrix;
+  using Traits = backend::LDLT_Traits<MatrixXs, Eigen::Lower>;
+  using PermutationType =
+      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
+
+protected:
+  MatrixXs m_matrix;
+  SymbolicBlockMatrix m_structure;
+  PermutationType m_permutation;
+  Eigen::ComputationInfo m_info;
+  isize *perm;
+  isize *iwork;
+  isize *idx_cumul;
+
+  std::size_t nblocks() const {
+    return std::size_t(m_structure.segments_count);
+  }
+
+public:
+  /// @brief  The constructor copies the input matrix @param mat and symbolic
+  /// block pattern @param structure.
+  explicit BlockLDLT(isize n, SymbolicBlockMatrix const &structure)
+      : m_matrix(n, n), m_structure(structure.copy()), m_permutation(n),
+        perm(new isize[nblocks()]), iwork(new isize[nblocks()]),
+        idx_cumul(new isize[nblocks()]) {
+    std::iota(perm, perm + nblocks(), isize(0));
+  }
+
+  /// @copydoc BlockLDLT()
+  /// @todo run the algorithm when in this constructor. Perhaps provide flags to
+  /// decide whether to compute/use permutations.
+  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
+      : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
+        perm(new isize[nblocks()]), iwork(new isize[nblocks()]),
+        idx_cumul(new isize[nblocks()]) {
+    std::iota(perm, perm + nblocks(), isize(0));
+  }
+
+  ~BlockLDLT() {
+    delete[] perm;
+    delete[] iwork;
+    delete[] idx_cumul;
+    delete[] m_structure.data;
+    delete[] m_structure.segment_lens;
+    m_structure.data = nullptr;
+    m_structure.segment_lens = nullptr;
+  }
+
+  Eigen::ComputationInfo info() const { return m_info; }
+
+  /// @returns a reference to the symbolic representation of the block-matrix.
+  inline const SymbolicBlockMatrix &structure() const { return m_structure; }
+
+  /// @brief Analyze and factorize the block structure, if not done already.
+  inline bool performAnalysis() {
+    if (m_structure.performed_llt)
+      return true;
+    return m_structure.llt_in_place();
+  }
+
+  void setPermutation(isize const *new_perm = nullptr) {
+    auto in = m_structure.copy();
+    const isize n = m_structure.nsegments();
+    if (new_perm != nullptr)
+      std::copy_n(new_perm, n, perm);
+    m_structure.performed_llt = false;
+    symbolic_deep_copy(in, m_structure, perm);
+    performAnalysis();
+  }
+
+  isize *blockPermIndices() { return perm; }
+
+  /// @brief Find a sparsity-maximizing permutation of the blocks. This will
+  /// also compute the symbolic factorization.
+  void findSparsifyingPermutation() {
+    auto in = m_structure.copy();
+    m_structure.brute_force_best_permutation(in, perm, iwork);
+    symbolic_deep_copy(in, m_structure, perm);
+    performAnalysis();
+  }
+
+  inline const PermutationType &permutationP() const { return m_permutation; }
+
+  void updateBlockPermutMatrix(SymbolicBlockMatrix const &in) {
+    const isize *row_segs = in.segment_lens;
+    const isize nblocks = in.nsegments();
+    using IndicesType = PermutationType::IndicesType;
+    IndicesType &indices = m_permutation.indices();
+    isize idx = 0;
+    for (isize i = 0; i < nblocks; ++i) {
+      idx_cumul[i] = idx;
+      idx += row_segs[i];
+    }
+
+    idx = 0;
+    for (isize i = 0; i < nblocks; ++i) {
+      auto len = row_segs[perm[i]];
+      auto s = indices.segment(idx, len);
+      isize i0 = idx_cumul[perm[i]];
+      s.setLinSpaced(i0, i0 + len - 1);
+      idx += len;
+    }
+    m_permutation = m_permutation.transpose();
+  }
+
+  MatrixXs reconstructedMatrix() const {
+    MatrixXs res(m_matrix.rows(), m_matrix.cols());
+    res = permutationP();
+    backend::dense_ldlt_reconstruct(m_matrix, res);
+    res = permutationP().transpose() * res;
+    return res;
+  }
+
+  Traits::MatrixL matrixL() const { return Traits::getL(m_matrix); }
+
+  Traits::MatrixU matrixU() const { return Traits::getU(m_matrix); }
+
+  /// TODO: make block-sparse variant of solveInPlace()
+  bool solveInPlace(MatrixRef b) const {
+    b = permutationP() * b;
+    bool flag = backend::dense_ldlt_solve_in_place(m_matrix, b);
+    b = permutationP().transpose() * b;
+    return flag;
+  }
+
+  const MatrixXs &matrixLDLT() const { return m_matrix; }
+
+  void permute() {
+    m_matrix = permutationP() * m_matrix;
+    m_matrix = m_matrix * permutationP().transpose();
+  }
+
+  void compute() {
+    m_info = backend::block_impl{m_matrix, m_structure}.ldlt_in_place_impl()
+                 ? Eigen::Success
+                 : Eigen::NumericalIssue;
   }
 
   BlockLDLT &compute(MatrixRef mat) {
     m_matrix = mat;
-    m_info = ldlt_in_place_impl() ? Eigen::Success : Eigen::NumericalIssue;
+    // do not re-run analysis
+    compute();
 
     return *this;
   }
