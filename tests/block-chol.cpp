@@ -8,7 +8,7 @@
 #endif
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "proxnlp/blocks.hpp"
+#include "proxnlp/linalg/blocks.hpp"
 
 #include <benchmark/benchmark.h>
 #define BOOST_TEST_NO_MAIN
@@ -24,12 +24,9 @@ using block_chol::BlockKind;
 using block_chol::BlockLDLT;
 using block_chol::DenseLDLT;
 using block_chol::isize;
-using block_chol::MatrixRef;
-using block_chol::Scalar;
 using block_chol::SymbolicBlockMatrix;
-
-using MatrixXs = MatrixRef::PlainMatrix;
-using VectorXs = math_types<Scalar>::VectorXs;
+using Scalar = double;
+PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
 MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
   isize *row_segments = sym.segment_lens;
@@ -70,17 +67,18 @@ MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
   return mat;
 }
 
-constexpr isize n = 2;
+constexpr isize n = 3;
 
 // clang-format off
 BlockKind data[n * n] = {
-    BlockKind::Diag,  BlockKind::Dense,
-    BlockKind::Dense, BlockKind::Diag,
+    BlockKind::Dense,  BlockKind::Dense, BlockKind::Zero,
+    BlockKind::Dense, BlockKind::Diag, BlockKind::Zero,
+    BlockKind::Zero, BlockKind::Zero, BlockKind::Diag
 };
 // clang-format on
 
 // isize row_segments[n] = {8, 16, 16};
-isize row_segments[n] = {4, 8};
+isize row_segments[n] = {24, 30, 10};
 SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
 MatrixXs mat = get_block_matrix(sym_mat);
 isize size = mat.cols();
@@ -88,43 +86,59 @@ isize size = mat.cols();
 VectorXs rhs = VectorXs::Random(size);
 
 static void bm_blocked(benchmark::State &s) {
-  auto l = mat;
+  BlockLDLT<Scalar> block_ldlt(size, sym_mat);
+  block_ldlt.findSparsifyingPermutation();
+  block_ldlt.updateBlockPermutMatrix(sym_mat);
   for (auto _ : s) {
-    l = mat;
-    BlockLDLT l_block{l, sym_mat};
-    l_block.performAnalysis();
-    l_block.compute();
+    block_ldlt.compute(mat);
+    auto b = rhs;
+    block_ldlt.solveInPlace(b);
+    if (block_ldlt.info() != Eigen::Success) {
+      s.SkipWithError("BlockLDLT computation failed.");
+      break;
+    }
+    if (!rhs.isApprox(mat * b)) {
+      s.SkipWithError("BlockLDLT gave wrong solution.");
+      break;
+    }
   }
 }
 
 static void bm_unblocked(benchmark::State &s) {
+  DenseLDLT<Scalar> dense_ldlt(size);
   for (auto _ : s) {
-    DenseLDLT dense_ldlt(mat);
+    dense_ldlt.compute(mat);
     auto b = rhs;
     dense_ldlt.solveInPlace(b);
     if (dense_ldlt.info() != Eigen::Success) {
       s.SkipWithError("DenseLDLT computation failed.");
       break;
     }
-    if ((mat * b).isApprox(rhs)) {
-      s.SkipWithError("DenseLDLT gave wrong solution.");
+    if (!rhs.isApprox(mat * b)) {
+      Scalar err = math::infty_norm(rhs - (mat * b));
+      s.SkipWithError(
+          fmt::format("DenseLDLT gave wrong solution, err={:.4e}.", err)
+              .c_str());
       break;
     }
   }
 }
 
 static void bm_eigen_ldlt(benchmark::State &s) {
+  Eigen::LDLT<MatrixXs> ldlt(size);
   for (auto _ : s) {
-    Eigen::LDLT<MatrixXs> ldlt(mat);
+    ldlt.compute(mat);
     auto b = rhs;
-    ldlt.solveInPlace(b);
     ldlt.solveInPlace(b);
     if (ldlt.info() != Eigen::Success) {
       s.SkipWithError("Eigen::LDLT computation failed.");
       break;
     }
-    if ((mat * b).isApprox(rhs)) {
-      s.SkipWithError("Eigen::LDLT gave wrong solution.");
+    if (!rhs.isApprox(mat * b)) {
+      Scalar err = math::infty_norm(rhs - (mat * b));
+      s.SkipWithError(
+          fmt::format("Eigen::LDLT gave wrong solution, err={:.4e}.", err)
+              .c_str());
       break;
     }
     benchmark::DoNotOptimize(ldlt);
@@ -145,7 +159,6 @@ struct ldlt_fixture {
 };
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
-  fmt::print("Input matrix:\n{}\n", mat);
   MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_REQUIRE(ldlt.info() == Eigen::Success);
   BOOST_CHECK(reconstr.isApprox(mat));
@@ -154,7 +167,7 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   // dense LDLT
-  DenseLDLT dense_ldlt(mat);
+  DenseLDLT<Scalar> dense_ldlt(mat);
   BOOST_REQUIRE(dense_ldlt.info() == Eigen::Success);
 
   MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
@@ -174,16 +187,28 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   block_chol::print_sparsity_pattern(sym_mat);
   BOOST_REQUIRE(sym_mat.check_if_symmetric());
 
-  auto l0 = mat;
-  auto l1 = mat;
-  BlockLDLT block_permuted(l0, sym_mat);
-  std::vector<isize> best_perm(block_permuted.blockPermIndices(),
-                               block_permuted.blockPermIndices() + n);
-  fmt::print("Optimal permutation: {}\n", fmt::join(best_perm, ", "));
-  block_permuted.permute(sym_mat, best_perm.data());
-  block_permuted.performAnalysis();
+  BlockLDLT<Scalar> block_permuted(mat, sym_mat);
+  block_permuted.findSparsifyingPermutation();
+  // {
+  //   isize perm[] = {2, 1, 0};
+  //   isize perm[] = {2, 0, 1};
+  //   block_permuted.setPermutation(perm);
+  // }
+  block_permuted.updateBlockPermutMatrix(sym_mat);
+  block_permuted.permute();
+  auto best_perm = block_permuted.blockPermIndices();
+  fmt::print("Optimal permutation: {}\n",
+             fmt::join(best_perm, best_perm + n, ", "));
 
-  fmt::print("Optimized structure:\n");
+  {
+    auto copy_sym = sym_mat.copy();
+    block_chol::symbolic_deep_copy(sym_mat, copy_sym, best_perm);
+    fmt::print("Permuted structure:\n");
+    block_chol::print_sparsity_pattern(copy_sym);
+  }
+
+  fmt::print("Optimized structure (nnz={:d}):\n",
+             block_permuted.structure().count_nnz());
   block_chol::print_sparsity_pattern(block_permuted.structure());
 
   auto pmat = block_permuted.permutationP();
@@ -193,9 +218,13 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   Eigen::ComputationInfo info = block_permuted.info();
   BOOST_REQUIRE(info == Eigen::Success);
 
-  sym_mat.llt_in_place();
-  fmt::print("Un-permuted (suboptimal) LLT :\n");
-  block_chol::print_sparsity_pattern(sym_mat);
+  {
+    auto copy_sym_mat = sym_mat.copy();
+    copy_sym_mat.llt_in_place();
+    fmt::print("Un-permuted (suboptimal) LLT (nnz={:d}):\n",
+               copy_sym_mat.count_nnz());
+    block_chol::print_sparsity_pattern(copy_sym_mat);
+  }
 
   MatrixXs reconstr = block_permuted.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));

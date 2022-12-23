@@ -12,19 +12,17 @@
 
 #include <algorithm>
 #include <numeric>
-#include "linalg/block-kind.hpp"
+#include "proxnlp/linalg/block-kind.hpp"
 
 namespace proxnlp {
 /// @brief	Block-wise Cholesky and LDLT factorisation routines.
 namespace block_chol {
 
-using Scalar = double;
-using MatrixRef = math_types<Scalar>::MatrixRef;
-using ConstMatrixRef = math_types<Scalar>::ConstMatrixRef;
-using VectorRef = math_types<Scalar>::VectorRef;
-
 using isize = std::int64_t;
 
+/// @brief    Symbolic representation of the sparsity structure of a block
+/// matrix.
+/// @details  This struct describes the block-wise layout of a matrix.
 struct SymbolicBlockMatrix {
   BlockKind *data;
   isize *segment_lens;
@@ -83,7 +81,8 @@ namespace backend {
 /// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
 /// More precisely: a stores L -sans its diagonal which is all ones.
 /// The diagonal of @param a contains the diagonal matrix @f$D@f$.
-inline bool ldlt_in_place_unblocked(MatrixRef a) {
+template <typename Scalar>
+inline bool ldlt_in_place_unblocked(typename math_types<Scalar>::MatrixRef a) {
   const isize n = a.rows();
   if (n <= 1) {
     return true;
@@ -113,35 +112,38 @@ inline bool ldlt_in_place_unblocked(MatrixRef a) {
   }
 }
 
+static constexpr isize UNBLK_THRESHOLD = 128;
+
 /// A recursive, in-place implementation of the LDLT decomposition.
 /// To be applied to dense blocks.
-inline bool dense_ldlt_in_place(MatrixRef const &a) {
-  isize n = a.rows();
-  if (n <= 128) {
-    return backend::ldlt_in_place_unblocked(a);
+template <typename Scalar>
+inline bool dense_ldlt_in_place(typename math_types<Scalar>::MatrixRef a) {
+  using MatrixRef = typename math_types<Scalar>::MatrixRef;
+  const isize n = a.rows();
+  if (n <= UNBLK_THRESHOLD) {
+    return backend::ldlt_in_place_unblocked<Scalar>(a);
   } else {
-    isize bs = (n + 1) / 2;
-    isize rem = n - bs;
+    const isize bs = (n + 1) / 2;
+    const isize rem = n - bs;
 
-    auto a_mut = a.const_cast_derived();
-    MatrixRef l00 = a_mut.block(0, 0, bs, bs);
-    MatrixRef l10 = a_mut.block(bs, 0, rem, bs);
-    MatrixRef l11 = a_mut.block(bs, bs, rem, rem);
+    MatrixRef l00 = a.block(0, 0, bs, bs);
+    Eigen::Block<MatrixRef> l10 = a.block(bs, 0, rem, bs);
+    MatrixRef l11 = a.block(bs, bs, rem, rem);
 
-    backend::dense_ldlt_in_place(l00);
+    backend::dense_ldlt_in_place<Scalar>(l00);
     auto d0 = l00.diagonal();
 
     l00.transpose()
         .template triangularView<Eigen::UnitUpper>()
         .template solveInPlace<Eigen::OnTheRight>(l10);
 
-    MatrixRef work = a_mut.block(0, rem, rem, bs);
+    auto work = a.block(0, bs, bs, rem).transpose();
     work = l10;
     l10 = l10 * d0.asDiagonal().inverse();
 
     l11.template triangularView<Eigen::Lower>() -= l10 * work.transpose();
 
-    return backend::dense_ldlt_in_place(l11);
+    return backend::dense_ldlt_in_place<Scalar>(l11);
   }
 }
 
@@ -149,12 +151,17 @@ using Eigen::internal::LDLT_Traits;
 
 /// Taking the decomposed LDLT matrix @param mat, solve the original linear
 /// system.
-inline bool dense_ldlt_solve_in_place(ConstMatrixRef const &mat, MatrixRef b) {
+template <typename Scalar>
+inline bool dense_ldlt_solve_in_place(
+    typename math_types<Scalar>::ConstMatrixRef const &mat,
+    typename math_types<Scalar>::MatrixRef b) {
+  using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
   typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
   Traits::getL(mat).solveInPlace(b);
 
   using std::abs;
-  Eigen::Diagonal<const ConstMatrixRef>::RealReturnType vecD(mat.diagonal());
+  typename Eigen::Diagonal<const ConstMatrixRef>::RealReturnType vecD(
+      mat.diagonal());
   const Scalar tol = std::numeric_limits<Scalar>::min();
   for (isize i = 0; i < vecD.size(); ++i) {
     if (abs(vecD(i)) > tol)
@@ -167,7 +174,11 @@ inline bool dense_ldlt_solve_in_place(ConstMatrixRef const &mat, MatrixRef b) {
   return true;
 }
 
-inline void dense_ldlt_reconstruct(ConstMatrixRef const &mat, MatrixRef res) {
+template <typename Scalar>
+inline void
+dense_ldlt_reconstruct(typename math_types<Scalar>::ConstMatrixRef const &mat,
+                       typename math_types<Scalar>::MatrixRef res) {
+  using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
   typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
   res = Traits::getU(mat) * res;
 
@@ -176,141 +187,25 @@ inline void dense_ldlt_reconstruct(ConstMatrixRef const &mat, MatrixRef res) {
 
   res = Traits::getL(mat) * res;
 }
-
-#if true
-
-#include "linalg/gemmt-v1.hpp"
-
-#else
-
-#include "linalg/gemmt-v2.hpp"
-
-#endif
-
-inline void gemmt(MatrixRef const &dst, MatrixRef const &lhs,
-                  MatrixRef const &rhs, BlockKind lhs_kind, BlockKind rhs_kind,
-                  Scalar alpha) {
-  // dst += alpha * lhs * rhs.Scalar
-  switch (lhs_kind) {
-  case Zero: {
-    switch (rhs_kind) {
-    case Zero:
-      GemmT<Zero, Zero>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Diag:
-      GemmT<Zero, Diag>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriL:
-      GemmT<Zero, TriL>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriU:
-      GemmT<Zero, TriU>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Dense:
-      GemmT<Zero, Dense>::fn(dst, lhs, rhs, alpha);
-      break;
-    }
-    break;
-  }
-  case Diag: {
-    switch (rhs_kind) {
-    case Zero:
-      GemmT<Diag, Zero>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Diag:
-      GemmT<Diag, Diag>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriL:
-      GemmT<Diag, TriL>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriU:
-      GemmT<Diag, TriU>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Dense:
-      GemmT<Diag, Dense>::fn(dst, lhs, rhs, alpha);
-      break;
-    }
-    break;
-  }
-  case TriL: {
-    switch (rhs_kind) {
-    case Zero:
-      GemmT<TriL, Zero>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Diag:
-      GemmT<TriL, Diag>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriL:
-      GemmT<TriL, TriL>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriU:
-      GemmT<TriL, TriU>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Dense:
-      GemmT<TriL, Dense>::fn(dst, lhs, rhs, alpha);
-      break;
-    }
-    break;
-  }
-  case TriU: {
-    switch (rhs_kind) {
-    case Zero:
-      GemmT<TriU, Zero>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Diag:
-      GemmT<TriU, Diag>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriL:
-      GemmT<TriU, TriL>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriU:
-      GemmT<TriU, TriU>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Dense:
-      GemmT<TriU, Dense>::fn(dst, lhs, rhs, alpha);
-      break;
-    }
-    break;
-  }
-  case Dense: {
-    switch (rhs_kind) {
-    case Zero:
-      GemmT<Dense, Zero>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Diag:
-      GemmT<Dense, Diag>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriL:
-      GemmT<Dense, TriL>::fn(dst, lhs, rhs, alpha);
-      break;
-    case TriU:
-      GemmT<Dense, TriU>::fn(dst, lhs, rhs, alpha);
-      break;
-    case Dense:
-      GemmT<Dense, Dense>::fn(dst, lhs, rhs, alpha);
-      break;
-    }
-    break;
-  }
-  }
-}
 } // namespace backend
 
 /// @brief  A fast, recursive divide-and-conquer LDLT algorithm.
-struct DenseLDLT {
-  using MatrixXs = MatrixRef::PlainMatrix;
+template <typename Scalar> struct DenseLDLT {
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   DenseLDLT() = default;
   explicit DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
   explicit DenseLDLT(MatrixRef a) : m_matrix(a) {
-    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
-                                                    : Eigen::NumericalIssue;
+    m_info = backend::dense_ldlt_in_place<Scalar>(m_matrix)
+                 ? Eigen::Success
+                 : Eigen::NumericalIssue;
   }
 
   DenseLDLT &compute(MatrixRef mat) {
     m_matrix = mat;
-    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
-                                                    : Eigen::NumericalIssue;
+    m_info = backend::dense_ldlt_in_place<Scalar>(m_matrix)
+                 ? Eigen::Success
+                 : Eigen::NumericalIssue;
     return *this;
   }
 
@@ -319,13 +214,13 @@ struct DenseLDLT {
   Eigen::ComputationInfo info() const { return m_info; }
 
   void solveInPlace(MatrixRef b) const {
-    backend::dense_ldlt_solve_in_place(m_matrix, b);
+    backend::dense_ldlt_solve_in_place<Scalar>(m_matrix, b);
   }
 
   MatrixXs reconstructedMatrix() const {
     MatrixXs res(m_matrix.rows(), m_matrix.cols());
     res.setIdentity();
-    backend::dense_ldlt_reconstruct(m_matrix, res);
+    backend::dense_ldlt_reconstruct<Scalar>(m_matrix, res);
     return res;
   }
 
@@ -338,12 +233,131 @@ protected:
   Eigen::ComputationInfo m_info;
   bool permutate = false;
 };
+} // namespace block_chol
+} // namespace proxnlp
 
+#include "proxnlp/linalg/gemmt.hpp"
+
+namespace proxnlp {
+namespace block_chol {
 namespace backend {
 
+template <typename Scalar> struct gemmt {
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  template <typename DstDerived, typename LhsDerived, typename RhsDerived>
+  inline static void run(Eigen::MatrixBase<DstDerived> &dst,
+                         Eigen::MatrixBase<LhsDerived> const &lhs,
+                         Eigen::MatrixBase<RhsDerived> const &rhs,
+                         BlockKind lhs_kind, BlockKind rhs_kind, Scalar alpha) {
+    // dst += alpha * lhs * rhs.T
+    switch (lhs_kind) {
+    case Zero: {
+      switch (rhs_kind) {
+      case Zero:
+        GemmT<Scalar, Zero, Zero>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Diag:
+        GemmT<Scalar, Zero, Diag>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriL:
+        GemmT<Scalar, Zero, TriL>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriU:
+        GemmT<Scalar, Zero, TriU>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Dense:
+        GemmT<Scalar, Zero, Dense>::fn(dst, lhs, rhs, alpha);
+        break;
+      }
+      break;
+    }
+    case Diag: {
+      switch (rhs_kind) {
+      case Zero:
+        GemmT<Scalar, Diag, Zero>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Diag:
+        GemmT<Scalar, Diag, Diag>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriL:
+        GemmT<Scalar, Diag, TriL>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriU:
+        GemmT<Scalar, Diag, TriU>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Dense:
+        GemmT<Scalar, Diag, Dense>::fn(dst, lhs, rhs, alpha);
+        break;
+      }
+      break;
+    }
+    case TriL: {
+      switch (rhs_kind) {
+      case Zero:
+        GemmT<Scalar, TriL, Zero>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Diag:
+        GemmT<Scalar, TriL, Diag>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriL:
+        GemmT<Scalar, TriL, TriL>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriU:
+        GemmT<Scalar, TriL, TriU>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Dense:
+        GemmT<Scalar, TriL, Dense>::fn(dst, lhs, rhs, alpha);
+        break;
+      }
+      break;
+    }
+    case TriU: {
+      switch (rhs_kind) {
+      case Zero:
+        GemmT<Scalar, TriU, Zero>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Diag:
+        GemmT<Scalar, TriU, Diag>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriL:
+        GemmT<Scalar, TriU, TriL>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriU:
+        GemmT<Scalar, TriU, TriU>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Dense:
+        GemmT<Scalar, TriU, Dense>::fn(dst, lhs, rhs, alpha);
+        break;
+      }
+      break;
+    }
+    case Dense: {
+      switch (rhs_kind) {
+      case Zero:
+        GemmT<Scalar, Dense, Zero>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Diag:
+        GemmT<Scalar, Dense, Diag>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriL:
+        GemmT<Scalar, Dense, TriL>::fn(dst, lhs, rhs, alpha);
+        break;
+      case TriU:
+        GemmT<Scalar, Dense, TriU>::fn(dst, lhs, rhs, alpha);
+        break;
+      case Dense:
+        GemmT<Scalar, Dense, Dense>::fn(dst, lhs, rhs, alpha);
+        break;
+      }
+      break;
+    }
+    }
+  }
+};
+
 /// Implementation struct for the recursive block LDLT algorithm.
-struct block_impl {
-  using MatrixXs = MatrixRef::PlainMatrix;
+template <typename Scalar> struct block_impl {
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   MatrixRef mat;
   SymbolicBlockMatrix sym_structure;
   /// @returns bool whether the decomposition was successful.
@@ -362,12 +376,10 @@ struct block_impl {
     const isize rem = n - bs;
     MatrixRef l00 = mat.block(0, 0, bs, bs);
     MatrixRef l11 = mat.block(bs, bs, rem, rem);
-    auto d0 = l00.diagonal();
+    const auto d0 = l00.diagonal();
 
-    // temp workspace -> upper triangle of matrix, filled with "garbage"
-    /// TODO: FIX ALLOCATION HERE, USING work CREATES ALIASING LATER IN CALL TO
-    /// GEMMT
-    MatrixXs work = mat.block(0, rem, rem, bs);
+    MatrixRef work_tr = mat.block(0, bs, bs, rem);
+    Eigen::Transpose<MatrixRef> work = work_tr.transpose();
 
     switch (sym_structure(0, 0)) {
     case Zero:
@@ -377,14 +389,15 @@ struct block_impl {
 
     case TriL: {
       // compute l00
-      backend::dense_ldlt_in_place(l00);
+      backend::dense_ldlt_in_place<Scalar>(l00);
 
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
         const isize bsi = sym_structure.segment_lens[i];
         MatrixRef li0 = mat.block(offset, 0, bsi, bs);
-        MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
+        Eigen::Block<decltype(work)> li0_copy =
+            work.block(offset - bs, 0, bsi, bs);
 
         switch (sym_structure(i, 0)) {
         case Diag:
@@ -392,7 +405,7 @@ struct block_impl {
           return false;
         case TriU: {
           auto li0_u = li0.template triangularView<Eigen::Upper>();
-          // PERF: replace li0.Scalar by li0_tl
+          // PERF: replace li0.T by li0_tl
           // auto li0_tl = li0.transpose().template
           // triangularView<Eigen::Lower>();
           l00.template triangularView<Eigen::UnitLower>().solveInPlace(
@@ -423,7 +436,8 @@ struct block_impl {
       for (isize i = 1; i < nblocks; ++i) {
         const isize bsi = sym_structure.segment_lens[i];
         MatrixRef li0 = mat.block(offset, 0, bsi, bs);
-        MatrixRef li0_copy = work.block(offset - bs, 0, bsi, bs);
+        Eigen::Block<decltype(work)> li0_copy =
+            work.block(offset - bs, 0, bsi, bs);
 
         switch (sym_structure(i, 0)) {
         case TriL:
@@ -458,27 +472,31 @@ struct block_impl {
     isize offset_i = bs;
     for (isize i = 1; i < nblocks; ++i) {
       const isize bsi = sym_structure.segment_lens[i];
-      const MatrixRef li0 = mat.block(offset_i, 0, bsi, bs);
-      const MatrixRef li0_prev = work.block(offset_i - bs, 0, bsi, bs);
+      Eigen::Block<MatrixRef> li0 = mat.block(offset_i, 0, bsi, bs);
+      Eigen::Block<decltype(work)> li0_prev =
+          work.block(offset_i - bs, 0, bsi, bs);
 
       /// WARNING: target_ii CONTAINS LAST ROW OF "WORK"
-      MatrixRef target_ii = mat.block(offset_i, offset_i, bsi, bsi);
+      Eigen::Block<MatrixRef> target_ii =
+          mat.block(offset_i, offset_i, bsi, bsi);
 
       // target_ii -= li0 * li0_prev.T;
       /// TODO: FIX ALIASING HERE, target_ii CONTAINS COEFFS FROM li0_prev
-      backend::gemmt(target_ii, li0, li0_prev, sym_structure(i, 0),
-                     sym_structure(i, 0), Scalar(-1));
+      backend::gemmt<Scalar>::run(target_ii, li0, li0_prev, sym_structure(i, 0),
+                                  sym_structure(i, 0), Scalar(-1));
 
       isize offset_j = offset_i + bsi;
       for (isize j = i + 1; j < nblocks; ++j) {
         // target_ji -= lj0 * li0_prev.T;
 
-        isize bsj = sym_structure.segment_lens[j];
-        const MatrixRef lj0 = mat.block(offset_j, 0, bsj, bs);
-        MatrixRef target_ji = mat.block(offset_j, offset_i, bsj, bsi);
+        const isize bsj = sym_structure.segment_lens[j];
+        Eigen::Block<MatrixRef> lj0 = mat.block(offset_j, 0, bsj, bs);
+        Eigen::Block<MatrixRef> target_ji =
+            mat.block(offset_j, offset_i, bsj, bsi);
 
-        backend::gemmt(target_ji, lj0, li0_prev, sym_structure(j, 0),
-                       sym_structure(i, 0), Scalar(-1));
+        backend::gemmt<Scalar>::run(target_ji, lj0, li0_prev,
+                                    sym_structure(j, 0), sym_structure(i, 0),
+                                    Scalar(-1));
 
         offset_j += bsj;
       }
@@ -510,8 +528,8 @@ struct block_impl {
 /// over the lifetime of this object when calling compute(). A change
 /// of structure should lead to recalculating the expected sparsity pattern of
 /// the factorization, and even recomputing the sparsity-optimal permutation.
-struct BlockLDLT {
-  using MatrixXs = MatrixRef::PlainMatrix;
+template <typename Scalar> struct BlockLDLT {
+  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Traits = backend::LDLT_Traits<MatrixXs, Eigen::Lower>;
   using PermutationType =
       Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
@@ -521,9 +539,9 @@ protected:
   SymbolicBlockMatrix m_structure;
   PermutationType m_permutation;
   Eigen::ComputationInfo m_info;
-  isize *perm;
-  isize *iwork;
-  isize *idx_cumul;
+  isize *m_perm;
+  isize *m_iwork;
+  isize *m_idx;
 
   std::size_t nblocks() const {
     return std::size_t(m_structure.segments_count);
@@ -534,9 +552,9 @@ public:
   /// block pattern @param structure.
   explicit BlockLDLT(isize n, SymbolicBlockMatrix const &structure)
       : m_matrix(n, n), m_structure(structure.copy()), m_permutation(n),
-        perm(new isize[nblocks()]), iwork(new isize[nblocks()]),
-        idx_cumul(new isize[nblocks()]) {
-    std::iota(perm, perm + nblocks(), isize(0));
+        m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
+        m_idx(new isize[nblocks()]) {
+    std::iota(m_perm, m_perm + nblocks(), isize(0));
   }
 
   /// @copydoc BlockLDLT()
@@ -544,15 +562,15 @@ public:
   /// decide whether to compute/use permutations.
   BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
       : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
-        perm(new isize[nblocks()]), iwork(new isize[nblocks()]),
-        idx_cumul(new isize[nblocks()]) {
-    std::iota(perm, perm + nblocks(), isize(0));
+        m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
+        m_idx(new isize[nblocks()]) {
+    std::iota(m_perm, m_perm + nblocks(), isize(0));
   }
 
   ~BlockLDLT() {
-    delete[] perm;
-    delete[] iwork;
-    delete[] idx_cumul;
+    delete[] m_perm;
+    delete[] m_iwork;
+    delete[] m_idx;
     delete[] m_structure.data;
     delete[] m_structure.segment_lens;
     m_structure.data = nullptr;
@@ -565,7 +583,7 @@ public:
   inline const SymbolicBlockMatrix &structure() const { return m_structure; }
 
   /// @brief Analyze and factorize the block structure, if not done already.
-  inline bool performAnalysis() {
+  inline bool analyzePattern() {
     if (m_structure.performed_llt)
       return true;
     return m_structure.llt_in_place();
@@ -575,21 +593,21 @@ public:
     auto in = m_structure.copy();
     const isize n = m_structure.nsegments();
     if (new_perm != nullptr)
-      std::copy_n(new_perm, n, perm);
+      std::copy_n(new_perm, n, m_perm);
     m_structure.performed_llt = false;
-    symbolic_deep_copy(in, m_structure, perm);
-    performAnalysis();
+    symbolic_deep_copy(in, m_structure, m_perm);
+    analyzePattern();
   }
 
-  isize *blockPermIndices() { return perm; }
+  isize *blockPermIndices() { return m_perm; }
 
   /// @brief Find a sparsity-maximizing permutation of the blocks. This will
   /// also compute the symbolic factorization.
   void findSparsifyingPermutation() {
     auto in = m_structure.copy();
-    m_structure.brute_force_best_permutation(in, perm, iwork);
-    symbolic_deep_copy(in, m_structure, perm);
-    performAnalysis();
+    m_structure.brute_force_best_permutation(in, m_perm, m_iwork);
+    symbolic_deep_copy(in, m_structure, m_perm);
+    analyzePattern();
   }
 
   inline const PermutationType &permutationP() const { return m_permutation; }
@@ -601,15 +619,15 @@ public:
     IndicesType &indices = m_permutation.indices();
     isize idx = 0;
     for (isize i = 0; i < nblocks; ++i) {
-      idx_cumul[i] = idx;
+      m_idx[i] = idx;
       idx += row_segs[i];
     }
 
     idx = 0;
     for (isize i = 0; i < nblocks; ++i) {
-      auto len = row_segs[perm[i]];
+      auto len = row_segs[m_perm[i]];
       auto s = indices.segment(idx, len);
-      isize i0 = idx_cumul[perm[i]];
+      isize i0 = m_idx[m_perm[i]];
       s.setLinSpaced(i0, i0 + len - 1);
       idx += len;
     }
@@ -619,19 +637,19 @@ public:
   MatrixXs reconstructedMatrix() const {
     MatrixXs res(m_matrix.rows(), m_matrix.cols());
     res = permutationP();
-    backend::dense_ldlt_reconstruct(m_matrix, res);
+    backend::dense_ldlt_reconstruct<Scalar>(m_matrix, res);
     res = permutationP().transpose() * res;
     return res;
   }
 
-  Traits::MatrixL matrixL() const { return Traits::getL(m_matrix); }
+  typename Traits::MatrixL matrixL() const { return Traits::getL(m_matrix); }
 
-  Traits::MatrixU matrixU() const { return Traits::getU(m_matrix); }
+  typename Traits::MatrixU matrixU() const { return Traits::getU(m_matrix); }
 
   /// TODO: make block-sparse variant of solveInPlace()
   bool solveInPlace(MatrixRef b) const {
     b = permutationP() * b;
-    bool flag = backend::dense_ldlt_solve_in_place(m_matrix, b);
+    bool flag = backend::dense_ldlt_solve_in_place<Scalar>(m_matrix, b);
     b = permutationP().transpose() * b;
     return flag;
   }
@@ -644,14 +662,18 @@ public:
   }
 
   void compute() {
-    m_info = backend::block_impl{m_matrix, m_structure}.ldlt_in_place_impl()
-                 ? Eigen::Success
-                 : Eigen::NumericalIssue;
+    m_info =
+        backend::block_impl<Scalar>{m_matrix, m_structure}.ldlt_in_place_impl()
+            ? Eigen::Success
+            : Eigen::NumericalIssue;
   }
 
+  /// Sets the input matrix to @p mat, performs the permutation and runs the
+  /// algorithm.
   BlockLDLT &compute(MatrixRef mat) {
     m_matrix = mat;
     // do not re-run analysis
+    permute();
     compute();
 
     return *this;

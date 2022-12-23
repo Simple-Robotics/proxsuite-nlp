@@ -5,10 +5,15 @@ namespace block_chol {
 
 /// Kind of matrix block: zeros, diagonal, lower/upper triangular or dense.
 enum BlockKind {
+  /// All entries in the block are zero.
   Zero,
+  /// The block is diagonal.
   Diag,
+  /// The block is lower-triangular.
   TriL,
+  /// The block is upper-triangular.
   TriU,
+  /// There is no known prior structure; assume a dense block.
   Dense,
 };
 
