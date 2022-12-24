@@ -18,7 +18,7 @@ template <typename T> struct PolynomialTpl {
   PolynomialTpl() {}
   PolynomialTpl(const Eigen::Ref<const VectorXs> &c) : coeffs(c) {}
   /// @brief Polynomial degree (number of coefficients minus one).
-  std::size_t degree() const { return coeffs.size() - 1; }
+  Eigen::Index degree() const { return coeffs.size() - 1; }
   inline T evaluate(T a) const {
     T r = 0.0;
     for (int i = 0; i < coeffs.size(); i++) {
