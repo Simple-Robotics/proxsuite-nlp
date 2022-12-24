@@ -64,15 +64,23 @@ void exposeSolver() {
                      "Maximum step contraction.")
       .def(bp::self_ns::str(bp::self));
 
-  bp::class_<Solver>(
+  using context::Results;
+  using context::Workspace;
+  using solve_std_vec_ins_t = ConvergenceFlag (Solver::*)(
+      const ConstVectorRef &, const std::vector<VectorRef> &);
+  using solve_eig_vec_ins_t = ConvergenceFlag (Solver::*)(
+      const ConstVectorRef &, const ConstVectorRef &);
+
+  bp::class_<Solver, boost::noncopyable>(
       "Solver", "The numerical solver.",
       bp::init<shared_ptr<Problem>, Scalar, Scalar, Scalar, VerboseLevel,
-               Scalar, Scalar, Scalar, Scalar, Scalar>(
+               Scalar, Scalar, Scalar, Scalar, Scalar, bool>(
           (bp::arg("self"), bp::arg("problem"), bp::arg("tol") = 1e-6,
            bp::arg("mu_init") = 1e-2, bp::arg("rho_init") = 0.,
            bp::arg("verbose") = VerboseLevel::QUIET, bp::arg("mu_min") = 1e-9,
            bp::arg("prim_alpha") = 0.1, bp::arg("prim_beta") = 0.9,
-           bp::arg("dual_alpha") = 1., bp::arg("dual_beta") = 1.)))
+           bp::arg("dual_alpha") = 1., bp::arg("dual_beta") = 1.,
+           bp::arg("ldlt_blocked") = false)))
       .add_property("manifold",
                     bp::make_function(&Solver::manifold,
                                       bp::return_internal_reference<>()),
@@ -84,26 +92,23 @@ void exposeSolver() {
       .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.",
            bp::args("self"))
       .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
-      .def("solve",
-           (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
-                                       const ConstVectorRef &,
-                                       const std::vector<VectorRef> &)) &
-               Solver::solve,
-           bp::args("self", "workspace", "results", "x0", "lams0"),
-           "Run the solver.")
-      .def("solve",
-           (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
-                                       const ConstVectorRef &,
-                                       const ConstVectorRef &)) &
-               Solver::solve,
-           bp::args("self", "workspace", "results", "x0", "lams0"),
-           "Run the solver.")
-      .def("solve",
-           (ConvergenceFlag(Solver::*)(context::Workspace &, context::Results &,
-                                       const ConstVectorRef &)) &
-               Solver::solve,
-           bp::args("self", "workspace", "results", "x0"),
-           "Run the solver (without initial multiplier guess).")
+      .def_readwrite("ldlt_is_blocked", &Solver::ldlt_is_blocked_,
+                     "Use the BlockLDLT solver.")
+      .def("setup", &Solver::setup, bp::args("self"),
+           "Initialize the solver workspace and results.")
+      .def("getResults", &Solver::getResults, bp::args("self"),
+           bp::return_internal_reference<>(),
+           "Get a reference to the results object.")
+      .def("getWorkspace", &Solver::getWorkspace, bp::args("self"),
+           bp::return_internal_reference<>(),
+           "Get a reference to the workspace object.")
+      .def<solve_std_vec_ins_t>(
+          "solve", &Solver::solve, bp::args("self", "x0", "lams0"),
+          "Run the solver (multiplier guesses given as a list).")
+      .def<solve_eig_vec_ins_t>("solve", &Solver::solve,
+                                (bp::arg("self"), bp::arg("x0"),
+                                 bp::arg("lams0") = context::VectorXs(0)),
+                                "Run the solver.")
       .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
       .def("setDualPenalty", &Solver::setDualPenalty, bp::args("self", "gamma"),
@@ -129,7 +134,7 @@ void exposeSolver() {
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def_readwrite("mul_update_mode", &Solver::mul_update_mode,
                      "Type of multiplier update.")
-      .def_readwrite("max_refinement_steps", &Solver::max_refinemment_steps_,
+      .def_readwrite("max_refinement_steps", &Solver::max_refinement_steps_,
                      "Maximum number of iterative refinement steps.")
       .def_readwrite("kkt_tolerance", &Solver::kkt_tolerance_,
                      "Acceptable tolerance for the KKT linear system "

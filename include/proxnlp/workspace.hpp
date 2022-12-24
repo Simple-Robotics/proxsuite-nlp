@@ -4,12 +4,30 @@
 
 #include "proxnlp/problem-base.hpp"
 
-#include <Eigen/Cholesky>
 #ifdef PROXNLP_CUSTOM_LDLT
-#include "proxnlp/blocks.hpp"
+#include "proxnlp/ldlt_variant.hpp"
+#else
+#include <Eigen/Cholesky>
 #endif
 
 namespace proxnlp {
+
+template <typename Scalar>
+LDLT_variant<Scalar>
+init_ldlt_variant_from_problem(const ProblemTpl<Scalar> &prob,
+                               bool make_blocked = false) {
+  if (make_blocked) {
+    long ndx = prob.ndx();
+    std::vector<long> nduals(prob.getNumConstraints());
+    for (std::size_t i = 0; i < nduals.size(); ++i) {
+      nduals[i] = prob.getConstraintDim(i);
+    }
+    return initialize_block_ldlt_from_structure<Scalar>(ndx, nduals);
+  } else {
+    const long size = prob.ndx() + prob.getTotalConstraintDim();
+    return block_chol::DenseLDLT<Scalar>(size);
+  }
+}
 
 /** Workspace class, which holds the necessary intermediary data
  * for the solver to function.
@@ -43,7 +61,7 @@ public:
 
   /// LDLT storage
 #ifdef PROXNLP_CUSTOM_LDLT
-  block_chol::DenseLDLT ldlt_;
+  LDLT_variant<Scalar> ldlt_;
 #else
   Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
 #endif
@@ -112,16 +130,21 @@ public:
 
   VectorXs tmp_dx_scaled;
 
-  WorkspaceTpl(const Problem &prob)
+  WorkspaceTpl(const Problem &prob, bool ldlt_is_blocked = false)
       : nx(long(prob.nx())), ndx(long(prob.ndx())),
         numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
         kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
         kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
-        ldlt_(kkt_matrix.cols()), x_prev(nx), x_trial(nx),
-        data_lams_prev(numdual), data_lams_trial(numdual), prox_grad(ndx),
-        prox_hess(ndx, ndx), dual_residual(ndx), data_cstr_values(numdual),
+#ifdef PROXNLP_CUSTOM_LDLT
+        ldlt_(init_ldlt_variant_from_problem(prob, ldlt_is_blocked)),
+#else
+        ldlt_(kkt_matrix.cols()),
+#endif
+        x_prev(nx), x_trial(nx), data_lams_prev(numdual),
+        data_lams_trial(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
+        dual_residual(ndx), data_cstr_values(numdual),
         data_shift_cstr_proj(numdual), objective_gradient(ndx),
         objective_hessian(ndx, ndx), merit_gradient(ndx),
         data_jacobians(numdual, ndx), data_hessians((int)numblocks * ndx, ndx),

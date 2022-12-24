@@ -57,8 +57,9 @@ public:
   MultiplierUpdateMode mul_update_mode = MultiplierUpdateMode::NEWTON;
 
   /// linear algebra opts
-  std::size_t max_refinemment_steps_ = 5;
+  std::size_t max_refinement_steps_ = 5;
   Scalar kkt_tolerance_ = 1e-13;
+  bool ldlt_is_blocked_;
 
   //// Algorithm proximal parameters
 
@@ -107,44 +108,48 @@ public:
   /// Callbacks
   std::vector<CallbackPtr> callbacks_;
 
+  std::unique_ptr<Workspace> workspace_;
+  std::unique_ptr<Results> results_;
+
   SolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
             const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
             const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
             const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,
             const Scalar dual_alpha = 1., const Scalar dual_beta = 1.,
+            bool ldlt_blocked = false,
             const LinesearchOptions ls_options = LinesearchOptions());
 
   const Manifold &manifold() const { return *problem_->manifold_; }
 
+  void setup() {
+    workspace_ = std::make_unique<Workspace>(*problem_, ldlt_is_blocked_);
+    results_ = std::make_unique<Results>(*problem_);
+  }
+
   /**
    * @brief Solve the problem.
    *
-   * @param workspace
-   * @param results
    * @param x0    Initial guess.
    * @param lams0 Initial Lagrange multipliers given separately for each
    * constraint.
    *
    */
-  ConvergenceFlag solve(Workspace &workspace, Results &results,
-                        const ConstVectorRef &x0,
+  ConvergenceFlag solve(const ConstVectorRef &x0,
                         const std::vector<VectorRef> &lams0);
+
+  const Workspace &getWorkspace() const { return *workspace_; }
+  const Results &getResults() const { return *results_; }
 
   /**
    * @copybrief solve().
    *
-   * @param workspace
-   * @param results
    * @param x0    Initial guess.
    * @param lams0 Initial Lagrange multipliers given separately for each
    * constraint.
    *
    */
-  ConvergenceFlag solve(Workspace &workspace, Results &results,
-                        const ConstVectorRef &x0, const ConstVectorRef &lams0);
-
-  ConvergenceFlag solve(Workspace &workspace, Results &results,
-                        const ConstVectorRef &x0);
+  ConvergenceFlag solve(const ConstVectorRef &x0,
+                        const ConstVectorRef &lams0 = VectorXs(0));
 
   void innerLoop(Workspace &workspace, Results &results);
 

@@ -10,6 +10,95 @@
 namespace proxnlp {
 namespace python {
 
+namespace internal {
+void exposeManifoldBase() {
+  using context::ConstVectorRef;
+  using context::Manifold;
+  using context::MatrixRef;
+  using context::MatrixXs;
+  using context::Scalar;
+  using context::VectorRef;
+  using context::VectorXs;
+
+  using BinaryFunTypeRet = VectorXs (Manifold::*)(const ConstVectorRef &,
+                                                  const ConstVectorRef &) const;
+  using BinaryFunType = void (Manifold::*)(
+      const ConstVectorRef &, const ConstVectorRef &, VectorRef) const;
+  using JacobianFunType = void (Manifold::*)(
+      const ConstVectorRef &, const ConstVectorRef &, MatrixRef, int) const;
+
+  bp::class_<Manifold, shared_ptr<Manifold>, boost::noncopyable>(
+      "ManifoldAbstract", "Manifold abstract class.", bp::no_init)
+      .add_property("nx", &Manifold::nx, "Manifold representation dimension.")
+      .add_property("ndx", &Manifold::ndx, "Tangent space dimension.")
+      .def("neutral", &Manifold::neutral, bp::args("self"),
+           "Get the neutral point from the manifold (if a Lie group).")
+      .def("rand", &Manifold::rand, bp::args("self"),
+           "Sample a random point from the manifold.")
+      .def("integrate", static_cast<BinaryFunType>(&Manifold::integrate),
+           bp::args("self", "x", "v", "out"))
+      .def("difference", static_cast<BinaryFunType>(&Manifold::difference),
+           bp::args("self", "x0", "x1", "out"))
+      .def("integrate", static_cast<BinaryFunTypeRet>(&Manifold::integrate),
+           bp::args("self", "x", "v"))
+      .def("difference", static_cast<BinaryFunTypeRet>(&Manifold::difference),
+           bp::args("self", "x0", "x1"))
+      .def("interpolate",
+           (void(Manifold::*)(const ConstVectorRef &, const ConstVectorRef &,
+                              const Scalar &, VectorRef)
+                const)(&Manifold::interpolate),
+           bp::args("self", "x0", "x1", "u", "out"))
+      .def(
+          "interpolate",
+          (VectorXs(Manifold::*)(const ConstVectorRef &, const ConstVectorRef &,
+                                 const Scalar &) const)(&Manifold::interpolate),
+          bp::args("self", "x0", "x1", "u"),
+          "Interpolate between two points on the manifold. Allocated version.")
+      .def("Jintegrate", static_cast<JacobianFunType>(&Manifold::Jintegrate),
+           bp::args("self", "x", "v", "Jout", "arg"),
+           "Compute the Jacobian of the exp operator.")
+      .def("Jdifference", static_cast<JacobianFunType>(&Manifold::Jdifference),
+           bp::args("self", "x0", "x1", "Jout", "arg"),
+           "Compute the Jacobian of the log operator.")
+      .def(
+          "Jintegrate",
+          +[](const Manifold &m, const ConstVectorRef x,
+              const ConstVectorRef &v, int arg) {
+            MatrixXs Jout(m.ndx(), m.ndx());
+            m.Jintegrate(x, v, Jout, arg);
+            return Jout;
+          },
+          "Compute and return the Jacobian of the exp.")
+      .def("JintegrateTransport", &Manifold::JintegrateTransport,
+           bp::args("self", "x", "v", "J", "arg"),
+           "Perform parallel transport of matrix J expressed at point x+v to "
+           "point x.")
+      .def(
+          "Jdifference",
+          +[](const Manifold &m, const ConstVectorRef x0,
+              const ConstVectorRef &x1, int arg) {
+            MatrixXs Jout(m.ndx(), m.ndx());
+            m.Jdifference(x0, x1, Jout, arg);
+            return Jout;
+          },
+          "Compute and return the Jacobian of the log.")
+      .def("tangent_space", &Manifold::tangentSpace, bp::args("self"),
+           "Returns an object representing the tangent space to this manifold.")
+      .def(
+          "__mul__", +[](const shared_ptr<Manifold> &a,
+                         const shared_ptr<Manifold> &b) { return a * b; })
+      .def(
+          "__mul__",
+          +[](const shared_ptr<Manifold> &a,
+              const CartesianProductTpl<Scalar> &b) { return a * b; })
+      .def(
+          "__rmul__",
+          +[](const shared_ptr<Manifold> &a,
+              const CartesianProductTpl<Scalar> &b) { return a * b; });
+}
+
+} // namespace internal
+
 /// Expose the tangent bundle of a manifold type @p M.
 template <typename M>
 bp::class_<TangentBundleTpl<M>, bp::bases<context::Manifold>>
@@ -43,11 +132,11 @@ void exposeLieGroup(const char *name, const char *docstring) {
 }
 #endif
 
-void exposeManifold() {
+void exposeManifolds() {
   using context::Manifold;
   using context::Scalar;
 
-  internal::exposeBaseManifold();
+  internal::exposeManifoldBase();
 
   /* Basic vector space */
   bp::class_<VectorSpaceTpl<Scalar>, bp::bases<Manifold>>(

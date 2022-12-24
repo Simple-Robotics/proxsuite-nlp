@@ -166,8 +166,6 @@ problem = proxnlp.Problem(pb_space, cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", problem.total_constraint_dim)
-workspace = proxnlp.Workspace(problem)
-results = proxnlp.Results(problem)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-5
@@ -176,6 +174,8 @@ mu_init = 0.9
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
+solver.ldlt_is_blocked = True
+solver.setup()
 solver.register_callback(callback)
 solver.max_iters = 300
 
@@ -184,12 +184,15 @@ for t in range(nsteps + 1):
     xu_init[t * xspace.nx] = theta0
 lams0 = [np.zeros(cs.nr) for cs in constraints_]
 try:
-    flag = solver.solve(workspace, results, xu_init, lams0)
+    flag = solver.solve(xu_init, lams0)
 except RuntimeError:
     import pprint
 
     pprint.pp(callback.storage.xs.tolist())
     raise
+
+workspace = solver.getWorkspace()
+results = solver.getResults()
 
 print(results)
 prim_errs = callback.storage.prim_infeas

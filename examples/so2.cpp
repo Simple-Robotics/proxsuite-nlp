@@ -75,10 +75,10 @@ int main() {
              lams.size(), lams[0]);
 
   SolverTpl<double> solver(prob, 0.01);
-  WorkspaceTpl<double> ws(*prob);
-  ResultsTpl<double> rs(*prob);
-  solver.solve(ws, rs, space.rand());
+  solver.setup();
+  solver.solve(space.rand());
 
+  auto &rs = solver.getResults();
   fmt::print("Results: {}\n", rs);
 
   return 0;

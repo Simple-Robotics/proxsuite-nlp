@@ -59,12 +59,12 @@ solver.setDualPenalty(0.0)
 solver.max_iters = 20
 solver.reg_init = 0.1
 
-ws = proxnlp.Workspace(problem)
-rs = proxnlp.Results(problem)
-
 cb = HistoryCallback()
 solver.register_callback(cb)
-flag = solver.solve(ws, rs, x0)
+solver.setup()
+flag = solver.solve(x0)
+ws = solver.getWorkspace()
+rs = solver.getResults()
 print("FLAG:", flag)
 
 print(rs)

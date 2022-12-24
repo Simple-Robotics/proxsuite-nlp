@@ -187,7 +187,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   block_chol::print_sparsity_pattern(sym_mat);
   BOOST_REQUIRE(sym_mat.check_if_symmetric());
 
-  BlockLDLT<Scalar> block_permuted(mat, sym_mat);
+  BlockLDLT<Scalar> block_permuted(size, sym_mat);
   block_permuted.findSparsifyingPermutation();
   // {
   //   isize perm[] = {2, 1, 0};
@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   //   block_permuted.setPermutation(perm);
   // }
   block_permuted.updateBlockPermutMatrix(sym_mat);
-  block_permuted.permute();
+  block_permuted.compute(mat);
   auto best_perm = block_permuted.blockPermIndices();
   fmt::print("Optimal permutation: {}\n",
              fmt::join(best_perm, best_perm + n, ", "));
@@ -214,7 +214,6 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   auto pmat = block_permuted.permutationP();
   fmt::print("Permutation matrix: {}\n", pmat.indices().transpose());
 
-  block_permuted.compute();
   Eigen::ComputationInfo info = block_permuted.info();
   BOOST_REQUIRE(info == Eigen::Success);
 

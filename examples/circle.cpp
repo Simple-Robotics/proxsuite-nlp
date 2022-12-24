@@ -105,15 +105,15 @@ int main() {
 
   // gradient of merit fun
 
-  WorkspaceTpl<double> workspace(*prob);
-  ResultsTpl<double> results(*prob);
-
   SolverTpl<double> solver(prob);
   solver.verbose = VerboseLevel::VERY;
   solver.setPenalty(1. / 50);
 
   auto lams0 = lams;
-  solver.solve(workspace, results, p1, lams0);
+  solver.ldlt_is_blocked_ = true;
+  solver.setup();
+  solver.solve(p1, lams0);
+  auto &results = solver.getResults();
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.x_opt.transpose());
   fmt::print("Target point was {}\n", p0.transpose());

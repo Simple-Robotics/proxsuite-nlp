@@ -53,21 +53,23 @@ cstrs_ = [
 ]
 
 problem = proxnlp.Problem(space, cost_, cstrs_)
-results = proxnlp.Results(problem)
-workspace = proxnlp.Workspace(problem)
 
 mu_init = 0.01
 rho_init = 0.0
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
+solver.ldlt_is_blocked = True
+solver.setup()
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
-solver.solve(workspace, results, p1, lams0)
+solver.solve(p1, lams0)
+results = solver.getResults()
+workspace = solver.getWorkspace()
 
 print("Complementarity:", workspace.cstr_values[0] * results.lamsopt[0])
 

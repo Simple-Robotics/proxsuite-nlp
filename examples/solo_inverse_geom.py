@@ -257,8 +257,6 @@ problem = proxnlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", problem.total_constraint_dim)
-workspace = proxnlp.Workspace(problem)
-results = proxnlp.Results(problem)
 
 callback = proxnlp.helpers.HistoryCallback()
 rho_init = 1e-12
@@ -273,8 +271,12 @@ solver = proxnlp.Solver(
     dual_beta=0.5,
     verbose=proxnlp.VERBOSE,
 )
+solver.setup()
 solver.register_callback(callback)
 solver.max_iters = 1000
+
+results = solver.getResults()
+workspace = solver.getWorkspace()
 
 xu_init = pb_space.neutral()
 lams0 = [np.zeros(cs.nr) for cs in constraints]

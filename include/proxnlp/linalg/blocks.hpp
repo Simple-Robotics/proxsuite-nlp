@@ -550,11 +550,12 @@ protected:
 public:
   /// @brief  The constructor copies the input matrix @param mat and symbolic
   /// block pattern @param structure.
-  explicit BlockLDLT(isize n, SymbolicBlockMatrix const &structure)
+  BlockLDLT(isize n, SymbolicBlockMatrix const &structure)
       : m_matrix(n, n), m_structure(structure.copy()), m_permutation(n),
         m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
         m_idx(new isize[nblocks()]) {
     std::iota(m_perm, m_perm + nblocks(), isize(0));
+    m_permutation.setIdentity();
   }
 
   /// @copydoc BlockLDLT()
@@ -564,7 +565,18 @@ public:
       : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
         m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
         m_idx(new isize[nblocks()]) {
-    std::iota(m_perm, m_perm + nblocks(), isize(0));
+    findSparsifyingPermutation();
+    updateBlockPermutMatrix(structure);
+    compute(mat);
+  }
+
+  BlockLDLT(BlockLDLT const &other)
+      : BlockLDLT(other.m_matrix.rows(), other.m_structure) {
+    m_matrix = other.m_matrix;
+    m_permutation = other.m_permutation;
+    m_info = other.m_info;
+    std::copy_n(other.m_perm, nblocks(), m_perm);
+    std::copy_n(other.m_iwork, nblocks(), m_iwork);
   }
 
   ~BlockLDLT() {
@@ -645,6 +657,10 @@ public:
   typename Traits::MatrixL matrixL() const { return Traits::getL(m_matrix); }
 
   typename Traits::MatrixU matrixU() const { return Traits::getU(m_matrix); }
+
+  Eigen::Diagonal<const MatrixXs> vectorD() const {
+    return m_matrix.diagonal();
+  }
 
   /// TODO: make block-sparse variant of solveInPlace()
   bool solveInPlace(MatrixRef b) const {

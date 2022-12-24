@@ -253,8 +253,6 @@ prob = proxnlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
-workspace = proxnlp.Workspace(prob)
-results = proxnlp.Results(prob)
 
 callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-6
@@ -268,6 +266,7 @@ solver = proxnlp.Solver(
     tol=tol,
     verbose=proxnlp.VERYVERBOSE,
 )
+solver.setup()
 solver.register_callback(callback)
 solver.max_iters = 50
 
@@ -275,9 +274,12 @@ xu_init = pb_space.neutral()
 lams0 = [np.zeros(cs.nr) for cs in constraints]
 
 try:
-    flag = solver.solve(workspace, results, xu_init, lams0)
+    flag = solver.solve(xu_init, lams0)
 except KeyboardInterrupt:
     pass
+
+workspace = solver.getWorkspace()
+results = solver.getResults()
 
 assert results.num_iters <= 24
 

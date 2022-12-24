@@ -33,11 +33,12 @@ def test_quad1d(ls_strat, ls_interp_type):
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
     solver = proxnlp.Solver(problem, 1e-5)
-    ws = proxnlp.Workspace(problem)
-    rs = proxnlp.Results(problem)
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type
-    flag = solver.solve(ws, rs, space.neutral(), [])
+    solver.setup()
+    flag = solver.solve(space.neutral(), [])
+    rs = solver.getResults()
+    ws = solver.getWorkspace()
 
     real_solution = -b / (2 * a)
 

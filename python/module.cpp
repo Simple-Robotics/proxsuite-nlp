@@ -45,7 +45,7 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   exposeFunctionTypes();
   {
     bp::scope man_scope = get_namespace("manifolds");
-    exposeManifold();
+    exposeManifolds();
   }
   {
     bp::scope res_cope = get_namespace("residuals");

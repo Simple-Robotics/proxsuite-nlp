@@ -97,10 +97,10 @@ rho_init = 0.0
 solver = proxnlp.Solver(problem, tol, mu_init, rho_init, verbose=proxnlp.VERBOSE)
 solver.mul_update_mode = proxnlp.MUL_PRIMAL_DUAL
 
-rs = proxnlp.Results(problem)
-ws = proxnlp.Workspace(problem)
 solver.register_callback(proxnlp.helpers.HistoryCallback())
-solver.solve(ws, rs, q_ref)
+solver.setup()
+solver.solve(q_ref)
+rs = solver.getResults()
 
 print(rs)
 

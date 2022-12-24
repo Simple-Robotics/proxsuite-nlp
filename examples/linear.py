@@ -51,9 +51,6 @@ print("Target :", x_target)
 problem = proxnlp.Problem(space, cost_, [cstr1])
 
 
-results = proxnlp.Results(problem)
-workspace = proxnlp.Workspace(problem)
-
 cb = proxnlp.helpers.HistoryCallback()
 
 tol = 1e-6
@@ -63,7 +60,10 @@ solver.register_callback(cb)
 
 x_init = np.random.randn(nx) * 10
 lams0 = [np.random.randn(resdl.nr)]
-solver.solve(workspace, results, x_init, lams0)
+solver.setup()
+solver.solve(x_init, lams0)
+results = solver.getResults()
+workspace = solver.getWorkspace()
 
 solver.clear_callbacks()
 

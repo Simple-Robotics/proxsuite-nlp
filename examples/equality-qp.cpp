@@ -58,15 +58,14 @@ template <int N, int M = 1> int submain() {
   auto problem = std::make_shared<Problem>(space_, cost, constraints);
 
   using Solver_t = SolverTpl<double>;
-  typename Solver_t::Workspace workspace(*problem);
-  typename Solver_t::Results results(*problem);
 
   Solver_t solver(problem);
   solver.setPenalty(1e-4);
   solver.setProxParameter(1e-8);
+  solver.setup();
+  solver.solve(p1);
 
-  solver.solve(workspace, results, p1, workspace.lams_prev);
-  fmt::print("{}\n", results);
+  fmt::print("{}\n", solver.getResults());
 
   return 0;
 }
