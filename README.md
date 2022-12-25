@@ -1,6 +1,6 @@
 # proxnlp: An augmented Lagrangian nonlinear solver on manifolds
 
-`proxnlp` is a C++11 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds,
+`proxnlp` is a C++14 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds,
 as well as some modelling tools.
 
 ## Building from source
