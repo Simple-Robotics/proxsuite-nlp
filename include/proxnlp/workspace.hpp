@@ -5,7 +5,7 @@
 #include "proxnlp/problem-base.hpp"
 
 #ifdef PROXNLP_CUSTOM_LDLT
-#include "proxnlp/ldlt_variant.hpp"
+#include "proxnlp/ldlt-variant.hpp"
 #else
 #include <Eigen/Cholesky>
 #endif
