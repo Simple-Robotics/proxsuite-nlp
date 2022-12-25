@@ -18,14 +18,14 @@ struct VectorSpaceTpl : public ManifoldAbstractTpl<_Scalar, _Options> {
 
   /// @brief    Default constructor where the dimension is supplied.
   template <int N = Dim,
-            typename = typename std::enable_if<N == Eigen::Dynamic>::type>
+            typename = typename std::enable_if_t<N == Eigen::Dynamic>>
   VectorSpaceTpl(const int dim) : dim_(dim) {}
 
   /// @brief    Default constructor without arguments.
   ///
   /// @details  This constructor is disabled for the dynamic-sized vectors.
   template <int N = Dim,
-            typename = typename std::enable_if<N != Eigen::Dynamic>::type>
+            typename = typename std::enable_if_t<N != Eigen::Dynamic>>
   VectorSpaceTpl() : dim_(Dim) {}
 
   inline int nx() const { return dim_; }
