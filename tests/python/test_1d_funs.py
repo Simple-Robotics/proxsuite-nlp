@@ -38,7 +38,6 @@ def test_quad1d(ls_strat, ls_interp_type):
     solver.setup()
     flag = solver.solve(space.neutral(), [])
     rs = solver.getResults()
-    ws = solver.getWorkspace()
 
     real_solution = -b / (2 * a)
 
@@ -61,12 +60,12 @@ def test_cubic1d(ls_strat, ls_interp_type):
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
     solver = proxnlp.Solver(problem, 1e-5)
-    ws = proxnlp.Workspace(problem)
-    rs = proxnlp.Results(problem)
     x0 = np.array([1.0])
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type
-    flag = solver.solve(ws, rs, x0, [])
+    solver.setup()
+    flag = solver.solve(x0, [])
+    rs = solver.getResults()
     assert flag == proxnlp.ConvergenceFlag.success
     assert rs.num_iters <= 7
     print(rs)

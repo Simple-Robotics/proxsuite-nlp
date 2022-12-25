@@ -14,8 +14,8 @@ namespace proxnlp {
 
 template <typename Scalar>
 LDLT_variant<Scalar>
-init_ldlt_variant_from_problem(const ProblemTpl<Scalar> &prob,
-                               bool make_blocked = false) {
+initialize_ldlt_variant_from_problem(const ProblemTpl<Scalar> &prob,
+                                     bool make_blocked = false) {
   if (make_blocked) {
     long ndx = prob.ndx();
     std::vector<long> nduals(prob.getNumConstraints());
@@ -138,7 +138,7 @@ public:
         kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
 #ifdef PROXNLP_CUSTOM_LDLT
-        ldlt_(init_ldlt_variant_from_problem(prob, ldlt_is_blocked)),
+        ldlt_(initialize_ldlt_variant_from_problem(prob, ldlt_is_blocked)),
 #else
         ldlt_(kkt_matrix.cols()),
 #endif
