@@ -52,7 +52,7 @@ initialize_block_ldlt_from_structure(long ndx, std::vector<long> nduals) {
 
   block_chol::BlockLDLT<Scalar> ldlt(tot_size, structure.copy());
   ldlt.findSparsifyingPermutation();
-  ldlt.updateBlockPermutMatrix(structure);
+  ldlt.updateBlockPermutationMatrix(structure);
   return ldlt;
 }
 

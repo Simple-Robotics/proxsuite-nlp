@@ -88,7 +88,7 @@ VectorXs rhs = VectorXs::Random(size);
 static void bm_blocked(benchmark::State &s) {
   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
   block_ldlt.findSparsifyingPermutation();
-  block_ldlt.updateBlockPermutMatrix(sym_mat);
+  block_ldlt.updateBlockPermutationMatrix(sym_mat);
   for (auto _ : s) {
     block_ldlt.compute(mat);
     auto b = rhs;
@@ -194,7 +194,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   //   isize perm[] = {2, 0, 1};
   //   block_permuted.setPermutation(perm);
   // }
-  block_permuted.updateBlockPermutMatrix(sym_mat);
+  block_permuted.updateBlockPermutationMatrix(sym_mat);
   block_permuted.compute(mat);
   auto best_perm = block_permuted.blockPermIndices();
   fmt::print("Optimal permutation: {}\n",

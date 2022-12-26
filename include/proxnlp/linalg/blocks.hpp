@@ -7,8 +7,8 @@
 #pragma once
 
 #include "proxnlp/math.hpp"
+#include "proxnlp/macros.hpp"
 #include <Eigen/Cholesky>
-#include <type_traits>
 
 #include <algorithm>
 #include <numeric>
@@ -151,17 +151,14 @@ using Eigen::internal::LDLT_Traits;
 
 /// Taking the decomposed LDLT matrix @param mat, solve the original linear
 /// system.
-template <typename Scalar>
-inline bool dense_ldlt_solve_in_place(
-    typename math_types<Scalar>::ConstMatrixRef const &mat,
-    typename math_types<Scalar>::MatrixRef b) {
-  using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
-  typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
+template <typename MatDerived, typename Rhs>
+inline bool dense_ldlt_solve_in_place(MatDerived &mat, Rhs &b) {
+  typedef typename MatDerived::Scalar Scalar;
+  typedef LDLT_Traits<MatDerived, Eigen::Lower> Traits;
   Traits::getL(mat).solveInPlace(b);
 
   using std::abs;
-  typename Eigen::Diagonal<const ConstMatrixRef>::RealReturnType vecD(
-      mat.diagonal());
+  auto vecD(mat.diagonal());
   const Scalar tol = std::numeric_limits<Scalar>::min();
   for (isize i = 0; i < vecD.size(); ++i) {
     if (abs(vecD(i)) > tol)
@@ -213,8 +210,9 @@ template <typename Scalar> struct DenseLDLT {
 
   Eigen::ComputationInfo info() const { return m_info; }
 
-  void solveInPlace(MatrixRef b) const {
-    backend::dense_ldlt_solve_in_place<Scalar>(m_matrix, b);
+  template <typename Derived>
+  void solveInPlace(Eigen::MatrixBase<Derived> &b) const {
+    backend::dense_ldlt_solve_in_place(m_matrix, b.derived());
   }
 
   MatrixXs reconstructedMatrix() const {
@@ -224,7 +222,7 @@ template <typename Scalar> struct DenseLDLT {
     return res;
   }
 
-  Eigen::Diagonal<const MatrixXs> vectorD() const {
+  inline Eigen::Diagonal<const MatrixXs> vectorD() const {
     return m_matrix.diagonal();
   }
 
@@ -521,7 +519,7 @@ template <typename Scalar> struct block_impl {
 /// (for now a brute-force search) to find a sparsity-maximizing permutation of
 /// the blocks in the input matrix.
 /// updateBlockPermutMatrix() updates the permutation matrix according to the
-/// stored block-wise permutation indices. Calling permute() will perform the
+/// stored block-wise permutation indices. Calling permutate() will perform the
 /// permutation on the input matrix.
 ///
 /// @warning  The underlying block-wise structure is assumed to be invariant
@@ -566,7 +564,7 @@ public:
         m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
         m_idx(new isize[nblocks()]) {
     findSparsifyingPermutation();
-    updateBlockPermutMatrix(structure);
+    updateBlockPermutationMatrix(structure);
     compute(mat);
   }
 
@@ -624,57 +622,31 @@ public:
 
   inline const PermutationType &permutationP() const { return m_permutation; }
 
-  void updateBlockPermutMatrix(SymbolicBlockMatrix const &in) {
-    const isize *row_segs = in.segment_lens;
-    const isize nblocks = in.nsegments();
-    using IndicesType = PermutationType::IndicesType;
-    IndicesType &indices = m_permutation.indices();
-    isize idx = 0;
-    for (isize i = 0; i < nblocks; ++i) {
-      m_idx[i] = idx;
-      idx += row_segs[i];
-    }
+  void updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
 
-    idx = 0;
-    for (isize i = 0; i < nblocks; ++i) {
-      auto len = row_segs[m_perm[i]];
-      auto s = indices.segment(idx, len);
-      isize i0 = m_idx[m_perm[i]];
-      s.setLinSpaced(i0, i0 + len - 1);
-      idx += len;
-    }
-    m_permutation = m_permutation.transpose();
+  MatrixXs reconstructedMatrix() const;
+
+  inline typename Traits::MatrixL matrixL() const {
+    return Traits::getL(m_matrix);
   }
 
-  MatrixXs reconstructedMatrix() const {
-    MatrixXs res(m_matrix.rows(), m_matrix.cols());
-    res = permutationP();
-    backend::dense_ldlt_reconstruct<Scalar>(m_matrix, res);
-    res = permutationP().transpose() * res;
-    return res;
+  inline typename Traits::MatrixU matrixU() const {
+    return Traits::getU(m_matrix);
   }
 
-  typename Traits::MatrixL matrixL() const { return Traits::getL(m_matrix); }
-
-  typename Traits::MatrixU matrixU() const { return Traits::getU(m_matrix); }
-
-  Eigen::Diagonal<const MatrixXs> vectorD() const {
+  inline Eigen::Diagonal<const MatrixXs> vectorD() const {
     return m_matrix.diagonal();
   }
 
   /// TODO: make block-sparse variant of solveInPlace()
-  bool solveInPlace(MatrixRef b) const {
-    b = permutationP() * b;
-    bool flag = backend::dense_ldlt_solve_in_place<Scalar>(m_matrix, b);
-    b = permutationP().transpose() * b;
-    return flag;
-  }
+  template <typename Derived>
+  bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
 
   const MatrixXs &matrixLDLT() const { return m_matrix; }
 
-  void permute() {
-    m_matrix = permutationP() * m_matrix;
-    m_matrix = m_matrix * permutationP().transpose();
+  inline void permutate() {
+    m_matrix.noalias() = permutationP() * m_matrix;
+    m_matrix.noalias() = m_matrix * permutationP().transpose();
   }
 
   void compute() {
@@ -689,7 +661,7 @@ public:
   BlockLDLT &compute(MatrixRef mat) {
     m_matrix = mat;
     // do not re-run analysis
-    permute();
+    permutate();
     compute();
 
     return *this;
@@ -698,3 +670,5 @@ public:
 
 } // namespace block_chol
 } // namespace proxnlp
+
+#include "proxnlp/linalg/blocks.hxx"
