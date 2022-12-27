@@ -22,7 +22,8 @@ initialize_ldlt_variant_from_problem(const ProblemTpl<Scalar> &prob,
     for (std::size_t i = 0; i < nduals.size(); ++i) {
       nduals[i] = prob.getConstraintDim(i);
     }
-    return initialize_block_ldlt_from_structure<Scalar>(ndx, nduals);
+    return block_chol::initialize_block_ldlt_from_structure<Scalar>(ndx,
+                                                                    nduals);
   } else {
     const long size = prob.ndx() + prob.getTotalConstraintDim();
     return block_chol::DenseLDLT<Scalar>(size);

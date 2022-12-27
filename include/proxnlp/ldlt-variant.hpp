@@ -10,27 +10,26 @@ namespace proxnlp {
 
 using boost::variant;
 
-/// @brief A variant type for all available
+/// @brief A variant type for all LDLT implementations to be made available to
+/// the user.
 template <typename Scalar>
 using LDLT_variant =
     variant<block_chol::DenseLDLT<Scalar>, block_chol::BlockLDLT<Scalar>>;
 
+namespace block_chol {
+
 template <typename Scalar>
-block_chol::BlockLDLT<Scalar>
-initialize_block_ldlt_from_structure(long ndx, std::vector<long> nduals) {
-  using block_chol::BlockKind;
-  using block_chol::isize;
-  using block_chol::SymbolicBlockMatrix;
+BlockLDLT<Scalar>
+initialize_block_ldlt_from_structure(long nprim,
+                                     const std::vector<long> &nduals) {
   const isize nblocks = 1 + (isize)nduals.size();
 
-  isize tot_size = ndx;
-  for (const long &s : nduals) {
-    tot_size += s;
-  }
+  isize tot_size =
+      nprim + std::accumulate(nduals.begin(), nduals.end(), isize(0));
 
   std::vector<BlockKind> blocks((std::size_t)(nblocks * nblocks));
   std::vector<long> seg_lens = nduals;
-  seg_lens.insert(seg_lens.begin(), ndx);
+  seg_lens.insert(seg_lens.begin(), nprim);
 
   SymbolicBlockMatrix structure{blocks.data(), seg_lens.data(), nblocks,
                                 nblocks, false};
@@ -50,10 +49,11 @@ initialize_block_ldlt_from_structure(long ndx, std::vector<long> nduals) {
     structure(i, i) = BlockKind::Diag;
   }
 
-  block_chol::BlockLDLT<Scalar> ldlt(tot_size, structure.copy());
+  BlockLDLT<Scalar> ldlt(tot_size, structure.copy());
   ldlt.findSparsifyingPermutation();
   ldlt.updateBlockPermutationMatrix(structure);
   return ldlt;
 }
 
+} // namespace block_chol
 } // namespace proxnlp
