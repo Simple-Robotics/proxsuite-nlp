@@ -357,9 +357,9 @@ template <typename Scalar> struct block_impl {
 /// The member function findSparsifyingPermutation() uses a heuristic
 /// (for now a brute-force search) to find a sparsity-maximizing permutation of
 /// the blocks in the input matrix.
-/// updateBlockPermutMatrix() updates the permutation matrix according to the
-/// stored block-wise permutation indices. Calling permutate() will perform the
-/// permutation on the input matrix.
+/// updateBlockPermutationMatrix() updates the permutation matrix according to
+/// the stored block-wise permutation indices. Calling permutate() will perform
+/// the permutation on the input matrix.
 ///
 /// @warning  The underlying block-wise structure is assumed to be invariant
 /// over the lifetime of this object when calling compute(). A change
@@ -443,16 +443,17 @@ public:
 
   /// @brief Find a sparsity-maximizing permutation of the blocks. This will
   /// also compute the symbolic factorization.
-  void findSparsifyingPermutation() {
+  BlockLDLT &findSparsifyingPermutation() {
     auto in = m_structure.copy();
     m_structure.brute_force_best_permutation(in, m_perm, m_iwork);
     symbolic_deep_copy(in, m_structure, m_perm);
     analyzePattern();
+    return *this;
   }
 
   inline const PermutationType &permutationP() const { return m_permutation; }
 
-  void updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
+  BlockLDLT &updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
 
   MatrixXs reconstructedMatrix() const override;
 

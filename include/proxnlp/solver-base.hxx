@@ -17,13 +17,13 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const VerboseLevel verbose, const Scalar mu_lower,
                              const Scalar prim_alpha, const Scalar prim_beta,
                              const Scalar dual_alpha, const Scalar dual_beta,
-                             bool ldlt_blocked,
+                             LDLTChoice ldlt_choice,
                              const LinesearchOptions ls_options)
     : problem_(prob), merit_fun(problem_, mu_init, 1.),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
-      verbose(verbose), ldlt_is_blocked_(ldlt_blocked), rho_init_(rho_init),
+      verbose(verbose), ldlt_choice_(ldlt_choice), rho_init_(rho_init),
       mu_init_(mu_init), mu_lower_(mu_lower), bcl_params{prim_alpha, prim_beta,
                                                          dual_alpha, dual_beta},
       ls_options(ls_options), target_tol(tol) {}
@@ -376,12 +376,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
 
 #ifdef PROXNLP_CUSTOM_LDLT
-      auto vecD = boost::apply_visitor(
-          [&workspace](auto &ldlt_solver) {
-            ldlt_solver.compute(workspace.kkt_matrix);
-            return ldlt_solver.vectorD();
-          },
-          workspace.ldlt_);
+      workspace.ldlt_->compute(workspace.kkt_matrix);
+      auto vecD = workspace.ldlt_->vectorD();
 #else
       workspace.ldlt_.compute(workspace.kkt_matrix);
       auto vecD(workspace.ldlt_.vectorD());
@@ -472,11 +468,7 @@ template <typename Scalar>
 bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
 #ifdef PROXNLP_CUSTOM_LDLT
-  boost::apply_visitor(
-      [&workspace](const auto &ldlt_solve) {
-        ldlt_solve.solveInPlace(workspace.pd_step);
-      },
-      workspace.ldlt_);
+  workspace.ldlt_->solveInPlace(workspace.pd_step);
 #else
   workspace.ldlt_.solveInPlace(workspace.pd_step);
 #endif
@@ -486,11 +478,7 @@ bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
     if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
       return true;
 #ifdef PROXNLP_CUSTOM_LDLT
-    boost::apply_visitor(
-        [&workspace](const auto &ldlt_solve) {
-          ldlt_solve.solveInPlace(workspace.kkt_err);
-        },
-        workspace.ldlt_);
+    workspace.ldlt_->solveInPlace(workspace.kkt_err);
 #else
     workspace.ldlt_.solveInPlace(workspace.kkt_err);
 #endif

@@ -7,7 +7,7 @@ namespace python {
 void exposeWorkspace() {
   using context::Scalar;
   using context::Workspace;
-  bp::class_<Workspace>(
+  bp::class_<Workspace, boost::noncopyable>(
       "Workspace", "SolverTpl workspace.",
       bp::init<const context::Problem &>(bp::args("self", "problem")))
       .def_readonly("kkt_matrix", &Workspace::kkt_matrix, "KKT matrix buffer.")
@@ -37,7 +37,27 @@ void exposeWorkspace() {
                     "Primal-dual multiplier estimates.")
       .def_readonly("alpha_opt", &Workspace::alpha_opt,
                     "Computed linesearch step length.")
-      .def_readonly("dmerit_dir", &Workspace::dmerit_dir);
+      .def_readonly("dmerit_dir", &Workspace::dmerit_dir)
+#ifdef PROXNLP_CUSTOM_LDLT
+      .def(
+          "ldlt",
+          +[](const Workspace &ws) -> const linalg::ldlt_base<Scalar> & {
+            return *ws.ldlt_;
+          },
+          bp::return_internal_reference<>(),
+          "Returns a reference to the underlying LDLT solver.")
+#endif
+      ;
+
+#ifdef PROXNLP_CUSTOM_LDLT
+  using LDLTBase = linalg::ldlt_base<Scalar>;
+  bp::class_<LDLTBase, boost::noncopyable>(
+      "LDLTBase", "Base class for LDLT solvers.", bp::no_init)
+      .def("matrixLDLT", &LDLTBase::matrixLDLT,
+           bp::return_value_policy<bp::return_by_value>(),
+           "Get the current value of the decomposition matrix. This makes a "
+           "copy.");
+#endif
 }
 
 } // namespace python

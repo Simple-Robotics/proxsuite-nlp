@@ -21,8 +21,8 @@ void BlockLDLT<Scalar>::setPermutation(isize const *new_perm) {
 }
 
 template <typename Scalar>
-void BlockLDLT<Scalar>::updateBlockPermutationMatrix(
-    const SymbolicBlockMatrix &in) {
+BlockLDLT<Scalar> &
+BlockLDLT<Scalar>::updateBlockPermutationMatrix(const SymbolicBlockMatrix &in) {
   const isize *row_segs = in.segment_lens;
   const isize nblocks = in.nsegments();
   using IndicesType = PermutationType::IndicesType;
@@ -42,6 +42,7 @@ void BlockLDLT<Scalar>::updateBlockPermutationMatrix(
     idx += len;
   }
   m_permutation = m_permutation.transpose();
+  return *this;
 }
 
 template <typename Scalar>

@@ -38,13 +38,11 @@ template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
   using Base = ldlt_base<Scalar>;
 
   EigenLDLTWrapper(isize size) : Base(), m_ldlt(size) {}
-  EigenLDLTWrapper(const MatrixRef &mat) : m_ldlt(mat) {
-    m_info = m_ldlt.info();
-  }
+  EigenLDLTWrapper(const MatrixRef &mat) : m_ldlt(mat) {}
+  EigenLDLTWrapper(const Eigen::LDLT<MatrixXs> &ldlt) : m_ldlt(ldlt) {}
 
   inline EigenLDLTWrapper &compute(const MatrixRef &mat) override {
     m_ldlt.compute(mat);
-    m_info = m_ldlt.info();
     return *this;
   }
 
@@ -60,13 +58,14 @@ template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
     return m_ldlt.matrixLDLT();
   }
 
+  inline Eigen::ComputationInfo info() const override { return m_ldlt.info(); }
+
   inline Eigen::Diagonal<const MatrixXs> vectorD() const override {
     return m_ldlt.vectorD();
   }
 
 protected:
   Eigen::LDLT<MatrixXs> m_ldlt;
-  using Base::m_info;
 };
 
 } // namespace linalg

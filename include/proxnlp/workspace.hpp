@@ -5,29 +5,12 @@
 #include "proxnlp/problem-base.hpp"
 
 #ifdef PROXNLP_CUSTOM_LDLT
-#include "proxnlp/ldlt-variant.hpp"
+#include "proxnlp/ldlt-allocator.hpp"
 #else
 #include <Eigen/Cholesky>
 #endif
 
 namespace proxnlp {
-
-template <typename Scalar>
-LDLT_variant<Scalar>
-initialize_ldlt_variant_from_problem(const ProblemTpl<Scalar> &prob,
-                                     bool make_blocked = false) {
-  if (make_blocked) {
-    long ndx = prob.ndx();
-    std::vector<long> nduals(prob.getNumConstraints());
-    for (std::size_t i = 0; i < nduals.size(); ++i) {
-      nduals[i] = prob.getConstraintDim(i);
-    }
-    return linalg::initialize_block_ldlt_from_structure<Scalar>(ndx, nduals);
-  } else {
-    const long size = prob.ndx() + prob.getTotalConstraintDim();
-    return linalg::DenseLDLT<Scalar>(size);
-  }
-}
 
 /** Workspace class, which holds the necessary intermediary data
  * for the solver to function.
@@ -61,7 +44,7 @@ public:
 
   /// LDLT storage
 #ifdef PROXNLP_CUSTOM_LDLT
-  LDLT_variant<Scalar> ldlt_;
+  unique_ptr<linalg::ldlt_base<Scalar>> ldlt_;
 #else
   Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
 #endif
@@ -130,7 +113,7 @@ public:
 
   VectorXs tmp_dx_scaled;
 
-  WorkspaceTpl(const Problem &prob, bool ldlt_is_blocked = false)
+  WorkspaceTpl(const Problem &prob, LDLTChoice ldlt_choice = LDLTChoice::DENSE)
       : nx(long(prob.nx())), ndx(long(prob.ndx())),
         numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
@@ -138,7 +121,7 @@ public:
         kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
 #ifdef PROXNLP_CUSTOM_LDLT
-        ldlt_(initialize_ldlt_variant_from_problem(prob, ldlt_is_blocked)),
+        ldlt_(allocate_ldlt_from_problem(prob, ldlt_choice)),
 #else
         ldlt_(kkt_matrix.cols()),
 #endif

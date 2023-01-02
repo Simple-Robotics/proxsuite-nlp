@@ -110,7 +110,7 @@ int main() {
   solver.setPenalty(1. / 50);
 
   auto lams0 = lams;
-  solver.ldlt_is_blocked_ = true;
+  solver.ldlt_choice_ = LDLTChoice::BLOCKED;
   solver.setup();
   solver.solve(p1, lams0);
   auto &results = solver.getResults();

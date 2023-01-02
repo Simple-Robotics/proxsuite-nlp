@@ -42,6 +42,12 @@ void exposeSolver() {
       .value("QUADRATIC", LSInterpolation::QUADRATIC)
       .value("CUBIC", LSInterpolation::CUBIC);
 
+  bp::enum_<LDLTChoice>("LDLTChoice", "Choice of LDLT solver.")
+      .value("LDLT_DENSE", LDLTChoice::DENSE)
+      .value("LDLT_BLOCKED", LDLTChoice::BLOCKED)
+      .value("LDLT_EIGEN", LDLTChoice::EIGEN)
+      .export_values();
+
   using LinesearchOptions = Linesearch<Scalar>::Options;
   bp::class_<LinesearchOptions>(
       "LinesearchOptions", "Linesearch options.",
@@ -74,13 +80,13 @@ void exposeSolver() {
   bp::class_<Solver, boost::noncopyable>(
       "Solver", "The numerical solver.",
       bp::init<shared_ptr<Problem>, Scalar, Scalar, Scalar, VerboseLevel,
-               Scalar, Scalar, Scalar, Scalar, Scalar, bool>(
+               Scalar, Scalar, Scalar, Scalar, Scalar, LDLTChoice>(
           (bp::arg("self"), bp::arg("problem"), bp::arg("tol") = 1e-6,
            bp::arg("mu_init") = 1e-2, bp::arg("rho_init") = 0.,
            bp::arg("verbose") = VerboseLevel::QUIET, bp::arg("mu_min") = 1e-9,
            bp::arg("prim_alpha") = 0.1, bp::arg("prim_beta") = 0.9,
            bp::arg("dual_alpha") = 1., bp::arg("dual_beta") = 1.,
-           bp::arg("ldlt_blocked") = false)))
+           bp::arg("ldlt_choice") = LDLTChoice::DENSE)))
       .add_property("manifold",
                     bp::make_function(&Solver::manifold,
                                       bp::return_internal_reference<>()),
@@ -92,7 +98,7 @@ void exposeSolver() {
       .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.",
            bp::args("self"))
       .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
-      .def_readwrite("ldlt_is_blocked", &Solver::ldlt_is_blocked_,
+      .def_readwrite("ldlt_choice", &Solver::ldlt_choice_,
                      "Use the BlockLDLT solver.")
       .def("setup", &Solver::setup, bp::args("self"),
            "Initialize the solver workspace and results.")

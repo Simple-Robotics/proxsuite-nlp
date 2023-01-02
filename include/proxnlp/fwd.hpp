@@ -24,6 +24,8 @@ namespace helpers {}
 
 /// Use the STL shared_ptr.
 using std::shared_ptr;
+/// Use the STL unique_ptr.
+using std::unique_ptr;
 
 } // namespace proxnlp
 
