@@ -63,26 +63,32 @@ allocate_block_ldlt_from_structure(long nprim,
 
 template <typename Scalar>
 unique_ptr<linalg::ldlt_base<Scalar>>
-allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
-  typedef linalg::ldlt_base<Scalar> ldlt_t;
-  const long size = prob.ndx() + prob.getTotalConstraintDim();
+allocate_ldlt_from_sizes(const isize nprim, const std::vector<isize> &nduals,
+                         LDLTChoice choice) {
+  using ldlt_ptr_t = unique_ptr<linalg::ldlt_base<Scalar>>;
+  const long size =
+      nprim + std::accumulate(nduals.begin(), nduals.end(), isize(0));
   switch (choice) {
   case LDLTChoice::DENSE:
-    return unique_ptr<ldlt_t>(new linalg::DenseLDLT<Scalar>(size));
+    return ldlt_ptr_t(new linalg::DenseLDLT<Scalar>(size));
   case LDLTChoice::BLOCKED: {
-    long ndx = prob.ndx();
-    std::vector<long> nduals(prob.getNumConstraints());
-    for (std::size_t i = 0; i < nduals.size(); ++i) {
-      nduals[i] = prob.getConstraintDim(i);
-    }
-    return unique_ptr<ldlt_t>(
-        allocate_block_ldlt_from_structure<Scalar>(ndx, nduals));
+    return ldlt_ptr_t(
+        allocate_block_ldlt_from_structure<Scalar>(nprim, nduals));
   }
   case LDLTChoice::EIGEN:
-    return unique_ptr<ldlt_t>(new linalg::EigenLDLTWrapper<Scalar>(size));
+    return ldlt_ptr_t(new linalg::EigenLDLTWrapper<Scalar>(size));
   default:
     return nullptr;
   }
+}
+
+template <typename Scalar>
+unique_ptr<linalg::ldlt_base<Scalar>>
+allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
+  std::vector<isize> nduals(prob.getNumConstraints());
+  for (std::size_t i = 0; i < nduals.size(); ++i)
+    nduals[i] = prob.getConstraintDim(i);
+  return allocate_ldlt_from_sizes<Scalar>(prob.ndx(), nduals, choice);
 }
 
 } // namespace proxnlp
