@@ -1,13 +1,24 @@
 /// @file
 /// @author Sarah El-Kazdadi
 /// @author Wilson Jallet
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
 #include "./blocks.hpp"
 
 namespace proxnlp {
-namespace block_chol {
+namespace linalg {
+
+template <typename Scalar>
+void BlockLDLT<Scalar>::setPermutation(isize const *new_perm) {
+  auto in = m_structure.copy();
+  const isize n = m_structure.nsegments();
+  if (new_perm != nullptr)
+    std::copy_n(new_perm, n, m_perm);
+  m_structure.performed_llt = false;
+  symbolic_deep_copy(in, m_structure, m_perm);
+  analyzePattern();
+}
 
 template <typename Scalar>
 void BlockLDLT<Scalar>::updateBlockPermutationMatrix(
@@ -45,8 +56,7 @@ BlockLDLT<Scalar>::reconstructedMatrix() const {
 }
 
 template <typename Scalar>
-template <typename Derived>
-bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
+bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
 
   b.noalias() = permutationP() * b;
   PROXNLP_NOMALLOC_BEGIN;
@@ -56,5 +66,5 @@ bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
   return flag;
 }
 
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp

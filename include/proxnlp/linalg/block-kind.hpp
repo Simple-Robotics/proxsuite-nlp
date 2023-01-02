@@ -1,7 +1,12 @@
+/// @file
+/// @author Sarah El-Kazdadi
+/// @author Wilson Jallet
+/// @brief  Definition for matrix "kind" enums.
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
 namespace proxnlp {
-namespace block_chol {
+namespace linalg {
 
 /// Kind of matrix block: zeros, diagonal, lower/upper triangular or dense.
 enum BlockKind {
@@ -26,5 +31,5 @@ BlockKind add(BlockKind a, BlockKind b) noexcept;
 /// BlockKind of the product of two matrices.
 BlockKind mul(BlockKind a, BlockKind b) noexcept;
 
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp

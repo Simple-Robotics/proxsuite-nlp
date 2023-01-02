@@ -3,22 +3,17 @@
 /// @author Wilson Jallet
 /// @brief Routines for block-sparse (notably, KKT-type) matrix LDLT
 /// factorisation.
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/math.hpp"
-#include "proxnlp/macros.hpp"
-#include <Eigen/Cholesky>
+#include "proxnlp/linalg/dense.hpp"
 
 #include <algorithm>
 #include <numeric>
 #include "proxnlp/linalg/block-kind.hpp"
 
 namespace proxnlp {
-/// @brief	Block-wise Cholesky and LDLT factorisation routines.
-namespace block_chol {
-
-using isize = std::int64_t;
+namespace linalg {
 
 /// @brief    Symbolic representation of the sparsity structure of a block
 /// matrix.
@@ -75,169 +70,13 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
 void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
                         isize const *perm = nullptr) noexcept;
 
-namespace backend {
-
-/// At the end of the execution, @param a contains
-/// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
-/// More precisely: a stores L -sans its diagonal which is all ones.
-/// The diagonal of @param a contains the diagonal matrix @f$D@f$.
-template <typename Scalar>
-inline bool ldlt_in_place_unblocked(typename math_types<Scalar>::MatrixRef a) {
-  const isize n = a.rows();
-  if (n <= 1) {
-    return true;
-  }
-
-  isize j = 0;
-  while (true) {
-    auto l10 = a.row(j).head(j);
-    auto d0 = a.diagonal().head(j);
-    auto work = a.col(n - 1).head(j);
-
-    work = l10.transpose().cwiseProduct(d0);
-    a(j, j) -= work.dot(l10);
-
-    if (j + 1 == n) {
-      return true;
-    }
-
-    const isize rem = n - j - 1;
-
-    auto l20 = a.bottomLeftCorner(rem, j);
-    auto l21 = a.col(j).tail(rem);
-
-    l21.noalias() -= l20 * work;
-    l21 *= 1 / a(j, j);
-    ++j;
-  }
-}
-
-static constexpr isize UNBLK_THRESHOLD = 128;
-
-/// A recursive, in-place implementation of the LDLT decomposition.
-/// To be applied to dense blocks.
-template <typename Scalar>
-inline bool dense_ldlt_in_place(typename math_types<Scalar>::MatrixRef a) {
-  using MatrixRef = typename math_types<Scalar>::MatrixRef;
-  const isize n = a.rows();
-  if (n <= UNBLK_THRESHOLD) {
-    return backend::ldlt_in_place_unblocked<Scalar>(a);
-  } else {
-    const isize bs = (n + 1) / 2;
-    const isize rem = n - bs;
-
-    MatrixRef l00 = a.block(0, 0, bs, bs);
-    Eigen::Block<MatrixRef> l10 = a.block(bs, 0, rem, bs);
-    MatrixRef l11 = a.block(bs, bs, rem, rem);
-
-    backend::dense_ldlt_in_place<Scalar>(l00);
-    auto d0 = l00.diagonal();
-
-    l00.transpose()
-        .template triangularView<Eigen::UnitUpper>()
-        .template solveInPlace<Eigen::OnTheRight>(l10);
-
-    auto work = a.block(0, bs, bs, rem).transpose();
-    work = l10;
-    l10 = l10 * d0.asDiagonal().inverse();
-
-    l11.template triangularView<Eigen::Lower>() -= l10 * work.transpose();
-
-    return backend::dense_ldlt_in_place<Scalar>(l11);
-  }
-}
-
-using Eigen::internal::LDLT_Traits;
-
-/// Taking the decomposed LDLT matrix @param mat, solve the original linear
-/// system.
-template <typename MatDerived, typename Rhs>
-inline bool dense_ldlt_solve_in_place(MatDerived &mat, Rhs &b) {
-  typedef typename MatDerived::Scalar Scalar;
-  typedef LDLT_Traits<MatDerived, Eigen::Lower> Traits;
-  Traits::getL(mat).solveInPlace(b);
-
-  using std::abs;
-  auto vecD(mat.diagonal());
-  const Scalar tol = std::numeric_limits<Scalar>::min();
-  for (isize i = 0; i < vecD.size(); ++i) {
-    if (abs(vecD(i)) > tol)
-      b.row(i) /= vecD(i);
-    else
-      b.row(i).setZero();
-  }
-
-  Traits::getU(mat).solveInPlace(b);
-  return true;
-}
-
-template <typename Scalar>
-inline void
-dense_ldlt_reconstruct(typename math_types<Scalar>::ConstMatrixRef const &mat,
-                       typename math_types<Scalar>::MatrixRef res) {
-  using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
-  typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
-  res = Traits::getU(mat) * res;
-
-  auto vecD = mat.diagonal();
-  res = vecD.asDiagonal() * res;
-
-  res = Traits::getL(mat) * res;
-}
-} // namespace backend
-
-/// @brief  A fast, recursive divide-and-conquer LDLT algorithm.
-template <typename Scalar> struct DenseLDLT {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-
-  DenseLDLT() = default;
-  explicit DenseLDLT(isize n) : m_matrix(n, n) { m_matrix.setZero(); }
-  explicit DenseLDLT(MatrixRef a) : m_matrix(a) {
-    m_info = backend::dense_ldlt_in_place<Scalar>(m_matrix)
-                 ? Eigen::Success
-                 : Eigen::NumericalIssue;
-  }
-
-  DenseLDLT &compute(MatrixRef mat) {
-    m_matrix = mat;
-    m_info = backend::dense_ldlt_in_place<Scalar>(m_matrix)
-                 ? Eigen::Success
-                 : Eigen::NumericalIssue;
-    return *this;
-  }
-
-  const MatrixXs &matrixLDLT() const { return m_matrix; }
-
-  Eigen::ComputationInfo info() const { return m_info; }
-
-  template <typename Derived>
-  void solveInPlace(Eigen::MatrixBase<Derived> &b) const {
-    backend::dense_ldlt_solve_in_place(m_matrix, b.derived());
-  }
-
-  MatrixXs reconstructedMatrix() const {
-    MatrixXs res(m_matrix.rows(), m_matrix.cols());
-    res.setIdentity();
-    backend::dense_ldlt_reconstruct<Scalar>(m_matrix, res);
-    return res;
-  }
-
-  inline Eigen::Diagonal<const MatrixXs> vectorD() const {
-    return m_matrix.diagonal();
-  }
-
-protected:
-  MatrixXs m_matrix;
-  Eigen::ComputationInfo m_info;
-  bool permutate = false;
-};
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp
 
 #include "proxnlp/linalg/gemmt.hpp"
 
 namespace proxnlp {
-namespace block_chol {
+namespace linalg {
 namespace backend {
 
 template <typename Scalar> struct gemmt {
@@ -387,7 +226,7 @@ template <typename Scalar> struct block_impl {
 
     case TriL: {
       // compute l00
-      backend::dense_ldlt_in_place<Scalar>(l00);
+      backend::dense_ldlt_in_place(l00);
 
       isize offset = bs;
 
@@ -526,9 +365,10 @@ template <typename Scalar> struct block_impl {
 /// over the lifetime of this object when calling compute(). A change
 /// of structure should lead to recalculating the expected sparsity pattern of
 /// the factorization, and even recomputing the sparsity-optimal permutation.
-template <typename Scalar> struct BlockLDLT {
+template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-  using Traits = backend::LDLT_Traits<MatrixXs, Eigen::Lower>;
+  using Base = ldlt_base<Scalar>;
+  using Traits = LDLT_Traits<MatrixXs, Eigen::Lower>;
   using PermutationType =
       Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
 
@@ -536,7 +376,7 @@ protected:
   MatrixXs m_matrix;
   SymbolicBlockMatrix m_structure;
   PermutationType m_permutation;
-  Eigen::ComputationInfo m_info;
+  using Base::m_info;
   isize *m_perm;
   isize *m_iwork;
   isize *m_idx;
@@ -548,10 +388,10 @@ protected:
 public:
   /// @brief  The constructor copies the input matrix @param mat and symbolic
   /// block pattern @param structure.
-  BlockLDLT(isize n, SymbolicBlockMatrix const &structure)
-      : m_matrix(n, n), m_structure(structure.copy()), m_permutation(n),
-        m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
-        m_idx(new isize[nblocks()]) {
+  BlockLDLT(isize size, SymbolicBlockMatrix const &structure)
+      : Base(), m_matrix(size, size), m_structure(structure.copy()),
+        m_permutation(size), m_perm(new isize[nblocks()]),
+        m_iwork(new isize[nblocks()]), m_idx(new isize[nblocks()]) {
     std::iota(m_perm, m_perm + nblocks(), isize(0));
     m_permutation.setIdentity();
   }
@@ -587,8 +427,6 @@ public:
     m_structure.segment_lens = nullptr;
   }
 
-  Eigen::ComputationInfo info() const { return m_info; }
-
   /// @returns a reference to the symbolic representation of the block-matrix.
   inline const SymbolicBlockMatrix &structure() const { return m_structure; }
 
@@ -599,15 +437,7 @@ public:
     return m_structure.llt_in_place();
   }
 
-  void setPermutation(isize const *new_perm = nullptr) {
-    auto in = m_structure.copy();
-    const isize n = m_structure.nsegments();
-    if (new_perm != nullptr)
-      std::copy_n(new_perm, n, m_perm);
-    m_structure.performed_llt = false;
-    symbolic_deep_copy(in, m_structure, m_perm);
-    analyzePattern();
-  }
+  void setPermutation(isize const *new_perm = nullptr);
 
   isize *blockPermIndices() { return m_perm; }
 
@@ -624,7 +454,7 @@ public:
 
   void updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
 
-  MatrixXs reconstructedMatrix() const;
+  MatrixXs reconstructedMatrix() const override;
 
   inline typename Traits::MatrixL matrixL() const {
     return Traits::getL(m_matrix);
@@ -634,15 +464,14 @@ public:
     return Traits::getU(m_matrix);
   }
 
-  inline Eigen::Diagonal<const MatrixXs> vectorD() const {
+  inline Eigen::Diagonal<const MatrixXs> vectorD() const override {
     return m_matrix.diagonal();
   }
 
   /// TODO: make block-sparse variant of solveInPlace()
-  template <typename Derived>
-  bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
+  bool solveInPlace(MatrixRef b) const override;
 
-  const MatrixXs &matrixLDLT() const { return m_matrix; }
+  const MatrixXs &matrixLDLT() const override { return m_matrix; }
 
   inline void permutate() {
     m_matrix.noalias() = permutationP() * m_matrix;
@@ -658,7 +487,7 @@ public:
 
   /// Sets the input matrix to @p mat, performs the permutation and runs the
   /// algorithm.
-  BlockLDLT &compute(MatrixRef mat) {
+  BlockLDLT &compute(const MatrixRef &mat) override {
     m_matrix = mat;
     // do not re-run analysis
     permutate();
@@ -668,7 +497,7 @@ public:
   }
 };
 
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp
 
 #include "proxnlp/linalg/blocks.hxx"

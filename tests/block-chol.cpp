@@ -20,11 +20,11 @@
 namespace utf = boost::unit_test;
 
 using namespace proxnlp;
-using block_chol::BlockKind;
-using block_chol::BlockLDLT;
-using block_chol::DenseLDLT;
-using block_chol::isize;
-using block_chol::SymbolicBlockMatrix;
+using linalg::BlockKind;
+using linalg::BlockLDLT;
+using linalg::DenseLDLT;
+using linalg::isize;
+using linalg::SymbolicBlockMatrix;
 using Scalar = double;
 PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
@@ -165,6 +165,20 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
   BOOST_CHECK(rhs.isApprox(mat * sol_eig));
 }
 
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_fixture) {
+  linalg::EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
+  BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
+
+  MatrixXs reconstr = ldlt_wrap.reconstructedMatrix();
+  BOOST_CHECK(reconstr.isApprox(mat));
+
+  MatrixXs sol_wrap = rhs;
+  ldlt_wrap.solveInPlace(sol_wrap);
+
+  BOOST_CHECK(sol_wrap.isApprox(sol_eig));
+  BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+}
+
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   // dense LDLT
   DenseLDLT<Scalar> dense_ldlt(mat);
@@ -184,16 +198,11 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   fmt::print("Input matrix pattern:\n");
-  block_chol::print_sparsity_pattern(sym_mat);
+  linalg::print_sparsity_pattern(sym_mat);
   BOOST_REQUIRE(sym_mat.check_if_symmetric());
 
   BlockLDLT<Scalar> block_permuted(size, sym_mat);
   block_permuted.findSparsifyingPermutation();
-  // {
-  //   isize perm[] = {2, 1, 0};
-  //   isize perm[] = {2, 0, 1};
-  //   block_permuted.setPermutation(perm);
-  // }
   block_permuted.updateBlockPermutationMatrix(sym_mat);
   block_permuted.compute(mat);
   auto best_perm = block_permuted.blockPermIndices();
@@ -202,14 +211,14 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
 
   {
     auto copy_sym = sym_mat.copy();
-    block_chol::symbolic_deep_copy(sym_mat, copy_sym, best_perm);
+    linalg::symbolic_deep_copy(sym_mat, copy_sym, best_perm);
     fmt::print("Permuted structure:\n");
-    block_chol::print_sparsity_pattern(copy_sym);
+    linalg::print_sparsity_pattern(copy_sym);
   }
 
   fmt::print("Optimized structure (nnz={:d}):\n",
              block_permuted.structure().count_nnz());
-  block_chol::print_sparsity_pattern(block_permuted.structure());
+  linalg::print_sparsity_pattern(block_permuted.structure());
 
   auto pmat = block_permuted.permutationP();
   fmt::print("Permutation matrix: {}\n", pmat.indices().transpose());
@@ -222,7 +231,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
     copy_sym_mat.llt_in_place();
     fmt::print("Un-permuted (suboptimal) LLT (nnz={:d}):\n",
                copy_sym_mat.count_nnz());
-    block_chol::print_sparsity_pattern(copy_sym_mat);
+    linalg::print_sparsity_pattern(copy_sym_mat);
   }
 
   MatrixXs reconstr = block_permuted.reconstructedMatrix();

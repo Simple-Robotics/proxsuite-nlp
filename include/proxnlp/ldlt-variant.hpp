@@ -14,9 +14,9 @@ using boost::variant;
 /// the user.
 template <typename Scalar>
 using LDLT_variant =
-    variant<block_chol::DenseLDLT<Scalar>, block_chol::BlockLDLT<Scalar>>;
+    variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>>;
 
-namespace block_chol {
+namespace linalg {
 
 template <typename Scalar>
 BlockLDLT<Scalar>
@@ -55,5 +55,5 @@ initialize_block_ldlt_from_structure(long nprim,
   return ldlt;
 }
 
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp

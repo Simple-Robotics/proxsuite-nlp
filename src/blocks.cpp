@@ -7,7 +7,7 @@
 #include <iostream>
 
 namespace proxnlp {
-namespace block_chol {
+namespace linalg {
 
 /// BlockKind of the transpose of a matrix.
 BlockKind trans(BlockKind a) noexcept {
@@ -38,7 +38,7 @@ BlockKind mul(BlockKind a, BlockKind b) noexcept {
   if (a == Zero || b == Zero) {
     return Zero;
   }
-  return block_chol::add(a, b);
+  return linalg::add(a, b);
 }
 
 /* IMPLS FOR SYMBOLIC MATRIX */
@@ -193,19 +193,17 @@ bool SymbolicBlockMatrix::llt_in_place() noexcept {
 
   // update l11
   for (isize i = 1; i < n; ++i) {
-    self(i, i) =
-        block_chol::add(self(i, i),
-                        block_chol::mul( //
-                            self(i, 0), block_chol::trans(self(i, 0))));
+    self(i, i) = linalg::add(self(i, i),
+                             linalg::mul( //
+                                 self(i, 0), linalg::trans(self(i, 0))));
 
     for (isize j = i + 1; j < n; ++j) {
 
-      self(i, j) =
-          block_chol::add(self(i, j),
-                          block_chol::mul( //
-                              self(i, 0), block_chol::trans(self(j, 0))));
+      self(i, j) = linalg::add(self(i, j),
+                               linalg::mul( //
+                                   self(i, 0), linalg::trans(self(j, 0))));
 
-      self(j, i) = block_chol::trans(self(i, j));
+      self(j, i) = linalg::trans(self(i, j));
     }
   }
 
@@ -279,5 +277,5 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
   }
 }
 
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp

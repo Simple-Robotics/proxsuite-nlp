@@ -3,7 +3,7 @@
 #pragma once
 
 namespace proxnlp {
-namespace block_chol {
+namespace linalg {
 namespace backend {
 
 template <typename Scalar, BlockKind LHS, BlockKind RHS> struct GemmT {
@@ -215,5 +215,5 @@ template <typename Scalar> struct GemmT<Scalar, Dense, Dense> {
 };
 
 } // namespace backend
-} // namespace block_chol
+} // namespace linalg
 } // namespace proxnlp
