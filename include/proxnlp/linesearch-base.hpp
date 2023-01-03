@@ -57,16 +57,11 @@ public:
   };
 
   const Linesearch::Options &options() const { return options_; }
+  void setOptions(const Linesearch::Options &options) { options_ = options; }
 
 private:
   Linesearch::Options options_;
 };
-
-} // namespace proxnlp
-
-#include "proxnlp/linesearch-armijo.hpp"
-
-namespace proxnlp {
 
 template <typename T>
 Linesearch<T>::Linesearch(const Linesearch::Options &options)
@@ -75,3 +70,5 @@ Linesearch<T>::Linesearch(const Linesearch::Options &options)
 template <typename T> Linesearch<T>::~Linesearch() = default;
 
 } // namespace proxnlp
+
+#include "proxnlp/linesearch-armijo.hpp"

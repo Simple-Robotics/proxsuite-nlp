@@ -39,15 +39,14 @@ template <typename T> struct PolynomialTpl {
 };
 
 /// @brief  Basic backtracking Armijo line-search strategy.
-template <typename Scalar> class ArmijoLinesearch : public Linesearch<Scalar> {
+template <typename Scalar> struct ArmijoLinesearch final : Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
   using FunctionSample = typename Base::FunctionSample;
   using Polynomial = PolynomialTpl<Scalar>;
   using VectorXs = typename math_types<Scalar>::VectorXs;
-  using Base::options;
-
-  Polynomial interpol;
+  using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
+  using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
 
   ArmijoLinesearch(const typename Base::Options &options)
       : Base(options), lu(alph_mat) {}
@@ -90,7 +89,8 @@ public:
       if (strat == LSInterpolation::BISECTION) {
         alpha_try *= 0.5;
       } else {
-        std::vector<FunctionSample> samples = {lower_bound};
+        samples.reserve(3);
+        samples = {lower_bound};
 
         // interpolation routines
         switch (strat) {
@@ -114,7 +114,7 @@ public:
         }
 
         alpha_try = this->minimize_interpolant(
-            strat, samples, options().contraction_min * alpha_try,
+            strat, options().contraction_min * alpha_try,
             options().contraction_max * alpha_try);
       }
 
@@ -139,19 +139,11 @@ public:
     return latest.phi;
   }
 
-  using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
-  using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
-  Matrix2s alph_mat;
-  Vector2s alph_rhs;
-  Vector2s coeffs_cubic_interpolant;
-  Eigen::HouseholderQR<Eigen::Ref<Matrix2s>> lu;
-
   /// Propose a new candidate step size through safeguarded interpolation
-  Scalar minimize_interpolant(LSInterpolation strat,
-                              const std::vector<FunctionSample> &samples,
-                              Scalar min_step_size, Scalar max_step_size) {
+  Scalar minimize_interpolant(LSInterpolation strat, Scalar min_step_size,
+                              Scalar max_step_size) {
     Scalar anext = 0.0;
-    VectorXs &coeffs = interpol.coeffs;
+    VectorXs &coeffs = interpolant.coeffs;
 
     assert(samples.size() >= 2);
     const FunctionSample &lower_bound = samples[0];
@@ -164,7 +156,7 @@ public:
 
     switch (strat) {
     case LSInterpolation::QUADRATIC: {
-
+      assert(samples.size() >= 2);
       const FunctionSample &cand0 = samples[1];
       Scalar a = (cand0.phi - phi0 - cand0.alpha * dphi0) /
                  (cand0.alpha * cand0.alpha);
@@ -175,7 +167,7 @@ public:
       break;
     }
     case LSInterpolation::CUBIC: {
-
+      assert(samples.size() >= 3);
       const FunctionSample &cand0 = samples[1];
       const FunctionSample &cand1 = samples[2];
       const Scalar &a0 = cand0.alpha;
@@ -207,8 +199,8 @@ public:
 
     if ((anext > max_step_size) || (anext < min_step_size)) {
       // if min outside of (amin; amax), look at the edges
-      Scalar pleft = interpol.evaluate(min_step_size);
-      Scalar pright = interpol.evaluate(max_step_size);
+      Scalar pleft = interpolant.evaluate(min_step_size);
+      Scalar pright = interpolant.evaluate(max_step_size);
       if (pleft < pright) {
         anext = min_step_size;
       } else {
@@ -218,6 +210,18 @@ public:
 
     return anext;
   }
+
+protected:
+  using Base::options;
+  Polynomial interpolant;
+  std::vector<FunctionSample> samples; // interpolation samples
+
+  Matrix2s alph_mat;
+  Vector2s alph_rhs;
+  Vector2s coeffs_cubic_interpolant;
+  /// Solver for the 2x2 linear system
+  using LuType = Eigen::HouseholderQR<Eigen::Ref<Matrix2s>>;
+  LuType lu;
 };
 
 } // namespace proxnlp
