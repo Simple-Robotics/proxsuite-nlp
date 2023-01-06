@@ -7,17 +7,27 @@
 #pragma once
 
 #include "proxnlp/linalg/dense.hpp"
+#include "proxnlp/linalg/block-kind.hpp"
 
 #include <algorithm>
 #include <numeric>
-#include "proxnlp/linalg/block-kind.hpp"
 
 namespace proxnlp {
 namespace linalg {
 
-/// @brief    Symbolic representation of the sparsity structure of a block
-/// matrix.
-/// @details  This struct describes the block-wise layout of a matrix.
+// fwd declaration
+struct SymbolicBlockMatrix;
+
+// fwd declaration
+template <typename Scalar> struct BlockLDLT;
+
+// fwd declaration
+template <typename MatType, int Mode> struct TriangularBlockMatrix;
+
+/// @brief    Symbolic representation of the sparsity structure of a (square)
+/// block matrix.
+/// @details  This struct describes the block-wise layout of a matrix, in
+/// row-major format.
 struct SymbolicBlockMatrix {
   BlockKind *data;
   isize *segment_lens;
@@ -382,6 +392,10 @@ template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
   using Traits = LDLT_Traits<MatrixXs, Eigen::Lower>;
   using PermutationType =
       Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
+  using BlockTriL = TriangularBlockMatrix<const MatrixXs, Eigen::UnitLower>;
+  using BlockTriU =
+      TriangularBlockMatrix<const typename MatrixXs::AdjointReturnType,
+                            Eigen::UnitUpper>;
 
 protected:
   MatrixXs m_matrix;
@@ -512,4 +526,5 @@ public:
 } // namespace linalg
 } // namespace proxnlp
 
+#include "proxnlp/linalg/block-triangular.hpp"
 #include "proxnlp/linalg/blocks.hxx"

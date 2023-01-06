@@ -2,11 +2,10 @@
 /// @copyright Copyright (C) 2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/linalg/blocks.hpp"
+#include "./blocks.hpp"
 
 namespace proxnlp {
 namespace linalg {
-
 namespace backend {
 
 template <int Mode, bool IsLower = (Mode & Eigen::Lower) == Eigen::Lower>
@@ -17,7 +16,7 @@ struct block_triangular_subsolve_impl;
 /// @brief    Representation for triangular block matrices.
 /// @details  Provides a convenience function for solving linear systems
 /// in-place.
-template <typename _MatrixType, int _Mode> class TriangularBlockMatrix {
+template <typename _MatrixType, int _Mode> struct TriangularBlockMatrix {
 public:
   enum { Mode = _Mode, IsLower = (Mode & Eigen::Lower) == Eigen::Lower };
   using MatrixType = _MatrixType;
@@ -30,7 +29,7 @@ public:
 
   /// @brief  Block-sparse variant of the TriangularViewType::solveInPlace()
   /// method on standard dense matrices.
-  template <typename Derived>
+  template <typename Derived, bool UseBlockGemmT = true>
   bool solveInPlace(Eigen::MatrixBase<Derived> &bAndX) const {
 
     assert(bAndX.rows() == m_matrix.cols());
@@ -73,7 +72,27 @@ public:
 
       // step 2: reformulate the problem for the following rows
 
-      b1 = b1 - L10 * b0;
+      if (!UseBlockGemmT) {
+        b1.noalias() -= L10 * b0;
+      } else {
+
+        // perform the multiplication in a block aware manner
+        // in Lower mode: move down from block (i, i) until (i, nb-1)
+        // in Upper mode: move down from block (0, nb-1) until (i, nb-1)
+        isize p0 = 0;
+        for (isize p = IsLower ? i + 1 : 0; IsLower ? p < nblocks : p < i;
+             ++p) {
+          isize n_c = m_structure.segment_lens[p];
+          auto L10_blk = L10.middleRows(p0, n_c); // size (n_c, n0)
+          auto dst = b1.middleRows(p0, n_c);      // size (n_c)
+          // b0 has size n0
+          // take the block out of L10
+          BlockKind lhs_kind = m_structure(p, i);
+          backend::gemmt<Scalar>::run(dst, L10_blk, b0.transpose(), lhs_kind,
+                                      Dense, Scalar(-1));
+          p0 += n_c;
+        }
+      }
     }
 
     assert(rem == 0);
