@@ -61,7 +61,25 @@ bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
 
   b.noalias() = permutationP() * b;
   PROXNLP_NOMALLOC_BEGIN;
-  bool flag = backend::dense_ldlt_solve_in_place(m_matrix, b.derived());
+  BlockTriL mat_blk_L(m_matrix, m_structure);
+  bool flag = mat_blk_L.solveInPlace(b);
+
+  using std::abs;
+  auto vecD(m_matrix.diagonal());
+  const Scalar tol = std::numeric_limits<Scalar>::min();
+  for (isize i = 0; i < vecD.size(); ++i) {
+    if (abs(vecD(i)) > tol)
+      b.row(i) /= vecD(i);
+    else
+      b.row(i).setZero();
+  }
+
+  auto structureT = m_structure.transpose();
+  BlockTriU mat_blk_U(m_matrix.transpose(), structureT);
+  flag |= mat_blk_U.solveInPlace(b);
+
+  delete[] structureT.data;
+  delete[] structureT.segment_lens;
   PROXNLP_NOMALLOC_END;
   b.noalias() = permutationP().transpose() * b;
   return flag;
