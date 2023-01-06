@@ -3,9 +3,6 @@
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 
-#ifdef EIGEN_DEFAULT_IO_FORMAT
-#undef EIGEN_DEFAULT_IO_FORMAT
-#endif
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "block-test.hpp"
