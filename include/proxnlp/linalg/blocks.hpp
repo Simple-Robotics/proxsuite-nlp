@@ -30,7 +30,7 @@ struct SymbolicBlockMatrix {
   SymbolicBlockMatrix() = delete;
   /// Shallow copy constructor.
   SymbolicBlockMatrix(SymbolicBlockMatrix const &other) = default;
-  SymbolicBlockMatrix &operator=(SymbolicBlockMatrix const &other) = delete;
+  SymbolicBlockMatrix &operator=(SymbolicBlockMatrix const &other) = default;
 
   /// Deep copy.
   SymbolicBlockMatrix copy() const;
@@ -61,6 +61,17 @@ struct SymbolicBlockMatrix {
   /// the output sparsity pattern should be that of the matrix \f$L\f$
   /// of the Cholesky decomposition.
   bool llt_in_place() noexcept;
+
+  SymbolicBlockMatrix transpose() const {
+    const auto &self = *this;
+    SymbolicBlockMatrix s2(copy());
+    for (isize i = 0; i < nsegments(); ++i) {
+      for (isize j = 0; j < nsegments(); ++j) {
+        s2(i, j) = trans(self(j, i));
+      }
+    }
+    return s2;
+  }
 };
 
 /// TODO: print triangles for triangular blocks
@@ -381,10 +392,6 @@ protected:
   isize *m_iwork;
   isize *m_idx;
 
-  std::size_t nblocks() const {
-    return std::size_t(m_structure.segments_count);
-  }
-
 public:
   /// @brief  The constructor copies the input matrix @param mat and symbolic
   /// block pattern @param structure.
@@ -435,6 +442,10 @@ public:
     if (m_structure.performed_llt)
       return true;
     return m_structure.llt_in_place();
+  }
+
+  std::size_t nblocks() const {
+    return std::size_t(m_structure.segments_count);
   }
 
   void setPermutation(isize const *new_perm = nullptr);

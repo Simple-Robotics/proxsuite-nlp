@@ -46,6 +46,7 @@ endfunction(add_proxnlp_test)
 
 set(TEST_NAMES
     block-chol
+    block-tri
     constraints
     costs
     finite-diff

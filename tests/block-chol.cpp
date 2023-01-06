@@ -1,14 +1,14 @@
 /// @file
 /// @author Sarah El-Kazdadi
 /// @author Wilson Jallet
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 
 #ifdef EIGEN_DEFAULT_IO_FORMAT
 #undef EIGEN_DEFAULT_IO_FORMAT
 #endif
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "proxnlp/linalg/blocks.hpp"
+#include "block-test.hpp"
 
 #include <benchmark/benchmark.h>
 #define BOOST_TEST_NO_MAIN
@@ -19,53 +19,8 @@
 
 namespace utf = boost::unit_test;
 
-using namespace proxnlp;
-using linalg::BlockKind;
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
-using linalg::isize;
-using linalg::SymbolicBlockMatrix;
-using Scalar = double;
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-
-MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
-  isize *row_segments = sym.segment_lens;
-  auto n = std::size_t(sym.nsegments());
-  isize size = 0;
-  for (std::size_t i = 0; i < n; ++i)
-    size += row_segments[i];
-
-  MatrixXs mat(size, size);
-  mat.setZero();
-
-  isize startRow = 0;
-  isize startCol = 0;
-  for (unsigned i = 0; i < n; ++i) {
-    isize blockRows = row_segments[i];
-    startCol = 0;
-    for (unsigned j = 0; j <= i; ++j) {
-      isize blockCols = row_segments[j];
-      const BlockKind kind = sym(i, j);
-      auto block = mat.block(startRow, startCol, blockRows, blockCols);
-      switch (kind) {
-      case BlockKind::Zero:
-        block.setZero();
-        break;
-      case BlockKind::Dense:
-        block.setRandom();
-        break;
-      case BlockKind::Diag:
-        block.diagonal().setRandom();
-      default:
-        break;
-      }
-      startCol += blockCols;
-    }
-    startRow += blockRows;
-  }
-  mat = mat.selfadjointView<Eigen::Lower>();
-  return mat;
-}
 
 constexpr isize n = 3;
 

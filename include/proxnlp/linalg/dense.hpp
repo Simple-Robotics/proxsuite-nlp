@@ -55,8 +55,8 @@ static constexpr isize UNBLK_THRESHOLD = 128;
 /// To be applied to dense blocks.
 template <typename Derived>
 inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a) {
-  typedef typename Derived::PlainObject PlainObject;
-  typedef Eigen::Ref<PlainObject> MatrixRef;
+  using PlainObject = typename Derived::PlainObject;
+  using MatrixRef = Eigen::Ref<PlainObject>;
   const isize n = a.rows();
   if (n <= UNBLK_THRESHOLD) {
     return backend::ldlt_in_place_unblocked(a);
@@ -89,8 +89,8 @@ inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a) {
 /// system.
 template <typename MatDerived, typename Rhs>
 inline bool dense_ldlt_solve_in_place(MatDerived &mat, Rhs &b) {
-  typedef typename MatDerived::Scalar Scalar;
-  typedef LDLT_Traits<MatDerived, Eigen::Lower> Traits;
+  using Scalar = typename MatDerived::Scalar;
+  using Traits = LDLT_Traits<MatDerived, Eigen::Lower>;
   Traits::getL(mat).solveInPlace(b);
 
   using std::abs;
@@ -112,7 +112,7 @@ inline void
 dense_ldlt_reconstruct(typename math_types<Scalar>::ConstMatrixRef const &mat,
                        typename math_types<Scalar>::MatrixRef res) {
   using ConstMatrixRef = typename math_types<Scalar>::ConstMatrixRef;
-  typedef LDLT_Traits<ConstMatrixRef, Eigen::Lower> Traits;
+  using Traits = LDLT_Traits<ConstMatrixRef, Eigen::Lower>;
   res = Traits::getU(mat) * res;
 
   auto vecD = mat.diagonal();
