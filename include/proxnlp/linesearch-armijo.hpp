@@ -162,7 +162,7 @@ public:
                  (cand0.alpha * cand0.alpha);
       coeffs.conservativeResize(3);
       coeffs << a, dphi0, phi0;
-      assert(interpol.degree() == 2);
+      assert(interpolant.degree() == 2);
       anext = -dphi0 / (2. * a);
       break;
     }
@@ -187,7 +187,7 @@ public:
       const Scalar c2 = coeffs_cubic_interpolant(1);
       coeffs.conservativeResize(4);
       coeffs << c3, c2, dphi0, phi0;
-      assert(interpol.degree() == 3);
+      assert(interpolant.degree() == 3);
 
       // minimizer of cubic interpolant -> solve dinterp/da = 0
       anext = (-c2 + std::sqrt(c2 * c2 - 3.0 * c3 * dphi0)) / (3.0 * c3);
