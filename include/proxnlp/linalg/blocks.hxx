@@ -74,12 +74,9 @@ bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
       b.row(i).setZero();
   }
 
-  auto structureT = m_structure.transpose();
-  BlockTriU mat_blk_U(m_matrix.transpose(), structureT);
+  BlockTriU mat_blk_U(m_matrix.transpose(), m_struct_transposed);
   flag |= mat_blk_U.solveInPlace(b);
 
-  delete[] structureT.data;
-  delete[] structureT.segment_lens;
   PROXNLP_NOMALLOC_END;
   b.noalias() = permutationP().transpose() * b;
   return flag;

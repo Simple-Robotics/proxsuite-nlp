@@ -400,6 +400,7 @@ template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
 protected:
   MatrixXs m_matrix;
   SymbolicBlockMatrix m_structure;
+  SymbolicBlockMatrix m_struct_transposed;
   PermutationType m_permutation;
   using Base::m_info;
   isize *m_perm;
@@ -411,8 +412,9 @@ public:
   /// block pattern @param structure.
   BlockLDLT(isize size, SymbolicBlockMatrix const &structure)
       : Base(), m_matrix(size, size), m_structure(structure.copy()),
-        m_permutation(size), m_perm(new isize[nblocks()]),
-        m_iwork(new isize[nblocks()]), m_idx(new isize[nblocks()]) {
+        m_struct_transposed(m_structure.transpose()), m_permutation(size),
+        m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
+        m_idx(new isize[nblocks()]) {
     std::iota(m_perm, m_perm + nblocks(), isize(0));
     m_permutation.setIdentity();
   }
@@ -444,8 +446,12 @@ public:
     delete[] m_idx;
     delete[] m_structure.data;
     delete[] m_structure.segment_lens;
+    delete[] m_struct_transposed.data;
+    delete[] m_struct_transposed.segment_lens;
     m_structure.data = nullptr;
     m_structure.segment_lens = nullptr;
+    m_struct_transposed.data = nullptr;
+    m_struct_transposed.segment_lens = nullptr;
   }
 
   /// @returns a reference to the symbolic representation of the block-matrix.
