@@ -41,9 +41,10 @@ static void bm_blocked(benchmark::State &s) {
   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
   block_ldlt.findSparsifyingPermutation();
   block_ldlt.updateBlockPermutationMatrix(sym_mat);
+  auto b = rhs;
   for (auto _ : s) {
+    b = rhs;
     block_ldlt.compute(mat);
-    auto b = rhs;
     block_ldlt.solveInPlace(b);
     if (block_ldlt.info() != Eigen::Success) {
       s.SkipWithError("BlockLDLT computation failed.");
@@ -58,9 +59,10 @@ static void bm_blocked(benchmark::State &s) {
 
 static void bm_unblocked(benchmark::State &s) {
   DenseLDLT<Scalar> dense_ldlt(size);
+  auto b = rhs;
   for (auto _ : s) {
+    b = rhs;
     dense_ldlt.compute(mat);
-    auto b = rhs;
     dense_ldlt.solveInPlace(b);
     if (dense_ldlt.info() != Eigen::Success) {
       s.SkipWithError("DenseLDLT computation failed.");
@@ -78,9 +80,10 @@ static void bm_unblocked(benchmark::State &s) {
 
 static void bm_eigen_ldlt(benchmark::State &s) {
   Eigen::LDLT<MatrixXs> ldlt(size);
+  auto b = rhs;
   for (auto _ : s) {
+    b = rhs;
     ldlt.compute(mat);
-    auto b = rhs;
     ldlt.solveInPlace(b);
     if (ldlt.info() != Eigen::Success) {
       s.SkipWithError("Eigen::LDLT computation failed.");
