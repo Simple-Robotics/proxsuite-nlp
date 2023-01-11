@@ -3,8 +3,7 @@
 /// @brief  Base structs for linesearch algorithms.
 #pragma once
 
-#include "proxnlp/workspace.hpp"
-#include "proxnlp/results.hpp"
+#include "proxnlp/fwd.hpp"
 
 #include <fmt/core.h>
 #include <ostream>
