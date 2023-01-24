@@ -258,7 +258,6 @@ template <typename Scalar> struct block_impl {
             work.block(offset - bs, 0, bsi, bs);
 
         switch (sym_structure(i, 0)) {
-        case Diag:
         case TriL:
           return false;
         case TriU: {
@@ -272,6 +271,8 @@ template <typename Scalar> struct block_impl {
           li0_u = li0 * d0.asDiagonal().inverse();
           break;
         }
+        /// TODO: make this smarter for Diag
+        case Diag:
         case Dense: {
           l00.template triangularView<Eigen::UnitLower>().solveInPlace(
               li0.transpose());
