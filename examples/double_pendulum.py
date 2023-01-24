@@ -38,16 +38,6 @@ print(args)
 
 
 USE_VIEWER = args.view
-if USE_VIEWER:
-    try:
-        import meshcat_utils as msu
-    except ImportError:
-        import warnings
-
-        warnings.warn(
-            "Please install pin-meshcat-utils to record or use the Meshcat viewer."
-        )
-        raise
 
 print("Package version: {}".format(proxnlp.__version__))
 robot = erd.load("double_pendulum_simple")
@@ -87,8 +77,7 @@ if USE_VIEWER:
     vizer.initViewer(loadModel=True)
     vizer.display(x0[: model.nq])
     vizer.viewer.open()
-    viz_util = msu.VizUtil(vizer)
-    viz_util.set_cam_angle_preset("acrobot")
+    vizer.setCameraPreset("acrobot")
 
 
 def make_dynamics_expression(cmodel: cpin.Model, cdata: cpin.Data, x0, cxs, cus):
@@ -259,17 +248,15 @@ plt.show()
 
 
 if USE_VIEWER:
-    viz_util.set_cam_angle_preset("acrobot")
+    vizer.setBackgroundColor()
+    vizer.setCameraPreset("acrobot")
     allimgs = []
     fps = 1.0 / dt
-    recorder = msu.VideoRecorder(args.video_file, fps)
-    for _ in range(args.num_replay):
-        viz_util.play_trajectory(
-            xs_opt,
-            us_opt,
-            frame_ids=[toolid],
-            show_vel=True,
-            timestep=dt,
-            record=args.record,
-            recorder=recorder,
-        )
+    qs_opt = [x[:nq] for x in xs_opt]
+
+    def callback(i: int):
+        vizer.drawFrameVelocities(toolid)
+
+    with vizer.create_video_ctx(args.video_file, fps=fps):
+        for _ in range(args.num_replay):
+            vizer.play(qs_opt, dt, callback)

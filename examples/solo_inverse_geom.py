@@ -34,7 +34,7 @@ sns.set_style("whitegrid")
 
 # LOAD AND DISPLAY SOLO12
 robot = robex.load("solo12")
-model = robot.model
+model: pin.Model = robot.model
 cmodel = cpin.Model(model)
 data = model.createData()
 cdata = cmodel.createData()
@@ -68,27 +68,31 @@ def ground(xy):
     )
 
 
-def vizGround(viz, elevation, space, name="ground", color=[1.0, 1.0, 0.6, 1.0]):
-    from meshcat_utils import VizUtil
-
-    drawer = VizUtil(viz)
-    viz.viewer.open()
-    prefix = "bg2"
-    xg = np.arange(-1, 1, space)
+def vizGround(viz, elevation_fn, space, name="ground", color=[1.0, 1.0, 0.6, 0.8]):
+    xg = np.arange(-2, 2, space)
+    nx = xg.shape[0]
     xy_g = np.meshgrid(xg, xg)
     xy_g = np.stack(xy_g)
-    elev_g = ground(xy_g)
-    xyz_g = np.concatenate([xy_g, elev_g[None]], axis=0)
-    space = 1e-1
-    xyz_g = xyz_g.reshape(3, -1).T
-    npts = xyz_g.shape[0]
-    colors = np.array([color] * npts)
-    assert colors.shape[1] == 4
-    drawer.draw_point_cloud(xyz_g, colors, prefix)
+    elev_g = np.zeros((nx, nx))
+    elev_g[:, :] = elevation_fn(xy_g)
+
+    sx = xg[-1] - xg[0]
+    sy = xg[-1] - xg[0]
+    elev_g[:, :] = elev_g[::-1, :]
+    import hppfcl
+
+    heightField = hppfcl.HeightFieldAABB(sx, sy, elev_g, np.min(elev_g))
+    pl = pin.SE3.Identity()
+    obj = pin.GeometryObject("ground", 0, pl, heightField)
+    obj.meshColor[:] = color
+    viz.addGeometryObject(obj)
+    viz.viewer.open()
 
 
 if viz is not None:
-    vizGround(viz, ground, 0.02)
+    colorrgb = [128, 149, 255, 200]
+    colorrgb = np.array(colorrgb) / 255.0
+    vizGround(viz, ground, 0.02, color=colorrgb)
 
 cxyz = casadi.SX.sym("xyz", 3, 1)
 
@@ -282,7 +286,7 @@ xu_init = pb_space.neutral()
 lams0 = [np.zeros(cs.nr) for cs in constraints]
 
 try:
-    flag = solver.solve(workspace, results, xu_init, lams0)
+    flag = solver.solve(xu_init, lams0)
 except KeyboardInterrupt:
     pass
 

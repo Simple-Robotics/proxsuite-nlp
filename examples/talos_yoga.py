@@ -33,7 +33,6 @@ import proxnlp
 from proxnlp.manifolds import MultibodyPhaseSpace
 from proxnlp.utils import plot_pd_errs
 from proxnlp.casadi_utils import CasadiFunction
-import meshcat_utils as msu
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -67,7 +66,6 @@ viz.initViewer()
 viz.loadViewerModel()
 viz.display(robot.q0)
 viz.viewer.open()
-viz_util = msu.VizUtil(viz)
 
 cq = casadi.SX.sym("cq", nq, 1)
 cDq = casadi.SX.sym("cx", nDq, 1)
@@ -304,10 +302,11 @@ print("Right foot pos:", rf_position(qs_opt).full().flatten())
 
 # VISUALIZATION
 
-input("Enter to continue")
 viz.display(qs_opt)
-viz_util.set_cam_target([0.0, 0.0, 1.1])
-viz_util.set_cam_pos([1.7, 0.0, 1.0])
+viz.setBackgroundColor()
+input("Enter to continue")
+viz.setCameraTarget([0.0, 0.0, 1.1])
+viz.setCameraPosition([1.7, 0.0, 1.0])
 
 fig, ax0 = plt.subplots(figsize=(6.4, 6.4))
 plot_pd_errs(ax0, prim_errs, dual_errs)
