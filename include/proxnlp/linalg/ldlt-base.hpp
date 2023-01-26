@@ -15,7 +15,7 @@ namespace proxnlp {
 /// @details	Block-wise Cholesky and LDLT factorisation routines.
 namespace linalg {
 
-using isize = std::int64_t;
+using isize = Eigen::Index;
 
 /// @brief  Base interface for LDLT solvers.
 template <typename Scalar> struct ldlt_base {
