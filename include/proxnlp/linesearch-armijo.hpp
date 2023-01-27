@@ -69,6 +69,7 @@ public:
         alpha_try *= 0.5;
         if (alpha_try <= options().alpha_min) {
           alpha_try = options().alpha_min;
+          break;
         }
       }
     }
