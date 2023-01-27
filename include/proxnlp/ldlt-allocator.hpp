@@ -25,23 +25,19 @@ enum class LDLTChoice {
   EIGEN,
 };
 
-template <typename Scalar>
-BlockLDLT<Scalar> *
-allocate_block_ldlt_from_structure(const std::vector<isize> &nprims,
-                                   const std::vector<isize> &nduals) {
-  const isize nprim_blocks = (isize)nprims.size();
-  const isize nblocks = nprim_blocks + (isize)(nduals.size());
-
-  isize tot_size = std::accumulate(nprims.begin(), nprims.end(), isize(0)) +
-                   std::accumulate(nduals.begin(), nduals.end(), isize(0));
+inline SymbolicBlockMatrix
+create_default_block_structure(const std::vector<isize> &dims_primal,
+                               const std::vector<isize> &dims_dual) {
+  const isize nprim_blocks = (isize)dims_primal.size();
+  const isize nblocks = nprim_blocks + (isize)(dims_dual.size());
 
   std::vector<BlockKind> blocks((std::size_t)(nblocks * nblocks));
-  std::vector<long> seg_lens = nprims;
-  for (auto &i : nduals) {
-    seg_lens.push_back(i);
+  std::vector<long> segment_lens = dims_primal;
+  for (auto &i : dims_dual) {
+    segment_lens.push_back(i);
   }
 
-  SymbolicBlockMatrix structure{blocks.data(), seg_lens.data(), nblocks,
+  SymbolicBlockMatrix structure{blocks.data(), segment_lens.data(), nblocks,
                                 nblocks, false};
 
   // default structure: primal blocks are dense, others are sparse
@@ -64,10 +60,20 @@ allocate_block_ldlt_from_structure(const std::vector<isize> &nprims,
     // diag
     structure(i, i) = BlockKind::Diag;
   }
+  return structure;
+}
 
-  BlockLDLT<Scalar> *ldlt = new BlockLDLT<Scalar>(tot_size, structure.copy());
-  (*ldlt).findSparsifyingPermutation().updateBlockPermutationMatrix(structure);
-  return ldlt;
+template <typename Scalar>
+BlockLDLT<Scalar> *
+allocate_block_ldlt_from_structure(const std::vector<isize> &nprims,
+                                   const std::vector<isize> &nduals) {
+  SymbolicBlockMatrix structure =
+      create_default_block_structure(nprims, nduals);
+
+  isize tot_size = std::accumulate(nprims.begin(), nprims.end(), isize(0)) +
+                   std::accumulate(nduals.begin(), nduals.end(), isize(0));
+
+  return new BlockLDLT<Scalar>(tot_size, structure);
 }
 
 template <typename Scalar>
@@ -81,8 +87,12 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   case LDLTChoice::DENSE:
     return ldlt_ptr_t(new linalg::DenseLDLT<Scalar>(size));
   case LDLTChoice::BLOCKED: {
-    return ldlt_ptr_t(
-        allocate_block_ldlt_from_structure<Scalar>(nprims, nduals));
+    BlockLDLT<Scalar> *block_ldlt =
+        allocate_block_ldlt_from_structure<Scalar>(nprims, nduals);
+    auto structure = block_ldlt->structure().copy();
+    block_ldlt->findSparsifyingPermutation();
+    block_ldlt->updateBlockPermutationMatrix(structure);
+    return ldlt_ptr_t(block_ldlt);
   }
   case LDLTChoice::EIGEN:
     return ldlt_ptr_t(new linalg::EigenLDLTWrapper<Scalar>(size));
