@@ -3,8 +3,7 @@
 // license available in LICENSE file, or at
 // http://www.opensource.org/licenses/mit-license.php
 
-#ifndef PROXSUITE_TEST_CNPY_HPP
-#define PROXSUITE_TEST_CNPY_HPP
+#pragma once
 
 #include <memory>
 #include <cstring>
@@ -232,5 +231,3 @@ extern template auto npy_load_vec<double>(std::string const &)
     -> Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::ColMajor>;
 
 } // namespace cnpy
-
-#endif /* end of include guard PROXSUITE_TEST_CNPY_HPP */

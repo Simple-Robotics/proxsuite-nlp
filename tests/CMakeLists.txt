@@ -8,6 +8,10 @@ set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 ADD_PROJECT_DEPENDENCY(Boost COMPONENTS unit_test_framework REQUIRED)
 ADD_PROJECT_DEPENDENCY(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 
+# create an object library just for cnpy
+add_library(cnpy OBJECT cnpy.cpp)
+target_link_libraries(cnpy Eigen3::Eigen)
+target_include_directories(cnpy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 macro(ADD_TEST_CFLAGS test_name flag)
   set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " ${flag}")
@@ -41,24 +45,30 @@ function(add_proxnlp_test name)
   target_link_libraries(${test_name} ${PROJECT_NAME})
   target_link_libraries(${test_name} Boost::unit_test_framework)
   target_link_libraries(${test_name} benchmark::benchmark)
+  target_link_libraries(${test_name} cnpy)
 endfunction(add_proxnlp_test)
 
+# symlink test data file
+function(symlink_data_file filename)
+  # filename should be relative
+  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
+                  ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+                  ${CMAKE_CURRENT_BINARY_DIR}/${filename})
+endfunction()
 
-set(TEST_NAMES
-    block-chol
-    block-tri
-    constraints
-    costs
-    finite-diff
-    math
-    functions
-    manifolds
-    solver)
+add_proxnlp_test(block-chol)
+add_proxnlp_test(block-tri)
+add_proxnlp_test(constraints)
+add_proxnlp_test(costs)
+add_proxnlp_test(finite-diff)
+add_proxnlp_test(math)
+add_proxnlp_test(functions)
+add_proxnlp_test(manifolds)
+add_proxnlp_test(solver)
 
-foreach(test_name ${TEST_NAMES})
-  add_proxnlp_test(${test_name})
-endforeach(test_name)
-
+add_proxnlp_test(cnpy-load)
+symlink_data_file("npy_payload.npy")
+symlink_data_file("npy_payload2.npy")
 
 # PYTHON TESTS
 if (BUILD_PYTHON_INTERFACE)
