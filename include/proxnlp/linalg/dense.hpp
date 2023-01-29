@@ -43,6 +43,7 @@ void update_sign_matrix(SignMatrix &sign, const Scalar &akk) {
 template <typename Derived>
 inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a,
                                     SignMatrix &sign) {
+  using Scalar = typename Derived::Scalar;
   const isize n = a.rows();
   if (n <= 1) {
     if (n == 0)
@@ -63,9 +64,11 @@ inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a,
     auto work = a.col(n - 1).head(j);
 
     work = l10.transpose().cwiseProduct(d0);
-    a(j, j) -= work.dot(l10);
 
-    update_sign_matrix(sign, a(j, j));
+    Scalar &akk = a.coeffRef(j, j);
+    akk -= work.dot(l10);
+
+    update_sign_matrix(sign, akk);
 
     if (j + 1 == n) {
       return true;
@@ -77,7 +80,7 @@ inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a,
     auto l21 = a.col(j).tail(rem);
 
     l21.noalias() -= l20 * work;
-    l21 *= 1 / a(j, j);
+    l21 *= 1 / akk;
     ++j;
   }
 }
