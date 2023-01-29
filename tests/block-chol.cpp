@@ -202,6 +202,32 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
   BOOST_CHECK(rhs.isApprox(mat * sol_block));
 }
 
+BOOST_AUTO_TEST_CASE(block_structure_allocator) {
+
+  std::vector<isize> nprims = {7, 14};
+  std::vector<isize> nduals = {14};
+
+  BOOST_TEST_MESSAGE("Default structure:");
+  linalg::SymbolicBlockMatrix default_structure =
+      proxnlp::create_default_block_structure(nprims, nduals);
+  linalg::print_sparsity_pattern(default_structure);
+
+  BOOST_TEST_MESSAGE("Modified structure:");
+  linalg::SymbolicBlockMatrix modified_structure = default_structure.copy();
+
+  // zero out the primal off-diagonal blocks
+  for (isize i = 0; i < (uint)nprims.size(); ++i) {
+    for (isize j = 0; i < (uint)nprims.size(); ++i) {
+      if (i != j) {
+        modified_structure(i, j) = linalg::Zero;
+        modified_structure(j, i) = linalg::Zero;
+      }
+    }
+  }
+
+  linalg::print_sparsity_pattern(modified_structure);
+}
+
 int main(int argc, char **argv) {
   // call default test initialization function
   // see Boost.Test docs:

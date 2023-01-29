@@ -29,21 +29,27 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
 
   for (isize i = 0; i < nprim_blocks; ++i) {
     for (isize j = 0; j < nprim_blocks; ++j) {
-      structure(i, j) = BlockKind::Dense;
+      structure(i, j) = linalg::Dense;
+    }
+  }
+
+  // jacobian blocks: assumed dense
+  for (isize i = 0; i < nprim_blocks; ++i) {
+    for (isize j = nprim_blocks; j < nblocks; ++j) {
+      structure(i, j) = linalg::Dense;
+      structure(j, i) = linalg::Dense;
     }
   }
 
   for (isize i = nprim_blocks; i < nblocks; ++i) {
-    // first col/row
-    structure(i, nprim_blocks) = BlockKind::Dense;
-    structure(nprim_blocks, i) = BlockKind::Dense;
+    // diagonal blocks are diagonal
+    structure(i, i) = linalg::Diag;
 
+    // off-diagonal blocks are zero
     for (isize j = nprim_blocks; j < nblocks; ++j) {
-      structure(i, j) = BlockKind::Zero;
+      if (i != j)
+        structure(i, j) = linalg::Zero;
     }
-
-    // diag
-    structure(i, i) = BlockKind::Diag;
   }
   return structure;
 }
