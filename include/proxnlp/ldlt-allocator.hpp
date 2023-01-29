@@ -5,7 +5,7 @@
 #pragma once
 
 #include "linalg/blocks.hpp"
-#include "proxnlp/problem-base.hpp"
+#include <memory>
 
 namespace proxnlp {
 
@@ -13,6 +13,7 @@ namespace {
 using linalg::BlockLDLT;
 using linalg::isize;
 using linalg::SymbolicBlockMatrix;
+using std::unique_ptr;
 } // namespace
 
 enum class LDLTChoice {
@@ -64,15 +65,6 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   default:
     return nullptr;
   }
-}
-
-template <typename Scalar>
-unique_ptr<linalg::ldlt_base<Scalar>>
-allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
-  std::vector<isize> nduals(prob.getNumConstraints());
-  for (std::size_t i = 0; i < nduals.size(); ++i)
-    nduals[i] = prob.getConstraintDim(i);
-  return allocate_ldlt_from_sizes<Scalar>({prob.ndx()}, nduals, choice);
 }
 
 } // namespace proxnlp

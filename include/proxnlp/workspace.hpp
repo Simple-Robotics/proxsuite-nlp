@@ -12,6 +12,19 @@
 
 namespace proxnlp {
 
+#ifdef PROXNLP_CUSTOM_LDLT
+
+template <typename Scalar>
+unique_ptr<linalg::ldlt_base<Scalar>>
+allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
+  std::vector<isize> nduals(prob.getNumConstraints());
+  for (std::size_t i = 0; i < nduals.size(); ++i)
+    nduals[i] = prob.getConstraintDim(i);
+  return allocate_ldlt_from_sizes<Scalar>({prob.ndx()}, nduals, choice);
+}
+
+#endif
+
 /** Workspace class, which holds the necessary intermediary data
  * for the solver to function.
  */
