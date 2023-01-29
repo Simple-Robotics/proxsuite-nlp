@@ -14,14 +14,45 @@ using Eigen::internal::LDLT_Traits;
 
 namespace backend {
 
+template <typename Scalar>
+void update_sign_matrix(SignMatrix &sign, const Scalar &akk) {
+  switch (sign) {
+  case SignMatrix::PositiveSemiDef:
+    if (akk < 0)
+      sign = SignMatrix::Indefinite;
+    break;
+  case SignMatrix::NegativeSemiDef:
+    if (akk > 0)
+      sign = SignMatrix::Indefinite;
+    break;
+  case SignMatrix::ZeroSign: {
+    if (akk > 0)
+      sign = SignMatrix::PositiveSemiDef;
+    else if (akk < 0)
+      sign = SignMatrix::NegativeSemiDef;
+  }
+  default:
+    break;
+  }
+}
+
 /// At the end of the execution, @param a contains
 /// the lower-triangular matrix \f$L\f$ in the LDLT decomposition.
 /// More precisely: a stores L -sans its diagonal which is all ones.
 /// The diagonal of @param a contains the diagonal matrix @f$D@f$.
 template <typename Derived>
-inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a) {
+inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a,
+                                    SignMatrix &sign) {
   const isize n = a.rows();
   if (n <= 1) {
+    if (n == 0)
+      sign = SignMatrix::ZeroSign;
+    else if (a(0, 0) > 0)
+      sign = SignMatrix::PositiveSemiDef;
+    else if (a(0, 0) < 0)
+      sign = SignMatrix::NegativeSemiDef;
+    else
+      sign = SignMatrix::ZeroSign;
     return true;
   }
 
@@ -33,6 +64,8 @@ inline bool ldlt_in_place_unblocked(Eigen::MatrixBase<Derived> &a) {
 
     work = l10.transpose().cwiseProduct(d0);
     a(j, j) -= work.dot(l10);
+
+    update_sign_matrix(sign, a(j, j));
 
     if (j + 1 == n) {
       return true;
@@ -54,12 +87,13 @@ static constexpr isize UNBLK_THRESHOLD = 128;
 /// A recursive, in-place implementation of the LDLT decomposition.
 /// To be applied to dense blocks.
 template <typename Derived>
-inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a) {
+inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a,
+                                SignMatrix &sign) {
   using PlainObject = typename Derived::PlainObject;
   using MatrixRef = Eigen::Ref<PlainObject>;
   const isize n = a.rows();
   if (n <= UNBLK_THRESHOLD) {
-    return backend::ldlt_in_place_unblocked(a);
+    return backend::ldlt_in_place_unblocked(a, sign);
   } else {
     const isize bs = (n + 1) / 2;
     const isize rem = n - bs;
@@ -68,7 +102,7 @@ inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a) {
     Eigen::Block<Derived> l10 = a.block(bs, 0, rem, bs);
     MatrixRef l11 = a.block(bs, bs, rem, rem);
 
-    backend::dense_ldlt_in_place(l00);
+    backend::dense_ldlt_in_place(l00, sign);
     auto d0 = l00.diagonal();
 
     l00.transpose()
@@ -81,7 +115,7 @@ inline bool dense_ldlt_in_place(Eigen::MatrixBase<Derived> &a) {
 
     l11.template triangularView<Eigen::Lower>() -= l10 * work.transpose();
 
-    return backend::dense_ldlt_in_place(l11);
+    return backend::dense_ldlt_in_place(l11, sign);
   }
 }
 
@@ -132,14 +166,16 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
     m_matrix.setZero();
   }
   explicit DenseLDLT(MatrixRef a) : Base(), m_matrix(a) {
-    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
-                                                    : Eigen::NumericalIssue;
+    m_info = backend::dense_ldlt_in_place(m_matrix, m_sign)
+                 ? Eigen::Success
+                 : Eigen::NumericalIssue;
   }
 
   DenseLDLT &compute(const MatrixRef &mat) override {
     m_matrix = mat;
-    m_info = backend::dense_ldlt_in_place(m_matrix) ? Eigen::Success
-                                                    : Eigen::NumericalIssue;
+    m_info = backend::dense_ldlt_in_place(m_matrix, m_sign)
+                 ? Eigen::Success
+                 : Eigen::NumericalIssue;
     return *this;
   }
 
@@ -163,6 +199,7 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
 protected:
   MatrixXs m_matrix;
   using Base::m_info;
+  using Base::m_sign;
 };
 
 } // namespace linalg

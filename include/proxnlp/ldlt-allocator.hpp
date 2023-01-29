@@ -60,7 +60,7 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
     // diag
     structure(i, i) = BlockKind::Diag;
   }
-  return structure;
+  return structure.copy();
 }
 
 template <typename Scalar>

@@ -219,7 +219,7 @@ template <typename Scalar> struct block_impl {
   MatrixRef mat;
   SymbolicBlockMatrix sym_structure;
   /// @returns bool whether the decomposition was successful.
-  bool ldlt_in_place_impl() {
+  bool ldlt_in_place_impl(SignMatrix &sign) {
     if (!sym_structure.performed_llt) {
       assert(false && "Block structure was not analyzed yet.");
       return false;
@@ -247,7 +247,7 @@ template <typename Scalar> struct block_impl {
 
     case TriL: {
       // compute l00
-      backend::dense_ldlt_in_place(l00);
+      backend::dense_ldlt_in_place(l00, sign);
 
       isize offset = bs;
 
@@ -290,6 +290,9 @@ template <typename Scalar> struct block_impl {
     }
     case Diag: {
       // l00 is unchanged
+      for (isize k = 0; k < bs; k++) {
+        update_sign_matrix(sign, l00(k, k));
+      }
       isize offset = bs;
 
       for (isize i = 1; i < nblocks; ++i) {
@@ -367,7 +370,7 @@ template <typename Scalar> struct block_impl {
         l11,
         sym_structure.submatrix(1, nblocks - 1),
     }
-        .ldlt_in_place_impl();
+        .ldlt_in_place_impl(sign);
   }
 };
 
@@ -380,8 +383,7 @@ template <typename Scalar> struct block_impl {
 /// (for now a brute-force search) to find a sparsity-maximizing permutation of
 /// the blocks in the input matrix.
 /// updateBlockPermutationMatrix() updates the permutation matrix according to
-/// the stored block-wise permutation indices. Calling permutate() will perform
-/// the permutation on the input matrix.
+/// the stored block-wise permutation indices.
 ///
 /// @warning  The underlying block-wise structure is assumed to be invariant
 /// over the lifetime of this object when calling compute(). A change
@@ -403,6 +405,7 @@ protected:
   SymbolicBlockMatrix m_structure;
   PermutationType m_permutation;
   using Base::m_info;
+  using Base::m_sign;
   isize *m_perm;
   isize *m_iwork;
   isize *m_idx;
@@ -495,19 +498,15 @@ public:
     return m_matrix.diagonal();
   }
 
-  /// TODO: make block-sparse variant of solveInPlace()
+  /// Solve for the right-hand side in-place.
   bool solveInPlace(MatrixRef b) const override;
 
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 
-  inline void permutate() {
-    m_matrix.noalias() = permutationP() * m_matrix;
-    m_matrix.noalias() = m_matrix * permutationP().transpose();
-  }
-
   void compute() {
     m_info =
-        backend::block_impl<Scalar>{m_matrix, m_structure}.ldlt_in_place_impl()
+        backend::block_impl<Scalar>{m_matrix, m_structure}.ldlt_in_place_impl(
+            m_sign)
             ? Eigen::Success
             : Eigen::NumericalIssue;
   }
@@ -516,8 +515,9 @@ public:
   /// algorithm.
   BlockLDLT &compute(const MatrixRef &mat) override {
     m_matrix = mat;
+    m_matrix.noalias() = permutationP() * m_matrix;
+    m_matrix.noalias() = m_matrix * permutationP().transpose();
     // do not re-run analysis
-    permutate();
     compute();
 
     return *this;

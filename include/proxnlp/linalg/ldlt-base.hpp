@@ -16,6 +16,7 @@ namespace proxnlp {
 namespace linalg {
 
 using isize = Eigen::Index;
+using Eigen::internal::SignMatrix;
 
 /// @brief  Base interface for LDLT solvers.
 template <typename Scalar> struct ldlt_base {
@@ -27,10 +28,12 @@ template <typename Scalar> struct ldlt_base {
   virtual const MatrixXs &matrixLDLT() const = 0;
   virtual MatrixXs reconstructedMatrix() const = 0;
   virtual Eigen::ComputationInfo info() const { return m_info; }
+  SignMatrix sign() const { return m_sign; }
   virtual ~ldlt_base() = default;
 
 protected:
   Eigen::ComputationInfo m_info;
+  SignMatrix m_sign = SignMatrix::ZeroSign;
 };
 
 template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
