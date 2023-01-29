@@ -128,7 +128,8 @@ file(GLOB_RECURSE LIB_HEADERS
      )
 
 file(GLOB_RECURSE LIB_SOURCES
-     ${PROJECT_SOURCE_DIR}/src/*.cpp
+     ${PROJECT_SOURCE_DIR}/src/blocks.cpp
+     ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp
      )
 
 function(create_library)

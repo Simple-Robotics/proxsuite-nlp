@@ -10,7 +10,6 @@
 namespace proxnlp {
 
 namespace {
-using linalg::BlockKind;
 using linalg::BlockLDLT;
 using linalg::isize;
 using linalg::SymbolicBlockMatrix;
@@ -25,43 +24,9 @@ enum class LDLTChoice {
   EIGEN,
 };
 
-inline SymbolicBlockMatrix
+SymbolicBlockMatrix
 create_default_block_structure(const std::vector<isize> &dims_primal,
-                               const std::vector<isize> &dims_dual) {
-  const isize nprim_blocks = (isize)dims_primal.size();
-  const isize nblocks = nprim_blocks + (isize)(dims_dual.size());
-
-  std::vector<BlockKind> blocks((std::size_t)(nblocks * nblocks));
-  std::vector<long> segment_lens = dims_primal;
-  for (auto &i : dims_dual) {
-    segment_lens.push_back(i);
-  }
-
-  SymbolicBlockMatrix structure{blocks.data(), segment_lens.data(), nblocks,
-                                nblocks, false};
-
-  // default structure: primal blocks are dense, others are sparse
-
-  for (isize i = 0; i < nprim_blocks; ++i) {
-    for (isize j = 0; j < nprim_blocks; ++j) {
-      structure(i, j) = BlockKind::Dense;
-    }
-  }
-
-  for (isize i = nprim_blocks; i < nblocks; ++i) {
-    // first col/row
-    structure(i, nprim_blocks) = BlockKind::Dense;
-    structure(nprim_blocks, i) = BlockKind::Dense;
-
-    for (isize j = nprim_blocks; j < nblocks; ++j) {
-      structure(i, j) = BlockKind::Zero;
-    }
-
-    // diag
-    structure(i, i) = BlockKind::Diag;
-  }
-  return structure.copy();
-}
+                               const std::vector<isize> &dims_dual);
 
 template <typename Scalar>
 BlockLDLT<Scalar> *
