@@ -6,6 +6,7 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "block-test.hpp"
+#include "proxnlp/ldlt-allocator.hpp"
 
 #include <benchmark/benchmark.h>
 #define BOOST_TEST_NO_MAIN
@@ -37,7 +38,7 @@ isize size = mat.cols();
 
 VectorXs rhs = VectorXs::Random(size);
 
-static void bm_blocked(benchmark::State &s) {
+static void bm_block_sparse(benchmark::State &s) {
   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
   block_ldlt.findSparsifyingPermutation();
   block_ldlt.updateBlockPermutationMatrix(sym_mat);
@@ -102,7 +103,7 @@ static void bm_eigen_ldlt(benchmark::State &s) {
 
 auto unit = benchmark::kMicrosecond;
 BENCHMARK(bm_unblocked)->Unit(unit);
-BENCHMARK(bm_blocked)->Unit(unit);
+BENCHMARK(bm_block_sparse)->Unit(unit);
 BENCHMARK(bm_eigen_ldlt)->Unit(unit);
 
 struct ldlt_fixture {
