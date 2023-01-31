@@ -127,10 +127,9 @@ file(GLOB_RECURSE LIB_HEADERS
      ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hxx
      )
 
-file(GLOB_RECURSE LIB_SOURCES
-     ${PROJECT_SOURCE_DIR}/src/blocks.cpp
-     ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp
-     )
+set(LIB_SOURCES
+    ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
+    ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp)
 
 function(create_library)
   # get the compile defs

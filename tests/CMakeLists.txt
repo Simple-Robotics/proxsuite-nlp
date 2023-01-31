@@ -11,7 +11,14 @@ ADD_PROJECT_DEPENDENCY(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.
 # create an object library just for cnpy
 add_library(cnpy OBJECT cnpy.cpp)
 target_link_libraries(cnpy Eigen3::Eigen)
-target_include_directories(cnpy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
+set_target_properties(cnpy PROPERTIES PUBLIC_HEADER cnpy.hpp)
+
+install(TARGETS cnpy
+        EXPORT ${TARGETS_EXPORT_NAME}
+        OBJECTS DESTINATION lib/
+        PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests
+        )
 
 macro(ADD_TEST_CFLAGS test_name flag)
   set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " ${flag}")
