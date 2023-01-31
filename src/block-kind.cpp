@@ -2,8 +2,9 @@
 /// @author Sarah El-Kazdadi
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxnlp/linalg/blocks.hpp"
+#include "proxnlp/linalg/block-kind.hpp"
 
+#include <numeric>
 #include <iostream>
 
 namespace proxnlp {
