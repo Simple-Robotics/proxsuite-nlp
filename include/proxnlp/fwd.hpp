@@ -80,7 +80,7 @@ template <typename Scalar> struct ResultsTpl;
 template <typename Scalar> struct WorkspaceTpl;
 
 /// Verbosity level.
-enum VerboseLevel { QUIET = 0, VERBOSE = 1, VERY = 2 };
+enum VerboseLevel { QUIET = 0, VERBOSE = 1, VERYVERBOSE = 2 };
 
 template <typename Scalar> class SolverTpl;
 

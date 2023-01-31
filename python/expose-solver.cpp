@@ -15,7 +15,7 @@ void exposeSolver() {
   bp::enum_<VerboseLevel>("VerboseLevel", "Verbose level for the solver.")
       .value("QUIET", QUIET)
       .value("VERBOSE", VERBOSE)
-      .value("VERYVERBOSE", VERY)
+      .value("VERYVERBOSE", VERYVERBOSE)
       .export_values();
 
   bp::enum_<LinesearchStrategy>(

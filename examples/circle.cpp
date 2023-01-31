@@ -106,7 +106,7 @@ int main() {
   // gradient of merit fun
 
   SolverTpl<double> solver(prob);
-  solver.verbose = VerboseLevel::VERY;
+  solver.verbose = VERYVERBOSE;
   solver.setPenalty(1. / 50);
 
   auto lams0 = lams;
