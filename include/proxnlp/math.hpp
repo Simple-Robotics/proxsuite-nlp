@@ -38,10 +38,8 @@
 
 namespace proxnlp {
 
-/** @brief  Typedefs for math (Eigen vectors, matrices) depending on scalar
- * type.
- *
- */
+///  @brief  Typedefs for math (Eigen vectors, matrices) depending on scalar
+/// type.
 template <typename _Scalar> struct math_types {
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(_Scalar);

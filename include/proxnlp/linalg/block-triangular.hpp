@@ -2,7 +2,7 @@
 /// @copyright Copyright (C) 2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "./blocks.hpp"
+#include "proxnlp/linalg/blocks.hpp"
 
 namespace proxnlp {
 namespace linalg {
@@ -88,8 +88,8 @@ public:
           // b0 has size n0
           // take the block out of L10
           BlockKind lhs_kind = m_structure(p, i);
-          backend::gemmt<Scalar>::run(dst, L10_blk, b0.transpose(), lhs_kind,
-                                      Dense, Scalar(-1));
+          backend::gemmt(dst, L10_blk, b0.transpose(), lhs_kind, Dense,
+                         Scalar(-1));
           p0 += n_c;
         }
       }

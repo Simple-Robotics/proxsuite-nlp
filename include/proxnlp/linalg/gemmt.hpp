@@ -2,6 +2,8 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
+#include "proxnlp/linalg/block-kind.hpp"
+
 namespace proxnlp {
 namespace linalg {
 namespace backend {
@@ -202,6 +204,117 @@ template <typename Scalar> struct GemmT<Scalar, Dense, Dense> {
     dst.noalias() += alpha * lhs * rhs.transpose();
   }
 };
+
+template <typename Scalar, typename DstDerived, typename LhsDerived,
+          typename RhsDerived>
+inline void gemmt(Eigen::MatrixBase<DstDerived> &dst,
+                  Eigen::MatrixBase<LhsDerived> const &lhs,
+                  Eigen::MatrixBase<RhsDerived> const &rhs, BlockKind lhs_kind,
+                  BlockKind rhs_kind, Scalar alpha) {
+  // dst += alpha * lhs * rhs.T
+  switch (lhs_kind) {
+  case Zero: {
+    switch (rhs_kind) {
+    case Zero:
+      GemmT<Scalar, Zero, Zero>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Diag:
+      GemmT<Scalar, Zero, Diag>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriL:
+      GemmT<Scalar, Zero, TriL>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriU:
+      GemmT<Scalar, Zero, TriU>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Dense:
+      GemmT<Scalar, Zero, Dense>::fn(dst, lhs, rhs, alpha);
+      break;
+    }
+    break;
+  }
+  case Diag: {
+    switch (rhs_kind) {
+    case Zero:
+      GemmT<Scalar, Diag, Zero>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Diag:
+      GemmT<Scalar, Diag, Diag>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriL:
+      GemmT<Scalar, Diag, TriL>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriU:
+      GemmT<Scalar, Diag, TriU>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Dense:
+      GemmT<Scalar, Diag, Dense>::fn(dst, lhs, rhs, alpha);
+      break;
+    }
+    break;
+  }
+  case TriL: {
+    switch (rhs_kind) {
+    case Zero:
+      GemmT<Scalar, TriL, Zero>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Diag:
+      GemmT<Scalar, TriL, Diag>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriL:
+      GemmT<Scalar, TriL, TriL>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriU:
+      GemmT<Scalar, TriL, TriU>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Dense:
+      GemmT<Scalar, TriL, Dense>::fn(dst, lhs, rhs, alpha);
+      break;
+    }
+    break;
+  }
+  case TriU: {
+    switch (rhs_kind) {
+    case Zero:
+      GemmT<Scalar, TriU, Zero>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Diag:
+      GemmT<Scalar, TriU, Diag>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriL:
+      GemmT<Scalar, TriU, TriL>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriU:
+      GemmT<Scalar, TriU, TriU>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Dense:
+      GemmT<Scalar, TriU, Dense>::fn(dst, lhs, rhs, alpha);
+      break;
+    }
+    break;
+  }
+  case Dense: {
+    switch (rhs_kind) {
+    case Zero:
+      GemmT<Scalar, Dense, Zero>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Diag:
+      GemmT<Scalar, Dense, Diag>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriL:
+      GemmT<Scalar, Dense, TriL>::fn(dst, lhs, rhs, alpha);
+      break;
+    case TriU:
+      GemmT<Scalar, Dense, TriU>::fn(dst, lhs, rhs, alpha);
+      break;
+    case Dense:
+      GemmT<Scalar, Dense, Dense>::fn(dst, lhs, rhs, alpha);
+      break;
+    }
+    break;
+  }
+  }
+}
 
 } // namespace backend
 } // namespace linalg
