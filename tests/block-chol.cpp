@@ -22,23 +22,49 @@ using linalg::DenseLDLT;
 
 constexpr isize n = 3;
 
-// clang-format off
-BlockKind data[n * n] = {
-    BlockKind::Dense,  BlockKind::Dense, BlockKind::Zero,
-    BlockKind::Dense, BlockKind::Diag, BlockKind::Zero,
-    BlockKind::Zero, BlockKind::Zero, BlockKind::Diag
+auto create_problem_structure() {
+  // clang-format off
+  BlockKind *data = new BlockKind[n * n]{
+      BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
+      BlockKind::Zero, BlockKind::Dense, BlockKind::Diag,
+      BlockKind::Dense, BlockKind::Diag, BlockKind::Diag
+  };
+  // clang-format on
+
+  // isize row_segments[n] = {8, 16, 16};
+  isize *row_segments = new isize[n]{7, 14, 14};
+  SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
+  return sym_mat;
+}
+
+auto sym_mat = create_problem_structure();
+isize ncols = 2;
+
+struct ldlt_test_fixture {
+  ldlt_test_fixture() : mat(), rhs(), ldlt() { this->init(); }
+  ~ldlt_test_fixture() = default;
+
+  MatrixXs mat;
+  MatrixXs rhs;
+  Eigen::LDLT<MatrixXs> ldlt;
+  MatrixXs sol_eig;
+  isize size;
+
+  void init() {
+    mat = get_block_matrix(sym_mat);
+    ldlt.compute(mat);
+    size = mat.cols();
+    rhs = MatrixXs::Random(size, ncols);
+    sol_eig = ldlt.solve(rhs);
+  }
 };
-// clang-format on
 
-// isize row_segments[n] = {8, 16, 16};
-isize row_segments[n] = {24, 30, 10};
-SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
-MatrixXs mat = get_block_matrix(sym_mat);
-isize size = mat.cols();
+struct ldlt_bench_fixture : benchmark::Fixture, ldlt_test_fixture {
+  void SetUp(const benchmark::State &) override { this->init(); }
+  void TearDown(const benchmark::State &) override {}
+};
 
-VectorXs rhs = VectorXs::Random(size);
-
-static void bm_block_sparse(benchmark::State &s) {
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
   block_ldlt.findSparsifyingPermutation();
   block_ldlt.updateBlockPermutationMatrix(sym_mat);
@@ -58,7 +84,7 @@ static void bm_block_sparse(benchmark::State &s) {
   }
 }
 
-static void bm_unblocked(benchmark::State &s) {
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, unblocked)(benchmark::State &s) {
   DenseLDLT<Scalar> dense_ldlt(size);
   auto b = rhs;
   for (auto _ : s) {
@@ -79,7 +105,7 @@ static void bm_unblocked(benchmark::State &s) {
   }
 }
 
-static void bm_eigen_ldlt(benchmark::State &s) {
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
   Eigen::LDLT<MatrixXs> ldlt(size);
   auto b = rhs;
   for (auto _ : s) {
@@ -101,27 +127,14 @@ static void bm_eigen_ldlt(benchmark::State &s) {
   }
 }
 
-auto unit = benchmark::kMicrosecond;
-BENCHMARK(bm_unblocked)->Unit(unit);
-BENCHMARK(bm_block_sparse)->Unit(unit);
-BENCHMARK(bm_eigen_ldlt)->Unit(unit);
-
-struct ldlt_fixture {
-  ldlt_fixture() : ldlt(mat) { sol_eig = ldlt.solve(rhs); }
-  ~ldlt_fixture() = default;
-
-  Eigen::LDLT<MatrixXs> ldlt;
-  MatrixXs sol_eig;
-};
-
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture) {
   MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_REQUIRE(ldlt.info() == Eigen::Success);
   BOOST_CHECK(reconstr.isApprox(mat));
   BOOST_CHECK(rhs.isApprox(mat * sol_eig));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture) {
   linalg::EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
   BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
 
@@ -135,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_fixture) {
   BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture) {
   // dense LDLT
   DenseLDLT<Scalar> dense_ldlt(mat);
   BOOST_REQUIRE(dense_ldlt.info() == Eigen::Success);
@@ -152,7 +165,7 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_fixture) {
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture) {
   fmt::print("Input matrix pattern:\n");
   linalg::print_sparsity_pattern(sym_mat);
   BOOST_REQUIRE(sym_mat.check_if_symmetric());
@@ -228,6 +241,11 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
 
   linalg::print_sparsity_pattern(modified_structure);
 }
+
+auto unit = benchmark::kMicrosecond;
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, unblocked)->Unit(unit);
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
 
 int main(int argc, char **argv) {
   // call default test initialization function
