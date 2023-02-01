@@ -1,6 +1,5 @@
 #pragma once
 
-#include "proxnlp/manifold-base.hpp"
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 
 #include "proxnlp/exceptions.hpp"
@@ -285,3 +284,7 @@ CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
 }
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/modelling/spaces/cartesian-product.txx"
+#endif

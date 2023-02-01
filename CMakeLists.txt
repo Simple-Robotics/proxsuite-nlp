@@ -46,6 +46,7 @@ endif()
 option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 option(USE_CUSTOM_LDLT "Use our custom LDLT solver" ON)
+option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
@@ -67,6 +68,10 @@ if(CHECK_RUNTIME_MALLOC)
   add_compile_definitions(PROXNLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
+
+if(ENABLE_TEMPLATE_INSTANTIATION)
+  add_definitions(-DPROXNLP_ENABLE_TEMPLATE_INSTANTIATION)
+endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 macro(TAG_LIBRARY_VERSION target)
   set_target_properties(${target} PROPERTIES SOVERSION ${PROJECT_VERSION})
@@ -130,6 +135,21 @@ file(GLOB_RECURSE LIB_HEADERS
 set(LIB_SOURCES
     ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
     ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp)
+
+if(ENABLE_TEMPLATE_INSTANTIATION)
+
+  set(LIB_TEMPLATE_SOURCES
+       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
+       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
+       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
+       )
+  file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS
+       ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx
+       )
+  list(APPEND LIB_HEADERS ${LIB_TEMPLATE_DECLARATIONS})
+  list(APPEND LIB_SOURCES ${LIB_TEMPLATE_SOURCES})
+
+endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 function(create_library)
   # get the compile defs

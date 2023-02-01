@@ -6,7 +6,7 @@
 #ifdef byte
 #undef byte
 #endif
-#include "proxnlp/python/context.hpp"
+#include "proxnlp/context.hpp"
 
 namespace proxnlp {
 

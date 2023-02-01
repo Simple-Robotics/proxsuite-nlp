@@ -133,3 +133,7 @@ protected:
 } // namespace proxnlp
 
 #include "proxnlp/manifold-base.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/manifold-base.txx"
+#endif

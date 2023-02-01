@@ -3,8 +3,6 @@
 #include "proxnlp/fwd.hpp"
 
 namespace proxnlp {
-namespace python {
-
 namespace context {
 
 using Scalar = double;
@@ -38,6 +36,4 @@ using VHPFuncRetType = MatrixXs(const ConstVectorRef &,
                                 const ConstVectorRef &) const;
 
 } // namespace context
-
-} // namespace python
 } // namespace proxnlp

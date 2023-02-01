@@ -1,10 +1,10 @@
-// #include <pinocchio/fwd.hpp>
-// #include <pinocchio/bindings/python/utils/std-vector.hpp>
 #include <eigenpy/std-vector.hpp>
 
 #include "proxnlp/python/fwd.hpp"
 #include "proxnlp/python/utils/namespace.hpp"
 #include "proxnlp/version.hpp"
+
+namespace context = proxnlp::context;
 
 namespace proxnlp {
 namespace python {
