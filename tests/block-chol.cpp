@@ -21,6 +21,7 @@ using linalg::BlockLDLT;
 using linalg::DenseLDLT;
 
 constexpr isize n = 3;
+constexpr double TOL = 1e-11;
 
 auto create_problem_structure() {
   // clang-format off
@@ -127,14 +128,16 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
   MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_REQUIRE(ldlt.info() == Eigen::Success);
-  BOOST_CHECK(reconstr.isApprox(mat));
-  BOOST_CHECK(rhs.isApprox(mat * sol_eig));
+  BOOST_CHECK(reconstr.isApprox(mat, TOL));
+  BOOST_CHECK(rhs.isApprox(mat * sol_eig, TOL));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
   linalg::EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
   BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
 
@@ -148,7 +151,8 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture) {
   BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
   // dense LDLT
   DenseLDLT<Scalar> dense_ldlt(mat);
   BOOST_REQUIRE(dense_ldlt.info() == Eigen::Success);
@@ -161,11 +165,12 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture) {
 
   Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
   fmt::print("Dense err = {:.5e}\n", dense_err);
-  BOOST_CHECK(sol_dense.isApprox(sol_eig));
+  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 }
 
-BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture) {
+BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
   fmt::print("Input matrix pattern:\n");
   linalg::print_sparsity_pattern(sym_mat);
   BOOST_REQUIRE(sym_mat.check_if_symmetric());
@@ -212,7 +217,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture) {
   block_permuted.solveInPlace(sol_block);
   Scalar err = math::infty_norm(sol_block - sol_eig);
   fmt::print("err = {:.5e}\n", err);
-  BOOST_CHECK(sol_block.isApprox(sol_eig));
+  BOOST_CHECK(sol_block.isApprox(sol_eig, TOL));
   BOOST_CHECK(rhs.isApprox(mat * sol_block));
 }
 
