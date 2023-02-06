@@ -38,7 +38,6 @@ For easy dependency management, I suggest using the [conda](https://github.com/c
 * typed-argument-parser
 * tqdm
 * meshcat-python
-* [meshcat-utils](https://github.com/Simple-Robotics/pin-meshcat-utils)
 
 ### Notes
 
