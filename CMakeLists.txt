@@ -139,10 +139,10 @@ set(LIB_SOURCES
 if(ENABLE_TEMPLATE_INSTANTIATION)
 
   set(LIB_TEMPLATE_SOURCES
-       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
-       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
-       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
-       )
+      ${PROJECT_SOURCE_DIR}/src/blocks.cpp
+      ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
+      ${PROJECT_SOURCE_DIR}/src/cost-function.cpp)
   file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS
        ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx
        )

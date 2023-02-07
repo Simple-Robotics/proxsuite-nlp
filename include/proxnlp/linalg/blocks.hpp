@@ -341,3 +341,7 @@ public:
 
 #include "proxnlp/linalg/block-triangular.hpp"
 #include "proxnlp/linalg/blocks.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/linalg/blocks.txx"
+#endif
