@@ -27,6 +27,13 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
+if(APPLE) # Use the handmade approach
+  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
+elseif(UNIX)
+  if(${CMAKE_VERSION} VERSION_GREATER "3.20.0" OR ${CMAKE_VERSION} VERSION_EQUAL "3.20.0")
+    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
+  endif()
+endif(APPLE)
 include(CMakeDependentOption)
 
 if(WIN32)
@@ -51,8 +58,7 @@ option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
 option(BUILD_WITH_CASADI_SUPPORT "Build the library with the support of CASADI" OFF)
-option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" ON)
-cmake_dependent_option(LINK_PYTHON_INTERFACE_TO_OPENMP "Link OpenMP to the Python interface" ON BUILD_WITH_OPENMP_SUPPORT OFF)
+option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
 cmake_dependent_option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF BUILD_PYTHON_INTERFACE OFF)
 
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
@@ -91,7 +97,7 @@ if(BUILD_WITH_CASADI_SUPPORT)
 endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
-  ADD_PROJECT_DEPENDENCY(OpenMP REQUIRED)
+  find_package(OpenMP REQUIRED)
   add_compile_definitions(PROXNLP_MULTITHREADING)
   link_libraries(OpenMP::OpenMP_CXX)
 endif(BUILD_WITH_OPENMP_SUPPORT)
