@@ -1,7 +1,6 @@
 #pragma once
 
 #include <eigenpy/eigenpy.hpp>
-#include <boost/python.hpp>
 
 #ifdef byte
 #undef byte

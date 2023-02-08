@@ -10,7 +10,6 @@ namespace proxnlp {
 namespace python {
 /// Expose some useful container types
 void exposeContainerTypes() {
-  // using pinocchio::python::StdVectorPythonVisitor;
   using eigenpy::StdVectorPythonVisitor;
 
   StdVectorPythonVisitor<std::vector<int>, true>::expose("StdVec_int");
