@@ -1,5 +1,7 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
+
+A simple QP with equality and inequality constraints.
 """
 import numpy as np
 import proxnlp
