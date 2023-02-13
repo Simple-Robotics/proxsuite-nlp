@@ -6,7 +6,7 @@
 #pragma once
 
 #include "proxnlp/linalg/dense.hpp"
-#include "proxnlp/linalg/block-kind.hpp"
+#include "proxnlp/linalg/block-triangular.hpp"
 
 #include "proxnlp/linalg/gemmt.hpp"
 
@@ -14,15 +14,6 @@
 
 namespace proxnlp {
 namespace linalg {
-
-// fwd declaration
-struct SymbolicBlockMatrix;
-
-// fwd declaration
-template <typename Scalar> struct BlockLDLT;
-
-// fwd declaration
-template <typename MatType, int Mode> struct TriangularBlockMatrix;
 
 namespace backend {
 
@@ -334,7 +325,6 @@ public:
 } // namespace linalg
 } // namespace proxnlp
 
-#include "proxnlp/linalg/block-triangular.hpp"
 #include "proxnlp/linalg/blocks.hxx"
 
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
