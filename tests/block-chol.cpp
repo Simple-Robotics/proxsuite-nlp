@@ -81,7 +81,7 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
   }
 }
 
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, unblocked)(benchmark::State &s) {
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, recursive)(benchmark::State &s) {
   DenseLDLT<Scalar> dense_ldlt(size);
   auto b = rhs;
   for (auto _ : s) {
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
 }
 
 auto unit = benchmark::kMicrosecond;
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, unblocked)->Unit(unit);
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, recursive)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
 
