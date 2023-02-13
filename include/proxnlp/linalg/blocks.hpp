@@ -48,6 +48,7 @@ template <typename Scalar> struct block_impl {
     MatrixRef l00 = mat.block(0, 0, bs, bs);
     MatrixRef l11 = mat.block(bs, bs, rem, rem);
     const auto d0 = l00.diagonal();
+    const auto d0_inv = d0.asDiagonal().inverse();
 
     MatrixRef work_tr = mat.block(0, bs, bs, rem);
     Eigen::Transpose<MatrixRef> work = work_tr.transpose();
@@ -81,7 +82,7 @@ template <typename Scalar> struct block_impl {
           l00.template triangularView<Eigen::UnitLower>().solveInPlace(
               li0.transpose());
           li0_copy.template triangularView<Eigen::Upper>() = li0_u;
-          li0_u = li0 * d0.asDiagonal().inverse();
+          li0_u = li0 * d0_inv;
           break;
         }
         /// TODO: make this smarter for Diag
@@ -90,7 +91,7 @@ template <typename Scalar> struct block_impl {
           l00.template triangularView<Eigen::UnitLower>().solveInPlace(
               li0.transpose());
           li0_copy = li0;
-          li0 = li0 * d0.asDiagonal().inverse();
+          li0 = li0 * d0_inv;
           break;
         }
         case Zero:
@@ -126,12 +127,12 @@ template <typename Scalar> struct block_impl {
         case TriU: {
           auto li0_u = li0.template triangularView<Eigen::Upper>();
           li0_copy.template triangularView<Eigen::Upper>() = li0_u;
-          li0_u = li0 * d0.asDiagonal().inverse();
+          li0_u = li0 * d0_inv;
           break;
         }
         case Dense: {
           li0_copy = li0;
-          li0 = li0 * d0.asDiagonal().inverse();
+          li0 = li0 * d0_inv;
           break;
         }
         case Zero:
@@ -218,18 +219,19 @@ protected:
   PermutationType m_permutation;
   using Base::m_info;
   using Base::m_sign;
-  isize *m_perm;
-  isize *m_iwork;
-  isize *m_idx;
+  std::vector<isize> m_perm;
+  std::vector<isize> m_perm_inv;
+  std::vector<isize> m_iwork;
+  std::vector<isize> m_idx;
 
 public:
   /// @brief  The constructor copies the input matrix @param mat and symbolic
   /// block pattern @param structure.
   BlockLDLT(isize size, SymbolicBlockMatrix const &structure)
       : Base(), m_matrix(size, size), m_structure(structure.copy()),
-        m_permutation(size), m_perm(new isize[nblocks()]),
-        m_iwork(new isize[nblocks()]), m_idx(new isize[nblocks()]) {
-    std::iota(m_perm, m_perm + nblocks(), isize(0));
+        m_permutation(size), m_perm(nblocks()), m_perm_inv(nblocks()),
+        m_iwork(nblocks()), m_idx(nblocks()) {
+    std::iota(m_perm.begin(), m_perm.end(), isize(0));
     m_permutation.setIdentity();
   }
 
@@ -238,8 +240,8 @@ public:
   /// decide whether to compute/use permutations.
   BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
       : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
-        m_perm(new isize[nblocks()]), m_iwork(new isize[nblocks()]),
-        m_idx(new isize[nblocks()]) {
+        m_perm(nblocks()), m_perm_inv(nblocks()), m_iwork(nblocks()),
+        m_idx(nblocks()) {
     findSparsifyingPermutation();
     updateBlockPermutationMatrix(structure);
     compute(mat);
@@ -250,14 +252,13 @@ public:
     m_matrix = other.m_matrix;
     m_permutation = other.m_permutation;
     m_info = other.m_info;
-    std::copy_n(other.m_perm, nblocks(), m_perm);
-    std::copy_n(other.m_iwork, nblocks(), m_iwork);
+    m_perm = other.m_perm;
+    m_perm_inv = other.m_perm_inv;
+    m_iwork = other.m_iwork;
+    m_idx = other.m_idx;
   }
 
   ~BlockLDLT() {
-    delete[] m_perm;
-    delete[] m_iwork;
-    delete[] m_idx;
     delete[] m_structure.data;
     delete[] m_structure.segment_lens;
     m_structure.data = nullptr;
@@ -280,17 +281,11 @@ public:
 
   void setPermutation(isize const *new_perm = nullptr);
 
-  isize *blockPermIndices() { return m_perm; }
+  auto blockPermIndices() -> std::vector<isize> & { return m_perm; }
 
   /// @brief Find a sparsity-maximizing permutation of the blocks. This will
   /// also compute the symbolic factorization.
-  BlockLDLT &findSparsifyingPermutation() {
-    auto in = m_structure.copy();
-    m_structure.brute_force_best_permutation(in, m_perm, m_iwork);
-    symbolic_deep_copy(in, m_structure, m_perm);
-    analyzePattern();
-    return *this;
-  }
+  BlockLDLT &findSparsifyingPermutation();
 
   inline const PermutationType &permutationP() const { return m_permutation; }
 

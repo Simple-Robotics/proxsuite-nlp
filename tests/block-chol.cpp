@@ -163,11 +163,11 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
   block_permuted.compute(mat);
   auto best_perm = block_permuted.blockPermIndices();
   fmt::print("Optimal permutation: {}\n",
-             fmt::join(best_perm, best_perm + n, ", "));
+             fmt::join(best_perm.begin(), best_perm.end(), ", "));
 
   {
     auto copy_sym = sym_mat.copy();
-    linalg::symbolic_deep_copy(sym_mat, copy_sym, best_perm);
+    linalg::symbolic_deep_copy(sym_mat, copy_sym, best_perm.data());
     fmt::print("Permuted structure:\n");
     linalg::print_sparsity_pattern(copy_sym);
   }

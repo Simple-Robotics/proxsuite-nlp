@@ -14,27 +14,35 @@ void BlockLDLT<Scalar>::setPermutation(isize const *new_perm) {
   auto in = m_structure.copy();
   const isize n = m_structure.nsegments();
   if (new_perm != nullptr)
-    std::copy_n(new_perm, n, m_perm);
+    std::copy_n(new_perm, n, m_perm.data());
   m_structure.performed_llt = false;
-  symbolic_deep_copy(in, m_structure, m_perm);
+  symbolic_deep_copy(in, m_structure, m_perm.data());
+  analyzePattern(); // call manually
+}
+
+template <typename Scalar>
+BlockLDLT<Scalar> &BlockLDLT<Scalar>::findSparsifyingPermutation() {
+  auto in = m_structure.copy();
+  m_structure.brute_force_best_permutation(in, m_perm.data(), m_iwork.data());
+  symbolic_deep_copy(in, m_structure, m_perm.data());
   analyzePattern();
+  return *this;
 }
 
 template <typename Scalar>
 BlockLDLT<Scalar> &
 BlockLDLT<Scalar>::updateBlockPermutationMatrix(const SymbolicBlockMatrix &in) {
   const isize *row_segs = in.segment_lens;
-  const isize nblocks = in.nsegments();
   using IndicesType = PermutationType::IndicesType;
   IndicesType &indices = m_permutation.indices();
   isize idx = 0;
-  for (isize i = 0; i < nblocks; ++i) {
+  for (std::size_t i = 0; i < nblocks(); ++i) {
     m_idx[i] = idx;
     idx += row_segs[i];
   }
 
   idx = 0;
-  for (isize i = 0; i < nblocks; ++i) {
+  for (std::size_t i = 0; i < nblocks(); ++i) {
     auto len = row_segs[m_perm[i]];
     auto s = indices.segment(idx, len);
     isize i0 = m_idx[m_perm[i]];
