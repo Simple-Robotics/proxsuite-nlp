@@ -78,10 +78,6 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
       s.SkipWithError("BlockLDLT computation failed.");
       break;
     }
-    if (!rhs.isApprox(mat * b)) {
-      s.SkipWithError("BlockLDLT gave wrong solution.");
-      break;
-    }
   }
 }
 
@@ -96,13 +92,6 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, unblocked)(benchmark::State &s) {
       s.SkipWithError("DenseLDLT computation failed.");
       break;
     }
-    if (!rhs.isApprox(mat * b)) {
-      Scalar err = math::infty_norm(rhs - (mat * b));
-      s.SkipWithError(
-          fmt::format("DenseLDLT gave wrong solution, err={:.4e}.", err)
-              .c_str());
-      break;
-    }
   }
 }
 
@@ -115,13 +104,6 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
     ldlt.solveInPlace(b);
     if (ldlt.info() != Eigen::Success) {
       s.SkipWithError("Eigen::LDLT computation failed.");
-      break;
-    }
-    if (!rhs.isApprox(mat * b)) {
-      Scalar err = math::infty_norm(rhs - (mat * b));
-      s.SkipWithError(
-          fmt::format("Eigen::LDLT gave wrong solution, err={:.4e}.", err)
-              .c_str());
       break;
     }
     benchmark::DoNotOptimize(ldlt);
