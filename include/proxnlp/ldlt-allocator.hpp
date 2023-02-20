@@ -5,6 +5,7 @@
 #pragma once
 
 #include "linalg/blocks.hpp"
+#include "linalg/proxsuite-ldlt-wrap.hpp"
 #include <memory>
 
 namespace proxnlp {
@@ -23,6 +24,8 @@ enum class LDLTChoice {
   BLOCKED,
   /// Use Eigen's implementation.
   EIGEN,
+  /// Use Proxsuite's LDLT.
+  PROXSUITE
 };
 
 SymbolicBlockMatrix
@@ -56,6 +59,8 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   }
   case LDLTChoice::EIGEN:
     return ldlt_ptr_t(new linalg::EigenLDLTWrapper<Scalar>(size));
+  case LDLTChoice::PROXSUITE:
+    return ldlt_ptr_t(new linalg::ProxSuiteLDLTWrapper<Scalar>(size, size));
   default:
     return nullptr;
   }
