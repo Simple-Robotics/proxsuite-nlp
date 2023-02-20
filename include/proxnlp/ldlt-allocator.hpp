@@ -67,3 +67,17 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
 }
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+
+#include "proxnlp/context.hpp"
+
+namespace proxnlp {
+
+extern template unique_ptr<linalg::ldlt_base<context::Scalar>>
+allocate_ldlt_from_sizes(const std::vector<isize> &, const std::vector<isize> &,
+                         LDLTChoice);
+
+}
+
+#endif

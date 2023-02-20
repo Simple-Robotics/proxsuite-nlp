@@ -54,4 +54,12 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
   return structure;
 }
 
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+
+template unique_ptr<linalg::ldlt_base<context::Scalar>>
+allocate_ldlt_from_sizes(const std::vector<isize> &, const std::vector<isize> &,
+                         LDLTChoice);
+
+#endif
+
 } // namespace proxnlp
