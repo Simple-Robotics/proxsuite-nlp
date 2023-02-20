@@ -229,7 +229,7 @@ public:
   /// @copydoc BlockLDLT()
   /// @todo run the algorithm when in this constructor. Perhaps provide flags to
   /// decide whether to compute/use permutations.
-  BlockLDLT(MatrixRef mat, SymbolicBlockMatrix const &structure)
+  BlockLDLT(ConstMatrixRef mat, SymbolicBlockMatrix const &structure)
       : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
         m_perm(nblocks()), m_perm_inv(nblocks()), m_iwork(nblocks()),
         m_idx(nblocks()) {
@@ -311,7 +311,7 @@ public:
 
   /// Sets the input matrix to @p mat, performs the permutation and runs the
   /// algorithm.
-  BlockLDLT &compute(const MatrixRef &mat) override {
+  BlockLDLT &compute(const ConstMatrixRef &mat) override {
     m_matrix = mat;
     m_matrix.noalias() = permutationP() * m_matrix;
     m_matrix.noalias() = m_matrix * permutationP().transpose();

@@ -88,6 +88,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # ----------------------------------------------------
 ADD_PROJECT_DEPENDENCY(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
 ADD_PROJECT_DEPENDENCY(fmt 6.1.2 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 6.1.2")
+ADD_PROJECT_DEPENDENCY(proxsuite REQUIRED)
 
 # Variable containing all the cflags definition relative to optional dependencies
 set(CFLAGS_DEPENDENCIES)
@@ -182,6 +183,7 @@ function(create_library)
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
+  target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   foreach(headerFile ${LIB_HEADERS})

@@ -7,6 +7,7 @@
 
 #include "block-test.hpp"
 #include "proxnlp/ldlt-allocator.hpp"
+#include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 
 #include <benchmark/benchmark.h>
 #define BOOST_TEST_NO_MAIN
@@ -33,7 +34,7 @@ auto create_problem_structure() {
   // clang-format on
 
   // isize row_segments[n] = {8, 16, 16};
-  isize *row_segments = new isize[n]{7, 14, 14};
+  isize *row_segments = new isize[n]{12, 24, 24};
   SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
   return sym_mat;
 }
@@ -110,6 +111,17 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
   }
 }
 
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, proxsuite_ldlt)(benchmark::State &s) {
+
+  linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
+  auto sol_ps = rhs;
+  for (auto _ : s) {
+    sol_ps = rhs;
+    ps_ldlt.compute(mat);
+    ps_ldlt.solveInPlace(sol_ps);
+  }
+}
+
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
   MatrixXs reconstr = ldlt.reconstructedMatrix();
@@ -131,6 +143,19 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
 
   BOOST_CHECK(sol_wrap.isApprox(sol_eig));
   BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+}
+
+BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
+  linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
+  ps_ldlt.compute(mat);
+  MatrixXs reconstr = ps_ldlt.reconstructedMatrix();
+  BOOST_CHECK(reconstr.isApprox(mat));
+
+  auto sol_ps = rhs;
+  ps_ldlt.solveInPlace(sol_ps);
+
+  BOOST_CHECK(sol_ps.isApprox(sol_eig));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
@@ -233,6 +258,7 @@ auto unit = benchmark::kMicrosecond;
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, recursive)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, proxsuite_ldlt)->Unit(unit);
 
 int main(int argc, char **argv) {
   // call default test initialization function

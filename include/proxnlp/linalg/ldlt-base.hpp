@@ -22,7 +22,7 @@ using Eigen::internal::SignMatrix;
 template <typename Scalar> struct ldlt_base {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
-  virtual ldlt_base &compute(const MatrixRef &mat) = 0;
+  virtual ldlt_base &compute(const ConstMatrixRef &mat) = 0;
   virtual bool solveInPlace(MatrixRef b) const = 0;
   virtual Eigen::Diagonal<const MatrixXs> vectorD() const = 0;
   virtual const MatrixXs &matrixLDLT() const = 0;
@@ -44,7 +44,7 @@ template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
   EigenLDLTWrapper(const MatrixRef &mat) : m_ldlt(mat) {}
   EigenLDLTWrapper(const Eigen::LDLT<MatrixXs> &ldlt) : m_ldlt(ldlt) {}
 
-  inline EigenLDLTWrapper &compute(const MatrixRef &mat) override {
+  inline EigenLDLTWrapper &compute(const ConstMatrixRef &mat) override {
     m_ldlt.compute(mat);
     return *this;
   }

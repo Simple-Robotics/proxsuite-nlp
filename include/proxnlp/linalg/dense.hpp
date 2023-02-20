@@ -174,7 +174,7 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
                  : Eigen::NumericalIssue;
   }
 
-  DenseLDLT &compute(const MatrixRef &mat) override {
+  DenseLDLT &compute(const ConstMatrixRef &mat) override {
     m_matrix = mat;
     m_info = backend::dense_ldlt_in_place(m_matrix, m_sign)
                  ? Eigen::Success
