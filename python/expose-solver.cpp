@@ -46,6 +46,7 @@ void exposeSolver() {
       .value("LDLT_DENSE", LDLTChoice::DENSE)
       .value("LDLT_BLOCKED", LDLTChoice::BLOCKED)
       .value("LDLT_EIGEN", LDLTChoice::EIGEN)
+      .value("LDLT_PROXSUITE", LDLTChoice::PROXSUITE)
       .export_values();
 
   using LinesearchOptions = Linesearch<Scalar>::Options;
