@@ -20,14 +20,22 @@ print("p0:", p0)
 print("p1:", p1)
 print("p2:", p2)
 
-weights = np.eye(space.ndx)
+ndx = space.ndx
+weights = np.eye(ndx)
 
 dist_to_p0 = QuadraticDistanceCost(space, p0, weights)
 dist_to_p1 = QuadraticDistanceCost(space, p1, weights)
 dist_to_p2 = QuadraticDistanceCost(space, p2, weights)
+Hg0 = np.zeros((ndx, ndx))
+Hg1 = np.zeros((ndx, ndx))
 
-Hg0 = dist_to_p0.computeHessian(p0)
-Hg1 = dist_to_p1.computeHessian(p0)
+dist_to_p0.call(p0)
+dist_to_p0.computeGradient(p0)
+dist_to_p0.computeHessian(p0, Hg0)
+
+dist_to_p1.call(p0)
+dist_to_p1.computeGradient(p0)
+dist_to_p1.computeHessian(p0, Hg1)
 print("Hg0\n{}".format(Hg0))
 print("Hg1\n{}".format(Hg1))
 
