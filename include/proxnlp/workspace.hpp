@@ -186,3 +186,7 @@ public:
 };
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/workspace.txx"
+#endif

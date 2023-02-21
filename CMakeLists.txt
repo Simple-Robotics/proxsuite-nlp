@@ -147,7 +147,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp
       ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
-      ${PROJECT_SOURCE_DIR}/src/cost-function.cpp)
+      ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
+      ${PROJECT_SOURCE_DIR}/src/workspace.cpp)
   file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS
        ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx
        )
@@ -180,7 +181,7 @@ function(create_library)
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
-  target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite)
+  target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   foreach(headerFile ${LIB_HEADERS})
