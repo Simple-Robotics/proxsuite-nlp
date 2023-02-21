@@ -52,7 +52,6 @@ endif()
 # --- OPTIONS ----------------------------------------
 option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
-option(USE_CUSTOM_LDLT "Use our custom LDLT solver" ON)
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
@@ -128,10 +127,6 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
   add_compile_definitions(PROXNLP_WITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
-
-if(USE_CUSTOM_LDLT)
-  add_compile_definitions(PROXNLP_CUSTOM_LDLT)
-endif(USE_CUSTOM_LDLT)
 
 # --- MAIN LIBRARY ----------------------------------------
 file(GLOB_RECURSE LIB_HEADERS

@@ -3,16 +3,9 @@
 #pragma once
 
 #include "proxnlp/problem-base.hpp"
-
-#ifdef PROXNLP_CUSTOM_LDLT
 #include "proxnlp/ldlt-allocator.hpp"
-#else
-#include <Eigen/Cholesky>
-#endif
 
 namespace proxnlp {
-
-#ifdef PROXNLP_CUSTOM_LDLT
 
 template <typename Scalar>
 unique_ptr<linalg::ldlt_base<Scalar>>
@@ -22,8 +15,6 @@ allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
     nduals[i] = prob.getConstraintDim(i);
   return allocate_ldlt_from_sizes<Scalar>({prob.ndx()}, nduals, choice);
 }
-
-#endif
 
 /** Workspace class, which holds the necessary intermediary data
  * for the solver to function.
@@ -56,11 +47,7 @@ public:
   Eigen::VectorXi signature;
 
   /// LDLT storage
-#ifdef PROXNLP_CUSTOM_LDLT
   unique_ptr<linalg::ldlt_base<Scalar>> ldlt_;
-#else
-  Eigen::LDLT<MatrixXs, Eigen::Lower> ldlt_;
-#endif
 
   //// Data for proximal algorithm
 
@@ -133,19 +120,15 @@ public:
         kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
         kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
         dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
-#ifdef PROXNLP_CUSTOM_LDLT
-        ldlt_(allocate_ldlt_from_problem(prob, ldlt_choice)),
-#else
-        ldlt_(kkt_matrix.cols()),
-#endif
-        x_prev(nx), x_trial(nx), data_lams_prev(numdual),
-        data_lams_trial(numdual), prox_grad(ndx), prox_hess(ndx, ndx),
-        dual_residual(ndx), data_cstr_values(numdual),
-        data_shift_cstr_proj(numdual), objective_gradient(ndx),
-        objective_hessian(ndx, ndx), merit_gradient(ndx),
-        data_jacobians(numdual, ndx), data_hessians((int)numblocks * ndx, ndx),
-        data_lams_plus(numdual), data_lams_pdal(numdual),
-        data_dual_prox_err(numdual), tmp_dx_scaled(ndx) {
+        ldlt_(allocate_ldlt_from_problem(prob, ldlt_choice)), x_prev(nx),
+        x_trial(nx), data_lams_prev(numdual), data_lams_trial(numdual),
+        prox_grad(ndx), prox_hess(ndx, ndx), dual_residual(ndx),
+        data_cstr_values(numdual), data_shift_cstr_proj(numdual),
+        objective_gradient(ndx), objective_hessian(ndx, ndx),
+        merit_gradient(ndx), data_jacobians(numdual, ndx),
+        data_hessians((int)numblocks * ndx, ndx), data_lams_plus(numdual),
+        data_lams_pdal(numdual), data_dual_prox_err(numdual),
+        tmp_dx_scaled(ndx) {
     init(prob);
   }
 

@@ -38,26 +38,30 @@ void exposeWorkspace() {
       .def_readonly("alpha_opt", &Workspace::alpha_opt,
                     "Computed linesearch step length.")
       .def_readonly("dmerit_dir", &Workspace::dmerit_dir)
-#ifdef PROXNLP_CUSTOM_LDLT
       .def(
           "ldlt",
           +[](const Workspace &ws) -> const linalg::ldlt_base<Scalar> & {
             return *ws.ldlt_;
           },
           bp::return_internal_reference<>(),
-          "Returns a reference to the underlying LDLT solver.")
-#endif
-      ;
+          "Returns a reference to the underlying LDLT solver.");
 
-#ifdef PROXNLP_CUSTOM_LDLT
   using LDLTBase = linalg::ldlt_base<Scalar>;
   bp::class_<LDLTBase, boost::noncopyable>(
       "LDLTBase", "Base class for LDLT solvers.", bp::no_init)
+      .def("compute", &LDLTBase::compute, bp::return_internal_reference<>(),
+           bp::args("self", "mat"))
+      .def("solveInPlace", &LDLTBase::solveInPlace, bp::args("self", "rhsAndX"))
       .def("matrixLDLT", &LDLTBase::matrixLDLT,
            bp::return_value_policy<bp::return_by_value>(),
            "Get the current value of the decomposition matrix. This makes a "
            "copy.");
-#endif
+  bp::class_<linalg::DenseLDLT<Scalar>, bp::bases<LDLTBase>>("DenseLDLT",
+                                                             bp::no_init);
+  bp::class_<linalg::BlockLDLT<Scalar>, bp::bases<LDLTBase>>("BlockLDLT",
+                                                             bp::no_init);
+  bp::class_<linalg::ProxSuiteLDLTWrapper<Scalar>, bp::bases<LDLTBase>>(
+      "ProxSuiteLDLT", "Wrapper around ProxSuite's custom LDLT.", bp::no_init);
 }
 
 } // namespace python

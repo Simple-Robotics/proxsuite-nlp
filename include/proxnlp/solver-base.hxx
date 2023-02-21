@@ -375,13 +375,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       if (delta > 0.)
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
 
-#ifdef PROXNLP_CUSTOM_LDLT
       workspace.ldlt_->compute(workspace.kkt_matrix);
       auto vecD = workspace.ldlt_->vectorD();
-#else
-      workspace.ldlt_.compute(workspace.kkt_matrix);
-      auto vecD(workspace.ldlt_.vectorD());
-#endif
       workspace.signature.array() = vecD.array().sign().template cast<int>();
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
       is_inertia_correct = checkInertia(workspace.signature);
@@ -467,21 +462,13 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 template <typename Scalar>
 bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
-#ifdef PROXNLP_CUSTOM_LDLT
   workspace.ldlt_->solveInPlace(workspace.pd_step);
-#else
-  workspace.ldlt_.solveInPlace(workspace.pd_step);
-#endif
   for (std::size_t n = 0; n < max_refinement_steps_; n++) {
     workspace.kkt_err = -workspace.kkt_rhs;
     workspace.kkt_err.noalias() -= workspace.kkt_matrix * workspace.pd_step;
     if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
       return true;
-#ifdef PROXNLP_CUSTOM_LDLT
     workspace.ldlt_->solveInPlace(workspace.kkt_err);
-#else
-    workspace.ldlt_.solveInPlace(workspace.kkt_err);
-#endif
     workspace.pd_step += workspace.kkt_err;
   }
   return false;
