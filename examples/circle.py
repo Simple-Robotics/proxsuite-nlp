@@ -61,6 +61,8 @@ solver = proxnlp.Solver(
 )
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
+solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
+solver.setup()
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
