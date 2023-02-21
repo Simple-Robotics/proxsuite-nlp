@@ -21,11 +21,20 @@ using Eigen::internal::SignMatrix;
 /// @brief  Base interface for LDLT solvers.
 template <typename Scalar> struct ldlt_base {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  using DView = Eigen::Map<const VectorXs, Eigen::Unaligned,
+                           Eigen::InnerStride<Eigen::Dynamic>>;
+
+  template <typename Mat> static DView diag_view_impl(Mat &&mat) {
+    Eigen::InnerStride<Eigen::Dynamic> stride{mat.outerStride() + 1};
+    return {mat.data(), mat.rows(), 1, stride};
+  }
 
   virtual ldlt_base &compute(const ConstMatrixRef &mat) = 0;
   virtual bool solveInPlace(MatrixRef b) const = 0;
-  virtual Eigen::Diagonal<const MatrixXs> vectorD() const = 0;
-  virtual const MatrixXs &matrixLDLT() const = 0;
+  virtual DView vectorD() const = 0;
+  virtual const MatrixXs &matrixLDLT() const {
+    PROXNLP_RUNTIME_ERROR("Not implemented");
+  }
   virtual MatrixXs reconstructedMatrix() const = 0;
   virtual Eigen::ComputationInfo info() const { return m_info; }
   SignMatrix sign() const { return m_sign; }
@@ -39,6 +48,7 @@ protected:
 template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
+  using DView = typename Base::DView;
 
   EigenLDLTWrapper(isize size) : Base(), m_ldlt(size) {}
   EigenLDLTWrapper(const MatrixRef &mat) : m_ldlt(mat) {}
@@ -63,8 +73,8 @@ template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
 
   inline Eigen::ComputationInfo info() const override { return m_ldlt.info(); }
 
-  inline Eigen::Diagonal<const MatrixXs> vectorD() const override {
-    return m_ldlt.vectorD();
+  inline DView vectorD() const override {
+    return Base::diag_view_impl(m_ldlt.matrixLDLT());
   }
 
 protected:

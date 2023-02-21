@@ -37,10 +37,10 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using psldlt_t = psdense::Ldlt<Scalar>;
+  using DView = typename Base::DView;
 
   psldlt_t m_ldlt;
   StackType ldl_stack;
-  MatrixXs m_matrix;
   using Base::m_info;
 
   ProxSuiteLDLTWrapper(isize nr, isize rhs_max_cols) : m_ldlt{} {
@@ -57,8 +57,6 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
 
   ProxSuiteLDLTWrapper &compute(const ConstMatrixRef &mat) {
     using veg::dynstack::DynStackMut;
-
-    m_matrix = mat;
 
     DynStackMut stack{veg::from_slice_mut, ldl_stack.as_mut()};
 
@@ -83,7 +81,7 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
     // }
     work = perm_inv * rhs;
 
-    solve_impl(m_matrix, work);
+    solve_impl(m_ldlt.ld_col(), work);
 
     rhs = perm * work;
 
@@ -93,11 +91,9 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
     return true;
   }
 
-  Eigen::Diagonal<const MatrixXs> vectorD() const {
-    return m_matrix.diagonal();
+  inline DView vectorD() const {
+    return psdense::util::diagonal(m_ldlt.ld_col());
   }
-
-  const MatrixXs &matrixLDLT() const { return m_matrix; }
 
   MatrixXs reconstructedMatrix() const {
 

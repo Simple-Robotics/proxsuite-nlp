@@ -196,6 +196,7 @@ template <typename Scalar> struct block_impl {
 template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
+  using DView = typename Base::DView;
   using Traits = LDLT_Traits<MatrixXs, Eigen::Lower>;
   using PermutationType =
       Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
@@ -290,8 +291,8 @@ public:
     return Traits::getU(m_matrix);
   }
 
-  inline Eigen::Diagonal<const MatrixXs> vectorD() const override {
-    return m_matrix.diagonal();
+  inline DView vectorD() const override {
+    return Base::diag_view_impl(m_matrix);
   }
 
   /// Solve for the right-hand side in-place.

@@ -163,6 +163,7 @@ dense_ldlt_reconstruct(typename math_types<Scalar>::ConstMatrixRef const &mat,
 template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
+  using DView = typename Base::DView;
 
   DenseLDLT() = default;
   explicit DenseLDLT(isize size) : Base(), m_matrix(size, size) {
@@ -195,8 +196,8 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
     return res;
   }
 
-  inline Eigen::Diagonal<const MatrixXs> vectorD() const override {
-    return m_matrix.diagonal();
+  inline DView vectorD() const override {
+    return Base::diag_view_impl(m_matrix);
   }
 
 protected:

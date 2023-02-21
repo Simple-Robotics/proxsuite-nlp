@@ -36,7 +36,7 @@ BlockLDLT<Scalar>::updateBlockPermutationMatrix(const SymbolicBlockMatrix &in) {
   using IndicesType = PermutationType::IndicesType;
   IndicesType &indices = m_permutation.indices();
   isize idx = 0;
-  for (isize i = 0; i < nblocks(); ++i) {
+  for (isize i = 0; i < (isize)nblocks(); ++i) {
     m_idx[(usize)i] = idx;
     idx += row_segs[i];
   }
