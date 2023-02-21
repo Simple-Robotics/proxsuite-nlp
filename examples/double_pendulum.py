@@ -163,7 +163,6 @@ mu_init = 0.9
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
-solver.ldlt_is_blocked = True
 solver.setup()
 solver.register_callback(callback)
 solver.max_iters = 300

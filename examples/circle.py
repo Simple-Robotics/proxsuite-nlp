@@ -59,8 +59,6 @@ rho_init = 0.0
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
-solver.ldlt_is_blocked = True
-solver.setup()
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
 callback = proxnlp.helpers.HistoryCallback()
