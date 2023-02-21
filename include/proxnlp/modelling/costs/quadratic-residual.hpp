@@ -21,12 +21,14 @@ public:
   using Scalar = _Scalar;
   using FunctionType = C2FunctionTpl<Scalar>; // base constraint func to use
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  using RowMatrixXs = Eigen::Matrix<Scalar, -1, -1, Eigen::RowMajor>;
   using Base = CostFunctionBaseTpl<Scalar>;
   using Base::computeGradient;
   using Base::computeHessian;
+  using FunctionPtr = shared_ptr<FunctionType>;
 
   /// Residual function \f$r(x)\f$ the composite cost is constructed over.
-  shared_ptr<FunctionType> residual_;
+  FunctionPtr residual_;
   /// Weights \f$Q\f$
   MatrixXs weights_;
   /// Slope \f$b\f$
@@ -34,8 +36,7 @@ public:
   /// Constant term \f$c\f$
   Scalar constant_;
 
-  QuadraticResidualCost(const shared_ptr<FunctionType> &residual,
-                        const ConstMatrixRef &weights,
+  QuadraticResidualCost(FunctionPtr residual, const ConstMatrixRef &weights,
                         const ConstVectorRef &slope,
                         const Scalar constant = Scalar(0.))
       : Base(residual->nx(), residual->ndx()), residual_(residual),
@@ -47,8 +48,7 @@ public:
     H.setZero();
   }
 
-  QuadraticResidualCost(const shared_ptr<FunctionType> &residual,
-                        const ConstMatrixRef &weights,
+  QuadraticResidualCost(FunctionPtr residual, const ConstMatrixRef &weights,
                         const Scalar constant = Scalar(0.))
       : QuadraticResidualCost(residual, weights, VectorXs::Zero(residual->nr()),
                               constant) {}
@@ -61,11 +61,12 @@ public:
                               slope, constant) {}
 
   Scalar call(const ConstVectorRef &x) const {
-    PROXNLP_EIGEN_CONST_CAST(VectorXs, err) = (*residual_)(x);
+    auto &self = const_cast_self();
+    self.err = (*residual_)(x);
 
     PROXNLP_NOMALLOC_BEGIN;
 
-    PROXNLP_EIGEN_CONST_CAST(VectorXs, tmp_w_err).noalias() = weights_ * err;
+    self.tmp_w_err.noalias() = weights_ * err;
     Scalar res = Scalar(0.5) * err.dot(tmp_w_err) + err.dot(slope_) + constant_;
 
     PROXNLP_NOMALLOC_END;
@@ -74,37 +75,41 @@ public:
   }
 
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    MatrixXs &Jres_mut = PROXNLP_EIGEN_CONST_CAST(MatrixXs, Jres);
-    RowMatrixXs &JtW_mut = PROXNLP_EIGEN_CONST_CAST(RowMatrixXs, JtW);
-    residual_->computeJacobian(x, Jres_mut);
+    auto &self = const_cast_self();
+    residual_->computeJacobian(x, self.Jres);
 
-    JtW_mut.noalias() = Jres_mut.transpose() * weights_;
-    out.noalias() = JtW_mut * err;
+    self.JtW.noalias() = Jres.transpose() * weights_;
+    out.noalias() = JtW * err;
     out.noalias() += Jres.transpose() * slope_;
   }
 
   void computeHessian(const ConstVectorRef &x, MatrixRef out) const {
-    MatrixXs &Jres_mut = PROXNLP_EIGEN_CONST_CAST(MatrixXs, Jres);
-    residual_->computeJacobian(x, Jres_mut);
-    PROXNLP_EIGEN_CONST_CAST(VectorXs, err) = (*residual_)(x);
+    auto &self = const_cast_self();
+    self.tmp_w_err.noalias() = weights_ * err;
+    self.tmp_w_err += slope_;
 
-    out.noalias() = JtW * Jres_mut;
-    VectorXs &tmp_mut = PROXNLP_EIGEN_CONST_CAST(VectorXs, tmp_w_err);
-    tmp_mut.noalias() = weights_ * err;
-    tmp_mut += slope_;
+    residual_->vectorHessianProduct(x, self.tmp_w_err, self.H);
+    out = H;
 
-    MatrixXs &H_mut = PROXNLP_EIGEN_CONST_CAST(MatrixXs, H);
-    residual_->vectorHessianProduct(x, tmp_mut, H_mut);
-    out += H_mut;
+    residual_->computeJacobian(x, self.Jres);
+    out.noalias() += JtW * Jres;
+  }
+
+protected:
+  QuadraticResidualCost &const_cast_self() const {
+    return const_cast<QuadraticResidualCost &>(*this);
   }
 
 private:
   VectorXs err;
   VectorXs tmp_w_err;
   MatrixXs Jres;
-  using RowMatrixXs = Eigen::Matrix<Scalar, -1, -1, Eigen::RowMajor>;
   RowMatrixXs JtW;
   MatrixXs H;
 };
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/modelling/costs/quadratic-residual.txx"
+#endif

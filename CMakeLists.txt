@@ -151,6 +151,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp
       ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
+      ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp)
   file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS
        ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx
