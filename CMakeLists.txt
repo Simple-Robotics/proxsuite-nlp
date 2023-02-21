@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 LAAS-CNRS, INRIA
+# Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #
 
 cmake_minimum_required(VERSION 3.1)
@@ -150,6 +150,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp)
   file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS
        ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx
