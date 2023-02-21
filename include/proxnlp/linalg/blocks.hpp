@@ -250,9 +250,9 @@ public:
   }
 
   ~BlockLDLT() {
-    delete[] m_structure.data;
+    delete[] m_structure.m_data;
     delete[] m_structure.segment_lens;
-    m_structure.data = nullptr;
+    m_structure.m_data = nullptr;
     m_structure.segment_lens = nullptr;
   }
 
@@ -266,9 +266,7 @@ public:
     return m_structure.llt_in_place();
   }
 
-  std::size_t nblocks() const {
-    return std::size_t(m_structure.segments_count);
-  }
+  usize nblocks() const { return usize(m_structure.segments_count); }
 
   void setPermutation(isize const *new_perm = nullptr);
 

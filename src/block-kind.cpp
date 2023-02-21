@@ -44,15 +44,14 @@ BlockKind mul(BlockKind a, BlockKind b) noexcept {
 
 /* IMPLS FOR SYMBOLIC MATRIX */
 
-SymbolicBlockMatrix SymbolicBlockMatrix::submatrix(isize i,
-                                                   isize n) const noexcept {
-  return {ptr(i, i), segment_lens + i, n, outer_stride, performed_llt};
+SymbolicBlockMatrix SymbolicBlockMatrix::submatrix(isize i, isize n) noexcept {
+  SymbolicBlockMatrix res{ptr(i, i), segment_lens + i, n, outer_stride};
+  res.performed_llt = performed_llt;
+  return res;
 }
 
 SymbolicBlockMatrix SymbolicBlockMatrix::copy() const {
-  BlockKind *data = new BlockKind[std::size_t(segments_count * outer_stride)];
-  isize *segment_lens = new isize[std::size_t(segments_count)];
-  SymbolicBlockMatrix out{data, segment_lens, segments_count, outer_stride};
+  SymbolicBlockMatrix out(segments_count, outer_stride);
   symbolic_deep_copy(*this, out);
   return out;
 }

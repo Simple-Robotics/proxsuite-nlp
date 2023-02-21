@@ -13,8 +13,8 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
   isize ndual_blocks = (isize)dims_dual.size();
   isize nblocks = nprim_blocks + ndual_blocks;
 
-  BlockKind *blocks = new BlockKind[(uint)(nblocks * nblocks)];
-  isize *segment_lens = new isize[(uint)nblocks];
+  SymbolicBlockMatrix structure(nblocks, nblocks);
+  isize *segment_lens = structure.segment_lens;
 
   for (uint i = 0; i < nprim_blocks; ++i) {
     segment_lens[i] = dims_primal[i];
@@ -22,8 +22,6 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
   for (uint i = 0; i < ndual_blocks; ++i) {
     segment_lens[i + nprim_blocks] = dims_dual[i];
   }
-
-  SymbolicBlockMatrix structure{blocks, segment_lens, nblocks, nblocks, false};
 
   // default structure: primal blocks are dense, others are sparse
 

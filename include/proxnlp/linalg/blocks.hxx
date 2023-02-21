@@ -11,7 +11,7 @@ namespace linalg {
 
 template <typename Scalar>
 void BlockLDLT<Scalar>::setPermutation(isize const *new_perm) {
-  auto in = m_structure.copy();
+  SymbolicBlockMatrix in(m_structure.copy());
   const isize n = m_structure.nsegments();
   if (new_perm != nullptr)
     std::copy_n(new_perm, n, m_perm.data());
@@ -22,7 +22,7 @@ void BlockLDLT<Scalar>::setPermutation(isize const *new_perm) {
 
 template <typename Scalar>
 BlockLDLT<Scalar> &BlockLDLT<Scalar>::findSparsifyingPermutation() {
-  auto in = m_structure.copy();
+  SymbolicBlockMatrix in(m_structure.copy());
   m_structure.brute_force_best_permutation(in, m_perm.data(), m_iwork.data());
   symbolic_deep_copy(in, m_structure, m_perm.data());
   analyzePattern();
@@ -36,16 +36,17 @@ BlockLDLT<Scalar>::updateBlockPermutationMatrix(const SymbolicBlockMatrix &in) {
   using IndicesType = PermutationType::IndicesType;
   IndicesType &indices = m_permutation.indices();
   isize idx = 0;
-  for (std::size_t i = 0; i < nblocks(); ++i) {
-    m_idx[i] = idx;
+  for (isize i = 0; i < nblocks(); ++i) {
+    m_idx[(usize)i] = idx;
     idx += row_segs[i];
   }
 
   idx = 0;
-  for (std::size_t i = 0; i < nblocks(); ++i) {
-    auto len = row_segs[m_perm[i]];
+  for (isize i = 0; i < (isize)nblocks(); ++i) {
+    auto j = (usize)m_perm[(usize)i];
+    isize len = row_segs[j];
     auto s = indices.segment(idx, len);
-    isize i0 = m_idx[m_perm[i]];
+    isize i0 = m_idx[j];
     s.setLinSpaced(i0, i0 + len - 1);
     idx += len;
   }
@@ -86,7 +87,7 @@ bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
   auto struct_tr = m_structure.transpose();
   BlockTriU mat_blk_U(m_matrix.transpose(), struct_tr);
   flag |= mat_blk_U.solveInPlace(b);
-  delete[] struct_tr.data;
+  delete[] struct_tr.m_data;
   delete[] struct_tr.segment_lens;
 
   PROXNLP_NOMALLOC_END;

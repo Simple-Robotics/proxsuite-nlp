@@ -20,11 +20,13 @@ namespace utf = boost::unit_test;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
+using linalg::EigenLDLTWrapper;
 
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
+const isize ndx = 26;
 
-auto create_problem_structure() {
+auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
   // clang-format off
   BlockKind *data = new BlockKind[n * n]{
       BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
@@ -34,13 +36,12 @@ auto create_problem_structure() {
   // clang-format on
 
   // isize row_segments[n] = {8, 16, 16};
-  isize *row_segments = new isize[n]{12, 24, 24};
-  SymbolicBlockMatrix sym_mat{data, row_segments, n, n};
-  return sym_mat;
+  isize *row_segments = new isize[n]{12, ndx, ndx};
+  return {data, row_segments, n, n};
 }
 
 auto sym_mat = create_problem_structure();
-isize ncols = 2;
+isize ncols = ndx;
 
 struct ldlt_test_fixture {
   ldlt_test_fixture() : mat(), rhs(), ldlt() { this->init(); }
@@ -132,7 +133,7 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
-  linalg::EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
+  EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
   BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
 
   MatrixXs reconstr = ldlt_wrap.reconstructedMatrix();
@@ -156,6 +157,8 @@ BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
   ps_ldlt.solveInPlace(sol_ps);
 
   BOOST_CHECK(sol_ps.isApprox(sol_eig));
+  Scalar solve_err = math::infty_norm(sol_ps - sol_eig);
+  fmt::print("proxsuite_err = {:.5e}\n", solve_err);
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
