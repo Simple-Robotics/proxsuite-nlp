@@ -5,7 +5,9 @@
 #pragma once
 
 #include "linalg/blocks.hpp"
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 #include "linalg/proxsuite-ldlt-wrap.hpp"
+#endif
 #include <memory>
 
 namespace proxnlp {
@@ -60,7 +62,13 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   case LDLTChoice::EIGEN:
     return ldlt_ptr_t(new linalg::EigenLDLTWrapper<Scalar>(size));
   case LDLTChoice::PROXSUITE:
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
     return ldlt_ptr_t(new linalg::ProxSuiteLDLTWrapper<Scalar>(size, size));
+#else
+    PROXNLP_RUNTIME_ERROR(
+        "ProxSuite support is not enabled. You should recompile ProxNLP with "
+        "the BUILD_WITH_PROXSUITE flag.");
+#endif
   default:
     return nullptr;
   }

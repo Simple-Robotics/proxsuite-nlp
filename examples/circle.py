@@ -61,8 +61,14 @@ solver = proxnlp.Solver(
 )
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
-solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
-solver.setup()
+try:
+    solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
+    solver.setup()
+except RuntimeError as e:
+    print("Got exception: {}".format(e))
+    print("Will proceed using LDLT_DENSE")
+    solver.ldlt_choice = proxnlp.LDLT_DENSE
+    solver.setup()
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 

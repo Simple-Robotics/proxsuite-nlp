@@ -58,6 +58,7 @@ option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
 option(BUILD_WITH_CASADI_SUPPORT "Build the library with the support of CASADI" OFF)
 option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
+option(BUILD_WITH_PROXSUITE "Build the library with ProxSuite's LDLT" OFF)
 cmake_dependent_option(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF BUILD_PYTHON_INTERFACE OFF)
 
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
@@ -87,7 +88,11 @@ endmacro(TAG_LIBRARY_VERSION)
 # ----------------------------------------------------
 ADD_PROJECT_DEPENDENCY(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
 ADD_PROJECT_DEPENDENCY(fmt 6.1.2 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 6.1.2")
-ADD_PROJECT_DEPENDENCY(proxsuite REQUIRED)
+
+if(BUILD_WITH_PROXSUITE)
+  ADD_PROJECT_DEPENDENCY(proxsuite REQUIRED)
+  add_definitions(-DPROXNLP_ENABLE_PROXSUITE_LDLT)
+endif()
 
 # Variable containing all the cflags definition relative to optional dependencies
 set(CFLAGS_DEPENDENCIES)
@@ -181,7 +186,9 @@ function(create_library)
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
-  target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
+  if(BUILD_WITH_PROXSUITE)
+    target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
+  endif(BUILD_WITH_PROXSUITE)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   foreach(headerFile ${LIB_HEADERS})

@@ -60,8 +60,11 @@ void exposeWorkspace() {
                                                              bp::no_init);
   bp::class_<linalg::BlockLDLT<Scalar>, bp::bases<LDLTBase>>("BlockLDLT",
                                                              bp::no_init);
+
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
   bp::class_<linalg::ProxSuiteLDLTWrapper<Scalar>, bp::bases<LDLTBase>>(
       "ProxSuiteLDLT", "Wrapper around ProxSuite's custom LDLT.", bp::no_init);
+#endif
 }
 
 } // namespace python
