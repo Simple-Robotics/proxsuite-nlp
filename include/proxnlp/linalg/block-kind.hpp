@@ -7,6 +7,7 @@
 
 #include <Eigen/Core>
 #include <numeric>
+#include <vector>
 
 namespace proxnlp {
 namespace linalg {
