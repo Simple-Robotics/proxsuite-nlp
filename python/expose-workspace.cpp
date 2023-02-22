@@ -58,9 +58,10 @@ void exposeWorkspace() {
            "copy.");
   bp::class_<linalg::DenseLDLT<Scalar>, bp::bases<LDLTBase>>("DenseLDLT",
                                                              bp::no_init);
-  bp::class_<linalg::BlockLDLT<Scalar>, bp::bases<LDLTBase>>("BlockLDLT",
-                                                             bp::no_init);
-
+  using BlockLDLT = linalg::BlockLDLT<Scalar>;
+  bp::class_<BlockLDLT, bp::bases<LDLTBase>>("BlockLDLT", bp::no_init)
+      .def("print_sparsity", &BlockLDLT::print_sparsity, bp::args("self"),
+           "Print the sparsity pattern of the matrix to factorize.");
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
   bp::class_<linalg::ProxSuiteLDLTWrapper<Scalar>, bp::bases<LDLTBase>>(
       "ProxSuiteLDLT", "Wrapper around ProxSuite's custom LDLT.", bp::no_init);

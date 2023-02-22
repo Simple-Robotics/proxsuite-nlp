@@ -259,6 +259,7 @@ public:
 
   /// @returns a reference to the symbolic representation of the block-matrix.
   inline const SymbolicBlockMatrix &structure() const { return m_structure; }
+  inline void print_sparsity() const { print_sparsity_pattern(m_structure); }
 
   /// @brief Analyze and factorize the block structure, if not done already.
   inline bool analyzePattern() {
