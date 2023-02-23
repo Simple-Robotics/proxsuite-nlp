@@ -56,7 +56,6 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
 
     BlockLDLT<Scalar> *block_ldlt = new BlockLDLT<Scalar>(size, structure);
     block_ldlt->findSparsifyingPermutation();
-    block_ldlt->updateBlockPermutationMatrix(structure);
     return ldlt_ptr_t(block_ldlt);
   }
   case LDLTChoice::EIGEN:

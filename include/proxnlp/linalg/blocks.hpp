@@ -200,6 +200,7 @@ template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
   using Traits = LDLT_Traits<MatrixXs, Eigen::Lower>;
   using PermutationType =
       Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, isize>;
+  using PermIdxType = Eigen::Matrix<isize, Eigen::Dynamic, 1>;
   using BlockTriL = TriangularBlockMatrix<const MatrixXs, Eigen::UnitLower>;
   using BlockTriU =
       TriangularBlockMatrix<const typename MatrixXs::AdjointReturnType,
@@ -208,13 +209,16 @@ template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
 protected:
   MatrixXs m_matrix;
   SymbolicBlockMatrix m_structure;
+  SymbolicBlockMatrix m_struct_tr;
   PermutationType m_permutation;
   using Base::m_info;
   using Base::m_sign;
   std::vector<isize> m_perm;
   std::vector<isize> m_perm_inv;
   std::vector<isize> m_iwork;
-  std::vector<isize> m_idx;
+  std::vector<isize> m_start_idx;
+
+  BlockLDLT &updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
 
 public:
   /// @brief  The constructor copies the input matrix @param mat and symbolic
@@ -222,21 +226,10 @@ public:
   BlockLDLT(isize size, SymbolicBlockMatrix const &structure)
       : Base(), m_matrix(size, size), m_structure(structure.copy()),
         m_permutation(size), m_perm(nblocks()), m_perm_inv(nblocks()),
-        m_iwork(nblocks()), m_idx(nblocks()) {
+        m_iwork(nblocks()), m_start_idx(nblocks()) {
     std::iota(m_perm.begin(), m_perm.end(), isize(0));
     m_permutation.setIdentity();
-  }
-
-  /// @copydoc BlockLDLT()
-  /// @todo run the algorithm when in this constructor. Perhaps provide flags to
-  /// decide whether to compute/use permutations.
-  BlockLDLT(ConstMatrixRef mat, SymbolicBlockMatrix const &structure)
-      : m_matrix(mat), m_structure(structure.copy()), m_permutation(mat.rows()),
-        m_perm(nblocks()), m_perm_inv(nblocks()), m_iwork(nblocks()),
-        m_idx(nblocks()) {
-    findSparsifyingPermutation();
-    updateBlockPermutationMatrix(structure);
-    compute(mat);
+    m_struct_tr = m_structure.transpose();
   }
 
   BlockLDLT(BlockLDLT const &other)
@@ -247,12 +240,22 @@ public:
     m_perm = other.m_perm;
     m_perm_inv = other.m_perm_inv;
     m_iwork = other.m_iwork;
-    m_idx = other.m_idx;
+    m_start_idx = other.m_start_idx;
+  }
+
+  /// Compute indices indicating where blocks start
+  void computeStartIndices(const SymbolicBlockMatrix &in) {
+    m_start_idx[0] = 0;
+    for (usize i = 0; i < nblocks() - 1; ++i) {
+      m_start_idx[i + 1] = m_start_idx[i] + in.segment_lens[i];
+    }
   }
 
   ~BlockLDLT() {
     delete[] m_structure.m_data;
     delete[] m_structure.segment_lens;
+    delete[] m_struct_tr.m_data;
+    delete[] m_struct_tr.segment_lens;
     m_structure.m_data = nullptr;
     m_structure.segment_lens = nullptr;
   }
@@ -262,15 +265,12 @@ public:
   inline void print_sparsity() const { print_sparsity_pattern(m_structure); }
 
   /// @brief Analyze and factorize the block structure, if not done already.
-  inline bool analyzePattern() {
-    if (m_structure.performed_llt)
-      return true;
-    return m_structure.llt_in_place();
-  }
+  inline bool analyzePattern();
 
   usize nblocks() const { return usize(m_structure.segments_count); }
 
-  void setPermutation(isize const *new_perm = nullptr);
+  /// Calls updateBlockPermutationMatrix
+  void setBlockPermutation(isize const *new_perm = nullptr);
 
   auto blockPermIndices() -> std::vector<isize> & { return m_perm; }
 
@@ -279,8 +279,6 @@ public:
   BlockLDLT &findSparsifyingPermutation();
 
   inline const PermutationType &permutationP() const { return m_permutation; }
-
-  BlockLDLT &updateBlockPermutationMatrix(SymbolicBlockMatrix const &in);
 
   MatrixXs reconstructedMatrix() const override;
 
@@ -301,7 +299,7 @@ public:
 
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 
-  void compute() {
+  inline void compute() {
     m_info =
         backend::block_impl<Scalar>{m_matrix, m_structure}.ldlt_in_place_impl(
             m_sign)
@@ -312,9 +310,23 @@ public:
   /// Sets the input matrix to @p mat, performs the permutation and runs the
   /// algorithm.
   BlockLDLT &compute(const ConstMatrixRef &mat) override {
-    m_matrix = mat;
-    m_matrix.noalias() = permutationP() * m_matrix;
-    m_matrix.noalias() = m_matrix * permutationP().transpose();
+    assert(mat.rows() == mat.cols());
+    m_matrix.conservativeResizeLike(mat);
+    auto mat_coeff = [&](isize i, isize j) {
+      return i >= j ? mat(i, j) : mat(j, i);
+    };
+    auto n = mat.rows();
+    auto indices = permutationP().indices();
+    // by column
+    for (isize j = 0; j < n; ++j) {
+      auto pj = indices[j];
+      // by line starting at j
+      for (isize i = j; i < n; ++i) {
+        m_matrix(i, j) = mat_coeff(indices[i], pj);
+      }
+    }
+    // m_matrix.noalias() = permutationP() * m_matrix;
+    // m_matrix.noalias() = m_matrix * permutationP().transpose();
     // do not re-run analysis
     compute();
 

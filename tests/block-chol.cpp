@@ -73,7 +73,6 @@ struct ldlt_bench_fixture : benchmark::Fixture, ldlt_test_fixture {
 BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
   block_ldlt.findSparsifyingPermutation();
-  block_ldlt.updateBlockPermutationMatrix(sym_mat);
   auto b = rhs;
   for (auto _ : s) {
     b = rhs;
@@ -164,7 +163,6 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
 
   BlockLDLT<Scalar> block_permuted(size, sym_mat);
   block_permuted.findSparsifyingPermutation();
-  block_permuted.updateBlockPermutationMatrix(sym_mat);
   block_permuted.compute(mat);
   auto best_perm = block_permuted.blockPermIndices();
   fmt::print("Optimal permutation: {}\n",
