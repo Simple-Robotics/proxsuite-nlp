@@ -173,8 +173,7 @@ function(create_library)
   set_target_properties(${PROJECT_NAME}
                         PROPERTIES
                         LINKER_LANGUAGE CXX
-                        VERSION ${PROJECT_VERSION}
-                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+                        VERSION ${PROJECT_VERSION})
   if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
     TAG_LIBRARY_VERSION(${PROJECT_NAME})
   endif()
