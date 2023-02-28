@@ -58,7 +58,7 @@ private:
   }
 
 public:
-  SymbolicBlockMatrix() = delete;
+  SymbolicBlockMatrix() {}
   /// Allocating constructor.
   SymbolicBlockMatrix(isize nc, isize os)
       : segments_count(nc), outer_stride(os) {

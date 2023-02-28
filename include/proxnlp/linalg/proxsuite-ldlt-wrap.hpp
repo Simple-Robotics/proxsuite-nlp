@@ -17,13 +17,23 @@ using StackReq = proxsuite::linalg::veg::dynstack::StackReq;
 template <typename Mat, typename Rhs> void solve_impl(Mat &&ld_, Rhs &&rhs_) {
   auto ld = psdense::util::to_view(ld_);
   auto rhs = psdense::util::to_view_dyn_rows(rhs_);
+  using Scalar = typename Mat::Scalar;
 
   auto l = ld.template triangularView<Eigen::UnitLower>();
   auto lt =
       psdense::util::trans(ld).template triangularView<Eigen::UnitUpper>();
   auto d = psdense::util::diagonal(ld);
   l.solveInPlace(rhs);
-  rhs = d.asDiagonal().inverse() * rhs;
+  constexpr Scalar eps = std::numeric_limits<Scalar>::min();
+
+  using std::abs;
+  for (Eigen::Index i = 0; i < d.size(); ++i) {
+    if (abs(d[i]) > eps) {
+      rhs.row(i) /= d[i];
+    } else {
+      rhs.row(i).setZero();
+    }
+  }
   lt.solveInPlace(rhs);
 }
 

@@ -64,7 +64,7 @@ function(symlink_data_file filename)
 endfunction()
 
 add_proxnlp_test(block-chol)
-add_proxnlp_test(block-tri)
+add_proxnlp_test(tri-solve)
 add_proxnlp_test(constraints)
 add_proxnlp_test(costs)
 add_proxnlp_test(finite-diff)

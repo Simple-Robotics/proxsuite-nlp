@@ -24,7 +24,7 @@ template <typename _MatrixType> struct BunchKaufman {
 public:
   using MatrixType = _MatrixType;
   using Scalar = typename MatrixType::Scalar;
-  using Matrix2s = Eigen::Matrix<Scalar, 2, 2, Eigen::ColMajor>;
+  using Matrix2s = Eigen::Matrix<Scalar, 2, 2, MatrixType::Options>;
   using Traits = LBLT_Traits<MatrixType>;
   using MatrixB = typename Traits::MatrixB;
 
