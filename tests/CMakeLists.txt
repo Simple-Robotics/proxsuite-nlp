@@ -4,9 +4,8 @@
 
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-
-ADD_PROJECT_DEPENDENCY(Boost COMPONENTS unit_test_framework REQUIRED)
-ADD_PROJECT_DEPENDENCY(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
+add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
+add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 
 # create an object library just for cnpy
 add_library(cnpy OBJECT cnpy.cpp)
@@ -14,31 +13,33 @@ target_link_libraries(cnpy Eigen3::Eigen)
 target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
 set_target_properties(cnpy PROPERTIES PUBLIC_HEADER cnpy.hpp)
 
-install(TARGETS cnpy
-        EXPORT ${TARGETS_EXPORT_NAME}
-        OBJECTS DESTINATION lib/
-        PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests
-        )
+install(
+  TARGETS cnpy
+  EXPORT ${TARGETS_EXPORT_NAME}
+  OBJECTS DESTINATION lib/
+  PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests)
 
 macro(ADD_TEST_CFLAGS test_name flag)
-  set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " ${flag}")
+  set_property(
+    TARGET ${test_name}
+    APPEND_STRING
+    PROPERTY COMPILE_FLAGS " ${flag}")
 endmacro()
-
 
 function(get_cpp_test_name name dir out_var)
   string(REPLACE "${TEST_DIR}" "" prefix ${dir})
-  set(${out_var} "test-${prefix}${name}" PARENT_SCOPE)
+  set(${out_var}
+      "test-${prefix}${name}"
+      PARENT_SCOPE)
 endfunction(get_cpp_test_name)
-
 
 function(add_proxnlp_test name)
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
   set(test_file ${name}.cpp)
 
-  ADD_UNIT_TEST(${test_name} ${test_file})
+  add_unit_test(${test_name} ${test_file})
   set_target_properties(${test_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${test_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 
   # define macros required by boost_test
   # see: https://www.boost.org/doc/libs/1_78_0/libs/test/doc/html/boost_test/usage_variants.html
@@ -46,8 +47,8 @@ function(add_proxnlp_test name)
   set(MODULE_NAME "${name}Test")
   string(REGEX REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
 
-  ADD_TEST_CFLAGS(${test_name} "-DBOOST_TEST_DYN_LINK")
-  ADD_TEST_CFLAGS(${test_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
+  add_test_cflags(${test_name} "-DBOOST_TEST_DYN_LINK")
+  add_test_cflags(${test_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
 
   target_link_libraries(${test_name} ${PROJECT_NAME})
   target_link_libraries(${test_name} Boost::unit_test_framework)
@@ -58,9 +59,8 @@ endfunction(add_proxnlp_test)
 # symlink test data file
 function(symlink_data_file filename)
   # filename should be relative
-  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK}
-                  ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-                  ${CMAKE_CURRENT_BINARY_DIR}/${filename})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+                          ${CMAKE_CURRENT_BINARY_DIR}/${filename})
 endfunction()
 
 add_proxnlp_test(block-chol)
@@ -78,13 +78,16 @@ symlink_data_file("npy_payload.npy")
 symlink_data_file("npy_payload2.npy")
 
 # PYTHON TESTS
-if (BUILD_PYTHON_INTERFACE)
-  file(GLOB PYTHON_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} python/test_*.py)
+if(BUILD_PYTHON_INTERFACE)
+  file(
+    GLOB PYTHON_TESTS
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    python/test_*.py)
   message(STATUS "Python tests: ${PYTHON_TESTS}")
   make_directory(${CMAKE_CURRENT_BINARY_DIR}/python)
 
   foreach(pyfile ${PYTHON_TESTS})
     get_filename_component(pyfile_name ${pyfile} NAME)
-    ADD_PYTHON_UNIT_TEST(${pyfile_name} "tests/${pyfile}")
+    add_python_unit_test(${pyfile_name} "tests/${pyfile}")
   endforeach()
 endif()
