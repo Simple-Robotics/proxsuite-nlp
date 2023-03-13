@@ -3,6 +3,8 @@
   <name>proxnlp</name>
   <version>0.2.3</version>
   <maintainer email="wilson.jallet@laas.fr">Wilson Jallet</maintainer>
+  <description> A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.</description>
+  <license>tbd</license>
 
   <build_depend>git</build_depend>
   <build_depend>doxygen</build_depend>
