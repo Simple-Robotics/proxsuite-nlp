@@ -255,3 +255,7 @@ public:
 } // namespace proxnlp
 
 #include "proxnlp/solver-base.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/solver-base.txx"
+#endif
