@@ -4,6 +4,8 @@ on:
   push:
   pull_request:
   workflow_call:
+env:
+  PYTHONPATH: /builds/custom_install/lib/python3/dist-packages
 
 jobs:
   build:
@@ -26,7 +28,7 @@ jobs:
         path: ${{ env.CCACHE_DIR }}
 
     # extract branch name
-    - name: Get branch name (merge)
+    - name: Get branch name
       if: github.event_name != 'pull_request'
       shell: bash
       run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
@@ -37,23 +39,23 @@ jobs:
       shell: bash
       run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $GITHUB_ENV
 
-    # print branch name
-    - name: Debug
-      run: echo ${{ env.BRANCH_NAME }}
-
-    - name: Set env variables
+    - name: Build and install proxnlp
       run: |
-        echo "PYTHONPATH=/builds/custom_install/lib/python3/dist-packages/" >> $GITHUB_ENV
-        echo "CTEST_OUTPUT_ON_FAILURE=1" >> $GITHUB_ENV
-        echo "CTEST_PARALLEL_LEVEL=4" >> $GITHUB_ENV
 
-    - name: Install proxnlp
-      run: |
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
 
         cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=~/custom_install -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python3)
         make -j3 install
+  test:
+    needs: build
+    runs-on: self-hosted
+    env:
+      CTEST_OUTPUT_ON_FAILURE: 1
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - run: |
+        cd $GITHUB_WORKSPACE/build
         pip install casadi --no-input
         make test
