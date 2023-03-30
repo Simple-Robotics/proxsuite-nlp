@@ -79,3 +79,7 @@ template <typename _Scalar> struct ResultsTpl {
 };
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/results.txx"
+#endif

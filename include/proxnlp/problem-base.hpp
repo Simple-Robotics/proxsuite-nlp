@@ -136,3 +136,7 @@ void allocateMultipliersOrResiduals(
 } // namespace helpers
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/problem-base.txx"
+#endif

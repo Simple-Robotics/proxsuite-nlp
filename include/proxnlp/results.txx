@@ -1,10 +1,10 @@
 #pragma once
 
 #include "proxnlp/context.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/results.hpp"
 
 namespace proxnlp {
 
-extern template class SolverTpl<context::Scalar>;
+extern template struct ResultsTpl<context::Scalar>;
 
 } // namespace proxnlp
