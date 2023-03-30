@@ -33,6 +33,6 @@ template <typename Scalar>
 void PDALFunction<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / new_mu;
-};
+}
 
 } // namespace proxnlp
