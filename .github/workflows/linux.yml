@@ -6,7 +6,7 @@ on:
   workflow_call:
 
 jobs:
-  proxnlp:
+  build:
 
     runs-on: self-hosted
 
