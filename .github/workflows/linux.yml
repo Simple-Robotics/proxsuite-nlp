@@ -55,5 +55,11 @@ jobs:
 
         cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=~/custom_install -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python3)
         make -j3 install
+  test:
+    needs: build
+    runs-on: self-hosted
+    steps:
+    - run: |
+        cd $GITHUB_WORKSPACE/build
         pip install casadi --no-input
         make test
