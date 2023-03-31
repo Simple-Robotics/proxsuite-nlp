@@ -1,16 +1,18 @@
-#include "proxnlp/python/manifold.hpp"
-
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
 #ifdef PROXNLP_WITH_PINOCCHIO
+#include <pinocchio/fwd.hpp>
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/spaces/multibody.hpp"
 #endif
 
+#include "proxnlp/python/fwd.hpp"
+#include "proxnlp/manifold-base.hpp"
+#include "proxnlp/modelling/spaces/cartesian-product.hpp"
+#include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
+
 namespace proxnlp {
 namespace python {
 
-namespace internal {
 void exposeManifoldBase() {
   using context::ConstVectorRef;
   using context::Manifold;
@@ -97,8 +99,6 @@ void exposeManifoldBase() {
               const CartesianProductTpl<Scalar> &b) { return a * b; });
 }
 
-} // namespace internal
-
 /// Expose the tangent bundle of a manifold type @p M.
 template <typename M>
 bp::class_<TangentBundleTpl<M>, bp::bases<context::Manifold>>
@@ -136,7 +136,7 @@ void exposeManifolds() {
   using context::Manifold;
   using context::Scalar;
 
-  internal::exposeManifoldBase();
+  exposeManifoldBase();
 
   /* Basic vector space */
   bp::class_<VectorSpaceTpl<Scalar>, bp::bases<Manifold>>(

@@ -4,8 +4,6 @@
 
 set(EXAMPLES_HEADER "example-base.hpp")
 
-file(GLOB EXAMPLES_CPP "*.cpp")
-
 function(add_proxnlp_example exfile)
   get_filename_component(example_name ${exfile} NAME_WE)
   set(example_name "example-${example_name}")
@@ -19,9 +17,11 @@ function(add_proxnlp_example exfile)
   target_link_libraries(${example_name} PUBLIC ${PROJECT_NAME})
 endfunction()
 
-foreach(exfile ${EXAMPLES_CPP})
-  add_proxnlp_example(${exfile})
-endforeach()
+add_proxnlp_example(circle.cpp)
+add_proxnlp_example(equality-qp.cpp)
+if(BUILD_WITH_PINOCCHIO_SUPPORT)
+  add_proxnlp_example(so2.cpp)
+endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # Python examples
 if(BUILD_PYTHON_INTERFACE)

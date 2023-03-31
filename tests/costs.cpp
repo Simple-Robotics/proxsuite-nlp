@@ -1,19 +1,25 @@
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 #include "proxnlp/cost-sum.hpp"
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
 #include <boost/test/unit_test.hpp>
 
+#ifdef PROXNLP_WITH_PINOCCHIO
+#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#endif
+
+using namespace proxnlp;
+namespace utf = boost::unit_test;
+#ifdef PROXNLP_WITH_PINOCCHIO
+namespace pin = pinocchio;
+using SE2 = PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>>;
+#endif
+
 BOOST_AUTO_TEST_SUITE(cost)
 
 #ifdef PROXNLP_WITH_PINOCCHIO
-using namespace proxnlp;
-namespace pin = pinocchio;
-namespace utf = boost::unit_test;
-using SE2 = PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>>;
 
 BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
   auto space_ = std::make_shared<SE2>();
