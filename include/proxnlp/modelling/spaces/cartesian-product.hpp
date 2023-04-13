@@ -31,6 +31,12 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     components.push_back(c);
   }
 
+  inline void addComponent(const shared_ptr<CartesianProductTpl> &other) {
+    for (const auto &c : other->components) {
+      this->addComponent(c);
+    }
+  }
+
   CartesianProductTpl() {}
 
   CartesianProductTpl(const std::vector<shared_ptr<Base>> &components)
@@ -41,14 +47,14 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
   CartesianProductTpl(const shared_ptr<Base> &left,
                       const shared_ptr<Base> &right) {
-    components.push_back(left);
-    components.push_back(right);
+    addComponent(left);
+    addComponent(right);
   }
 
   template <typename U, typename V>
   CartesianProductTpl(const U &left, const V &right) {
-    static_assert(!std::is_pointer<U>::value, "U should be pointer type.");
-    static_assert(!std::is_pointer<V>::value, "V should be pointer type.");
+    static_assert(!(std::is_pointer_v<U> || std::is_pointer_v<V>),
+                  "Ctor operators on non-pointer types.");
     components.push_back(std::make_shared<U>(left));
     components.push_back(std::make_shared<V>(right));
   }
@@ -91,9 +97,11 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  std::vector<VectorRef> split(VectorRef x) const {
+private:
+  template <class VectorType, class U = std::remove_const_t<VectorType>>
+  std::vector<U> split_impl(VectorType &x) const {
     proxnlp_dim_check(x, this->nx());
-    std::vector<VectorRef> out = {};
+    std::vector<U> out;
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
       const long n = components[i]->nx();
@@ -103,9 +111,10 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
     return out;
   }
 
-  std::vector<VectorRef> split_vector(VectorRef v) const {
+  template <class VectorType, class U = std::remove_const_t<VectorType>>
+  std::vector<U> split_vector_impl(VectorType &v) const {
     proxnlp_dim_check(v, this->ndx());
-    std::vector<VectorRef> out = {};
+    std::vector<U> out;
     Eigen::Index c = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
       const long n = components[i]->ndx();
@@ -113,6 +122,23 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
       c += n;
     }
     return out;
+  }
+
+public:
+  std::vector<VectorRef> split(VectorRef x) const {
+    return split_impl<VectorRef>(x);
+  }
+
+  std::vector<ConstVectorRef> split(const ConstVectorRef &x) const {
+    return split_impl<const ConstVectorRef>(x);
+  }
+
+  std::vector<VectorRef> split_vector(VectorRef v) const {
+    return split_vector_impl<VectorRef>(v);
+  }
+
+  std::vector<ConstVectorRef> split_vector(const ConstVectorRef &v) const {
+    return split_vector_impl<const ConstVectorRef>(v);
   }
 
   PointType merge(const std::vector<VectorXs> &xs) const {
@@ -207,14 +233,6 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
       getComponent(i).JintegrateTransport(sx, sv, sJout, arg);
     }
-    // const int nx1 = left().nx();
-    // const int nx2 = right().nx();
-    // const int ndx1 = left().ndx();
-    // const int ndx2 = right().ndx();
-    // left().JintegrateTransport(x.head(nx1), v.head(ndx1), Jout.topRows(ndx1),
-    //                            arg);
-    // right().JintegrateTransport(x.tail(nx2), v.head(ndx2),
-    //                             Jout.bottomRows(ndx2), arg);
   }
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
@@ -234,39 +252,29 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
       getComponent(i).Jdifference(sx0, sx1, sJout, arg);
     }
-    // const int nx1 = left().nx();
-    // const int nx2 = right().nx();
-    // const int ndx1 = left().ndx();
-    // const int ndx2 = right().ndx();
-    // left().Jdifference(x0.head(nx1), x1.head(nx1),
-    //                    Jout.topLeftCorner(ndx1, ndx1), arg);
-    // right().Jdifference(x0.tail(nx2), x1.tail(nx2),
-    //                     Jout.bottomRightCorner(ndx2, ndx2), arg);
   }
 };
 
-/// Direct product of two manifolds as a cartesian product.
-// template<typename U, typename V>
-// CartesianProductTpl<typename U::Scalar> operator*(const U& left, const V&
-// right)
-// {
-//   using T = typename U::Scalar;
-//   static_assert(std::is_same<T, typename V::Scalar>::value, "Both arguments
-//   should have same Scalar template arg!"); return
-//   CartesianProductTpl<T>(std::make_shared<U>(left),
-//   std::make_shared<V>(right));
-// }
-
 template <typename T>
-CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
-                                 const ManifoldPtr<T> &right) {
-  return CartesianProductTpl<T>({left, right});
+auto operator*(const ManifoldPtr<T> &left, const ManifoldPtr<T> &right) {
+  return std::make_shared<CartesianProductTpl<T>>(left, right);
 }
 
 template <typename T>
-CartesianProductTpl<T> operator*(const shared_ptr<CartesianProductTpl<T>> &left,
-                                 const ManifoldPtr<T> &right) {
-  return (*left) * right;
+auto operator*(const shared_ptr<CartesianProductTpl<T>> &left,
+               const ManifoldPtr<T> &right) {
+  auto out = std::make_shared<CartesianProductTpl<T>>(*left);
+  out->addComponent(right);
+  return out;
+}
+
+template <typename T>
+auto operator*(const ManifoldPtr<T> &left,
+               const shared_ptr<CartesianProductTpl<T>> &right) {
+  auto out = std::make_shared<CartesianProductTpl<T>>();
+  out->addComponent(left);
+  out->addComponent(right);
+  return out;
 }
 
 template <typename T>

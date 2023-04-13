@@ -29,8 +29,7 @@ void exposeCartesianProduct() {
   using MutSplitSig =
       std::vector<VectorRef> (CartesianProduct::*)(VectorRef) const;
 
-  bp::class_<CartesianProduct, bp::bases<Manifold>,
-             shared_ptr<CartesianProduct>>(
+  bp::class_<CartesianProduct, bp::bases<Manifold>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
       bp::init<const std::vector<ManifoldPtr> &>(bp::args("self", "spaces")))
       .def(
@@ -38,8 +37,16 @@ void exposeCartesianProduct() {
       .def("getComponent", &CartesianProduct::getComponent,
            bp::return_internal_reference<>(), bp::args("self", "i"),
            "Get the i-th component of the Cartesian product.")
-      .def("addComponent", &CartesianProduct::addComponent,
-           bp::args("self", "c"), "Add a component to the Cartesian product.")
+      .def(
+          "addComponent",
+          +[](CartesianProduct &m, ManifoldPtr const &p) { m.addComponent(p); },
+          bp::args("self", "c"), "Add a component to the Cartesian product.")
+      .def(
+          "addComponent",
+          +[](CartesianProduct &m, shared_ptr<CartesianProduct> const &p) {
+            m.addComponent(p);
+          },
+          bp::args("self", "c"), "Add a component to the Cartesian product.")
       .add_property("num_components", &CartesianProduct::numComponents,
                     "Get the number of components in the Cartesian product.")
       .def(

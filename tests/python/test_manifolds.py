@@ -72,14 +72,18 @@ def test_cartesian_product():
 
     s33 = space3 * space3 * space3
     x0 = s33.rand()
+    n0 = s33.neutral()
     print("space3^3:", s33)
     print("numcomp:", s33.num_components)
-    print("space3^3:", s33.ndx)
-    print("space3^3:", s33.neutral())
-    print("space3^3:", x0)
+    assert s33.num_components == 3
+    print("space3^3 ndx:", s33.ndx)
+    print("space3^3 neutral:", n0)
+    print("space3^3 rand:", x0)
+
     s33_split = s33.split(x0).tolist()
     assert len(s33_split) == s33.num_components
-    print("split s33:", s33_split)
+    print("split s33 x0:", s33_split)
+    print("split s33 neutral:", s33.split(n0).tolist())
 
     # test derivatives
     def product_space_diff_test(prod):

@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
   shared_ptr<Manifold> space2_ptr =
       std::make_shared<VectorSpaceTpl<double>>(space2);
 
-  CartesianProductTpl<double> prod2 = space2_ptr * space2_ptr;
-  x1 = prod2.rand();
+  auto prod2 = space2_ptr * space2_ptr;
+  x1 = prod2->rand();
 }
 
 #ifdef PROXNLP_WITH_PINOCCHIO
