@@ -29,7 +29,8 @@ void exposeCartesianProduct() {
   using MutSplitSig =
       std::vector<VectorRef> (CartesianProduct::*)(VectorRef) const;
 
-  bp::class_<CartesianProduct, bp::bases<Manifold>>(
+  bp::class_<CartesianProduct, bp::bases<Manifold>,
+             shared_ptr<CartesianProduct>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
       bp::init<const std::vector<ManifoldPtr> &>(bp::args("self", "spaces")))
       .def(
