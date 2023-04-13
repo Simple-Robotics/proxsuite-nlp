@@ -79,15 +79,5 @@ symlink_data_file("npy_payload2.npy")
 
 # PYTHON TESTS
 if(BUILD_PYTHON_INTERFACE)
-  file(
-    GLOB PYTHON_TESTS
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-    python/test_*.py)
-  message(STATUS "Python tests: ${PYTHON_TESTS}")
-  make_directory(${CMAKE_CURRENT_BINARY_DIR}/python)
-
-  foreach(pyfile ${PYTHON_TESTS})
-    get_filename_component(pyfile_name ${pyfile} NAME)
-    add_python_unit_test(${pyfile_name} "tests/${pyfile}")
-  endforeach()
+  add_subdirectory(python)
 endif()
