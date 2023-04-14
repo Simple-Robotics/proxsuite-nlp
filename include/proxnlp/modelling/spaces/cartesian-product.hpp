@@ -53,7 +53,7 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
 
   template <typename U, typename V>
   CartesianProductTpl(const U &left, const V &right) {
-    static_assert(!(std::is_pointer_v<U> || std::is_pointer_v<V>),
+    static_assert(!(std::is_pointer<U>::value || std::is_pointer<V>::value),
                   "Ctor operators on non-pointer types.");
     components.push_back(std::make_shared<U>(left));
     components.push_back(std::make_shared<V>(right));
