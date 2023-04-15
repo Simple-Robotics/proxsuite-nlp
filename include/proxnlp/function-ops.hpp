@@ -34,12 +34,12 @@ public:
     left().computeJacobian(right()(x), Jout);
     Jout = Jout * right().computeJacobian(x);
   }
-
-private:
-  shared_ptr<const Base> left_;
-  shared_ptr<const Base> right_;
   const Base &left() const { return *left_; }
   const Base &right() const { return *right_; }
+
+private:
+  shared_ptr<Base> left_;
+  shared_ptr<Base> right_;
 };
 
 /// @brief    Compose two function objects.
