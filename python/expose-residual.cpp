@@ -22,10 +22,14 @@ void exposeResiduals() {
   using context::Scalar;
   using context::VectorXs;
 
-  expose_function<LinearFunctionTpl<Scalar>>(
+  using LinearFunction = LinearFunctionTpl<Scalar>;
+
+  expose_function<LinearFunction>(
       "LinearFunction", "Residual f(x) = Ax + b.",
       bp::init<ConstMatrixRef, ConstVectorRef>(bp::args("self", "A", "b")))
-      .def(bp::init<ConstMatrixRef>(bp::args("self", "A")));
+      .def(bp::init<ConstMatrixRef>(bp::args("self", "A")))
+      .def_readwrite("A", &LinearFunction::mat, "Matrix :math:`A`.")
+      .def_readwrite("b", &LinearFunction::b, "Intercept :math:`b`.");
 
   expose_function<ManifoldDifferenceToPoint<Scalar>>(
       "ManifoldDifferenceToPoint", "Difference vector x (-) x0.",
