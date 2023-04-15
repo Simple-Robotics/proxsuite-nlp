@@ -3,12 +3,15 @@
 
 namespace proxnlp {
 namespace python {
+using context::C1Function;
+using context::C2Function;
+using context::ConstVectorRef;
+using context::Function;
+using context::Scalar;
+
+void exposeFunctionOps();
 
 void exposeFunctionTypes() {
-  using context::C1Function;
-  using context::C2Function;
-  using context::ConstVectorRef;
-  using context::Function;
 
   bp::class_<FunctionWrap, boost::noncopyable>(
       "BaseFunction", "Base class for functions.",
@@ -37,9 +40,21 @@ void exposeFunctionTypes() {
       .def("vectorHessianProduct", &C2Function::vectorHessianProduct,
            &C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))
       .def("getVHP", &C2FunctionWrap::getVHP, bp::args("self", "x", "v"),
-           "Compute and return the vector-Hessian product.");
+           "Compute and return the vector-Hessian product.")
+      .def(
+          "__matmul__",
+          +[](shared_ptr<C2Function> const &left,
+              shared_ptr<C2Function> const &right) {
+            return ::proxnlp::compose<Scalar>(left, right);
+          },
+          "Composition operator. This composes the first argument over the "
+          "second one.");
 
-  using ComposeFunction = ComposeFunctionTpl<context::Scalar>;
+  exposeFunctionOps();
+}
+
+void exposeFunctionOps() {
+  using ComposeFunction = ComposeFunctionTpl<Scalar>;
 
   const char *compose_doc = "Composition of two functions. This returns the "
                             "composition of `f` over `g`.";
