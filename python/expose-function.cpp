@@ -38,14 +38,25 @@ void exposeFunctionTypes() {
       .def("getVHP", &C2FunctionWrap::getVHP, bp::args("self", "x", "v"),
            "Compute and return the vector-Hessian product.");
 
-  bp::class_<ComposeFunctionTpl<context::Scalar>, bp::bases<C2Function>>(
-      "ComposeFunction", "Composition of two functions.",
-      bp::init<const shared_ptr<C2Function> &, const shared_ptr<C2Function> &>(
-          bp::args("self", "left", "right")));
+  using ComposeFunction = ComposeFunctionTpl<context::Scalar>;
 
-  bp::def("compose", &::proxnlp::compose<context::Scalar>,
-          bp::args("fn1", "fn2"),
-          "Returns the composition of two C2Function objects.");
+  const char *compose_doc = "Composition of two functions. This returns the "
+                            "composition of `f` over `g`.";
+  bp::class_<ComposeFunction, bp::bases<C2Function>>("ComposeFunction",
+                                                     compose_doc, bp::no_init)
+      .def(bp::init<const shared_ptr<C2Function> &,
+                    const shared_ptr<C2Function> &>(bp::args("self", "f", "g")))
+      .add_property("left",
+                    bp::make_function(&ComposeFunction::left,
+                                      bp::return_internal_reference<>()),
+                    "The left-hand side of the composition.")
+      .add_property("right",
+                    bp::make_function(&ComposeFunction::right,
+                                      bp::return_internal_reference<>()),
+                    "The right-hand side of the composition.");
+
+  bp::def("compose", &::proxnlp::compose<context::Scalar>, bp::args("f", "g"),
+          compose_doc);
 }
 
 } // namespace python
