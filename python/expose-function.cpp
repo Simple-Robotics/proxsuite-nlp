@@ -30,6 +30,7 @@ void exposeFunctionTypes() {
       .def("getJacobian", compJac2, bp::args("self", "x"),
            "Compute and return Jacobian.");
 
+  bp::register_ptr_to_python<shared_ptr<C2Function>>();
   bp::class_<C2FunctionWrap, bp::bases<C1Function>, boost::noncopyable>(
       "C2Function", "Base class for twice-differentiable functions.",
       bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
