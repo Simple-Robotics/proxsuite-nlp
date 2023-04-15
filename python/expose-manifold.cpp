@@ -72,6 +72,7 @@ void exposeManifoldBase() {
             m.Jintegrate(x, v, Jout, arg);
             return Jout;
           },
+          bp::args("self", "x", "v", "arg"),
           "Compute and return the Jacobian of the exp.")
       .def("JintegrateTransport", &Manifold::JintegrateTransport,
            bp::args("self", "x", "v", "J", "arg"),
@@ -85,6 +86,7 @@ void exposeManifoldBase() {
             m.Jdifference(x0, x1, Jout, arg);
             return Jout;
           },
+          bp::args("self", "x", "v", "arg"),
           "Compute and return the Jacobian of the log.")
       .def("tangent_space", &Manifold::tangentSpace, bp::args("self"),
            "Returns an object representing the tangent space to this manifold.")
