@@ -16,8 +16,8 @@ template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   using Base = C2FunctionTpl<Scalar>;
   using Base::computeJacobian;
 
-  const MatrixXs mat;
-  const VectorXs b;
+  MatrixXs mat;
+  VectorXs b;
 
   LinearFunctionTpl(const ConstMatrixRef &A, const ConstVectorRef &b)
       : Base((int)A.cols(), (int)A.cols(), (int)A.rows()), mat(A), b(b) {}
