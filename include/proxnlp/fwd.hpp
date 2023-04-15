@@ -49,6 +49,10 @@ template <typename Scalar> struct C2FunctionTpl;
 // fwd ComposeFunctionTpl
 template <typename Scalar> struct ComposeFunctionTpl;
 
+template <typename Scalar>
+auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
+             const shared_ptr<C2FunctionTpl<Scalar>> &right);
+
 // fwd Cost
 template <typename Scalar> struct CostFunctionBaseTpl;
 

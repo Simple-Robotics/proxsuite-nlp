@@ -23,6 +23,10 @@ public:
                      const shared_ptr<Base> &right)
       : Base(right->nx(), right->ndx(), left->nr()), left_(left),
         right_(right) {
+    if (left->nx() != right->nr()) {
+      PROXNLP_RUNTIME_ERROR(fmt::format(
+          "Incompatible dimensions ({:d} and {:d}).", left->nx(), right->nr()));
+    }
     assert(left->nx() == right->nr());
   }
 
@@ -34,6 +38,7 @@ public:
     left().computeJacobian(right()(x), Jout);
     Jout = Jout * right().computeJacobian(x);
   }
+
   const Base &left() const { return *left_; }
   const Base &right() const { return *right_; }
 
@@ -47,10 +52,13 @@ private:
 /// @return   ComposeFunctionTpl object representing the composition of @p left
 /// and @p right.
 template <typename Scalar>
-ComposeFunctionTpl<Scalar>
-compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
-        const shared_ptr<C2FunctionTpl<Scalar>> &right) {
-  return ComposeFunctionTpl<Scalar>(left, right);
+auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
+             const shared_ptr<C2FunctionTpl<Scalar>> &right) {
+  return std::make_shared<ComposeFunctionTpl<Scalar>>(left, right);
 }
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/function-ops.txx"
+#endif
