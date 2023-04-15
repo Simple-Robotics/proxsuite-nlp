@@ -2,7 +2,8 @@
 
 #include "proxnlp/python/fwd.hpp"
 
-namespace proxnlp::python {
+namespace proxnlp {
+namespace python {
 
 using context::Manifold;
 using context::Scalar;
@@ -35,9 +36,17 @@ void exposeCartesianProduct() {
       bp::init<const std::vector<ManifoldPtr> &>(bp::args("self", "spaces")))
       .def(
           bp::init<ManifoldPtr, ManifoldPtr>(bp::args("self", "left", "right")))
-      .def("getComponent", &CartesianProduct::getComponent,
-           bp::return_internal_reference<>(), bp::args("self", "i"),
-           "Get the i-th component of the Cartesian product.")
+      .def(
+          "getComponent",
+          +[](CartesianProduct const &m, std::size_t i) -> const Manifold & {
+            if (i >= m.numComponents()) {
+              PyErr_SetString(PyExc_IndexError, "Index out of bounds.");
+              bp::throw_error_already_set();
+            }
+            return m.getComponent(i);
+          },
+          bp::return_internal_reference<>(), bp::args("self", "i"),
+          "Get the i-th component of the Cartesian product.")
       .def(
           "addComponent",
           +[](CartesianProduct &m, ManifoldPtr const &p) { m.addComponent(p); },
@@ -85,4 +94,5 @@ void exposeCartesianProduct() {
                          const ManifoldPtr &b) { return a * b; });
 }
 
-} // namespace proxnlp::python
+} // namespace python
+} // namespace proxnlp
