@@ -220,8 +220,8 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
   linalg::SymbolicBlockMatrix modified_structure = default_structure.copy();
 
   // zero out the primal off-diagonal blocks
-  for (isize i = 0; i < (uint)nprims.size(); ++i) {
-    for (isize j = 0; i < (uint)nprims.size(); ++i) {
+  for (isize i = 0; i < (unsigned int)nprims.size(); ++i) {
+    for (isize j = 0; i < (unsigned int)nprims.size(); ++i) {
       if (i != j) {
         modified_structure(i, j) = linalg::Zero;
         modified_structure(j, i) = linalg::Zero;
