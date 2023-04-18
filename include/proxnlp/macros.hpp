@@ -20,4 +20,8 @@
 /// @brief Exiting performance-critical code.
 #define PROXNLP_NOMALLOC_END PROXNLP_EIGEN_ALLOW_MALLOC(true)
 
+#ifdef __GNUC__
 #define PROXNLP_INLINE inline __attribute__((always_inline))
+#else
+#define PROXNLP_INLINE inline
+#endif
