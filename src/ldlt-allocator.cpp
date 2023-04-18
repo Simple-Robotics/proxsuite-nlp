@@ -16,10 +16,10 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
   SymbolicBlockMatrix structure(nblocks, nblocks);
   isize *segment_lens = structure.segment_lens;
 
-  for (uint i = 0; i < nprim_blocks; ++i) {
+  for (isize i = 0; i < nprim_blocks; ++i) {
     segment_lens[i] = dims_primal[i];
   }
-  for (uint i = 0; i < ndual_blocks; ++i) {
+  for (isize i = 0; i < ndual_blocks; ++i) {
     segment_lens[i + nprim_blocks] = dims_dual[i];
   }
 
