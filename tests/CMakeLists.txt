@@ -2,8 +2,6 @@
 # Copyright (C) 2022 LAAS-CNRS, INRIA
 #
 
-set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
 add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 
@@ -27,9 +25,9 @@ macro(ADD_TEST_CFLAGS test_name flag)
 endmacro()
 
 function(get_cpp_test_name name dir out_var)
-  string(REPLACE "${TEST_DIR}" "" prefix ${dir})
+  string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "test-cpp" prefix ${dir})
   set(${out_var}
-      "test-${prefix}${name}"
+      "${prefix}-${name}"
       PARENT_SCOPE)
 endfunction(get_cpp_test_name)
 
