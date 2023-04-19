@@ -153,6 +153,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
+      ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
+      ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp
       ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp

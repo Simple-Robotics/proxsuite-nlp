@@ -10,6 +10,17 @@
 
 namespace proxnlp {
 namespace python {
+
+using context::ConstMatrixRef;
+using context::ConstVectorRef;
+using context::Cost;
+using context::Manifold;
+using context::MatrixRef;
+using context::MatrixXs;
+using context::Scalar;
+using context::VectorRef;
+using context::VectorXs;
+
 namespace internal {
 
 struct CostWrapper : context::Cost, bp::wrapper<context::Cost> {
@@ -30,14 +41,7 @@ struct CostWrapper : context::Cost, bp::wrapper<context::Cost> {
 } // namespace internal
 
 void exposeCost() {
-  using context::ConstMatrixRef;
-  using context::ConstVectorRef;
-  using context::Cost;
-  using context::Manifold;
-  using context::MatrixRef;
-  using context::MatrixXs;
-  using context::VectorRef;
-  using context::VectorXs;
+  using CostPtr = shared_ptr<context::Cost>;
 
   void (Cost::*compGrad1)(const ConstVectorRef &, VectorRef) const =
       &Cost::computeGradient;
@@ -61,9 +65,16 @@ void exposeCost() {
       .def("computeHessian", compHess2, bp::args("self", "x"),
            "Compute and return the Hessian.")
       // define non-member operators
-      .def(bp::self + bp::self) // see cost_sum.hpp / returns CostSum<Scalar>
-      .def(context::Scalar() *
-           bp::self) // see cost_sum.hpp / returns CostSum<Scalar>
+      .def(
+          "__add__",
+          +[](CostPtr const &a, CostPtr const &b) {
+            return a + b;
+          }) // see cost_sum.hpp / returns CostSum<Scalar>
+      .def(
+          "__mul__",
+          +[](Scalar a, CostPtr const &b) {
+            return a * b;
+          }) // see cost_sum.hpp / returns CostSum<Scalar>
       ;
 
   bp::class_<func_to_cost<context::Scalar>, bp::bases<Cost>>(
@@ -71,30 +82,28 @@ void exposeCost() {
       "Wrap a scalar-values C2 function into a cost function.",
       bp::init<const context::C2Function &>(bp::args("self", "func")));
 
-  using CostSum_t = CostSum<context::Scalar>;
-  bp::class_<CostSum_t, bp::bases<Cost>>(
+  using CostSum = CostSumTpl<context::Scalar>;
+  bp::register_ptr_to_python<shared_ptr<CostSum>>();
+  bp::class_<CostSum, bp::bases<Cost>>(
       "CostSum", "Sum of cost functions.",
-      bp::init<int, int, const std::vector<CostSum_t::BasePtr> &,
+      bp::init<int, int, const std::vector<CostSum::BasePtr> &,
                const std::vector<context::Scalar> &>(
           bp::args("self", "nx", "ndx", "components", "weights")))
       .def(bp::init<int, int>(bp::args("self", "nx", "ndx")))
-      .add_property("num_components", &CostSum_t::numComponents,
+      .add_property("num_components", &CostSum::numComponents,
                     "Number of components.")
-      .def_readonly("weights", &CostSum_t::weights_)
-      .def("add_component", &CostSum_t::addComponent,
+      .def_readonly("weights", &CostSum::weights_)
+      .def("add_component", &CostSum::addComponent,
            ((bp::arg("self"), bp::arg("comp"), bp::arg("w") = 1.)),
            "Add a component to the cost.")
       // expose inplace operators
-      .def(bp::self += bp::self)
-      .def(bp::self += internal::CostWrapper(
-               0,
-               0)) // declval doesn't work in context, use non-abstract wrapper
-      .def(bp::self *= context::Scalar())
-      // expose operator overloads
-      .def(bp::self + bp::self)
-      .def(context::Scalar() * bp::self)
-      .def(bp::self + internal::CostWrapper(0, 0))
-      // printing
+      .def(
+          "__iadd__", +[](CostSum &a, CostSum const &b) { return a += b; })
+      .def(
+          "__iadd__", +[](CostSum &a, CostPtr const &b) { return a += b; })
+      .def(
+          "__imul__", +[](CostSum &a, Scalar b) { return a *= b; })
+      //   // printing
       .def(bp::self_ns::str(bp::self));
 
   /* Expose specific cost functions */

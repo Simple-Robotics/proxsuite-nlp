@@ -8,21 +8,21 @@ namespace proxnlp {
 
 /// @brief    Defines the sum of one or more cost functions \f$c_1 + c_2 +
 /// \cdots\f$
-template <typename _Scalar> struct CostSum : CostFunctionBaseTpl<_Scalar> {
+template <typename _Scalar> struct CostSumTpl : CostFunctionBaseTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = CostFunctionBaseTpl<Scalar>;
-  using BasePtr = Base const *;
+  using BasePtr = shared_ptr<Base>;
 
   std::vector<BasePtr> components_; /// component sub-costs
   std::vector<Scalar> weights_;     /// cost component weights
 
-  CostSum(int nx, int ndx) : Base(nx, ndx) {}
+  CostSumTpl(int nx, int ndx) : Base(nx, ndx) {}
 
   /// Constructor with a predefined vector of components.
-  CostSum(int nx, int ndx, const std::vector<BasePtr> &comps,
-          const std::vector<Scalar> &weights)
+  CostSumTpl(int nx, int ndx, const std::vector<BasePtr> &comps,
+             const std::vector<Scalar> &weights)
       : Base(nx, ndx), components_(comps), weights_(weights) {
     assert(components_.size() == weights_.size());
   }
@@ -53,17 +53,17 @@ public:
 
   /* CostSum API definition */
 
-  void addComponent(const Base &comp, const Scalar w = 1.) {
-    components_.push_back(&comp);
+  void addComponent(shared_ptr<Base> comp, const Scalar w = 1.) {
+    components_.push_back(comp);
     weights_.push_back(w);
   }
 
-  CostSum<Scalar> &operator+=(const Base &other) {
+  CostSumTpl<Scalar> &operator+=(const shared_ptr<Base> &other) {
     addComponent(other);
     return *this;
   }
 
-  CostSum<Scalar> &operator+=(const CostSum<Scalar> &other) {
+  CostSumTpl<Scalar> &operator+=(const CostSumTpl<Scalar> &other) {
     components_.insert(components_.end(), other.components_.begin(),
                        other.components_.end());
     weights_.insert(weights_.end(), other.weights_.begin(),
@@ -71,13 +71,7 @@ public:
     return *this;
   }
 
-  // increment this using an rvalue (for ex tmp rhs)
-  CostSum<Scalar> &operator+=(CostSum<Scalar> &&rhs) {
-    (*this) += std::forward<CostSum<Scalar>>(rhs);
-    return *this;
-  }
-
-  CostSum<Scalar> &operator*=(const Scalar rhs) {
+  CostSumTpl<Scalar> &operator*=(Scalar rhs) {
     for (auto &weight : weights_) {
       weight = rhs * weight;
     }
@@ -86,7 +80,7 @@ public:
 
   // printing
   friend std::ostream &operator<<(std::ostream &ostr,
-                                  const CostSum<Scalar> &cost) {
+                                  const CostSumTpl<Scalar> &cost) {
     const std::size_t nc = cost.numComponents();
     ostr << "CostSum(num_components=" << nc;
     ostr << ", weights=(";
@@ -104,3 +98,7 @@ public:
 } // namespace proxnlp
 
 #include "proxnlp/cost-sum.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/cost-sum.txx"
+#endif
