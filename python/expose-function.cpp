@@ -58,6 +58,7 @@ void exposeFunctionOps() {
 
   const char *compose_doc = "Composition of two functions. This returns the "
                             "composition of `f` over `g`.";
+  bp::register_ptr_to_python<shared_ptr<ComposeFunction>>();
   bp::class_<ComposeFunction, bp::bases<C2Function>>("ComposeFunction",
                                                      compose_doc, bp::no_init)
       .def(bp::init<const shared_ptr<C2Function> &,
