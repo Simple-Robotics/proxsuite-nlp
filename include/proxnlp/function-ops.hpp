@@ -35,8 +35,8 @@ public:
   }
 
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const {
-    left().computeJacobian(right()(x), Jout);
-    Jout = Jout * right().computeJacobian(x);
+    MatrixXs Jleft = left().computeJacobian(right()(x));
+    Jout.noalias() = Jleft * right().computeJacobian(x);
   }
 
   const Base &left() const { return *left_; }
