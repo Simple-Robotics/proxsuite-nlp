@@ -59,6 +59,7 @@ endif()
 option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
+option(BUILD_WITH_EXAMPLES "Build the examples" ON)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
@@ -218,7 +219,9 @@ if(BUILD_PYTHON_INTERFACE)
   add_subdirectory(python)
 endif()
 
-add_subdirectory(examples)
+if (BUILD_WITH_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
