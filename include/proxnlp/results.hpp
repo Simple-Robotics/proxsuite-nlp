@@ -5,6 +5,7 @@
 #include "proxnlp/problem-base.hpp"
 
 #include <fmt/ostream.h>
+#include <fmt/ranges.h>
 
 namespace proxnlp {
 
@@ -59,7 +60,7 @@ template <typename _Scalar> struct ResultsTpl {
 
   friend std::ostream &operator<<(std::ostream &oss,
                                   const ResultsTpl<Scalar> &self) {
-    oss << "Results {" << fmt::format("\n  convergence:   {},", self.converged)
+    oss << "Results {" << fmt::format("\n  convergence:   {},", fmt::underlying(self.converged))
         << fmt::format("\n  merit:         {:.3e},", self.merit)
         << fmt::format("\n  value:         {:.3e},", self.value)
         << fmt::format("\n  num_iters:     {:d},", self.num_iters)
