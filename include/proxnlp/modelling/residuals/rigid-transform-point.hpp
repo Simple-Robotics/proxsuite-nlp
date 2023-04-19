@@ -15,10 +15,11 @@ struct RigidTransformationPointActionTpl : C2FunctionTpl<Scalar> {
   using Base = C2FunctionTpl<Scalar>;
   using Matrix33s = Eigen::Matrix<Scalar, 3, 3>;
 
+  SETpl<3, Scalar> space_; // manifold
   Vector3s point_;
 
   RigidTransformationPointActionTpl(const Eigen::Ref<const Vector3s> &point)
-      : Base(7, 6, 3), point_(point), skew_point_(pin::skew(point)) {}
+      : Base(7, 6, 3), space_(), point_(point), skew_point_(pin::skew(point)) {}
 
   VectorXs operator()(const ConstVectorRef &x) const override {
     QuatConstMap q(x.template tail<4>().data());

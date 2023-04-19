@@ -52,6 +52,8 @@ void exposeResiduals() {
       "rigid "
       "transform :math:`M` on a 3D point :math:`p`.",
       bp::init<context::Vector3s>(bp::args("self", "point")))
+      .def_readonly("space", &RigidTransformPointAction::space_,
+                    "Function input space.")
       .def_readwrite("point", &RigidTransformPointAction::point_)
       .add_property("skew_matrix", &RigidTransformPointAction::skew_point);
 }
