@@ -137,8 +137,8 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # --- MAIN LIBRARY ----------------------------------------
-file(GLOB_RECURSE LIB_HEADERS ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp
-     ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hxx)
+set(LIB_HEADER_DIR ${PROJECT_SOURCE_DIR}/include/proxnlp)
+file(GLOB_RECURSE LIB_HEADERS ${LIB_HEADER_DIR}/*.hpp ${LIB_HEADER_DIR}/*.hxx)
 
 set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
                 ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp)
@@ -154,12 +154,28 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
-      ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp
       ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp)
-  file(GLOB_RECURSE LIB_TEMPLATE_DECLARATIONS ${PROJECT_SOURCE_DIR}/include/proxnlp/*.txx)
+  set(LIB_TEMPLATE_DECLARATIONS
+      ${LIB_HEADER_DIR}/linalg/blocks.txx
+      ${LIB_HEADER_DIR}/manifold-base.txx
+      ${LIB_HEADER_DIR}/function-base.txx
+      ${LIB_HEADER_DIR}/cost-function.txx
+      ${LIB_HEADER_DIR}/cost-sum.txx
+      ${LIB_HEADER_DIR}/solver-base.txx
+      ${LIB_HEADER_DIR}/results.txx
+      ${LIB_HEADER_DIR}/problem-base.txx
+      ${LIB_HEADER_DIR}/workspace.txx
+      ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
+      ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
+      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)
+  if(BUILD_WITH_PINOCCHIO_SUPPORT)
+    list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp)
+    list(APPEND LIB_TEMPLATE_DECLARATIONS
+         ${LIB_HEADER_DIR}/modelling/residuals/rigid-transform-point.txx)
+  endif(BUILD_WITH_PINOCCHIO_SUPPORT)
   list(APPEND LIB_HEADERS ${LIB_TEMPLATE_DECLARATIONS})
   list(APPEND LIB_SOURCES ${LIB_TEMPLATE_SOURCES})
 
