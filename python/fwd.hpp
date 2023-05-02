@@ -17,6 +17,8 @@ void exposeFunctionTypes();
 void exposeManifolds();
 /// Expose defined residuals for modelling
 void exposeResiduals();
+/// Expose residuals dependent on Pinocchio
+void exposePinocchioResiduals();
 void exposeCost();
 void exposeConstraints();
 void exposeProblem();
