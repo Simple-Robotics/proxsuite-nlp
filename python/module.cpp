@@ -49,7 +49,9 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   {
     bp::scope res_cope = get_namespace("residuals");
     exposeResiduals();
+#ifdef PROXNLP_WITH_PINOCCHIO
     exposePinocchioResiduals();
+#endif
   }
   {
     bp::scope cost_scope = get_namespace("costs");

@@ -17,8 +17,10 @@ void exposeFunctionTypes();
 void exposeManifolds();
 /// Expose defined residuals for modelling
 void exposeResiduals();
+#ifdef PROXNLP_WITH_PINOCCHIO
 /// Expose residuals dependent on Pinocchio
 void exposePinocchioResiduals();
+#endif
 void exposeCost();
 void exposeConstraints();
 void exposeProblem();

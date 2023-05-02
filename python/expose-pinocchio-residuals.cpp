@@ -1,3 +1,4 @@
+#ifdef PROXNLP_WITH_PINOCCHIO
 #include "proxnlp/python/residuals.hpp"
 
 #include "proxnlp/modelling/residuals/rigid-transform-point.hpp"
@@ -24,3 +25,4 @@ void exposePinocchioResiduals() {
 
 } // namespace python
 } // namespace proxnlp
+#endif
