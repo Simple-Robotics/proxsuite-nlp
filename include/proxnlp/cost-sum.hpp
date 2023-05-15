@@ -29,6 +29,8 @@ public:
 
   std::size_t numComponents() const { return components_.size(); }
 
+  auto clone() const { return std::make_shared<CostSumTpl>(*this); }
+
   Scalar call(const ConstVectorRef &x) const {
     Scalar result_ = 0.;
     for (std::size_t i = 0; i < numComponents(); i++) {
@@ -92,6 +94,19 @@ public:
     ostr << ")";
     ostr << ")";
     return ostr;
+  }
+
+  friend auto operator*(CostSumTpl const &self, Scalar a)
+      -> shared_ptr<CostSumTpl> {
+    auto out = self.clone();
+    (*out) *= a;
+    return out;
+  }
+
+  friend auto operator*(Scalar a, CostSumTpl const &self) { return self * a; }
+
+  friend auto operator-(CostSumTpl const &self) {
+    return self * static_cast<Scalar>(-1.);
   }
 };
 

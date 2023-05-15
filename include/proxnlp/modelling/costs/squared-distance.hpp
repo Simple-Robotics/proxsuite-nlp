@@ -36,6 +36,10 @@ struct QuadraticDistanceCost : QuadraticResidualCost<_Scalar> {
   QuadraticDistanceCost(const shared_ptr<Manifold> &space)
       : QuadraticDistanceCost(space, space->neutral()) {}
 
+  ConstVectorRef getTarget() const {
+    return std::static_pointer_cast<FunctionType>(residual_)->target_;
+  }
+
   void updateTarget(const ConstVectorRef &x) {
     std::static_pointer_cast<FunctionType>(residual_)->target_ = x;
   }
