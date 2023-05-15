@@ -21,8 +21,8 @@ void exposeResiduals() {
 
   expose_function<LinearFunction>(
       "LinearFunction", "Residual f(x) = Ax + b.",
-      bp::init<ConstMatrixRef, ConstVectorRef>(bp::args("self", "A", "b")))
-      .def(bp::init<ConstMatrixRef>(bp::args("self", "A")))
+      bp::init<MatrixXs, VectorXs>(bp::args("self", "A", "b")))
+      .def(bp::init<MatrixXs>(bp::args("self", "A")))
       .def_readwrite("A", &LinearFunction::mat, "Matrix :math:`A`.")
       .def_readwrite("b", &LinearFunction::b, "Intercept :math:`b`.");
 
