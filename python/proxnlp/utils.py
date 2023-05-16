@@ -20,11 +20,19 @@ def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
     ax0.spines["right"].set_color(col2)
     ax0.yaxis.label.set_color(col2)
     ax0.set_yscale("log")
-    yhigh = ax0.get_ylim()[1]
-    mach_eps = np.finfo(float).eps
-    ymin = np.min(dual_errs[dual_errs > 2 * mach_eps])
-    if sum(prim_errs > 0) > 0:
-        ymin = min(np.min(prim_errs[prim_errs > 2 * mach_eps]), ymin)
-    ax0.set_ylim(ymin / _ROOT_10, yhigh)
     ax0.legend(["Primal error $p$", "Dual error $d$"])
     ax0.set_title("Solver primal-dual residuals")
+
+    # handle scaling
+    yhigh = ax0.get_ylim()[1]
+    if len(prim_errs) == 0 or len(dual_errs) == 0:
+        return
+    mach_eps = np.finfo(float).eps
+    dmask = dual_errs > 2 * mach_eps
+    pmask = prim_errs > 2 * mach_eps
+    ymin = np.finfo(float).max
+    if dmask.any():
+        ymin = np.min(dual_errs[dmask])
+    if pmask.any() and sum(prim_errs > 0) > 0:
+        ymin = min(np.min(prim_errs[pmask]), ymin)
+    ax0.set_ylim(ymin / _ROOT_10, yhigh)
