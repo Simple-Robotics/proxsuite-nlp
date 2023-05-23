@@ -5,6 +5,15 @@ import proxnlp
 from proxnlp import manifolds, residuals
 
 
+def test_state_residual():
+    space = manifolds.SE3()
+    target = np.zeros(7)
+    with pytest.raises(RuntimeError):
+        res = residuals.ManifoldDifferenceToPoint(space, target)
+    res = residuals.ManifoldDifferenceToPoint(space, space.rand())
+    assert space.isNormalized(res.target)
+
+
 class TestCompose:
     space = manifolds.SO2() * manifolds.SE3()
     fn = residuals.ManifoldDifferenceToPoint(space, space.rand())

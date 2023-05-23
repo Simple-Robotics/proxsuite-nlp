@@ -4,8 +4,18 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 import pytest
 import numpy as np
 
-from proxnlp.manifolds import SO2, SO3, SE2, CartesianProduct
+from proxnlp.manifolds import SO2, SO3, SE2, SE3, CartesianProduct
 from proxnlp import autodiff, residuals
+
+
+def test_is_normalized():
+    space = SE3()
+    assert space.isNormalized(space.neutral())
+    assert space.isNormalized(space.rand())
+
+    assert not space.isNormalized(np.zeros(7))
+    assert not space.isNormalized(np.zeros(2))
+    assert not space.isNormalized(np.zeros(8))
 
 
 def test_cartesian_product():
@@ -25,6 +35,8 @@ def test_cartesian_product():
     x1 = prod.rand()
     assert x0.size == prod.nx
     assert x1.size == prod.nx
+    assert prod.isNormalized(x0)
+    assert prod.isNormalized(x1)
 
     dx0 = prod.tangent_space().rand()
     x2 = prod.integrate(x0, dx0)
@@ -58,7 +70,7 @@ def test_cartesian_product():
     print(prod2.nx)
     print(prod2.ndx)
     x0 = prod2.rand()
-    print(x0)
+    assert prod2.isNormalized(x0)
     splitx0 = prod2.split(x0).tolist()
     print(splitx0)
     remerge0 = prod2.merge(splitx0).tolist()
@@ -72,6 +84,7 @@ def test_cartesian_product():
 
     s33 = space3 * space3 * space3
     x0 = s33.rand()
+    assert s33.isNormalized(x0)
     n0 = s33.neutral()
     print("space3^3:", s33)
     print("numcomp:", s33.num_components)
