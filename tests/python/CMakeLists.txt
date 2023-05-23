@@ -1,4 +1,4 @@
-set(PYTHON_TESTS test_1d_funs.py test_manifolds.py test_print.py)
+set(PYTHON_TESTS test_1d_funs.py test_manifolds.py test_functions.py test_print.py)
 
 message(STATUS "Python tests: ${PYTHON_TESTS}")
 

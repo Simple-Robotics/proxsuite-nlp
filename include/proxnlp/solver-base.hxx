@@ -24,8 +24,8 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
       verbose(verbose), ldlt_choice_(ldlt_choice), rho_init_(rho_init),
-      mu_init_(mu_init), mu_lower_(mu_lower), bcl_params{prim_alpha, prim_beta,
-                                                         dual_alpha, dual_beta},
+      mu_init_(mu_init), mu_lower_(mu_lower),
+      bcl_params{prim_alpha, prim_beta, dual_alpha, dual_beta},
       ls_options(ls_options), target_tol(tol) {}
 
 template <typename Scalar>

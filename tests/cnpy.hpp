@@ -48,8 +48,12 @@ enum struct LoadMatResult : int {
 void terminate_with_message(char const *msg, usize len);
 
 template <typename T> struct TypeCode;
-template <> struct TypeCode<float> { static constexpr char value = 'f'; };
-template <> struct TypeCode<double> { static constexpr char value = 'f'; };
+template <> struct TypeCode<float> {
+  static constexpr char value = 'f';
+};
+template <> struct TypeCode<double> {
+  static constexpr char value = 'f';
+};
 
 struct FromByteRepr {};
 struct FromLiteral {};

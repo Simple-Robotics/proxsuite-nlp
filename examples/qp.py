@@ -90,7 +90,7 @@ plt.scatter(
     label="target $\\bar{x}$",
     facecolor=(0.8, 0, 0, 0.5),
     edgecolors="k",
-    zorder=2
+    zorder=2,
 )
 plt.legend()
 
