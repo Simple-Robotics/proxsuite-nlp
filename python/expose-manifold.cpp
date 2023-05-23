@@ -39,6 +39,9 @@ void exposeManifoldBase() {
            "Get the neutral point from the manifold (if a Lie group).")
       .def("rand", &Manifold::rand, bp::args("self"),
            "Sample a random point from the manifold.")
+      .def("isNormalized", &Manifold::isNormalized, bp::args("self", "x"),
+           "Check if the input vector :math:`x` is a viable element of the "
+           "manifold.")
       .def<BinaryFunType>("integrate", &Manifold::integrate,
                           bp::args("self", "x", "v", "out"))
       .def<BinaryFunType>("difference", &Manifold::difference,

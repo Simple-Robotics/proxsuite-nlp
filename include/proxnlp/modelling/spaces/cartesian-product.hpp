@@ -78,8 +78,8 @@ public:
   }
 
   PointType neutral() const;
-
   PointType rand() const;
+  bool isNormalized(const ConstVectorRef &x) const;
 
 private:
   template <class VectorType, class U = std::remove_const_t<VectorType>>

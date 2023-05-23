@@ -29,6 +29,16 @@ auto CartesianProductTpl<Scalar>::rand() const -> PointType {
 }
 
 template <typename Scalar>
+bool CartesianProductTpl<Scalar>::isNormalized(const ConstVectorRef &x) const {
+  bool res = true;
+  auto xs = this->split(x);
+  for (std::size_t i = 0; i < numComponents(); i++) {
+    res |= components[i]->isNormalized(xs[i]);
+  }
+  return res;
+}
+
+template <typename Scalar>
 template <class VectorType, class U>
 std::vector<U> CartesianProductTpl<Scalar>::split_impl(VectorType &x) const {
   proxnlp_dim_check(x, this->nx());

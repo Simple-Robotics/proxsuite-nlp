@@ -32,6 +32,9 @@ public:
 
   PointType neutral() const;
   PointType rand() const;
+  bool isNormalized(const ConstVectorRef &x) const {
+    return base_.isNormalized(x);
+  }
 
   const Base &getBaseSpace() const { return base_; }
 

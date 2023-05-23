@@ -8,20 +8,18 @@
 
 namespace proxnlp {
 
-namespace pin = pinocchio;
-
 /** @brief    Multibody configuration group \f$\mathcal{Q}\f$, defined using the
  * Pinocchio library.
  *
- *  @details  This uses a pin::ModelTpl object to define the manifold.
+ *  @details  This uses a pinocchio::ModelTpl object to define the manifold.
  */
 template <typename _Scalar, int _Options = 0>
-class MultibodyConfiguration : public ManifoldAbstractTpl<_Scalar, _Options> {
+struct MultibodyConfiguration : public ManifoldAbstractTpl<_Scalar, _Options> {
 public:
   using Scalar = _Scalar;
   enum { Options = _Options };
   using Self = MultibodyConfiguration<Scalar, Options>;
-  using ModelType = pin::ModelTpl<Scalar, Options>;
+  using ModelType = pinocchio::ModelTpl<Scalar, Options>;
   using Base = ManifoldAbstractTpl<Scalar, Options>;
   PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
 
@@ -30,25 +28,27 @@ public:
   const ModelType &getModel() const { return model_; }
 
   PointType neutral() const { return pinocchio::neutral(model_); }
-
   PointType rand() const { return pinocchio::randomConfiguration(model_); }
+  bool isNormalized(const ConstVectorRef &x) const {
+    return pinocchio::isNormalized(x);
+  }
 
   /// \name implementations
   /// \{
 
   void integrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                       VectorRef xout) const {
-    pin::integrate(model_, x, v, xout);
+    pinocchio::integrate(model_, x, v, xout);
   }
 
   void Jintegrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                        MatrixRef Jout, int arg) const {
     switch (arg) {
     case 0:
-      pin::dIntegrate(model_, x, v, Jout, pin::ARG0);
+      pinocchio::dIntegrate(model_, x, v, Jout, pinocchio::ARG0);
       break;
     case 1:
-      pin::dIntegrate(model_, x, v, Jout, pin::ARG1);
+      pinocchio::dIntegrate(model_, x, v, Jout, pinocchio::ARG1);
       break;
     }
   }
@@ -57,10 +57,10 @@ public:
                            MatrixRef Jout, int arg) const {
     switch (arg) {
     case 0:
-      pin::dIntegrateTransport(model_, x, v, Jout, pin::ARG0);
+      pinocchio::dIntegrateTransport(model_, x, v, Jout, pinocchio::ARG0);
       break;
     case 1:
-      pin::dIntegrateTransport(model_, x, v, Jout, pin::ARG1);
+      pinocchio::dIntegrateTransport(model_, x, v, Jout, pinocchio::ARG1);
       break;
     default:
       break;
@@ -69,17 +69,17 @@ public:
 
   void difference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                        VectorRef vout) const {
-    pin::difference(model_, x0, x1, vout);
+    pinocchio::difference(model_, x0, x1, vout);
   }
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                         MatrixRef Jout, int arg) const {
     switch (arg) {
     case 0:
-      pin::dDifference(model_, x0, x1, Jout, pin::ARG0);
+      pinocchio::dDifference(model_, x0, x1, Jout, pinocchio::ARG0);
       break;
     case 1:
-      pin::dDifference(model_, x0, x1, Jout, pin::ARG1);
+      pinocchio::dDifference(model_, x0, x1, Jout, pinocchio::ARG1);
       break;
     }
   }
@@ -87,7 +87,7 @@ public:
   virtual void interpolate_impl(const ConstVectorRef &x0,
                                 const ConstVectorRef &x1, const Scalar &u,
                                 VectorRef out) const {
-    pin::interpolate(model_, x0, x1, u, out);
+    pinocchio::interpolate(model_, x0, x1, u, out);
   }
 
   inline int nx() const { return model_.nq; }
