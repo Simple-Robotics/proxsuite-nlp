@@ -118,3 +118,7 @@ struct MultibodyPhaseSpace
 };
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "./multibody.txx"
+#endif

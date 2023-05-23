@@ -149,6 +149,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/blocks.cpp
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
+      ${PROJECT_SOURCE_DIR}/src/multibody.cpp
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp
       ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
@@ -170,7 +171,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/workspace.txx
       ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
       ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
-      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)
+      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx
+      ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx)
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
     list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp)
     list(APPEND LIB_TEMPLATE_DECLARATIONS
