@@ -190,29 +190,25 @@ void exposePinocchioSpaces() {
   bp::class_<Multibody, bp::bases<Manifold>>(
       "MultibodyConfiguration", "Configuration group of a multibody",
       bp::init<const Model &>(bp::args("self", "model")))
-      .add_property(
-          "model",
-          bp::make_function(
-              &Multibody::getModel,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Return the Pinocchio model instance.");
+      .add_property("model",
+                    bp::make_function(&Multibody::getModel,
+                                      bp::return_internal_reference<>()),
+                    "Return the Pinocchio model instance.");
 
-  bp::class_<MultibodyPhaseSpace<Scalar>, bp::bases<Manifold>>(
+  using MultiPhase = MultibodyPhaseSpace<Scalar>;
+  bp::class_<MultiPhase, bp::bases<Manifold>>(
       "MultibodyPhaseSpace",
       "Tangent space of the multibody configuration group.",
       bp::init<const Model &>(bp::args("self", "model")))
-      .add_property(
-          "model",
-          bp::make_function(
-              &MultibodyPhaseSpace<Scalar>::getModel,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Return the Pinocchio model instance.")
-      .add_property(
-          "base",
-          +[](const MultibodyPhaseSpace<Scalar> &m) {
-            return m.getBaseSpace();
-          }, // decay lambda to function ptr
-          "Get the base space.");
+      .add_property("model",
+                    bp::make_function(&MultiPhase::getModel,
+                                      bp::return_internal_reference<>()),
+                    "Return the Pinocchio model instance.")
+      .add_property("base", bp::make_function(
+                                +[](const MultiPhase &m) -> const Multibody & {
+                                  return m.getBaseSpace();
+                                },
+                                bp::return_internal_reference<>()));
 }
 #endif
 
