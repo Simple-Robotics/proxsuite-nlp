@@ -30,7 +30,7 @@ public:
   PointType neutral() const { return pinocchio::neutral(model_); }
   PointType rand() const { return pinocchio::randomConfiguration(model_); }
   bool isNormalized(const ConstVectorRef &x) const {
-    return pinocchio::isNormalized(x);
+    return pinocchio::isNormalized(model_, x);
   }
 
   /// \name implementations
