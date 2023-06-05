@@ -25,7 +25,7 @@ cmake --build build/ --config Release --target install
 * [eigenpy](https://github.com/stack-of-tasks/eigenpy)>=2.8.0 | [conda](https://anaconda.org/conda-forge/eigenpy)
 * [pinocchio](https://github.com/stack-of-tasks/eigenpy)>=2.9.1 | [conda](https://anaconda.org/conda-forge/pinocchio)
 * Eigen>=3.3.7
-* [fmtlib](https://github.com/fmtlib/fmt)>=6.1.2, <9.0
+* [fmtlib](https://github.com/fmtlib/fmt)>=6.1.2, <=10
 * [Boost](https://www.boost.org/)>=1.71
 * [Benchmark](https://github.com/google/benchmark)==1.5
 
