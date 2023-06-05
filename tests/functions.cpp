@@ -2,11 +2,6 @@
 #include "proxnlp/function-ops.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
-#include <Eigen/Core>
-
-#include <fmt/core.h>
-#include <fmt/ostream.h>
-
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
