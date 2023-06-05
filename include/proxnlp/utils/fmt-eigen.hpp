@@ -11,5 +11,5 @@ template <typename MatrixType>
 struct fmt::formatter<
     MatrixType,
     std::enable_if_t<
-        std::is_base_of_v<Eigen::DenseBase<MatrixType>, MatrixType>, char>>
+        std::is_base_of<Eigen::DenseBase<MatrixType>, MatrixType>::value, char>>
     : fmt::ostream_formatter {};
