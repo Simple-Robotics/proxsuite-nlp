@@ -9,7 +9,7 @@
   throw ::proxnlp::RuntimeError(                                               \
       fmt::format("{}({}): {}", __FILE__, __LINE__, msg))
 
-#define proxnlp_dim_check(x, nx)                                               \
+#define PROXNLP_DIM_CHECK(x, nx)                                               \
   if (x.size() != nx)                                                          \
   PROXNLP_RUNTIME_ERROR(fmt::format(                                           \
       "Input size invalid (expected {:d}, got {:d})", nx, x.size()))
