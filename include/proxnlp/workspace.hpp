@@ -187,6 +187,10 @@ public:
 
 } // namespace proxnlp
 
+template <typename Scalar>
+struct fmt::formatter<proxnlp::WorkspaceTpl<Scalar>> : fmt::ostream_formatter {
+};
+
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/workspace.txx"
 #endif

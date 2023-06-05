@@ -2,8 +2,9 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/exceptions.hpp"
 #include <Eigen/Core>
+#include "proxnlp/utils/fmt-eigen.hpp"
+#include "proxnlp/exceptions.hpp"
 
 #include <cmath>
 #include <type_traits>
