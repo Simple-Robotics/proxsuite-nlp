@@ -3,13 +3,16 @@
 #pragma once
 
 #include <fmt/ostream.h>
+#include <fmt/ranges.h>
 
 /// Specialize fmt::formatter using the operator<< implementation for Eigen
 /// types.
+template <typename MatrixType>
+struct fmt::formatter<MatrixType,
+                      proxnlp::enable_if_eigen_dense<MatrixType, char>>
+    : fmt::ostream_formatter {};
 
 template <typename MatrixType>
-struct fmt::formatter<
-    MatrixType,
-    std::enable_if_t<
-        std::is_base_of<Eigen::DenseBase<MatrixType>, MatrixType>::value, char>>
-    : fmt::ostream_formatter {};
+struct fmt::is_range<MatrixType,
+                     proxnlp::enable_if_eigen_dense<MatrixType, char>>
+    : std::false_type {};

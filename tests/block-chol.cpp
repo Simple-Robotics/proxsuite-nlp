@@ -15,8 +15,7 @@
 #define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 
-#include <fmt/ostream.h>
-#include <fmt/ranges.h>
+#include "proxnlp/math.hpp"
 
 namespace utf = boost::unit_test;
 
