@@ -3,6 +3,22 @@
 #pragma once
 
 #include <Eigen/Core>
+
+namespace proxnlp {
+
+template <typename T>
+constexpr bool is_eigen_dense_type =
+    std::is_base_of<Eigen::DenseBase<T>, T>::value;
+
+template <typename T>
+constexpr bool is_eigen_matrix_type =
+    std::is_base_of<Eigen::MatrixBase<T>, T>::value;
+
+template <typename T, typename T2 = void>
+using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
+
+} // namespace proxnlp
+
 #include "proxnlp/utils/fmt-eigen.hpp"
 #include "proxnlp/exceptions.hpp"
 
