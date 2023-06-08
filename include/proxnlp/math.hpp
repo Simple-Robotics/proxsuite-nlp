@@ -22,8 +22,6 @@ using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
 #include "proxnlp/utils/fmt-eigen.hpp"
 #include "proxnlp/exceptions.hpp"
 
-#include <cmath>
-#include <type_traits>
 #include <limits>
 #include <vector>
 

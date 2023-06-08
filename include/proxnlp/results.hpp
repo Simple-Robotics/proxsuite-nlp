@@ -4,9 +4,6 @@
 
 #include "proxnlp/problem-base.hpp"
 
-#include <fmt/ostream.h>
-#include <fmt/ranges.h>
-
 namespace proxnlp {
 
 enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
