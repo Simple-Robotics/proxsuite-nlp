@@ -3,13 +3,14 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 """
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 
 _ROOT_10 = 10.0**0.5
 
 
-def plot_pd_errs(ax0: plt.Axes, prim_errs, dual_errs):
+def plot_pd_errs(ax0, prim_errs, dual_errs):
+    import matplotlib.pyplot as plt
+
+    ax0: plt.Axes
     prim_errs = np.asarray(prim_errs)
     dual_errs = np.asarray(dual_errs)
     ax0.plot(prim_errs, c="tab:blue")
