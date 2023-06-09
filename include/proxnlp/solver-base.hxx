@@ -19,7 +19,7 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              LDLTChoice ldlt_choice,
                              const LinesearchOptions ls_options)
-    : problem_(prob), merit_fun(problem_, mu_init, 1.),
+    : problem_(prob), merit_fun(problem_, 1.),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
@@ -478,7 +478,6 @@ template <typename Scalar>
 void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
-  merit_fun.setPenalty(mu_);
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->setProxParameters(mu_);

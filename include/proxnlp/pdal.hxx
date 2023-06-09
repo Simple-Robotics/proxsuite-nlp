@@ -6,9 +6,8 @@
 
 namespace proxnlp {
 template <typename Scalar>
-PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu,
-                                   const Scalar gamma)
-    : problem_(prob), mu_(mu), gamma_(gamma) {}
+PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar gamma)
+    : problem_(prob), gamma_(gamma) {}
 
 template <typename Scalar>
 Scalar
@@ -20,18 +19,13 @@ PDALFunction<Scalar>::evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
   for (std::size_t i = 0; i < nc; i++) {
     const ConstraintObjectTpl<Scalar> &cstr = problem_->getConstraint(i);
     res += cstr.set_->evaluateMoreauEnvelope(shift_cvals[i], proj_cvals[i]);
+    Scalar mu = cstr.set_->mu();
     if (gamma_ > 0.) {
-      res += 0.5 * gamma_ * mu_inv_ *
-             (proj_cvals[i] - mu_ * lams[i]).squaredNorm();
+      res += 0.5 * gamma_ * cstr.set_->mu_inv() *
+             (proj_cvals[i] - mu * lams[i]).squaredNorm();
     }
   }
   return res;
-}
-
-template <typename Scalar>
-void PDALFunction<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
-  mu_ = new_mu;
-  mu_inv_ = 1. / new_mu;
 }
 
 } // namespace proxnlp
