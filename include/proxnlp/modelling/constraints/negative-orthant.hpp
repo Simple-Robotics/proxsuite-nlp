@@ -38,3 +38,5 @@ struct NegativeOrthant : ConstraintSetBase<_Scalar> {
 };
 
 } // namespace proxnlp
+
+#include "proxnlp/modelling/constraints.hpp"

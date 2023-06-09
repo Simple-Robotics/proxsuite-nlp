@@ -48,3 +48,5 @@ public:
 };
 
 } // namespace proxnlp
+
+#include "proxnlp/modelling/constraints.hpp"
