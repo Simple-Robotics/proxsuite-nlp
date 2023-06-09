@@ -68,11 +68,11 @@ template <typename Scalar> struct CartesianProductTpl;
 
 template <typename Base> struct TangentBundleTpl;
 
-// fwd ConstraintObject
+// fwd ConstraintSetBase
 template <typename Scalar> struct ConstraintSetBase;
 
 // fwd ConstraintObject
-template <typename Scalar> struct ConstraintObject;
+template <typename Scalar> struct ConstraintObjectTpl;
 
 /* Solver structs */
 

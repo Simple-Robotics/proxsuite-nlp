@@ -115,7 +115,7 @@ public:
 /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
  *
  */
-template <typename _Scalar> struct ConstraintObject {
+template <typename _Scalar> struct ConstraintObjectTpl {
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
@@ -128,10 +128,11 @@ template <typename _Scalar> struct ConstraintObject {
   const FunctionType &func() const { return *func_; }
   int nr() const { return func_->nr(); }
 
-  ConstraintObject(shared_ptr<FunctionType> func, shared_ptr<ConstraintSet> set)
+  ConstraintObjectTpl(shared_ptr<FunctionType> func,
+                      shared_ptr<ConstraintSet> set)
       : func_(func), set_(set) {}
 
-  bool operator==(const ConstraintObject &other) {
+  bool operator==(const ConstraintObjectTpl &other) {
     return (func_ == other.func_) && (set_ && other.set_);
   }
 };

@@ -38,6 +38,7 @@ public:
   using LinesearchOptions = typename Linesearch<Scalar>::Options;
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetBase<Scalar>;
+  using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
   enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
 

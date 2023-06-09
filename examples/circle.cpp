@@ -72,7 +72,7 @@ int main() {
       std::make_shared<QuadraticResidualCost<double>>(resptr, w2, -radius_sq);
 
   using Ineq_t = NegativeOrthant<double>;
-  using CstrType = Problem::ConstraintType;
+  using CstrType = Problem::ConstraintObject;
   CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
   std::vector<CstrType> cstrs{cstr1};
   auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);

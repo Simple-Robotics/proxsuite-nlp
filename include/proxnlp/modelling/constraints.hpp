@@ -10,6 +10,7 @@
 namespace proxnlp {
 
 extern template struct ConstraintSetBase<context::Scalar>;
+extern template struct ConstraintObjectTpl<context::Scalar>;
 extern template struct EqualityConstraint<context::Scalar>;
 extern template struct NegativeOrthant<context::Scalar>;
 extern template struct BoxConstraintTpl<context::Scalar>;

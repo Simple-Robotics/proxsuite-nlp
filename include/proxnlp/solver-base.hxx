@@ -216,7 +216,7 @@ void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
   }
   workspace.data_jacobians_proj = workspace.data_jacobians;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->applyNormalConeProjectionJacobian(
         workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
 
@@ -480,7 +480,7 @@ void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_inv_ = 1. / mu_;
   merit_fun.setPenalty(mu_);
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->setProxParameters(mu_);
   }
 }

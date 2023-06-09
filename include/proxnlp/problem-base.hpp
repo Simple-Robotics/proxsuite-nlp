@@ -15,8 +15,8 @@ public:
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /// Generic constraint type
-  using ConstraintType = ConstraintObject<Scalar>;
-  using ConstraintPtr = shared_ptr<ConstraintType>;
+  using ConstraintObject = ConstraintObjectTpl<Scalar>;
+  using ConstraintPtr = shared_ptr<ConstraintObject>;
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
@@ -26,13 +26,13 @@ public:
   /// The cost function.
   shared_ptr<CostType> cost_;
   /// The set of constraints.
-  std::vector<ConstraintType> constraints_;
+  std::vector<ConstraintObject> constraints_;
 
   const CostType &cost() const { return *cost_; }
   const Manifold &manifold() const { return *manifold_; }
 
   ProblemTpl(shared_ptr<Manifold> manifold, shared_ptr<CostType> cost,
-             const std::vector<ConstraintType> &constraints)
+             const std::vector<ConstraintObject> &constraints)
       : manifold_(manifold), cost_(cost), constraints_(constraints),
         nc_total_(0) {
     reset_constraint_dim_vars();
@@ -44,7 +44,7 @@ public:
   }
 
   /// Get a pointer to the \f$i\f$-th constraint pointer
-  const ConstraintType &getConstraint(const std::size_t &i) const {
+  const ConstraintObject &getConstraint(const std::size_t &i) const {
     return constraints_[i];
   }
 
@@ -74,7 +74,7 @@ public:
     workspace.objective_value = cost().call(x);
 
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
-      const ConstraintType &cstr = constraints_[i];
+      const ConstraintObject &cstr = constraints_[i];
       workspace.cstr_values[i] = cstr.func()(x);
     }
   }
@@ -84,7 +84,7 @@ public:
     cost().computeGradient(x, workspace.objective_gradient);
 
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
-      const ConstraintType &cstr = constraints_[i];
+      const ConstraintObject &cstr = constraints_[i];
       cstr.func().computeJacobian(x, workspace.cstr_jacobians[i]);
     }
   }
@@ -102,7 +102,7 @@ protected:
     int cursor = 0;
     int nr = 0;
     for (std::size_t i = 0; i < constraints_.size(); i++) {
-      const ConstraintType &cstr = constraints_[i];
+      const ConstraintObject &cstr = constraints_[i];
       nr = cstr.func().nr();
       ncs_.push_back(nr);
       indices_.push_back(cursor);
@@ -126,7 +126,7 @@ void allocateMultipliersOrResiduals(
   int cursor = 0;
   int nr = 0;
   for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = prob.getConstraint(i);
+    const ConstraintObjectTpl<Scalar> &cstr = prob.getConstraint(i);
     nr = cstr.func().nr();
     out.emplace_back(data.segment(cursor, nr));
     cursor += nr;
