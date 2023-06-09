@@ -19,8 +19,7 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
 
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
-
-  Scalar mu_ = 0.;
+  using Base::mu_;
 
   Scalar evaluate(const ConstVectorRef &zproj) const {
     return zproj.template lpNorm<1>();
@@ -43,8 +42,6 @@ template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
                         Eigen::Ref<ActiveType> out) const {
     out = z.array().abs() < mu_;
   }
-
-  void setProxParameters(const Scalar mu) { mu_ = mu; };
 };
 
 } // namespace proxnlp

@@ -19,6 +19,7 @@ PDALFunction<Scalar>::evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
   const std::size_t nc = problem_->getNumConstraints();
   for (std::size_t i = 0; i < nc; i++) {
     const ConstraintObjectTpl<Scalar> &cstr = problem_->getConstraint(i);
+    res += cstr.set_->evaluateMoreauEnvelope(shift_cvals[i], proj_cvals[i]);
     if (gamma_ > 0.) {
       res += 0.5 * gamma_ * mu_inv_ *
              (proj_cvals[i] - mu_ * lams[i]).squaredNorm();

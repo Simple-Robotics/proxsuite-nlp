@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_CASE(test_equality) {
   EqualityConstraint<double> eq_set;
   double mu = 0.1;
 
-  double m = eq_set.computeMoreauEnvelope(x1, zout, 1. / mu);
+  eq_set.setProxParameters(mu);
+  double m = eq_set.computeMoreauEnvelope(x1, zout);
   BOOST_TEST_CHECK(zout.isApprox(x1));
   BOOST_TEST_CHECK(m == (0.5 / mu * zout.squaredNorm()));
 }

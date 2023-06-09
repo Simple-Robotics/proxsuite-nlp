@@ -66,7 +66,7 @@ void exposeConstraints() {
       .def("computeActiveSet", &ConstraintSet::computeActiveSet,
            bp::args("self", "z", "out"))
       .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
-           bp::args("self", "zin", "zproj", "inv_mu"),
+           bp::args("self", "zin", "zproj"),
            "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
       .def("setProxParameters", &ConstraintSet::setProxParameters,
            bp::args("self", "mu"), "Set proximal parameter.")
