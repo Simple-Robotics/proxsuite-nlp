@@ -80,7 +80,7 @@ public:
   Scalar mu_lower_ = 1e-9; // Lower safeguard for the penalty parameter.
 
   /// BCL strategy parameters.
-  BCLParams<Scalar> bcl_params;
+  BCLParamsTpl<Scalar> bcl_params;
 
   /// Linesearch options.
   LinesearchOptions ls_options;

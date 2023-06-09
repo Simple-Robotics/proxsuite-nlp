@@ -10,6 +10,7 @@ using Scalar = double;
 PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
+using BCLParams = ::proxnlp::BCLParamsTpl<Scalar>;
 using Problem = ProblemTpl<Scalar>;
 using Results = ResultsTpl<Scalar>;
 using Workspace = WorkspaceTpl<Scalar>;

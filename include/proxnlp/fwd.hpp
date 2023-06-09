@@ -35,6 +35,9 @@ using std::unique_ptr;
 
 namespace proxnlp {
 
+// fwd BCLParams
+template <typename Scalar> struct BCLParamsTpl;
+
 /* Function types */
 
 // fwd BaseFunction

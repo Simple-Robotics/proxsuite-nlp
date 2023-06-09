@@ -3,7 +3,7 @@
 #pragma once
 
 namespace proxnlp {
-template <typename Scalar> struct BCLParams {
+template <typename Scalar> struct BCLParamsTpl {
 
   /// Log-factor \f$\alpha_\eta\f$ for primal tolerance (failure)
   Scalar prim_alpha = 0.1;
