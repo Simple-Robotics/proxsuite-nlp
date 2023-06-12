@@ -281,8 +281,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     problem_->evaluate(workspace.x_trial, workspace);
     computeMultipliers(workspace.data_lams_trial, workspace);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
-                              workspace.shift_cstr_values,
-                              workspace.shift_cstr_proj) +
+                              workspace) +
            prox_penalty.call(workspace.x_trial);
   };
 
@@ -299,9 +298,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     }
 
     results.value = workspace.objective_value;
-    results.merit = merit_fun.evaluate(results.x_opt, results.lams_opt,
-                                       workspace.shift_cstr_values,
-                                       workspace.shift_cstr_proj);
+    results.merit =
+        merit_fun.evaluate(results.x_opt, results.lams_opt, workspace);
 
     if (rho_ > 0.) {
       results.merit += prox_penalty.call(results.x_opt);
@@ -415,9 +413,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     //// Take the step
 
-    workspace.dmerit_dir = workspace.merit_gradient.dot(workspace.prim_step) -
-                           merit_fun.gamma_ * workspace.data_dual_prox_err.dot(
-                                                  workspace.dual_step);
+    workspace.dmerit_dir = merit_fun.derivative(workspace);
 
     Scalar phi0 = results.merit;
     Scalar dphi0 = workspace.dmerit_dir;

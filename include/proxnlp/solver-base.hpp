@@ -47,7 +47,7 @@ public:
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
   /// Merit function.
-  PDALFunction<Scalar> merit_fun;
+  ALMeritFunctionTpl<Scalar> merit_fun;
   /// Proximal regularization penalty.
   QuadraticDistanceCost<Scalar> prox_penalty;
 
