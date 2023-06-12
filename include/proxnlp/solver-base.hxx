@@ -207,25 +207,20 @@ void SolverTpl<Scalar>::computeMultipliers(
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
-                                                     Workspace &workspace,
-                                                     bool second_order) const {
+void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
+                                                  Workspace &workspace,
+                                                  bool second_order) const {
   problem_->computeDerivatives(x, workspace);
   if (second_order) {
-    problem_->cost().computeHessian(x, workspace.objective_hessian);
+    problem_->computeHessians(x, workspace,
+                              hess_approx == HessianApprox::EXACT);
   }
+
   workspace.data_jacobians_proj = workspace.data_jacobians;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->applyNormalConeProjectionJacobian(
         workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
-
-    bool use_vhp = !cstr.set_->disableGaussNewton() ||
-                   (hess_approx == HessianApprox::EXACT);
-    if (second_order && use_vhp) {
-      cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
-                                       workspace.cstr_vector_hessian_prod[i]);
-    }
   }
 }
 
@@ -284,7 +279,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     problem_->evaluate(results.x_opt, workspace);
     computeMultipliers(results.data_lams_opt, workspace);
-    computeConstraintDerivatives(results.x_opt, workspace, true);
+    computeProblemDerivatives(results.x_opt, workspace, true);
 
     for (std::size_t i = 0; i < num_c; i++) {
       const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;

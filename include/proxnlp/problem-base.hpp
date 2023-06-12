@@ -20,6 +20,7 @@ public:
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
+  using Workspace = WorkspaceTpl<Scalar>;
 
   /// The working manifold \f$M\f$.
   shared_ptr<Manifold> manifold_;
@@ -69,8 +70,7 @@ public:
 
   int getIndex(std::size_t i) const { return indices_[i]; }
 
-  void evaluate(const ConstVectorRef &x,
-                WorkspaceTpl<Scalar> &workspace) const {
+  void evaluate(const ConstVectorRef &x, Workspace &workspace) const {
     workspace.objective_value = cost().call(x);
 
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
@@ -79,13 +79,25 @@ public:
     }
   }
 
-  void computeDerivatives(const ConstVectorRef &x,
-                          WorkspaceTpl<Scalar> &workspace) const {
+  void computeDerivatives(const ConstVectorRef &x, Workspace &workspace) const {
     cost().computeGradient(x, workspace.objective_gradient);
 
     for (std::size_t i = 0; i < getNumConstraints(); i++) {
       const ConstraintObject &cstr = constraints_[i];
       cstr.func().computeJacobian(x, workspace.cstr_jacobians[i]);
+    }
+  }
+
+  void computeHessians(const ConstVectorRef &x, Workspace &workspace,
+                       bool evaluate_all_constraint_hessians = false) const {
+    cost().computeHessian(x, workspace.objective_hessian);
+    for (std::size_t i = 0; i < getNumConstraints(); i++) {
+      const ConstraintObject &cstr = getConstraint(i);
+      bool use_vhp =
+          !cstr.set_->disableGaussNewton() || evaluate_all_constraint_hessians;
+      if (use_vhp)
+        cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
+                                         workspace.cstr_vector_hessian_prod[i]);
     }
   }
 
