@@ -11,6 +11,8 @@
 #include "proxnlp/logger.hpp"
 #include "proxnlp/bcl-params.hpp"
 
+#include <boost/mpl/bool.hpp>
+
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "proxnlp/linesearch-base.hpp"
@@ -218,7 +220,10 @@ public:
    * false for e.g. linesearch.
    */
   void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
-                                 bool second_order) const;
+                                 boost::mpl::false_) const;
+  /// @copydoc computeProblemDerivatives()
+  void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                 boost::mpl::true_) const;
 
   /**
    * Compute the primal residuals at the current primal-dual pair \f$(x,
