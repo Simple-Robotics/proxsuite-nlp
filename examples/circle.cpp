@@ -9,7 +9,6 @@
 #include "proxnlp/modelling/costs/quadratic-residual.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 #include "proxnlp/solver-base.hpp"
-#include "proxnlp/lagrangian.hpp"
 
 #include "example-base.hpp"
 
@@ -87,21 +86,12 @@ int main() {
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  LagrangianFunction<double> lagr(prob);
   Problem::VectorXs lams_data(prob->getTotalConstraintDim());
   Problem::VectorOfRef lams;
   helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n", lams.size(),
              lams[0]);
-
-  // lagrangian
-  fmt::print("\tL(p0) = {}\n", lagr.evaluate(p0, lams));
-  fmt::print("\tL(p1) = {}\n", lagr.evaluate(p1, lams));
-  lagr.computeGradient(p0, lams, grad);
-  fmt::print("\tgradL(p0) = {}\n", grad.transpose());
-  lagr.computeGradient(p1, lams, grad);
-  fmt::print("\tgradL(p1) = {}\n", grad.transpose());
 
   // gradient of merit fun
 

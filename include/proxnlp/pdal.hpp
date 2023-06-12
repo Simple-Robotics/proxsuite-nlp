@@ -3,7 +3,7 @@
 #pragma once
 
 #include "proxnlp/fwd.hpp"
-#include "proxnlp/merit-function-base.hpp"
+#include "proxnlp/workspace.hpp"
 
 namespace proxnlp {
 
@@ -25,6 +25,7 @@ public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
+  using Workspace = WorkspaceTpl<Scalar>;
 
   shared_ptr<Problem> problem_;
 
