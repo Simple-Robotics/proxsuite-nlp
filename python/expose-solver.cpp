@@ -8,6 +8,7 @@ void exposeSolver() {
   using context::Manifold;
   using context::Scalar;
   using Solver = context::Solver;
+  using context::BCLParams;
   using context::ConstVectorRef;
   using context::Problem;
   using context::VectorRef;
@@ -151,18 +152,17 @@ void exposeSolver() {
       .def_readwrite("reg_init", &Solver::DELTA_INIT,
                      "Initial regularization.");
 
-  using BCLType = BCLParams<Scalar>;
-  bp::class_<BCLType>("BCLParams",
-                      "Parameters for the bound-constrained Lagrangian (BCL) "
-                      "penalty update strategy.",
-                      bp::init<>(bp::args("self")))
-      .def_readwrite("prim_alpha", &BCLType::prim_alpha)
-      .def_readwrite("prim_beta", &BCLType::prim_beta)
-      .def_readwrite("dual_alpha", &BCLType::dual_alpha)
-      .def_readwrite("dual_beta", &BCLType::dual_beta)
-      .def_readwrite("mu_factor", &BCLType::mu_update_factor,
+  bp::class_<BCLParams>("BCLParams",
+                        "Parameters for the bound-constrained Lagrangian (BCL) "
+                        "penalty update strategy.",
+                        bp::init<>(bp::args("self")))
+      .def_readwrite("prim_alpha", &BCLParams::prim_alpha)
+      .def_readwrite("prim_beta", &BCLParams::prim_beta)
+      .def_readwrite("dual_alpha", &BCLParams::dual_alpha)
+      .def_readwrite("dual_beta", &BCLParams::dual_beta)
+      .def_readwrite("mu_factor", &BCLParams::mu_update_factor,
                      "Multiplier update factor.")
-      .def_readwrite("rho_factor", &BCLType::rho_update_factor,
+      .def_readwrite("rho_factor", &BCLParams::rho_update_factor,
                      "Proximal penalty update factor.");
 }
 } // namespace python

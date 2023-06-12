@@ -40,3 +40,5 @@ template <typename Scalar> struct BoxConstraintTpl : ConstraintSetBase<Scalar> {
 };
 
 } // namespace proxnlp
+
+#include "proxnlp/modelling/constraints.hpp"

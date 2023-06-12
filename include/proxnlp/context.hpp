@@ -10,11 +10,12 @@ using Scalar = double;
 PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
+using BCLParams = ::proxnlp::BCLParamsTpl<Scalar>;
 using Problem = ProblemTpl<Scalar>;
 using Results = ResultsTpl<Scalar>;
 using Workspace = WorkspaceTpl<Scalar>;
 using Cost = CostFunctionBaseTpl<Scalar>;
-using Constraint = ConstraintObject<Scalar>;
+using Constraint = ConstraintObjectTpl<Scalar>;
 using ConstraintSet = ConstraintSetBase<Scalar>;
 using Function = BaseFunctionTpl<Scalar>;
 using C1Function = C1FunctionTpl<Scalar>;

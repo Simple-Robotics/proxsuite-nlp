@@ -19,7 +19,7 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              LDLTChoice ldlt_choice,
                              const LinesearchOptions ls_options)
-    : problem_(prob), merit_fun(problem_, mu_init, 1.),
+    : problem_(prob), merit_fun(problem_, 1.),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
@@ -199,6 +199,13 @@ void SolverTpl<Scalar>::computeMultipliers(
                                   workspace.shift_cstr_proj[i]);
   }
   workspace.data_lams_plus = mu_inv_ * workspace.data_shift_cstr_proj;
+  workspace.data_lams_plus_reproj = workspace.data_lams_plus;
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    // reapply the prox operator Jacobian to multiplier estimate
+    cstr_set.applyProjectionJacobian(workspace.shift_cstr_values[i],
+                                     workspace.lams_plus_reproj[i]);
+  }
   workspace.data_dual_prox_err =
       mu_ * (workspace.data_lams_plus - inner_lams_data);
   workspace.data_lams_pdal = workspace.data_lams_plus +
@@ -207,26 +214,25 @@ void SolverTpl<Scalar>::computeMultipliers(
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
-                                                     Workspace &workspace,
-                                                     bool second_order) const {
+void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
+                                                  Workspace &workspace,
+                                                  boost::mpl::false_) const {
   problem_->computeDerivatives(x, workspace);
-  if (second_order) {
-    problem_->cost().computeHessian(x, workspace.objective_hessian);
-  }
+
   workspace.data_jacobians_proj = workspace.data_jacobians;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->applyNormalConeProjectionJacobian(
         workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
-
-    bool use_vhp = !cstr.set_->disableGaussNewton() ||
-                   (hess_approx == HessianApprox::EXACT);
-    if (second_order && use_vhp) {
-      cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
-                                       workspace.cstr_vector_hessian_prod[i]);
-    }
   }
+}
+
+template <typename Scalar>
+void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
+                                                  Workspace &workspace,
+                                                  boost::mpl::true_) const {
+  this->computeProblemDerivatives(x, workspace, boost::mpl::false_());
+  problem_->computeHessians(x, workspace, hess_approx == HessianApprox::EXACT);
 }
 
 template <typename Scalar>
@@ -275,8 +281,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     problem_->evaluate(workspace.x_trial, workspace);
     computeMultipliers(workspace.data_lams_trial, workspace);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
-                              workspace.shift_cstr_values,
-                              workspace.shift_cstr_proj) +
+                              workspace) +
            prox_penalty.call(workspace.x_trial);
   };
 
@@ -284,7 +289,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     problem_->evaluate(results.x_opt, workspace);
     computeMultipliers(results.data_lams_opt, workspace);
-    computeConstraintDerivatives(results.x_opt, workspace, true);
+    computeProblemDerivatives(results.x_opt, workspace, boost::mpl::true_());
 
     for (std::size_t i = 0; i < num_c; i++) {
       const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
@@ -293,9 +298,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     }
 
     results.value = workspace.objective_value;
-    results.merit = merit_fun.evaluate(results.x_opt, results.lams_opt,
-                                       workspace.shift_cstr_values,
-                                       workspace.shift_cstr_proj);
+    results.merit =
+        merit_fun.evaluate(results.x_opt, results.lams_opt, workspace);
 
     if (rho_ > 0.) {
       results.merit += prox_penalty.call(results.x_opt);
@@ -311,6 +315,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.kkt_rhs.head(ndx) = workspace.objective_gradient;
     workspace.kkt_rhs.head(ndx).noalias() +=
         workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
+    workspace.kkt_rhs.head(ndx).noalias() +=
+        workspace.data_jacobians.transpose() * workspace.data_lams_plus_reproj;
 
     workspace.kkt_rhs.tail(ndual) = workspace.data_dual_prox_err;
 
@@ -407,9 +413,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     //// Take the step
 
-    workspace.dmerit_dir = workspace.merit_gradient.dot(workspace.prim_step) -
-                           merit_fun.gamma_ * workspace.data_dual_prox_err.dot(
-                                                  workspace.dual_step);
+    workspace.dmerit_dir = merit_fun.derivative(workspace);
 
     Scalar phi0 = results.merit;
     Scalar dphi0 = workspace.dmerit_dir;
@@ -478,9 +482,8 @@ template <typename Scalar>
 void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
-  merit_fun.setPenalty(mu_);
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
+    const ConstraintObject &cstr = problem_->getConstraint(i);
     cstr.set_->setProxParameters(mu_);
   }
 }

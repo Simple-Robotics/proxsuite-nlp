@@ -147,6 +147,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
 
   set(LIB_TEMPLATE_SOURCES
       ${PROJECT_SOURCE_DIR}/src/blocks.cpp
+      ${PROJECT_SOURCE_DIR}/src/constraints.cpp
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp

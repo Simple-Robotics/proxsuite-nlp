@@ -52,7 +52,7 @@ int main() {
   /// DEFINE A PROBLEM
 
   auto eq_set = std::make_shared<EqualityConstraint<double>>();
-  std::vector<Problem::ConstraintType> cstrs;
+  std::vector<Problem::ConstraintObject> cstrs;
   cstrs.emplace_back(resptr, eq_set);
   auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
 

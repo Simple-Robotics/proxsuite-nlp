@@ -11,6 +11,8 @@
 #include "proxnlp/logger.hpp"
 #include "proxnlp/bcl-params.hpp"
 
+#include <boost/mpl/bool.hpp>
+
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "proxnlp/linesearch-base.hpp"
@@ -38,13 +40,14 @@ public:
   using LinesearchOptions = typename Linesearch<Scalar>::Options;
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetBase<Scalar>;
+  using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
   enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
 
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
   /// Merit function.
-  PDALFunction<Scalar> merit_fun;
+  ALMeritFunctionTpl<Scalar> merit_fun;
   /// Proximal regularization penalty.
   QuadraticDistanceCost<Scalar> prox_penalty;
 
@@ -79,7 +82,7 @@ public:
   Scalar mu_lower_ = 1e-9; // Lower safeguard for the penalty parameter.
 
   /// BCL strategy parameters.
-  BCLParams<Scalar> bcl_params;
+  BCLParamsTpl<Scalar> bcl_params;
 
   /// Linesearch options.
   LinesearchOptions ls_options;
@@ -216,9 +219,11 @@ public:
    * @param second_order Whether to compute the second-order information; set to
    * false for e.g. linesearch.
    */
-  void computeConstraintDerivatives(const ConstVectorRef &x,
-                                    Workspace &workspace,
-                                    bool second_order) const;
+  void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                 boost::mpl::false_) const;
+  /// @copydoc computeProblemDerivatives()
+  void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                 boost::mpl::true_) const;
 
   /**
    * Compute the primal residuals at the current primal-dual pair \f$(x,
