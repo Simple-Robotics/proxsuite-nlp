@@ -13,7 +13,8 @@ namespace proxnlp {
  *          This class implements the proximity operator (soft-thresholding)
  *          and an appropriate generalized Jacobian.
  */
-template <typename _Scalar> struct L1Penalty : ConstraintSetBase<_Scalar> {
+template <typename _Scalar>
+struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 

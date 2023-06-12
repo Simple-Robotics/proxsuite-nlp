@@ -199,6 +199,13 @@ void SolverTpl<Scalar>::computeMultipliers(
                                   workspace.shift_cstr_proj[i]);
   }
   workspace.data_lams_plus = mu_inv_ * workspace.data_shift_cstr_proj;
+  workspace.data_lams_plus_reproj = workspace.data_lams_plus;
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    // reapply the prox operator Jacobian to multiplier estimate
+    cstr_set.applyProjectionJacobian(workspace.shift_cstr_values[i],
+                                     workspace.lams_plus_reproj[i]);
+  }
   workspace.data_dual_prox_err =
       mu_ * (workspace.data_lams_plus - inner_lams_data);
   workspace.data_lams_pdal = workspace.data_lams_plus +
@@ -310,6 +317,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.kkt_rhs.head(ndx) = workspace.objective_gradient;
     workspace.kkt_rhs.head(ndx).noalias() +=
         workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
+    workspace.kkt_rhs.head(ndx).noalias() +=
+        workspace.data_jacobians.transpose() * workspace.data_lams_plus_reproj;
 
     workspace.kkt_rhs.tail(ndual) = workspace.data_dual_prox_err;
 

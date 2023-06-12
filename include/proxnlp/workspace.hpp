@@ -92,11 +92,14 @@ public:
 
   VectorXs data_shift_cstr_values;
   VectorXs data_lams_plus;
+  VectorXs data_lams_plus_reproj;
   VectorXs data_lams_pdal;
   VectorXs data_dual_prox_err;
 
   /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
   std::vector<VectorRef> lams_plus;
+  /// Product of the projector Jacobians with the first-order multipliers
+  std::vector<VectorRef> lams_plus_reproj;
   /// Pre-projected multipliers.
   std::vector<VectorRef> shift_cstr_values;
   /// Primal-dual multiplier estimates (from the pdBCL algorithm)
@@ -127,8 +130,8 @@ public:
         objective_gradient(ndx), objective_hessian(ndx, ndx),
         merit_gradient(ndx), data_jacobians(numdual, ndx),
         data_hessians((int)numblocks * ndx, ndx), data_lams_plus(numdual),
-        data_lams_pdal(numdual), data_dual_prox_err(numdual),
-        tmp_dx_scaled(ndx) {
+        data_lams_plus_reproj(numdual), data_lams_pdal(numdual),
+        data_dual_prox_err(numdual), tmp_dx_scaled(ndx) {
     init(prob);
   }
 
@@ -161,6 +164,8 @@ public:
     helpers::allocateMultipliersOrResiduals(prob, data_shift_cstr_values,
                                             shift_cstr_values);
     helpers::allocateMultipliersOrResiduals(prob, data_lams_plus, lams_plus);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_plus_reproj,
+                                            lams_plus_reproj);
     helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lams_pdal);
     helpers::allocateMultipliersOrResiduals(prob, data_dual_prox_err,
                                             subproblem_dual_err);
