@@ -46,7 +46,7 @@ int main() {
   weights.setIdentity();
 
   auto cost_fun =
-      std::make_shared<QuadraticDistanceCost<double>>(space_, p0, weights);
+      std::make_shared<QuadraticDistanceCostTpl<double>>(space_, p0, weights);
   const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
@@ -67,8 +67,8 @@ int main() {
   w2.setIdentity();
   w2 *= 2;
 
-  auto residualCirclePtr =
-      std::make_shared<QuadraticResidualCost<double>>(resptr, w2, -radius_sq);
+  auto residualCirclePtr = std::make_shared<QuadraticResidualCostTpl<double>>(
+      resptr, w2, -radius_sq);
 
   using Ineq_t = NegativeOrthant<double>;
   using CstrType = Problem::ConstraintObject;

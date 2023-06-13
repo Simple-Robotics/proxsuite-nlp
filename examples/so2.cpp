@@ -43,7 +43,7 @@ int main() {
   auto resptr = std::make_shared<ManifoldDifferenceToPoint<double>>(residual);
 
   auto cost_fun =
-      std::make_shared<QuadraticResidualCost<double>>(resptr, weights);
+      std::make_shared<QuadraticResidualCostTpl<double>>(resptr, weights);
   const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));

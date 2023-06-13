@@ -2,6 +2,6 @@
 
 namespace proxnlp {
 
-template struct QuadraticResidualCost<context::Scalar>;
+template struct QuadraticResidualCostTpl<context::Scalar>;
 
 }

@@ -31,8 +31,10 @@ BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
   auto x1 = space.rand();
   auto x2 = space.rand();
 
-  CostPtr cost1 = std::make_shared<QuadraticDistanceCost<double>>(space_, x0);
-  CostPtr cost2 = std::make_shared<QuadraticDistanceCost<double>>(space_, x1);
+  CostPtr cost1 =
+      std::make_shared<QuadraticDistanceCostTpl<double>>(space_, x0);
+  CostPtr cost2 =
+      std::make_shared<QuadraticDistanceCostTpl<double>>(space_, x1);
   auto cost_sum = cost1 + cost2;
 
   BOOST_CHECK_EQUAL(cost_sum->call(x2), cost1->call(x2) + cost2->call(x2));

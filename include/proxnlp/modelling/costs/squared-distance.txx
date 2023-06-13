@@ -5,6 +5,6 @@
 
 namespace proxnlp {
 
-extern template struct QuadraticDistanceCost<context::Scalar>;
+extern template struct QuadraticDistanceCostTpl<context::Scalar>;
 
 }

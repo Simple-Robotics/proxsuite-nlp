@@ -49,7 +49,7 @@ public:
   /// Merit function.
   ALMeritFunctionTpl<Scalar> merit_fun;
   /// Proximal regularization penalty.
-  QuadraticDistanceCost<Scalar> prox_penalty;
+  QuadraticDistanceCostTpl<Scalar> prox_penalty;
 
   /// Level of verbosity of the solver.
   VerboseLevel verbose = QUIET;

@@ -16,7 +16,7 @@ namespace proxnlp {
  * of a residual function \f$r :\calX\to \RR^p\f$.
  */
 template <typename _Scalar>
-struct QuadraticResidualCost : public CostFunctionBaseTpl<_Scalar> {
+struct QuadraticResidualCostTpl : public CostFunctionBaseTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using FunctionType = C2FunctionTpl<Scalar>; // base constraint func to use
@@ -36,9 +36,9 @@ public:
   /// Constant term \f$c\f$
   Scalar constant_;
 
-  QuadraticResidualCost(FunctionPtr residual, const ConstMatrixRef &weights,
-                        const ConstVectorRef &slope,
-                        const Scalar constant = Scalar(0.))
+  QuadraticResidualCostTpl(FunctionPtr residual, const ConstMatrixRef &weights,
+                           const ConstVectorRef &slope,
+                           const Scalar constant = Scalar(0.))
       : Base(residual->nx(), residual->ndx()), residual_(residual),
         weights_(weights), slope_(slope), constant_(constant),
         err(residual_->nr()), Jres(residual_->nr(), this->ndx()),
@@ -48,17 +48,17 @@ public:
     H.setZero();
   }
 
-  QuadraticResidualCost(FunctionPtr residual, const ConstMatrixRef &weights,
-                        const Scalar constant = Scalar(0.))
-      : QuadraticResidualCost(residual, weights, VectorXs::Zero(residual->nr()),
-                              constant) {}
+  QuadraticResidualCostTpl(FunctionPtr residual, const ConstMatrixRef &weights,
+                           const Scalar constant = Scalar(0.))
+      : QuadraticResidualCostTpl(residual, weights,
+                                 VectorXs::Zero(residual->nr()), constant) {}
 
   template <typename... ResidualArgs>
-  QuadraticResidualCost(const ConstMatrixRef &weights,
-                        const ConstVectorRef &slope, const Scalar constant,
-                        ResidualArgs &...args)
-      : QuadraticResidualCost(std::make_shared<FunctionType>(args...), weights,
-                              slope, constant) {}
+  QuadraticResidualCostTpl(const ConstMatrixRef &weights,
+                           const ConstVectorRef &slope, const Scalar constant,
+                           ResidualArgs &...args)
+      : QuadraticResidualCostTpl(std::make_shared<FunctionType>(args...),
+                                 weights, slope, constant) {}
 
   Scalar call(const ConstVectorRef &x) const {
     auto &self = const_cast_self();
@@ -96,8 +96,8 @@ public:
   }
 
 protected:
-  QuadraticResidualCost &const_cast_self() const {
-    return const_cast<QuadraticResidualCost &>(*this);
+  QuadraticResidualCostTpl &const_cast_self() const {
+    return const_cast<QuadraticResidualCostTpl &>(*this);
   }
 
 private:

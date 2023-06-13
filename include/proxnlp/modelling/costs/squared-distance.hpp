@@ -14,27 +14,27 @@ namespace proxnlp {
  * parent. This struct also exposes a method to update the target point.
  */
 template <typename _Scalar>
-struct QuadraticDistanceCost : QuadraticResidualCost<_Scalar> {
+struct QuadraticDistanceCostTpl : QuadraticResidualCostTpl<_Scalar> {
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using FunctionType = ManifoldDifferenceToPoint<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
-  using Base = QuadraticResidualCost<Scalar>;
+  using Base = QuadraticResidualCostTpl<Scalar>;
   using Base::residual_;
   using Base::weights_;
 
-  QuadraticDistanceCost(const shared_ptr<Manifold> &space,
-                        const ConstVectorRef &target,
-                        const ConstMatrixRef &weights)
+  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space,
+                           const ConstVectorRef &target,
+                           const ConstMatrixRef &weights)
       : Base(std::make_shared<FunctionType>(space, target), weights) {}
 
-  QuadraticDistanceCost(const shared_ptr<Manifold> &space,
-                        const ConstVectorRef &target)
-      : QuadraticDistanceCost(space, target,
-                              MatrixXs::Identity(space->ndx(), space->ndx())) {}
+  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space,
+                           const ConstVectorRef &target)
+      : QuadraticDistanceCostTpl(
+            space, target, MatrixXs::Identity(space->ndx(), space->ndx())) {}
 
-  QuadraticDistanceCost(const shared_ptr<Manifold> &space)
-      : QuadraticDistanceCost(space, space->neutral()) {}
+  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space)
+      : QuadraticDistanceCostTpl(space, space->neutral()) {}
 
   ConstVectorRef getTarget() const {
     return std::static_pointer_cast<FunctionType>(residual_)->target_;

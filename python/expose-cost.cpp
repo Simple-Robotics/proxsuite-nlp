@@ -109,7 +109,8 @@ void exposeCost() {
 
   /* Expose specific cost functions */
 
-  bp::class_<QuadraticResidualCost<Scalar>, bp::bases<Cost>>(
+  using QuadraticResidualCost = QuadraticResidualCostTpl<Scalar>;
+  bp::class_<QuadraticResidualCost, bp::bases<Cost>>(
       "QuadraticResidualCost", "Quadratic of a residual function",
       bp::init<const shared_ptr<context::C2Function> &, const ConstMatrixRef &,
                const ConstVectorRef &, Scalar>(
@@ -120,7 +121,8 @@ void exposeCost() {
           (bp::arg("self"), bp::arg("residual"), bp::arg("weights"),
            bp::arg("constant") = 0.)));
 
-  bp::class_<QuadraticDistanceCost<Scalar>, bp::bases<Cost>>(
+  using QuadraticDistanceCost = QuadraticDistanceCostTpl<Scalar>;
+  bp::class_<QuadraticDistanceCost, bp::bases<Cost>>(
       "QuadraticDistanceCost",
       "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the "
       "manifold.",
@@ -132,8 +134,8 @@ void exposeCost() {
       .def(bp::init<const shared_ptr<Manifold> &>(
           "Constructor which uses the neutral element of the space.",
           bp::args("self", "space")))
-      .add_property("target", &QuadraticDistanceCost<Scalar>::getTarget,
-                    &QuadraticDistanceCost<Scalar>::updateTarget);
+      .add_property("target", &QuadraticDistanceCost::getTarget,
+                    &QuadraticDistanceCost::updateTarget);
 }
 
 } // namespace python
