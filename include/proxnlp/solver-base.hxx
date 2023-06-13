@@ -127,8 +127,8 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
 }
 
 template <typename Scalar>
-typename SolverTpl<Scalar>::InertiaFlag
-SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
+auto SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const
+    -> InertiaFlag {
   const int ndx = manifold().ndx();
   const int numc = problem_->getTotalConstraintDim();
   const long n = signature.size();
