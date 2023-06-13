@@ -126,6 +126,20 @@ protected:
 
 namespace helpers {
 
+template <typename Scalar, typename VectorType>
+void createConstraintWiseView(const ProblemTpl<Scalar> &prob,
+                              typename math_types<Scalar>::VectorXs &input,
+                              std::vector<Eigen::Ref<VectorType>> &out) {
+  static_assert(VectorType::IsVectorAtCompileTime,
+                "Function only supports compile-time vectors.");
+  out.reserve(prob.getNumConstraints());
+  for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
+    int idx = prob.getIndex(i);
+    int nr = prob.getConstraintDim(i);
+    out.emplace_back(input.segment(idx, nr));
+  }
+}
+
 /// @brief   Allocate a set of multipliers (or residuals) for a given problem
 /// instance.
 template <typename Scalar>
@@ -134,15 +148,7 @@ void allocateMultipliersOrResiduals(
     typename math_types<Scalar>::VectorOfRef &out) {
   data.resize(prob.getTotalConstraintDim());
   data.setZero();
-  out.reserve(prob.getNumConstraints());
-  int cursor = 0;
-  int nr = 0;
-  for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
-    const ConstraintObjectTpl<Scalar> &cstr = prob.getConstraint(i);
-    nr = cstr.func().nr();
-    out.emplace_back(data.segment(cursor, nr));
-    cursor += nr;
-  }
+  createConstraintWiseView(prob, data, out);
 }
 
 } // namespace helpers
