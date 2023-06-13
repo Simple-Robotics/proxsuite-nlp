@@ -13,6 +13,12 @@ void exposeWorkspace() {
       .def_readonly("kkt_matrix", &Workspace::kkt_matrix, "KKT matrix buffer.")
       .def_readonly("kkt_rhs", &Workspace::kkt_rhs,
                     "KKT system right-hand side buffer.")
+      .def_readonly("prim_step", &Workspace::prim_step)
+      .def_readonly("dual_step", &Workspace::dual_step)
+      .def_readonly("objective_value", &Workspace::objective_value)
+      .def_readonly("objective_gradient", &Workspace::objective_gradient)
+      .def_readonly("objective_hessian", &Workspace::objective_hessian)
+      .def_readonly("merit_gradient", &Workspace::merit_gradient)
       .def_readonly("data_cstr_values", &Workspace::data_cstr_values)
       .def_readonly("cstr_values", &Workspace::cstr_values,
                     "Vector constraint residuals.")
