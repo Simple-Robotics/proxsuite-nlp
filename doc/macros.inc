@@ -5,6 +5,7 @@
 \newcommand{\calW}{\mathcal{W}}
 
 \newcommand{\proj}{\mathop{\mathrm{proj}}}
+\newcommand{\dist}{\mathop{\mathrm{dist}}}
 \newcommand{\prox}{\mathop{\mathrm{prox}}}
 \newcommand{\id}{\mathop{\mathrm{id}}}
 
