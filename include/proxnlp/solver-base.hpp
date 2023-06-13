@@ -70,16 +70,16 @@ public:
   Scalar prim_tol0 = 1.;
   Scalar inner_tol_ = inner_tol0;
   Scalar prim_tol_ = prim_tol0;
-  Scalar rho_init_; // Initial primal proximal penalty parameter.
-  Scalar mu_init_;  // Initial penalty parameter.
+  Scalar rho_init_; //< Initial primal proximal penalty parameter.
+  Scalar mu_init_;  //< Initial penalty parameter.
 private:
-  Scalar rho_ = rho_init_;   // Primal proximal penalty parameter.
-  Scalar mu_ = mu_init_;     // Penalty parameter.
-  Scalar mu_inv_ = 1. / mu_; // Inverse penalty parameter.
+  Scalar rho_ = rho_init_;   //< Primal proximal penalty parameter.
+  Scalar mu_ = mu_init_;     //< Penalty parameter.
+  Scalar mu_inv_ = 1. / mu_; //< Inverse penalty parameter.
 public:
-  Scalar inner_tol_min = 1e-9; // Lower safeguard for the subproblem tolerance.
-  Scalar mu_upper_ = 1.;
-  Scalar mu_lower_ = 1e-9; // Lower safeguard for the penalty parameter.
+  Scalar inner_tol_min = 1e-9; //< Lower safeguard for the subproblem tolerance.
+  Scalar mu_upper_ = 1.;       //< Upper safeguard for the penalty parameter.
+  Scalar mu_lower_ = 1e-9;     //< Lower safeguard for the penalty parameter.
 
   /// BCL strategy parameters.
   BCLParamsTpl<Scalar> bcl_params;
