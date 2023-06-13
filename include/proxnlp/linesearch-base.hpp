@@ -71,3 +71,7 @@ template <typename T> Linesearch<T>::~Linesearch() = default;
 } // namespace proxnlp
 
 #include "proxnlp/linesearch-armijo.hpp"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/linesearch.txx"
+#endif

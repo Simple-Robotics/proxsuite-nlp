@@ -156,6 +156,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
       ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/linesearch.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp
@@ -171,6 +172,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/problem-base.txx
       ${LIB_HEADER_DIR}/workspace.txx
       ${LIB_HEADER_DIR}/pdal.txx
+      ${LIB_HEADER_DIR}/linesearch.txx
       ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
       ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
       ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)

@@ -28,7 +28,7 @@ template <typename T> struct PolynomialTpl {
   }
   PolynomialTpl derivative() const {
     if (degree() == 0) {
-      return PolynomialTpl({0.});
+      return PolynomialTpl(VectorXs::Zero(1));
     }
     VectorXs out(degree());
     for (int i = 0; i < coeffs.size() - 1; i++) {
@@ -39,7 +39,8 @@ template <typename T> struct PolynomialTpl {
 };
 
 /// @brief  Basic backtracking Armijo line-search strategy.
-template <typename Scalar> struct ArmijoLinesearch final : Linesearch<Scalar> {
+template <typename Scalar>
+class ArmijoLinesearch final : public Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
   using FunctionSample = typename Base::FunctionSample;
