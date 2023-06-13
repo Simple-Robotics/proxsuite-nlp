@@ -158,7 +158,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
-      ${PROJECT_SOURCE_DIR}/src/workspace.cpp)
+      ${PROJECT_SOURCE_DIR}/src/workspace.cpp
+      ${PROJECT_SOURCE_DIR}/src/pdal.cpp)
   set(LIB_TEMPLATE_DECLARATIONS
       ${LIB_HEADER_DIR}/linalg/blocks.txx
       ${LIB_HEADER_DIR}/manifold-base.txx
@@ -169,10 +170,10 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/results.txx
       ${LIB_HEADER_DIR}/problem-base.txx
       ${LIB_HEADER_DIR}/workspace.txx
+      ${LIB_HEADER_DIR}/pdal.txx
       ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
       ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
-      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx
-      ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx)
+      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
     list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp
          ${PROJECT_SOURCE_DIR}/src/multibody.cpp)

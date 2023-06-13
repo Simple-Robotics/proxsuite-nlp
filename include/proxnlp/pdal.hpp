@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxnlp/fwd.hpp"
@@ -44,3 +44,7 @@ private:
 } // namespace proxnlp
 
 #include "proxnlp/pdal.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/pdal.txx"
+#endif
