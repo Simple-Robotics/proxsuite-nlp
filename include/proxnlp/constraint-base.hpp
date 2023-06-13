@@ -40,7 +40,7 @@ public:
 
   /**
    * @brief Compute projection of @p z onto the normal cone to the set. The
-   * default implementation is just $\f\mathrm{id} - P\f$.
+   * default implementation is just \f$ \mathrm{id} - P\f$.
    *
    * @param[in]   z     Input vector
    * @param[out]  zout  Output projection on the normal projection
@@ -49,8 +49,9 @@ public:
                                     VectorRef zout) const = 0;
 
   /**
-   * Apply the jacobian of the constraint set projection operator. This carries
-   * out the product \f$ \partial\prox . J \f$.
+   * @brief Apply a jacobian of the projection/proximal operator to a matrix.
+   * @details This carries out the product \f$PJ\f$, where \f$ P
+   * \in\partial_B\prox(z)\f$.
    *
    * @param[in]  z     Input vector (multiplier estimate)
    * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
@@ -87,11 +88,11 @@ public:
 
   ///
   /// @brief Evaluate the Moreau envelope with parameter @p mu for the given
-  /// contraint set or nonsmooth penalty \f$P\f$ at point @p zin.
+  /// contraint set or nonsmooth penalty \f$g\f$ at point @p zin.
   ///
   /// @details    The envelope is
-  ///              \f[ P(\prox_{P/\mu}(z)) + \frac{1}{2\mu} \| z -
-  ///              \prox_{P/\mu}(z) \|^2. \f]
+  ///              \f[ M_{\mu g}(z) := g(\prox_{\mu g}(z)) + \frac{1}{2\mu} \| z
+  ///              - \prox_{\mu g}(z) \|^2. \f]
   ///
   /// @param zin    		The input.
   /// @param zproj     Projection of the input to the normal.
@@ -104,6 +105,7 @@ public:
   }
 
   /// @copybrief evaluateMoreauEnvelope(). This variant evaluates the prox map.
+  /// @copydetails evaluateMoreauEnvelope
   Scalar computeMoreauEnvelope(const ConstVectorRef &zin,
                                VectorRef zprojout) const {
     normalConeProjection(zin, zprojout);
