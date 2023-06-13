@@ -47,8 +47,6 @@ public:
   C1FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
 
-  Base &toBase() { return static_cast<Base &>(*this); }
-
   /// @brief      Jacobian matrix of the constraint function.
   virtual void computeJacobian(const ConstVectorRef &x,
                                MatrixRef Jout) const = 0;
@@ -76,8 +74,6 @@ public:
 
   C2FunctionTpl(const int nx, const int ndx, const int nr)
       : Base(nx, ndx, nr) {}
-
-  Base &toC1() { return static_cast<Base &>(*this); }
 
   /// @brief      Vector-hessian product.
   virtual void vectorHessianProduct(const ConstVectorRef &,
