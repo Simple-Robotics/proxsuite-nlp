@@ -449,7 +449,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
                      dphi0,
                      results.merit,
                      phi_new - phi0,
-                     results.al_iters};
+                     results.al_iters + 1};
 
     logger.log(record);
 
