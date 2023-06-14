@@ -27,17 +27,17 @@ public:
   using Workspace = WorkspaceTpl<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
-  /// Generalized pdAL dual penalty param
-  Scalar gamma_;
-
-  ALMeritFunctionTpl(shared_ptr<const Problem> prob, const Scalar gamma);
+  ALMeritFunctionTpl(const Problem &prob, const Scalar &beta);
 
   Scalar evaluate(const ConstVectorRef &x, const std::vector<VectorRef> &lams,
                   Workspace &workspace) const;
-  Scalar derivative(Workspace &workspace) const;
+
+  void computeGradient(Workspace &workspace) const;
 
 private:
-  shared_ptr<const Problem> problem_;
+  // fraction of mu to use in linesearch; reference to outer algorithm param
+  const Scalar &beta_;
+  const Problem &problem_;
 };
 
 } // namespace proxnlp

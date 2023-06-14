@@ -80,6 +80,7 @@ public:
   Scalar inner_tol_min = 1e-9; //< Lower safeguard for the subproblem tolerance.
   Scalar mu_upper_ = 1.;       //< Upper safeguard for the penalty parameter.
   Scalar mu_lower_ = 1e-9;     //< Lower safeguard for the penalty parameter.
+  Scalar pdal_beta_ = 0.5;     //< primal-dual weight for the dual variables.
 
   /// BCL strategy parameters.
   BCLParamsTpl<Scalar> bcl_params;
@@ -164,7 +165,7 @@ public:
   inline void updatePenalty();
 
   /// @brief Set the dual penalty weight for the merit function.
-  void setDualPenalty(const Scalar gamma) { merit_fun.gamma_ = gamma; }
+  void setDualPenalty(const Scalar beta) { pdal_beta_ = beta; }
 
   /// @brief Set penalty parameter, its inverse and update the merit function.
   /// @param new_mu The new penalty parameter.

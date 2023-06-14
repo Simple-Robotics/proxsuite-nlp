@@ -6,36 +6,32 @@
 
 namespace proxnlp {
 template <typename Scalar>
-ALMeritFunctionTpl<Scalar>::ALMeritFunctionTpl(shared_ptr<const Problem> prob,
-                                               const Scalar gamma)
-    : gamma_(gamma), problem_(prob) {}
+ALMeritFunctionTpl<Scalar>::ALMeritFunctionTpl(const Problem &prob,
+                                               const Scalar &beta)
+    : beta_(beta), problem_(prob) {}
 
 template <typename Scalar>
-Scalar ALMeritFunctionTpl<Scalar>::evaluate(const ConstVectorRef &x,
+Scalar ALMeritFunctionTpl<Scalar>::evaluate(const ConstVectorRef & /*x*/,
                                             const std::vector<VectorRef> &lams,
                                             Workspace &workspace) const {
-  Scalar res = problem_->cost().call(x);
-  const std::size_t nc = problem_->getNumConstraints();
-  for (std::size_t i = 0; i < nc; i++) {
-    const ConstraintObject &cstr = problem_->getConstraint(i);
-    const auto &scv = workspace.shift_cstr_values;
-    const auto &pcv = workspace.shift_cstr_proj;
-    res += cstr.set_->evaluateMoreauEnvelope(scv[i], pcv[i]);
+  Scalar res = workspace.objective_value;
+  // value c(x) + \mu\lambda_e
+  const auto &pd_scv = workspace.shift_cstr_pdal;
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintObject &cstr = problem_.getConstraint(i);
     Scalar mu = cstr.set_->mu();
-    if (gamma_ > 0.) {
-      res += 0.5 * gamma_ * cstr.set_->mu_inv() *
-             (pcv[i] - mu * lams[i]).squaredNorm();
-    }
+    VectorXs scv_tmp = pd_scv[i];
+    res += 2.0 * cstr.set_->computeMoreauEnvelope(pd_scv[i], scv_tmp);
+    res += mu * lams[i].squaredNorm() / 4.0;
   }
   return res;
 }
 
 template <typename Scalar>
-Scalar ALMeritFunctionTpl<Scalar>::derivative(Workspace &workspace) const {
-  const auto &dx = workspace.prim_step;
-  const auto &dlam = workspace.dual_step;
-  return workspace.merit_gradient.dot(dx) -
-         gamma_ * workspace.data_dual_prox_err.dot(dlam);
+void ALMeritFunctionTpl<Scalar>::computeGradient(Workspace &workspace) const {
+  workspace.merit_gradient = workspace.objective_gradient;
+  workspace.merit_gradient +=
+      workspace.data_jacobians.transpose() * workspace.data_lams_pdal;
 }
 
 } // namespace proxnlp

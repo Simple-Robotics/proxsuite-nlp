@@ -19,7 +19,7 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              LDLTChoice ldlt_choice,
                              const LinesearchOptions ls_options)
-    : problem_(prob), merit_fun(problem_, 1.),
+    : problem_(prob), merit_fun(*problem_, pdal_beta_),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
@@ -199,6 +199,17 @@ void SolverTpl<Scalar>::computeMultipliers(
                                   workspace.shift_cstr_proj[i]);
   }
   workspace.data_lams_plus = mu_inv_ * workspace.data_shift_cstr_proj;
+  // compute primal-dual multiplier estimates:
+  // normalConeProj(w), w = c(x) + mu(lambda_k - (beta-1)lambda)
+  workspace.data_shift_cstr_pdal =
+      workspace.data_shift_cstr_values - 0.5 * mu_ * inner_lams_data;
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    cstr_set.normalConeProjection(workspace.shift_cstr_pdal[i],
+                                  workspace.lams_pdal[i]);
+    // multiply by fraction
+    workspace.lams_pdal[i] *= 2.0 / mu_;
+  }
   workspace.data_lams_plus_reproj = workspace.data_lams_plus;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
@@ -317,14 +328,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.kkt_rhs.head(ndx).noalias() +=
         workspace.data_jacobians.transpose() * workspace.data_lams_plus_reproj;
 
-    workspace.kkt_rhs.tail(ndual) = workspace.data_dual_prox_err;
-
-    workspace.merit_gradient = workspace.objective_gradient;
-    workspace.merit_gradient.noalias() +=
-        workspace.data_jacobians.transpose() * workspace.data_lams_plus;
-
-    workspace.dual_residual = workspace.kkt_rhs.head(ndx);
-
+    merit_fun.computeGradient(workspace);
     // add proximal penalty terms
     if (rho_ > 0.) {
       workspace.kkt_rhs.head(ndx) += workspace.prox_grad;
@@ -335,6 +339,9 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_matrix, "kkt_matrix");
 
     computePrimalResiduals(workspace, results);
+
+    // compute dual residual
+    workspace.dual_residual = workspace.objective_gradient;
     results.dual_infeas = math::infty_norm(workspace.dual_residual);
     Scalar inner_crit = math::infty_norm(workspace.kkt_rhs);
     Scalar outer_crit = std::max(results.prim_infeas, results.dual_infeas);
@@ -411,7 +418,9 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     //// Take the step
 
-    workspace.dmerit_dir = merit_fun.derivative(workspace);
+    workspace.dmerit_dir =
+        workspace.merit_gradient.dot(workspace.prim_step) +
+        workspace.merit_dual_gradient.dot(workspace.dual_step);
 
     Scalar phi0 = results.merit;
     Scalar dphi0 = workspace.dmerit_dir;
