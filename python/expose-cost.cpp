@@ -37,6 +37,7 @@ void exposeQuadraticCosts();
 
 void exposeCost() {
   using CostPtr = shared_ptr<Cost>;
+  bp::register_ptr_to_python<CostPtr>();
 
   void (Cost::*compGrad1)(const ConstVectorRef &, VectorRef) const =
       &Cost::computeGradient;
