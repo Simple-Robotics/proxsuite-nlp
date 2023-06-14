@@ -491,7 +491,7 @@ void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_inv_ = 1. / mu_;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintObject &cstr = problem_->getConstraint(i);
-    cstr.set_->setProxParameters(mu_);
+    cstr.set_->setProxParameter(mu_);
   }
 }
 

@@ -81,8 +81,9 @@ void exposeConstraints() {
       .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
            bp::args("self", "zin", "zproj"),
            "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
-      .def("setProxParameters", &ConstraintSet::setProxParameters,
+      .def("setProxParameter", &ConstraintSet::setProxParameter,
            bp::args("self", "mu"), "Set proximal parameter.")
+      .add_property("mu", &ConstraintSet::mu, "Current proximal parameter.")
       .def(bp::self == bp::self);
 
   bp::class_<Constraint>(

@@ -64,7 +64,7 @@ public:
 
   /// @brief Update proximal parameter; this applies to when this class is a
   /// proximal operator that isn't a projection (e.g. \f$ \ell_1 \f$).
-  void setProxParameters(const Scalar mu) {
+  void setProxParameter(const Scalar mu) {
     mu_ = mu;
     mu_inv_ = 1. / mu;
   };
