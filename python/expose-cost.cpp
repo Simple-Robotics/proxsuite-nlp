@@ -21,7 +21,7 @@ using context::VectorXs;
 struct CostWrapper : Cost, bp::wrapper<Cost> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
-  CostWrapper(const int nx, const int ndx) : Cost(nx, ndx) {}
+  using Cost::Cost;
 
   Scalar call(const ConstVectorRef &x) const { return get_override("call")(x); }
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
@@ -49,7 +49,9 @@ void exposeCost() {
       &Cost::computeHessian;
 
   bp::class_<CostWrapper, bp::bases<context::C2Function>, boost::noncopyable>(
-      "CostFunctionBase", bp::init<int, int>(bp::args("self", "nx", "ndx")))
+      "CostFunctionBase", bp::no_init)
+      .def(bp::init<int, int>(bp::args("self", "nx", "ndx")))
+      .def(bp::init<const Manifold &>(bp::args("self", "manifold")))
       .def("call", bp::pure_virtual(&Cost::call), bp::args("self", "x"))
       .def("computeGradient", bp::pure_virtual(compGrad1),
            bp::args("self", "x", "gout"))
@@ -75,7 +77,8 @@ void exposeCost() {
   bp::class_<func_to_cost<Scalar>, bp::bases<Cost>>(
       "CostFromFunction",
       "Wrap a scalar-values C2 function into a cost function.", bp::no_init)
-      .def(bp::init<const context::C2Function &>(bp::args("self", "func")));
+      .def(bp::init<const shared_ptr<context::C2Function> &>(
+          bp::args("self", "func")));
 
   using CostSum = CostSumTpl<Scalar>;
   bp::register_ptr_to_python<shared_ptr<CostSum>>();

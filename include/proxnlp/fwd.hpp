@@ -49,6 +49,9 @@ template <typename Scalar> struct C1FunctionTpl;
 // fwd C2FunctionTpl
 template <typename Scalar> struct C2FunctionTpl;
 
+// fwd func_to_cost
+template <typename Scalar> struct func_to_cost;
+
 // fwd ComposeFunctionTpl
 template <typename Scalar> struct ComposeFunctionTpl;
 
