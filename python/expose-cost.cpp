@@ -3,9 +3,6 @@
 #include "proxnlp/cost-function.hpp"
 #include "proxnlp/cost-sum.hpp"
 
-#include "proxnlp/modelling/costs/quadratic-residual.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-
 #include "boost/python/operators.hpp"
 
 namespace proxnlp {
@@ -21,8 +18,6 @@ using context::Scalar;
 using context::VectorRef;
 using context::VectorXs;
 
-namespace internal {
-
 struct CostWrapper : Cost, bp::wrapper<Cost> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
@@ -36,7 +31,9 @@ struct CostWrapper : Cost, bp::wrapper<Cost> {
     get_override("computeHessian")(x, out);
   }
 };
-} // namespace internal
+
+/// Expose specific cost functions
+void exposeQuadraticCosts();
 
 void exposeCost() {
   using CostPtr = shared_ptr<Cost>;
@@ -50,8 +47,7 @@ void exposeCost() {
   MatrixXs (Cost::*compHess2)(const ConstVectorRef &) const =
       &Cost::computeHessian;
 
-  bp::class_<internal::CostWrapper, bp::bases<context::C2Function>,
-             boost::noncopyable>(
+  bp::class_<CostWrapper, bp::bases<context::C2Function>, boost::noncopyable>(
       "CostFunctionBase", bp::init<int, int>(bp::args("self", "nx", "ndx")))
       .def("call", bp::pure_virtual(&Cost::call), bp::args("self", "x"))
       .def("computeGradient", bp::pure_virtual(compGrad1),
@@ -107,35 +103,7 @@ void exposeCost() {
       .def(-bp::self)
       .def(bp::self_ns::str(bp::self));
 
-  /* Expose specific cost functions */
-
-  using QuadraticResidualCost = QuadraticResidualCostTpl<Scalar>;
-  bp::class_<QuadraticResidualCost, bp::bases<Cost>>(
-      "QuadraticResidualCost", "Quadratic of a residual function",
-      bp::init<const shared_ptr<context::C2Function> &, const ConstMatrixRef &,
-               const ConstVectorRef &, Scalar>(
-          (bp::arg("self"), bp::arg("residual"), bp::arg("weights"),
-           bp::arg("slope"), bp::arg("constant") = 0.)))
-      .def(bp::init<const shared_ptr<context::C2Function> &,
-                    const ConstMatrixRef &, Scalar>(
-          (bp::arg("self"), bp::arg("residual"), bp::arg("weights"),
-           bp::arg("constant") = 0.)));
-
-  using QuadraticDistanceCost = QuadraticDistanceCostTpl<Scalar>;
-  bp::class_<QuadraticDistanceCost, bp::bases<Cost>>(
-      "QuadraticDistanceCost",
-      "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the "
-      "manifold.",
-      bp::init<const shared_ptr<Manifold> &, const VectorXs &,
-               const MatrixXs &>(
-          bp::args("self", "space", "target", "weights")))
-      .def(bp::init<const shared_ptr<Manifold> &, const VectorXs &>(
-          bp::args("self", "space", "target")))
-      .def(bp::init<const shared_ptr<Manifold> &>(
-          "Constructor which uses the neutral element of the space.",
-          bp::args("self", "space")))
-      .add_property("target", &QuadraticDistanceCost::getTarget,
-                    &QuadraticDistanceCost::updateTarget);
+  exposeQuadraticCosts();
 }
 
 } // namespace python
