@@ -47,10 +47,16 @@ void QuadraticResidualCostTpl<Scalar>::computeHessian(const ConstVectorRef &x,
   tmp_w_err.noalias() = weights_ * err;
   tmp_w_err += slope_;
 
-  residual_->vectorHessianProduct(x, tmp_w_err, H);
-  out = H;
+  if (!gauss_newton_) {
+    residual_->vectorHessianProduct(x, tmp_w_err, H);
+    out = H;
+  } else {
+    out.setZero();
+  }
 
+  Jres.setZero();
   residual_->computeJacobian(x, Jres);
+  JtW.noalias() = Jres.transpose() * weights_;
   out.noalias() += JtW * Jres;
 }
 

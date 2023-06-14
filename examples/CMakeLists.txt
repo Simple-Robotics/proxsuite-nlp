@@ -20,7 +20,10 @@ endfunction()
 add_proxnlp_example(circle.cpp)
 add_proxnlp_example(equality-qp.cpp)
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
+  find_package(example-robot-data REQUIRED)
   add_proxnlp_example(so2.cpp)
+  add_proxnlp_example(ur5-ik.cpp)
+  target_link_libraries(example-ur5-ik PUBLIC example-robot-data::example-robot-data)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # Python examples
