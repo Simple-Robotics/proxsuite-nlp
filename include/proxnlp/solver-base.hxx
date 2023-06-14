@@ -272,7 +272,6 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
   Scalar delta_last = 0.;
   Scalar delta = delta_last;
-  Scalar old_delta = 0.;
   Scalar phi_new = 0.;
 
   // lambda for evaluating the merit function
@@ -386,7 +385,6 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       workspace.signature.array() = vecD.array().sign().template cast<int>();
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
       is_inertia_correct = checkInertia(workspace.signature);
-      old_delta = delta;
 
       if (is_inertia_correct == INERTIA_OK) {
         delta_last = delta;
