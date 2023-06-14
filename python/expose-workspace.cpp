@@ -1,4 +1,5 @@
 #include "proxnlp/python/fwd.hpp"
+#include "proxnlp/python/policies.hpp"
 
 #include "proxnlp/workspace.hpp"
 
@@ -13,8 +14,10 @@ void exposeWorkspace() {
       .def_readonly("kkt_matrix", &Workspace::kkt_matrix, "KKT matrix buffer.")
       .def_readonly("kkt_rhs", &Workspace::kkt_rhs,
                     "KKT system right-hand side buffer.")
-      .def_readonly("prim_step", &Workspace::prim_step)
-      .def_readonly("dual_step", &Workspace::dual_step)
+      .add_property("prim_step", bp::make_getter(&Workspace::prim_step,
+                                                 policies::return_by_value))
+      .add_property("dual_step", bp::make_getter(&Workspace::dual_step,
+                                                 policies::return_by_value))
       .def_readonly("objective_value", &Workspace::objective_value)
       .def_readonly("objective_gradient", &Workspace::objective_gradient)
       .def_readonly("objective_hessian", &Workspace::objective_hessian)
@@ -52,17 +55,16 @@ void exposeWorkspace() {
           +[](const Workspace &ws) -> const linalg::ldlt_base<Scalar> & {
             return *ws.ldlt_;
           },
-          bp::return_internal_reference<>(),
+          policies::return_internal_reference,
           "Returns a reference to the underlying LDLT solver.");
 
   using LDLTBase = linalg::ldlt_base<Scalar>;
   bp::class_<LDLTBase, boost::noncopyable>(
       "LDLTBase", "Base class for LDLT solvers.", bp::no_init)
-      .def("compute", &LDLTBase::compute, bp::return_internal_reference<>(),
+      .def("compute", &LDLTBase::compute, policies::return_internal_reference,
            bp::args("self", "mat"))
       .def("solveInPlace", &LDLTBase::solveInPlace, bp::args("self", "rhsAndX"))
-      .def("matrixLDLT", &LDLTBase::matrixLDLT,
-           bp::return_value_policy<bp::return_by_value>(),
+      .def("matrixLDLT", &LDLTBase::matrixLDLT, policies::return_by_value,
            "Get the current value of the decomposition matrix. This makes a "
            "copy.");
   bp::class_<linalg::DenseLDLT<Scalar>, bp::bases<LDLTBase>>("DenseLDLT",
