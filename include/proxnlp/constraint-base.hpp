@@ -6,72 +6,64 @@
 
 namespace proxnlp {
 
-/**
- * @brief   Base constraint set type.
- *
- * @details Constraint sets can be the negative or positive orthant, the
- * \f$\{0\}\f$ singleton, cones, etc... The expected inputs are constraint
- * values or shifted constraint values (as in ALM-type algorithms).
- */
+///
+/// @brief   Base constraint set type.
+///
+/// @details Constraint sets can be the negative or positive orthant, the
+/// \f$\{0\}\f$ singleton, cones, etc... The expected inputs are constraint
+/// values or shifted constraint values (as in ALM-type algorithms).
+///
 template <typename _Scalar> struct ConstraintSetBase {
 public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
+  using Self = ConstraintSetBase<Scalar>;
 
   /// Do not use the vector-Hessian product in the Hessian
   /// for Gauss Newton.
   virtual bool disableGaussNewton() const { return true; }
 
-  /**
-   * Provided the image @p zproj by the proximal/projection map, evaluate the
-   * nonsmooth penalty or constraint set indicator function.
-   * @note This will be 0 for projection operators.
-   */
+  /// Provided the image @p zproj by the proximal/projection map, evaluate the
+  /// nonsmooth penalty or constraint set indicator function.
+  /// @note This will be 0 for projection operators.
   virtual Scalar evaluate(const ConstVectorRef & /*zproj*/) const { return 0.; }
 
-  /**
-   * @brief Compute projection of variable @p z onto the constraint set.
-   *
-   * @param[in]   z     Input vector
-   * @param[out]  zout  Output projection
-   */
+  /// @brief Compute projection of variable @p z onto the constraint set.
+  ///
+  /// @param[in]   z     Input vector
+  /// @param[out]  zout  Output projection
   virtual void projection(const ConstVectorRef &z, VectorRef zout) const = 0;
 
-  /**
-   * @brief Compute projection of @p z onto the normal cone to the set. The
-   * default implementation is just \f$ \mathrm{id} - P\f$.
-   *
-   * @param[in]   z     Input vector
-   * @param[out]  zout  Output projection on the normal projection
-   */
+  /// @brief Compute projection of @p z onto the normal cone to the set. The
+  /// default implementation is just \f$ \mathrm{id} - P\f$.
+  ///
+  /// @param[in]   z     Input vector
+  /// @param[out]  zout  Output projection on the normal projection
   virtual void normalConeProjection(const ConstVectorRef &z,
                                     VectorRef zout) const = 0;
 
-  /**
-   * @brief Apply a jacobian of the projection/proximal operator to a matrix.
-   * @details This carries out the product \f$PJ\f$, where \f$ P
-   * \in\partial_B\prox(z)\f$.
-   *
-   * @param[in]  z     Input vector (multiplier estimate)
-   * @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
-   * and returned.
-   */
+  /// @brief Apply a jacobian of the projection/proximal operator to a matrix.
+  /// @details This carries out the product \f$PJ\f$, where \f$ P
+  /// \in\partial_B\prox(z)\f$.
+  ///
+  /// @param[in]  z     Input vector (multiplier estimate)
+  /// @param[out] Jout  Output Jacobian matrix, which will be modifed in-place
+  /// and returned.
   virtual void applyProjectionJacobian(const ConstVectorRef &z,
                                        MatrixRef Jout) const;
 
-  /**
-   * Apply the jacobian of the projection on the normal cone.
-   *
-   * @param[in]  z     Input vector
-   * @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which
-   * will be modified in place. The modification should be a row-wise operation.
-   */
+  /// @brief Apply the jacobian of the projection on the normal cone.
+  ///
+  /// @param[in]  z     Input vector
+  /// @param[out] Jout  Output Jacobian matrix of shape \f$(nr, ndx)\f$, which
+  /// will be modified in place. The modification should be a row-wise
+  /// operation.
   virtual void applyNormalConeProjectionJacobian(const ConstVectorRef &z,
                                                  MatrixRef Jout) const;
 
-  /// Update proximal parameter; this applies to when this class is a proximal
-  /// operator.
+  /// @brief Update proximal parameter; this applies to when this class is a
+  /// proximal operator that isn't a projection (e.g. \f$ \ell_1 \f$).
   void setProxParameters(const Scalar mu) {
     mu_ = mu;
     mu_inv_ = 1. / mu;
