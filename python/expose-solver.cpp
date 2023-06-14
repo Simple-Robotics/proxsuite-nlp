@@ -120,7 +120,8 @@ void exposeSolver() {
       .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
       .def("setDualPenalty", &Solver::setDualPenalty, bp::args("self", "gamma"),
-           "Set the dual variable penalty for the linesearch merit function.")
+           "Set the dual variable penalty for the linesearch merit "
+           "function.")
       .def("setProxParameter", &Solver::setProxParameter,
            bp::args("self", "rho"),
            "Set the primal proximal penalty parameter.")
@@ -128,9 +129,9 @@ void exposeSolver() {
                      "Initial AL parameter value.")
       .def_readwrite("rho_init", &Solver::rho_init_,
                      "Initial proximal parameter value.")
-      .def_readwrite(
-          "mu_lower", &Solver::mu_lower_,
-          "Lower bound :math:`\\underline{\\mu} > 0` for the AL parameter.")
+      .def_readwrite("mu_lower", &Solver::mu_lower_,
+                     "Lower bound :math:`\\underline{\\mu} > 0` for the "
+                     "AL parameter.")
       .def_readwrite("mu_upper", &Solver::mu_upper_,
                      "Upper bound :math:`\\bar{\\mu}` for the AL parameter. "
                      "The tolerances for "
