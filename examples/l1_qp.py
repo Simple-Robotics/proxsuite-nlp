@@ -27,7 +27,7 @@ assert np.allclose(A @ target, lin_fun(target))
 uppr = np.array([1.0, 0.4])
 lowr = np.array([0.0, -0.1])
 # pset = constraints.BoxConstraint(lowr, uppr)
-pset = constraints.L1Penalty()
+pset = constraints.NonsmoothPenaltyL1()
 penalty = constraints.ConstraintObject(lin_fun, pset)
 
 
@@ -89,7 +89,7 @@ fig: plt.Figure = plt.figure()
 gs = fig.add_gridspec(2, 1, height_ratios=[2, 1])
 ax = fig.add_subplot(gs[0])
 
-if isinstance(pset, constraints.L1Penalty):
+if isinstance(pset, constraints.NonsmoothPenaltyL1):
     plt.scatter(*sol, s=40, c="cyan", label="solution")
 x_hist = np.array(cbstore.xs)
 x_hist = np.insert(x_hist, 0, x0, axis=0)

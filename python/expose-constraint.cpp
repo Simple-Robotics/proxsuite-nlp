@@ -108,7 +108,7 @@ static void exposeConstraintTypes() {
           "C2Function.");
 
   using L1Penalty_t = NonsmoothPenaltyL1Tpl<Scalar>;
-  exposeSpecificConstraintSet<L1Penalty_t>("L1Penalty",
+  exposeSpecificConstraintSet<L1Penalty_t>("NonsmoothPenaltyL1",
                                            "1-norm penalty function.");
 }
 
