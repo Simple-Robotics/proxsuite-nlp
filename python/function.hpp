@@ -9,8 +9,7 @@ struct FunctionWrap : context::Function, bp::wrapper<context::Function> {
 public:
   PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
-  FunctionWrap(const int nx, const int ndx, const int nr)
-      : context::Function(nx, ndx, nr) {}
+  using context::Function::BaseFunctionTpl;
 
   VectorXs operator()(const ConstVectorRef &x) const {
     bp::override f = get_override("__call__");
@@ -21,8 +20,7 @@ public:
 struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function> {
   PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
-  C1FunctionWrap(const int nx, const int ndx, const int nr)
-      : context::C1Function(nx, ndx, nr) {}
+  using context::C1Function::C1FunctionTpl;
 
   VectorXs operator()(const ConstVectorRef &x) const {
     bp::override f = get_override("__call__");
@@ -38,8 +36,7 @@ struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function> {
 struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
   PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
-  C2FunctionWrap(const int nx, const int ndx, const int nr)
-      : context::C2Function(nx, ndx, nr) {}
+  using context::C2Function::C2FunctionTpl;
 
   VectorXs operator()(const ConstVectorRef &x) const {
     bp::override f = get_override("__call__");

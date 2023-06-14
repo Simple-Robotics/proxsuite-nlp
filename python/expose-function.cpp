@@ -1,5 +1,6 @@
 #include "proxnlp/python/function.hpp"
 #include "proxnlp/function-ops.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 namespace proxnlp {
 namespace python {
@@ -7,6 +8,7 @@ using context::C1Function;
 using context::C2Function;
 using context::ConstVectorRef;
 using context::Function;
+using context::Manifold;
 using context::Scalar;
 
 void exposeFunctionOps();
@@ -14,8 +16,10 @@ void exposeFunctionOps();
 void exposeFunctionTypes() {
 
   bp::class_<FunctionWrap, boost::noncopyable>(
-      "BaseFunction", "Base class for functions.",
-      bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
+      "BaseFunction", "Base class for functions.", bp::no_init)
+      .def(bp::init<const Manifold &, const int>(
+          bp::args("self", "manifold", "nr")))
+      .def(bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("__call__", bp::pure_virtual(&Function::operator()),
            bp::args("self", "x"), "Call the function.")
       .add_property("nx", &Function::nx, "Input dimension")
@@ -26,8 +30,10 @@ void exposeFunctionTypes() {
   context::MatFuncRetType C1Function::*compJac2 = &C1Function::computeJacobian;
 
   bp::class_<C1FunctionWrap, bp::bases<Function>, boost::noncopyable>(
-      "C1Function", "Base class for differentiable functions",
-      bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
+      "C1Function", "Base class for differentiable functions", bp::no_init)
+      .def(bp::init<const Manifold &, const int>(
+          bp::args("self", "manifold", "nr")))
+      .def(bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("computeJacobian", bp::pure_virtual(compJac1),
            bp::args("self", "x", "Jout"))
       .def("getJacobian", compJac2, bp::args("self", "x"),
@@ -36,7 +42,10 @@ void exposeFunctionTypes() {
   bp::register_ptr_to_python<shared_ptr<C2Function>>();
   bp::class_<C2FunctionWrap, bp::bases<C1Function>, boost::noncopyable>(
       "C2Function", "Base class for twice-differentiable functions.",
-      bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
+      bp::no_init)
+      .def(bp::init<const Manifold &, const int>(
+          bp::args("self", "manifold", "nr")))
+      .def(bp::init<int, int, int>(bp::args("self", "nx", "ndx", "nr")))
       .def("vectorHessianProduct", &C2Function::vectorHessianProduct,
            &C2FunctionWrap::default_vhp, bp::args("self", "x", "v", "Hout"))
       .def("getVHP", &C2FunctionWrap::getVHP, bp::args("self", "x", "v"),

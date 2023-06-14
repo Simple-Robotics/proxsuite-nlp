@@ -22,6 +22,9 @@ public:
   BaseFunctionTpl(const int nx, const int ndx, const int nr)
       : nx_(nx), ndx_(ndx), nr_(nr) {}
 
+  BaseFunctionTpl(const ManifoldAbstractTpl<Scalar> &manifold, const int nr)
+      : BaseFunctionTpl(manifold.nx(), manifold.ndx(), nr) {}
+
   /// @brief      Evaluate the residual at a given point x.
   virtual VectorXs operator()(const ConstVectorRef &x) const = 0;
 
@@ -42,10 +45,8 @@ struct C1FunctionTpl : public BaseFunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = BaseFunctionTpl<_Scalar>;
+  using Base::Base;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-
-  C1FunctionTpl(const int nx, const int ndx, const int nr)
-      : Base(nx, ndx, nr) {}
 
   /// @brief      Jacobian matrix of the constraint function.
   virtual void computeJacobian(const ConstVectorRef &x,
@@ -70,10 +71,8 @@ struct C2FunctionTpl : public C1FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = C1FunctionTpl<_Scalar>;
+  using Base::Base;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-
-  C2FunctionTpl(const int nx, const int ndx, const int nr)
-      : Base(nx, ndx, nr) {}
 
   /// @brief      Vector-hessian product.
   virtual void vectorHessianProduct(const ConstVectorRef &,

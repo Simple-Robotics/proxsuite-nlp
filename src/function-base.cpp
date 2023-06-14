@@ -1,5 +1,7 @@
 #include "proxnlp/function-base.hpp"
 #include "proxnlp/function-ops.hpp"
+#include "proxnlp/cost-function.hpp"
+#include "proxnlp/manifold-base.hpp"
 
 namespace proxnlp {
 
