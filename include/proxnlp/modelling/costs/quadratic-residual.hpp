@@ -35,80 +35,43 @@ public:
   VectorXs slope_;
   /// Constant term \f$c\f$
   Scalar constant_;
+  bool gauss_newton_;
 
   QuadraticResidualCostTpl(FunctionPtr residual, const ConstMatrixRef &weights,
                            const ConstVectorRef &slope,
-                           const Scalar constant = Scalar(0.))
-      : Base(residual->nx(), residual->ndx()), residual_(residual),
-        weights_(weights), slope_(slope), constant_(constant),
-        err(residual_->nr()), Jres(residual_->nr(), this->ndx()),
-        JtW(this->ndx(), residual_->nr()), H(this->ndx(), this->ndx()) {
-    err.setZero();
-    tmp_w_err = err;
-    H.setZero();
-  }
+                           const Scalar constant = Scalar(0.));
 
   QuadraticResidualCostTpl(FunctionPtr residual, const ConstMatrixRef &weights,
                            const Scalar constant = Scalar(0.))
       : QuadraticResidualCostTpl(residual, weights,
                                  VectorXs::Zero(residual->nr()), constant) {}
 
-  template <typename... ResidualArgs>
+  /// @brief Constructor using the template parameter as the underlying type of
+  /// the residual.
+  template <typename Underlying, typename... ResidualArgs>
   QuadraticResidualCostTpl(const ConstMatrixRef &weights,
                            const ConstVectorRef &slope, const Scalar constant,
                            ResidualArgs &...args)
-      : QuadraticResidualCostTpl(std::make_shared<FunctionType>(args...),
-                                 weights, slope, constant) {}
+      : QuadraticResidualCostTpl(std::make_shared<Underlying>(args...), weights,
+                                 slope, constant) {}
 
-  Scalar call(const ConstVectorRef &x) const {
-    auto &self = const_cast_self();
-    self.err = (*residual_)(x);
+  Scalar call(const ConstVectorRef &x) const;
 
-    PROXNLP_NOMALLOC_BEGIN;
+  void computeGradient(const ConstVectorRef &x, VectorRef out) const;
 
-    self.tmp_w_err.noalias() = weights_ * err;
-    Scalar res = Scalar(0.5) * err.dot(tmp_w_err) + err.dot(slope_) + constant_;
-
-    PROXNLP_NOMALLOC_END;
-
-    return res;
-  }
-
-  void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    auto &self = const_cast_self();
-    residual_->computeJacobian(x, self.Jres);
-
-    self.JtW.noalias() = Jres.transpose() * weights_;
-    out.noalias() = JtW * err;
-    out.noalias() += Jres.transpose() * slope_;
-  }
-
-  void computeHessian(const ConstVectorRef &x, MatrixRef out) const {
-    auto &self = const_cast_self();
-    self.tmp_w_err.noalias() = weights_ * err;
-    self.tmp_w_err += slope_;
-
-    residual_->vectorHessianProduct(x, self.tmp_w_err, self.H);
-    out = H;
-
-    residual_->computeJacobian(x, self.Jres);
-    out.noalias() += JtW * Jres;
-  }
+  void computeHessian(const ConstVectorRef &x, MatrixRef out) const;
 
 protected:
-  QuadraticResidualCostTpl &const_cast_self() const {
-    return const_cast<QuadraticResidualCostTpl &>(*this);
-  }
-
-private:
-  VectorXs err;
-  VectorXs tmp_w_err;
-  MatrixXs Jres;
-  RowMatrixXs JtW;
-  MatrixXs H;
+  mutable VectorXs err;
+  mutable VectorXs tmp_w_err;
+  mutable MatrixXs Jres;
+  mutable RowMatrixXs JtW;
+  mutable MatrixXs H;
 };
 
 } // namespace proxnlp
+
+#include "proxnlp/modelling/costs/quadratic-residual.hxx"
 
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/modelling/costs/quadratic-residual.txx"
