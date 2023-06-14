@@ -14,6 +14,7 @@ namespace python {
 using context::C2Function;
 using context::Constraint;
 using context::ConstraintSet;
+using context::ConstVectorRef;
 using context::Scalar;
 using eigenpy::StdVectorPythonVisitor;
 
@@ -51,8 +52,24 @@ void exposeConstraints() {
            "on the projection/prox map of :math:`z`.")
       .def("projection", &ConstraintSet::projection,
            bp::args("self", "z", "zout"))
+      .def(
+          "projection",
+          +[](const ConstraintSet &c, const ConstVectorRef &z) {
+            context::VectorXs zout(z.size());
+            c.projection(z, zout);
+            return zout;
+          },
+          bp::args("self", "z"))
       .def("normalConeProjection", &ConstraintSet::normalConeProjection,
            bp::args("self", "z", "zout"))
+      .def(
+          "normalConeProjection",
+          +[](const ConstraintSet &c, const ConstVectorRef &z) {
+            context::VectorXs zout(z.size());
+            c.normalConeProjection(z, zout);
+            return zout;
+          },
+          bp::args("self", "z"))
       .def("applyProjectionJacobian", &ConstraintSet::applyProjectionJacobian,
            bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
       .def("applyNormalProjectionJacobian",
