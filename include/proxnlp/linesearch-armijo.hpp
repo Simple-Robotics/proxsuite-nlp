@@ -32,7 +32,7 @@ template <typename T> struct PolynomialTpl {
     }
     VectorXs out(degree());
     for (int i = 0; i < coeffs.size() - 1; i++) {
-      out(i) = coeffs(i) * (degree() - i);
+      out(i) = coeffs(i) * (T(degree()) - i);
     }
     return PolynomialTpl(out);
   }
