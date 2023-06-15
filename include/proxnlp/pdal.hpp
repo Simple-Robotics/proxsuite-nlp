@@ -32,7 +32,8 @@ public:
   Scalar evaluate(const ConstVectorRef &x, const std::vector<VectorRef> &lams,
                   Workspace &workspace) const;
 
-  void computeGradient(Workspace &workspace) const;
+  void computeGradient(const std::vector<VectorRef> &lams,
+                       Workspace &workspace) const;
 
 private:
   // fraction of mu to use in linesearch; reference to outer algorithm param

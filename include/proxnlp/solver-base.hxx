@@ -326,7 +326,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.kkt_rhs.head(ndx).noalias() +=
         workspace.data_jacobians.transpose() * workspace.data_lams_plus_reproj;
 
-    merit_fun.computeGradient(workspace);
+    merit_fun.computeGradient(results.lams_opt, workspace);
     // add proximal penalty terms
     if (rho_ > 0.) {
       workspace.kkt_rhs.head(ndx) += workspace.prox_grad;

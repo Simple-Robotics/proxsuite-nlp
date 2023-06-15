@@ -28,10 +28,18 @@ Scalar ALMeritFunctionTpl<Scalar>::evaluate(const ConstVectorRef & /*x*/,
 }
 
 template <typename Scalar>
-void ALMeritFunctionTpl<Scalar>::computeGradient(Workspace &workspace) const {
+void ALMeritFunctionTpl<Scalar>::computeGradient(
+    const std::vector<VectorRef> &lams, Workspace &workspace) const {
   workspace.merit_gradient = workspace.objective_gradient;
-  workspace.merit_gradient +=
+  workspace.merit_gradient.noalias() +=
       workspace.data_jacobians.transpose() * workspace.data_lams_pdal;
+  workspace.merit_dual_gradient.setZero();
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintObject &cstr = problem_.getConstraint(i);
+    Scalar mu = cstr.set_->mu();
+    workspace.merit_dual_gradient.noalias() +=
+        beta_ * mu * (lams[i] - workspace.lams_pdal[i]);
+  }
 }
 
 } // namespace proxnlp
