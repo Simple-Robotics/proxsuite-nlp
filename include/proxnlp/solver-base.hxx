@@ -318,13 +318,23 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_NOMALLOC_BEGIN;
     //// fill in KKT RHS
     workspace.kkt_rhs.setZero();
+    workspace.kkt_rhs_corr.setZero();
 
     // add jacobian-vector products to gradients
     workspace.kkt_rhs.head(ndx) = workspace.objective_gradient;
     workspace.kkt_rhs.head(ndx).noalias() +=
-        workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
-    workspace.kkt_rhs.head(ndx).noalias() +=
-        workspace.data_jacobians.transpose() * workspace.data_lams_plus_reproj;
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
+
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      workspace.kkt_rhs.tail(ndual) =
+          mu_ * (workspace.data_lams_plus - results.data_lams_opt);
+      break;
+    case KKT_PRIMAL_DUAL:
+      workspace.kkt_rhs.tail(ndual) =
+          0.5 * mu_ * (workspace.data_lams_pdal - results.data_lams_opt);
+      break;
+    }
 
     merit_fun.computeGradient(results.lams_opt, workspace);
     // add proximal penalty terms
@@ -340,6 +350,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     // compute dual residual
     workspace.dual_residual = workspace.objective_gradient;
+    workspace.dual_residual.noalias() +=
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
     results.dual_infeas = math::infty_norm(workspace.dual_residual);
     Scalar inner_crit = math::infty_norm(workspace.kkt_rhs);
     Scalar outer_crit = std::max(results.prim_infeas, results.dual_infeas);
@@ -351,6 +363,26 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     }
 
     // If not optimal: compute the step
+
+    // correct the rhs for the symmetric system
+    workspace.kkt_rhs_corr.head(ndx).noalias() -=
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
+    workspace.kkt_rhs_corr.head(ndx).noalias() +=
+        workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      workspace.kkt_rhs_corr.head(ndx).noalias() +=
+          workspace.data_jacobians.transpose() *
+          workspace.data_lams_plus_reproj;
+      break;
+    case KKT_PRIMAL_DUAL:
+      workspace.kkt_rhs_corr.head(ndx).noalias() +=
+          workspace.data_jacobians.transpose() *
+          workspace.data_lams_pdal_reproj;
+      break;
+    }
+    // apply correction
+    workspace.kkt_rhs += workspace.kkt_rhs_corr;
 
     // fill in KKT matrix
 

@@ -37,6 +37,8 @@ public:
   MatrixXs kkt_matrix;
   /// KKT iteration right-hand side.
   VectorXs kkt_rhs;
+  /// Correction for the kkt matrix
+  VectorXs kkt_rhs_corr;
   /// KKT linear system error (for refinement)
   VectorXs kkt_err;
   /// Primal-dual step \f$\delta w = (\delta x, \delta\lambda)\f$.
@@ -70,10 +72,6 @@ public:
   /// Values of each constraint
   std::vector<VectorRef> cstr_values;
 
-  VectorXs data_shift_cstr_proj;
-  /// Projected values of each constraint
-  std::vector<VectorRef> shift_cstr_proj;
-
   /// Objective value
   Scalar objective_value;
   /// Objective function gradient.
@@ -82,6 +80,8 @@ public:
   MatrixXs objective_hessian;
   /// Merit function gradient.
   VectorXs merit_gradient;
+  /// Merit function gradient in the dual variables (if applicable)
+  VectorXs merit_dual_gradient;
 
   MatrixXs data_jacobians;
   MatrixXs data_hessians;
@@ -94,18 +94,19 @@ public:
   VectorXs data_lams_plus;
   VectorXs data_lams_plus_reproj;
   VectorXs data_lams_pdal;
-  VectorXs data_dual_prox_err;
+  VectorXs data_lams_pdal_reproj;
+  VectorXs data_shift_cstr_pdal;
 
   /// First-order multipliers \f$\mathrm{proj}(\lambda_e + c / \mu)\f$
   std::vector<VectorRef> lams_plus;
   /// Product of the projector Jacobians with the first-order multipliers
   std::vector<VectorRef> lams_plus_reproj;
-  /// Pre-projected multipliers.
+  /// Buffer for shifted constraints
   std::vector<VectorRef> shift_cstr_values;
   /// Primal-dual multiplier estimates (from the pdBCL algorithm)
   std::vector<VectorRef> lams_pdal;
-  /// Subproblem proximal dual error.
-  std::vector<VectorRef> subproblem_dual_err;
+  std::vector<VectorRef> lams_pdal_reproj;
+  std::vector<VectorRef> shift_cstr_pdal;
 
   std::vector<Scalar> ls_alphas;
   std::vector<Scalar> ls_values;
@@ -121,23 +122,25 @@ public:
         numblocks(prob.getNumConstraints()),
         numdual(prob.getTotalConstraintDim()),
         kkt_matrix(ndx + numdual, ndx + numdual), kkt_rhs(ndx + numdual),
-        kkt_err(kkt_rhs), pd_step(ndx + numdual), prim_step(pd_step.head(ndx)),
-        dual_step(pd_step.tail(numdual)), signature(ndx + numdual),
+        kkt_rhs_corr(ndx + numdual), kkt_err(kkt_rhs), pd_step(ndx + numdual),
+        prim_step(pd_step.head(ndx)), dual_step(pd_step.tail(numdual)),
+        signature(ndx + numdual),
         ldlt_(allocate_ldlt_from_problem(prob, ldlt_choice)), x_prev(nx),
         x_trial(nx), data_lams_prev(numdual), data_lams_trial(numdual),
         prox_grad(ndx), prox_hess(ndx, ndx), dual_residual(ndx),
-        data_cstr_values(numdual), data_shift_cstr_proj(numdual),
-        objective_gradient(ndx), objective_hessian(ndx, ndx),
-        merit_gradient(ndx), data_jacobians(numdual, ndx),
+        data_cstr_values(numdual), objective_gradient(ndx),
+        objective_hessian(ndx, ndx), merit_gradient(ndx),
+        merit_dual_gradient(numdual), data_jacobians(numdual, ndx),
         data_hessians((int)numblocks * ndx, ndx), data_lams_plus(numdual),
         data_lams_plus_reproj(numdual), data_lams_pdal(numdual),
-        data_dual_prox_err(numdual), tmp_dx_scaled(ndx) {
+        tmp_dx_scaled(ndx) {
     init(prob);
   }
 
   void init(const Problem &prob) {
     kkt_matrix.setZero();
     kkt_rhs.setZero();
+    kkt_rhs_corr.setZero();
     pd_step.setZero();
     signature.setZero();
 
@@ -151,13 +154,11 @@ public:
     dual_residual.setZero();
     helpers::allocateMultipliersOrResiduals(
         prob, data_cstr_values, cstr_values); // not multipliers but same dims
-    data_shift_cstr_proj.setZero();
-    helpers::allocateMultipliersOrResiduals(prob, data_shift_cstr_proj,
-                                            shift_cstr_proj);
 
     objective_gradient.setZero();
     objective_hessian.setZero();
     merit_gradient.setZero();
+    merit_dual_gradient.setZero();
     data_jacobians.setZero();
     data_hessians.setZero();
 
@@ -167,8 +168,10 @@ public:
     helpers::allocateMultipliersOrResiduals(prob, data_lams_plus_reproj,
                                             lams_plus_reproj);
     helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal, lams_pdal);
-    helpers::allocateMultipliersOrResiduals(prob, data_dual_prox_err,
-                                            subproblem_dual_err);
+    helpers::allocateMultipliersOrResiduals(prob, data_lams_pdal_reproj,
+                                            lams_pdal_reproj);
+    helpers::allocateMultipliersOrResiduals(prob, data_shift_cstr_pdal,
+                                            shift_cstr_pdal);
     tmp_dx_scaled.setZero();
 
     cstr_jacobians.reserve(numblocks);
