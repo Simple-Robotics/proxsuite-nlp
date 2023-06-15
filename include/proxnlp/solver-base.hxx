@@ -79,12 +79,10 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   std::size_t &al_iter = results.al_iters;
   i = 0;
   al_iter = 0;
+  logger.start();
   while ((i < max_iters) && (al_iter < max_al_iters)) {
     results.mu = mu_;
     results.rho = rho_;
-    if (i == 0) {
-      logger.start();
-    }
     innerLoop(workspace, results);
 
     // accept new primal iterate
