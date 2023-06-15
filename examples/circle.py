@@ -61,6 +61,8 @@ solver = proxnlp.Solver(
 )
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
+solver.mul_update_mode = proxnlp.MUL_NEWTON
+solver.kkt_system = proxnlp.KktSystem.PRIMAL_DUAL
 try:
     solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
     solver.setup()
@@ -73,7 +75,8 @@ callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
-solver.solve(p1, lams0)
+flag = solver.solve(p1, lams0)
+print("FLAG = {}".format(flag))
 results = solver.getResults()
 workspace = solver.getWorkspace()
 
@@ -82,6 +85,7 @@ print("Complementarity:", workspace.cstr_values[0] * results.lamsopt[0])
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
 print("Results:", results)
+print("Merit grads:", workspace.merit_gradient, "dual:", workspace.merit_dual_gradient)
 
 
 if __name__ == "__main__":
