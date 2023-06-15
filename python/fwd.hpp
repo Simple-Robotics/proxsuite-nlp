@@ -26,6 +26,7 @@ void exposeConstraints();
 void exposeProblem();
 void exposeResults();
 void exposeWorkspace();
+void exposeLdltRoutines();
 void exposeSolver();
 void exposeCallbacks();
 void exposeAutodiff();

@@ -64,6 +64,7 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   exposeProblem();
   exposeResults();
   exposeWorkspace();
+  exposeLdltRoutines();
   exposeSolver();
   {
     bp::scope in_scope = get_namespace("helpers");
