@@ -8,6 +8,7 @@ void exposeResults() {
   using context::Results;
 
   bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
+      .value("uninit", ConvergenceFlag::UNINIT)
       .value("success", ConvergenceFlag::SUCCESS)
       .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED);
 
