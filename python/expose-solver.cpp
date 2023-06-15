@@ -143,6 +143,7 @@ void exposeSolver() {
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def_readwrite("mul_update_mode", &Solver::mul_update_mode,
                      "Type of multiplier update.")
+      .def_readwrite("kkt_system", &Solver::kkt_system_, "KKT system type.")
       .def_readwrite("max_refinement_steps", &Solver::max_refinement_steps_,
                      "Maximum number of iterative refinement steps.")
       .def_readwrite("kkt_tolerance", &Solver::kkt_tolerance_,
@@ -150,8 +151,13 @@ void exposeSolver() {
                      "(threshold for iterative refinement).")
       .def_readwrite("max_iters", &Solver::max_iters,
                      "Maximum number of iterations.")
+      .def_readwrite("max_al_iters", &Solver::max_al_iters,
+                     "Max augmented Lagrangian iterations.")
       .def_readwrite("reg_init", &Solver::DELTA_INIT,
                      "Initial regularization.");
+  bp::enum_<Solver::KktSystem>("KktSystem")
+      .value("CLASSIC", Solver::KKT_CLASSIC)
+      .value("PRIMAL_DUAL", Solver::KKT_PRIMAL_DUAL);
 
   bp::class_<BCLParams>("BCLParams",
                         "Parameters for the bound-constrained Lagrangian (BCL) "

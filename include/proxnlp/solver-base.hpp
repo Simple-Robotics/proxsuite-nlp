@@ -43,6 +43,7 @@ public:
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
   enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
+  enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
@@ -63,6 +64,7 @@ public:
   std::size_t max_refinement_steps_ = 5;
   Scalar kkt_tolerance_ = 1e-13;
   LDLTChoice ldlt_choice_;
+  KktSystem kkt_system_ = KKT_CLASSIC;
 
   //// Algorithm proximal parameters
 
@@ -156,6 +158,8 @@ public:
                         const ConstVectorRef &lams0 = VectorXs(0));
 
   void innerLoop(Workspace &workspace, Results &results);
+
+  void assembleKktMatrix(Workspace &workspace);
 
   /// Iterative refinement of the KKT linear system.
   PROXNLP_INLINE bool iterativeRefinement(Workspace &workspace) const;

@@ -194,9 +194,9 @@ void SolverTpl<Scalar>::computeMultipliers(
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
     // apply proximal op to shifted constraint
     cstr_set.normalConeProjection(workspace.shift_cstr_values[i],
-                                  workspace.shift_cstr_proj[i]);
+                                  workspace.lams_plus[i]);
   }
-  workspace.data_lams_plus = mu_inv_ * workspace.data_shift_cstr_proj;
+  workspace.data_lams_plus = mu_inv_ * workspace.data_lams_plus;
   // compute primal-dual multiplier estimates:
   // normalConeProj(w), w = c(x) + mu(lambda_k - (beta-1)lambda)
   workspace.data_shift_cstr_pdal =
@@ -205,20 +205,19 @@ void SolverTpl<Scalar>::computeMultipliers(
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
     cstr_set.normalConeProjection(workspace.shift_cstr_pdal[i],
                                   workspace.lams_pdal[i]);
-    // multiply by fraction
-    workspace.lams_pdal[i] *= 2.0 / mu_;
   }
+  workspace.data_lams_pdal *= mu_inv_ / pdal_beta_;
+
   workspace.data_lams_plus_reproj = workspace.data_lams_plus;
+  workspace.data_lams_pdal_reproj = workspace.data_lams_pdal;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
     // reapply the prox operator Jacobian to multiplier estimate
     cstr_set.applyProjectionJacobian(workspace.shift_cstr_values[i],
                                      workspace.lams_plus_reproj[i]);
+    cstr_set.applyProjectionJacobian(workspace.shift_cstr_pdal[i],
+                                     workspace.lams_pdal_reproj[i]);
   }
-  workspace.data_dual_prox_err =
-      mu_ * (workspace.data_lams_plus - inner_lams_data);
-  workspace.data_lams_pdal = workspace.data_lams_plus +
-                             merit_fun.gamma_ * workspace.data_dual_prox_err;
   PROXNLP_NOMALLOC_END;
 }
 
@@ -230,9 +229,17 @@ void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
 
   workspace.data_jacobians_proj = workspace.data_jacobians;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject &cstr = problem_->getConstraint(i);
-    cstr.set_->applyNormalConeProjectionJacobian(
-        workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      cstr_set.applyNormalConeProjectionJacobian(
+          workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
+      break;
+    case KKT_PRIMAL_DUAL:
+      cstr_set.applyNormalConeProjectionJacobian(
+          workspace.shift_cstr_pdal[i], workspace.cstr_jacobians_proj[i]);
+      break;
+    }
   }
 }
 
@@ -385,28 +392,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     workspace.kkt_rhs += workspace.kkt_rhs_corr;
 
     // fill in KKT matrix
-
-    workspace.kkt_matrix.setZero();
-    workspace.kkt_matrix.topLeftCorner(ndx, ndx) = workspace.objective_hessian;
-    workspace.kkt_matrix.topRightCorner(ndx, ndual) =
-        workspace.data_jacobians_proj.transpose();
-    workspace.kkt_matrix.bottomLeftCorner(ndual, ndx) =
-        workspace.data_jacobians_proj;
-    workspace.kkt_matrix.bottomRightCorner(ndual, ndual)
-        .diagonal()
-        .setConstant(-mu_);
-    if (rho_ > 0.) {
-      workspace.kkt_matrix.topLeftCorner(ndx, ndx) += workspace.prox_hess;
-    }
-    for (std::size_t i = 0; i < num_c; i++) {
-      const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
-      bool use_vhp = !cstr_set.disableGaussNewton() ||
-                     (hess_approx == HessianApprox::EXACT);
-      if (use_vhp) {
-        workspace.kkt_matrix.topLeftCorner(ndx, ndx) +=
-            workspace.cstr_vector_hessian_prod[i];
-      }
-    }
+    assembleKktMatrix(workspace);
 
     // choose regularisation level
 
@@ -498,6 +484,44 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
   }
 
   return;
+}
+
+template <typename Scalar>
+void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
+  const long ndx = (long)manifold().ndx();
+  const long ndual = workspace.numdual;
+  workspace.kkt_matrix.setZero();
+  workspace.kkt_matrix.topLeftCorner(ndx, ndx) = workspace.objective_hessian;
+  workspace.kkt_matrix.topRightCorner(ndx, ndual) =
+      workspace.data_jacobians_proj.transpose();
+  workspace.kkt_matrix.bottomLeftCorner(ndual, ndx) =
+      workspace.data_jacobians_proj;
+  auto lower_right_block = workspace.kkt_matrix.bottomRightCorner(ndual, ndual);
+  lower_right_block.diagonal().setConstant(-mu_);
+
+  if (rho_ > 0.) {
+    workspace.kkt_matrix.topLeftCorner(ndx, ndx) += workspace.prox_hess;
+  }
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    bool use_vhp =
+        !cstr_set.disableGaussNewton() || (hess_approx == HessianApprox::EXACT);
+    if (use_vhp) {
+      workspace.kkt_matrix.topLeftCorner(ndx, ndx) +=
+          workspace.cstr_vector_hessian_prod[i];
+    }
+    if (kkt_system_ == KKT_PRIMAL_DUAL) {
+      // correct lower right corner in primal-dual case
+      int idx = problem_->getIndex(i);
+      int nr = problem_->getConstraintDim(i);
+      auto d_sub = lower_right_block.diagonal().segment(idx, nr);
+      VectorXs d_sub2(d_sub);
+      // apply normal cone jacobian op
+      cstr_set.applyNormalConeProjectionJacobian(workspace.shift_cstr_pdal[i],
+                                                 d_sub2);
+      d_sub = 0.5 * (d_sub + d_sub2);
+    }
+  }
 }
 
 template <typename Scalar>
