@@ -45,6 +45,8 @@ void exposeWorkspace() {
                     "Projected constraint Jacobians.")
       .def_readonly("lams_plus", &Workspace::lams_plus,
                     "First-order multiplier estimates.")
+      .def_readonly("data_lams_plus", &Workspace::data_lams_plus,
+                    "First-order multiplier estimates.")
       .def_readonly("lams_plus_reproj", &Workspace::lams_plus_reproj,
                     "Product of projection Jacobian and first-order multiplier "
                     "estimates.")
