@@ -61,6 +61,14 @@ public:
     reset_constraint_dim_vars();
   }
 
+  auto getSegment(VectorXs &x, std::size_t i) const {
+    return x.segment(getIndex(i), getConstraintDim(i));
+  }
+
+  auto getConstSegment(const VectorXs &x, std::size_t i) const {
+    return x.segment(getIndex(i), getConstraintDim(i));
+  }
+
   std::vector<int> getIndices() const { return indices_; }
 
   int getIndex(std::size_t i) const { return indices_[i]; }
@@ -129,9 +137,7 @@ void createConstraintWiseView(const ProblemTpl<Scalar> &prob,
                 "Function only supports compile-time vectors.");
   out.reserve(prob.getNumConstraints());
   for (std::size_t i = 0; i < prob.getNumConstraints(); i++) {
-    int idx = prob.getIndex(i);
-    int nr = prob.getConstraintDim(i);
-    out.emplace_back(input.segment(idx, nr));
+    out.emplace_back(prob.getSegment(input, i));
   }
 }
 
