@@ -36,12 +36,12 @@ struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
   }
 
   void normalConeProjection(const ConstVectorRef &z, VectorRef zout) const {
-    zout = z.cwiseMin(mu_).cwiseMax(-mu_);
+    zout = z - projection_impl(z).matrix();
   }
 
   void computeActiveSet(const ConstVectorRef &z,
                         Eigen::Ref<ActiveType> out) const {
-    out = z.array().abs() < mu_;
+    out = z.array().abs() <= mu_;
   }
 };
 
