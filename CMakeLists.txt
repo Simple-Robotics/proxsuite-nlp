@@ -94,7 +94,7 @@ endmacro(TAG_LIBRARY_VERSION)
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
 add_project_dependency(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
-add_project_dependency(fmt 6.1.2 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 6.1.2")
+add_project_dependency(fmt 9.0.0 REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.0.0")
 
 if(BUILD_WITH_PROXSUITE)
   add_project_dependency(proxsuite REQUIRED)
