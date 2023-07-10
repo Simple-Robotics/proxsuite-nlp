@@ -39,6 +39,9 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 
   bp::import("warnings");
+#ifdef PROXNLP_WITH_PINOCCHIO
+  bp::import("pinocchio");
+#endif
 
   exposeContainerTypes();
   exposeFunctionTypes();
