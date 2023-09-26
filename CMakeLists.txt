@@ -2,7 +2,7 @@
 # Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 set(PROJECT_NAME proxnlp)
 set(PROJECT_DESCRIPTION
