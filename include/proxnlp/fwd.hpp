@@ -1,12 +1,13 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 /// @brief     Forward declarations and configuration macros.
 #pragma once
 
 #ifdef EIGEN_DEFAULT_IO_FORMAT
 #undef EIGEN_DEFAULT_IO_FORMAT
 #endif
-#define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
+#define EIGEN_DEFAULT_IO_FORMAT                                                \
+  Eigen::IOFormat(Eigen::StreamPrecision, 0, ",", "\n", "[", "]")
 
 #include <memory>
 
