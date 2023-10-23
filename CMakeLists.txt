@@ -30,6 +30,8 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
 if(APPLE) # Use the handmade approach
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
 elseif(UNIX)
