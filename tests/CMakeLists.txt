@@ -7,7 +7,7 @@ add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.
 
 # create an object library just for cnpy
 add_library(cnpy OBJECT cnpy.cpp)
-target_link_libraries(cnpy Eigen3::Eigen)
+target_link_libraries(cnpy PUBLIC Eigen3::Eigen)
 target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
 set_target_properties(cnpy PROPERTIES PUBLIC_HEADER cnpy.hpp)
 
@@ -48,10 +48,10 @@ function(add_proxnlp_test name)
   add_test_cflags(${test_name} "-DBOOST_TEST_DYN_LINK")
   add_test_cflags(${test_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
 
-  target_link_libraries(${test_name} ${PROJECT_NAME})
-  target_link_libraries(${test_name} Boost::unit_test_framework)
-  target_link_libraries(${test_name} benchmark::benchmark)
-  target_link_libraries(${test_name} cnpy)
+  target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
+  target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
+  target_link_libraries(${test_name} PRIVATE benchmark::benchmark)
+  target_link_libraries(${test_name} PRIVATE cnpy)
 endfunction(add_proxnlp_test)
 
 # symlink test data file
