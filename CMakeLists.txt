@@ -182,8 +182,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
       ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
-    list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/rigid-transform-point.cpp
-         ${PROJECT_SOURCE_DIR}/src/multibody.cpp)
+    list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/multibody/rigid-transform-point.cpp
+         ${PROJECT_SOURCE_DIR}/src/multibody/spaces.cpp)
     list(APPEND LIB_TEMPLATE_DECLARATIONS
          ${LIB_HEADER_DIR}/modelling/residuals/rigid-transform-point.txx
          ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx)
