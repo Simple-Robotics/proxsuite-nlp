@@ -54,7 +54,7 @@ cstrs_ = [
 
 problem = proxnlp.Problem(space, cost_, cstrs_)
 
-mu_init = 0.01
+mu_init = 0.1
 rho_init = 0.0
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE

@@ -29,7 +29,7 @@ struct CustomC2Func : C2FunctionTpl<Scalar> {
     return VectorXs::Random(nr());
   }
 
-  void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const {
+  void computeJacobian(const ConstVectorRef &, MatrixRef Jout) const {
     Jout.setZero();
   }
 };
