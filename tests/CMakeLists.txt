@@ -6,15 +6,15 @@ add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
 add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 
 # create an object library just for cnpy
-add_library(cnpy OBJECT cnpy.cpp)
+add_library(cnpy STATIC cnpy.cpp)
 target_link_libraries(cnpy PUBLIC Eigen3::Eigen)
 target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
-set_target_properties(cnpy PROPERTIES PUBLIC_HEADER cnpy.hpp)
+set_target_properties(cnpy PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp)
 
 install(
   TARGETS cnpy
   EXPORT ${TARGETS_EXPORT_NAME}
-  OBJECTS DESTINATION lib/
+  ARCHIVE DESTINATION lib/${PROJECT_NAME}
   PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests)
 
 macro(ADD_TEST_CFLAGS test_name flag)
