@@ -4,8 +4,7 @@
 #include "Eigen/Core"
 
 namespace Eigen {
-template <typename MatrixType_, int UpLo_ = Lower>
-struct BunchKaufman;
+template <typename MatrixType_, int UpLo_ = Lower> struct BunchKaufman;
 
 namespace internal {
 template <typename MatrixType_, int UpLo_>
@@ -17,7 +16,9 @@ struct traits<BunchKaufman<MatrixType_, UpLo_>> : traits<MatrixType_> {
 };
 
 template <typename MatrixType, typename IndicesType>
-ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& pivots, Index& pivot_count) {
+ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType &a,
+                                                 IndicesType &pivots,
+                                                 Index &pivot_count) {
   using Scalar = typename MatrixType::Scalar;
   using Real = typename Eigen::NumTraits<Scalar>::Real;
   Real alpha = (Real(1) + numext::sqrt(Real(17))) / Real(8);
@@ -54,7 +55,10 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& piv
           rowmax = a.row(imax).segment(k, imax - k).cwiseAbs().maxCoeff();
         }
         if (n - imax - 1 > 0) {
-          rowmax = numext::maxi(rowmax, a.col(imax).segment(imax + 1, n - imax - 1).cwiseAbs().maxCoeff());
+          rowmax = numext::maxi(rowmax, a.col(imax)
+                                            .segment(imax + 1, n - imax - 1)
+                                            .cwiseAbs()
+                                            .maxCoeff());
         }
 
         if (abs_akk >= (alpha * colmax) * (colmax / rowmax)) {
@@ -70,7 +74,9 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& piv
       Index kk = k + k_step - 1;
       if (kp != kk) {
         pivot_count += 1;
-        a.col(kk).segment(kp + 1, n - kp - 1).swap(a.col(kp).segment(kp + 1, n - kp - 1));
+        a.col(kk)
+            .segment(kp + 1, n - kp - 1)
+            .swap(a.col(kp).segment(kp + 1, n - kp - 1));
 
         for (Index j = kk + 1; j < kp; ++j) {
           Scalar tmp = a(j, kk);
@@ -90,7 +96,8 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& piv
         a(k, k) = Scalar(d11);
 
         auto x = a.middleRows(k + 1, n - k - 1).col(k);
-        auto trailing = a.middleRows(k + 1, n - k - 1).middleCols(k + 1, n - k - 1);
+        auto trailing =
+            a.middleRows(k + 1, n - k - 1).middleCols(k + 1, n - k - 1);
 
         for (Index j = 0; j < n - k - 1; ++j) {
           Scalar d11xj = numext::conj(x(j)) * d11;
@@ -118,10 +125,12 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& piv
 
         for (Index j = k + 2; j < n; ++j) {
           Scalar wk = ((a(j, k) * d11) - (a(j, k + 1) * d21)) * d;
-          Scalar wkp1 = ((a(j, k + 1) * d22) - (a(j, k) * numext::conj(d21))) * d;
+          Scalar wkp1 =
+              ((a(j, k + 1) * d22) - (a(j, k) * numext::conj(d21))) * d;
 
           for (Index i = j; i < n; ++i) {
-            a(i, j) -= a(i, k) * numext::conj(wk) + a(i, k + 1) * numext::conj(wkp1);
+            a(i, j) -=
+                a(i, k) * numext::conj(wk) + a(i, k + 1) * numext::conj(wkp1);
           }
           a(j, j) = Scalar(numext::real(a(j, j)));
 
@@ -145,8 +154,9 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType& a, IndicesType& piv
 }
 
 template <typename MatrixType, typename WType, typename IndicesType>
-ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, IndicesType& pivots, Index& pivot_count,
-                                                 Index& processed_cols) {
+ComputationInfo
+bunch_kaufman_in_place_one_block(MatrixType &a, WType &w, IndicesType &pivots,
+                                 Index &pivot_count, Index &processed_cols) {
   using Scalar = typename MatrixType::Scalar;
   using Real = typename Eigen::NumTraits<Scalar>::Real;
 
@@ -187,8 +197,10 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
       if (abs_akk >= colmax * alpha) {
         kp = k;
       } else {
-        w.col(k + 1).segment(k, imax - k) = a.row(imax).segment(k, imax - k).adjoint();
-        w.col(k + 1).segment(imax, n - imax) = a.col(imax).segment(imax, n - imax);
+        w.col(k + 1).segment(k, imax - k) =
+            a.row(imax).segment(k, imax - k).adjoint();
+        w.col(k + 1).segment(imax, n - imax) =
+            a.col(imax).segment(imax, n - imax);
 
         {
           auto w_row = w.row(imax).segment(0, k);
@@ -202,12 +214,16 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
           rowmax = w.col(k + 1).segment(k, imax - k).cwiseAbs().maxCoeff();
         }
         if (n - imax - 1 > 0) {
-          rowmax = numext::maxi(rowmax, w.col(k + 1).segment(imax + 1, n - imax - 1).cwiseAbs().maxCoeff());
+          rowmax = numext::maxi(rowmax, w.col(k + 1)
+                                            .segment(imax + 1, n - imax - 1)
+                                            .cwiseAbs()
+                                            .maxCoeff());
         }
 
         if (abs_akk >= (alpha * colmax) * (colmax / rowmax)) {
           kp = k;
-        } else if (numext::abs(numext::real(w(imax, k + 1))) >= alpha * rowmax) {
+        } else if (numext::abs(numext::real(w(imax, k + 1))) >=
+                   alpha * rowmax) {
           kp = imax;
           w.col(k).segment(k, n - k) = w.col(k + 1).segment(k, n - k);
         } else {
@@ -224,7 +240,8 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
         for (Index j = kk + 1; j < kp; ++j) {
           a(kp, j) = numext::conj(a(j, kk));
         }
-        a.col(kp).segment(kp + 1, n - kp - 1) = a.col(kk).segment(kp + 1, n - kp - 1);
+        a.col(kp).segment(kp + 1, n - kp - 1) =
+            a.col(kk).segment(kp + 1, n - kp - 1);
         a.row(kk).segment(0, k).swap(a.row(kp).segment(0, k));
         w.row(kk).segment(0, kk + 1).swap(w.row(kp).segment(0, kk + 1));
       }
@@ -236,7 +253,8 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
         a(k, k) = Scalar(d11);
         auto x = a.middleRows(k + 1, n - k - 1).col(k);
         x *= d11;
-        w.col(k).segment(k + 1, n - k - 1) = w.col(k).segment(k + 1, n - k - 1).conjugate();
+        w.col(k).segment(k + 1, n - k - 1) =
+            w.col(k).segment(k + 1, n - k - 1).conjugate();
       } else {
         Real d21_abs = numext::abs(w(k + 1, k));
         Real d21_inv = Real(1) / d21_abs;
@@ -253,14 +271,17 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
 
         for (Index j = k + 2; j < n; ++j) {
           Scalar wk = ((w(j, k) * d11) - (w(j, k + 1) * d21)) * d;
-          Scalar wkp1 = ((w(j, k + 1) * d22) - (w(j, k) * numext::conj(d21))) * d;
+          Scalar wkp1 =
+              ((w(j, k + 1) * d22) - (w(j, k) * numext::conj(d21))) * d;
 
           a(j, k) = wk;
           a(j, k + 1) = wkp1;
         }
 
-        w.col(k).segment(k + 1, n - k - 1) = w.col(k).segment(k + 1, n - k - 1).conjugate();
-        w.col(k + 1).segment(k + 2, n - k - 2) = w.col(k + 1).segment(k + 2, n - k - 2).conjugate();
+        w.col(k).segment(k + 1, n - k - 1) =
+            w.col(k).segment(k + 1, n - k - 1).conjugate();
+        w.col(k + 1).segment(k + 2, n - k - 2) =
+            w.col(k + 1).segment(k + 2, n - k - 2).conjugate();
       }
     }
 
@@ -277,7 +298,8 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
   auto a_left = a.bottomRows(n - k).leftCols(k);
   auto a_right = a.bottomRows(n - k).rightCols(n - k);
 
-  a_right.template triangularView<Lower>() -= a_left * w.block(k, 0, n - k, k).transpose();
+  a_right.template triangularView<Lower>() -=
+      a_left * w.block(k, 0, n - k, k).transpose();
   Index j = k - 1;
   processed_cols = k;
 
@@ -303,7 +325,9 @@ ComputationInfo bunch_kaufman_in_place_one_block(MatrixType& a, WType& w, Indice
 }
 
 template <typename MatrixType, typename VecType, typename IndicesType>
-ComputationInfo bunch_kaufman_in_place(MatrixType& a, VecType& subdiag, IndicesType& pivots, Index& pivot_count) {
+ComputationInfo bunch_kaufman_in_place(MatrixType &a, VecType &subdiag,
+                                       IndicesType &pivots,
+                                       Index &pivot_count) {
   Index blocksize = 32;
   Index n = a.rows();
 
@@ -321,9 +345,11 @@ ComputationInfo bunch_kaufman_in_place(MatrixType& a, VecType& subdiag, IndicesT
     auto pivots_block = pivots.segment(k, n - k);
     ComputationInfo info = InvalidInput;
     if (blocksize != 0 && blocksize < n - k) {
-      info = internal::bunch_kaufman_in_place_one_block(a_block, w, pivots_block, k_pivot_count, kb);
+      info = internal::bunch_kaufman_in_place_one_block(
+          a_block, w, pivots_block, k_pivot_count, kb);
     } else {
-      info = internal::bunch_kaufman_in_place_unblocked(a_block, pivots_block, k_pivot_count);
+      info = internal::bunch_kaufman_in_place_unblocked(a_block, pivots_block,
+                                                        k_pivot_count);
       kb = n - k;
     }
     if (info != Success) {
@@ -331,7 +357,7 @@ ComputationInfo bunch_kaufman_in_place(MatrixType& a, VecType& subdiag, IndicesT
     }
 
     for (Index j = k; j < k + kb; ++j) {
-      auto& p = pivots.coeffRef(j);
+      auto &p = pivots.coeffRef(j);
       if (p >= 0) {
         p += k;
       } else {
@@ -374,8 +400,10 @@ ComputationInfo bunch_kaufman_in_place(MatrixType& a, VecType& subdiag, IndicesT
   return Success;
 }
 
-template <bool Conjugate, typename MatrixType, typename VecType, typename IndicesType, typename Rhs>
-void bunch_kaufman_solve_in_place(MatrixType const& L, VecType const& subdiag, IndicesType const& pivots, Rhs& x) {
+template <bool Conjugate, typename MatrixType, typename VecType,
+          typename IndicesType, typename Rhs>
+void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
+                                  IndicesType const &pivots, Rhs &x) {
   Index n = L.rows();
 
   Index k;
@@ -393,7 +421,9 @@ void bunch_kaufman_solve_in_place(MatrixType const& L, VecType const& subdiag, I
     }
   }
 
-  L.template triangularView<UnitLower>().template conjugateIf<Conjugate>().solveInPlace(x);
+  L.template triangularView<UnitLower>()
+      .template conjugateIf<Conjugate>()
+      .solveInPlace(x);
 
   k = 0;
   while (k < n) {
@@ -425,7 +455,10 @@ void bunch_kaufman_solve_in_place(MatrixType const& L, VecType const& subdiag, I
     }
   }
 
-  L.transpose().template triangularView<UnitUpper>().template conjugateIf<!Conjugate>().solveInPlace(x);
+  L.transpose()
+      .template triangularView<UnitUpper>()
+      .template conjugateIf<!Conjugate>()
+      .solveInPlace(x);
 
   k = n;
   while (k > 0) {
@@ -440,7 +473,7 @@ void bunch_kaufman_solve_in_place(MatrixType const& L, VecType const& subdiag, I
     }
   }
 }
-}  // namespace internal
+} // namespace internal
 
 template <typename MatrixType_, int UpLo_>
 struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
@@ -454,58 +487,56 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
   EIGEN_GENERIC_PUBLIC_INTERFACE(BunchKaufman);
   friend class SolverBase<BunchKaufman>;
 
-  using IndicesType = typename Transpositions<RowsAtCompileTime, MaxRowsAtCompileTime>::IndicesType;
-  using PermutationType = PermutationMatrix<RowsAtCompileTime, MaxRowsAtCompileTime>;
+  using IndicesType =
+      typename Transpositions<RowsAtCompileTime,
+                              MaxRowsAtCompileTime>::IndicesType;
+  using PermutationType =
+      PermutationMatrix<RowsAtCompileTime, MaxRowsAtCompileTime>;
 
   BunchKaufman()
-      : m_matrix(),
-        m_subdiag(),
-        m_pivot_count(0),
-        m_pivots(),
-        m_isInitialized(false),
-        m_info(ComputationInfo::InvalidInput) {}
+      : m_matrix(), m_subdiag(), m_pivot_count(0), m_pivots(),
+        m_isInitialized(false), m_info(ComputationInfo::InvalidInput) {}
   explicit BunchKaufman(Index size)
-      : m_matrix(size, size),
-        m_subdiag(size),
-        m_pivot_count(0),
-        m_pivots(size),
-        m_isInitialized(false),
-        m_info(ComputationInfo::InvalidInput) {}
+      : m_matrix(size, size), m_subdiag(size), m_pivot_count(0), m_pivots(size),
+        m_isInitialized(false), m_info(ComputationInfo::InvalidInput) {}
 
   template <typename InputType>
-  explicit BunchKaufman(const EigenBase<InputType>& matrix)
-      : m_matrix(matrix.rows(), matrix.cols()),
-        m_subdiag(matrix.rows()),
-        m_pivot_count(0),
-        m_pivots(matrix.rows()),
-        m_isInitialized(false),
+  explicit BunchKaufman(const EigenBase<InputType> &matrix)
+      : m_matrix(matrix.rows(), matrix.cols()), m_subdiag(matrix.rows()),
+        m_pivot_count(0), m_pivots(matrix.rows()), m_isInitialized(false),
         m_info(ComputationInfo::InvalidInput) {
     this->compute(matrix.derived());
   }
 
-  // EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_matrix.rows(); }
-  // EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
-  EIGEN_DEVICE_FUNC inline Index rows() const EIGEN_NOEXCEPT { return m_matrix.rows(); }
-  EIGEN_DEVICE_FUNC inline Index cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
+  // EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT
+  // { return m_matrix.rows(); } EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index
+  // cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
+  EIGEN_DEVICE_FUNC inline Index rows() const EIGEN_NOEXCEPT {
+    return m_matrix.rows();
+  }
+  EIGEN_DEVICE_FUNC inline Index cols() const EIGEN_NOEXCEPT {
+    return m_matrix.cols();
+  }
 
   template <typename InputType>
-  BunchKaufman& compute(const EigenBase<InputType>& matrix);
+  BunchKaufman &compute(const EigenBase<InputType> &matrix);
 
 #ifdef EIGEN_PARSED_BY_DOXYGEN
   template <typename Rhs>
-  inline const Solve<LDLT, Rhs> solve(const MatrixBase<Rhs>& b) const;
+  inline const Solve<LDLT, Rhs> solve(const MatrixBase<Rhs> &b) const;
 #endif
 
 #ifndef EIGEN_PARSED_BY_DOXYGEN
   template <typename RhsType, typename DstType>
-  void _solve_impl(const RhsType& rhs, DstType& dst) const;
+  void _solve_impl(const RhsType &rhs, DstType &dst) const;
 
   template <bool Conjugate, typename RhsType, typename DstType>
-  void _solve_impl_transposed(const RhsType& rhs, DstType& dst) const;
+  void _solve_impl_transposed(const RhsType &rhs, DstType &dst) const;
 #endif
 
- private:
-  using VecType = Matrix<Scalar, RowsAtCompileTime, 1, Eigen::DontAlign, MaxRowsAtCompileTime>;
+private:
+  using VecType = Matrix<Scalar, RowsAtCompileTime, 1, Eigen::DontAlign,
+                         MaxRowsAtCompileTime>;
 
   MatrixType m_matrix;
   VecType m_subdiag;
@@ -518,22 +549,27 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
 #ifndef EIGEN_PARSED_BY_DOXYGEN
 template <typename MatrixType_, int UpLo_>
 template <typename RhsType, typename DstType>
-void BunchKaufman<MatrixType_, UpLo_>::_solve_impl(const RhsType& rhs, DstType& dst) const {
+void BunchKaufman<MatrixType_, UpLo_>::_solve_impl(const RhsType &rhs,
+                                                   DstType &dst) const {
   dst = rhs;
-  internal::bunch_kaufman_solve_in_place<false>(this->m_matrix, this->m_subdiag, this->m_pivots, dst);
+  internal::bunch_kaufman_solve_in_place<false>(this->m_matrix, this->m_subdiag,
+                                                this->m_pivots, dst);
 }
 
 template <typename MatrixType_, int UpLo_>
 template <bool Conjugate, typename RhsType, typename DstType>
-void BunchKaufman<MatrixType_, UpLo_>::_solve_impl_transposed(const RhsType& rhs, DstType& dst) const {
+void BunchKaufman<MatrixType_, UpLo_>::_solve_impl_transposed(
+    const RhsType &rhs, DstType &dst) const {
   dst = rhs;
-  internal::bunch_kaufman_solve_in_place<!Conjugate>(this->m_matrix, this->m_subdiag, this->m_pivots, dst);
+  internal::bunch_kaufman_solve_in_place<!Conjugate>(
+      this->m_matrix, this->m_subdiag, this->m_pivots, dst);
 }
 #endif
 
 template <typename MatrixType_, int UpLo_>
 template <typename InputType>
-BunchKaufman<MatrixType_, UpLo_>& BunchKaufman<MatrixType_, UpLo_>::compute(const EigenBase<InputType>& a) {
+BunchKaufman<MatrixType_, UpLo_> &
+BunchKaufman<MatrixType_, UpLo_>::compute(const EigenBase<InputType> &a) {
   eigen_assert(a.rows() == a.cols());
   Index n = a.rows();
   this->m_matrix.resize(n, n);
@@ -544,9 +580,11 @@ BunchKaufman<MatrixType_, UpLo_>& BunchKaufman<MatrixType_, UpLo_>::compute(cons
   this->m_subdiag.setZero();
   this->m_pivots.setZero();
 
-  this->m_matrix.template triangularView<Lower>() = a.derived().template triangularView<UpLo_>();
-  this->m_info = internal::bunch_kaufman_in_place(this->m_matrix, this->m_subdiag, this->m_pivots, this->m_pivot_count);
+  this->m_matrix.template triangularView<Lower>() =
+      a.derived().template triangularView<UpLo_>();
+  this->m_info = internal::bunch_kaufman_in_place(
+      this->m_matrix, this->m_subdiag, this->m_pivots, this->m_pivot_count);
   this->m_isInitialized = true;
   return *this;
 }
-}  // namespace Eigen
+} // namespace Eigen
