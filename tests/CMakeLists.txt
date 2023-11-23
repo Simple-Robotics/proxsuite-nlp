@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 LAAS-CNRS, INRIA
+# Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #
 
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
@@ -61,7 +61,7 @@ function(symlink_data_file filename)
                           ${CMAKE_CURRENT_BINARY_DIR}/${filename})
 endfunction()
 
-add_proxnlp_test(block-chol)
+add_proxnlp_test(cholesky-bench)
 add_proxnlp_test(tri-solve)
 add_proxnlp_test(constraints)
 add_proxnlp_test(costs)
