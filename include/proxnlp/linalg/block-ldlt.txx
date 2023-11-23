@@ -1,7 +1,7 @@
 #pragma once
 
 #include "proxnlp/context.hpp"
-#include "proxnlp/linalg/blocks.hpp"
+#include "./block-ldlt.hpp"
 
 namespace proxnlp {
 namespace linalg {

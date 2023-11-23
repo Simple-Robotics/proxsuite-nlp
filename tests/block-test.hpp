@@ -1,6 +1,6 @@
 #pragma once
 
-#include "proxnlp/linalg/blocks.hpp"
+#include "proxnlp/linalg/block-ldlt.hpp"
 
 using namespace proxnlp;
 using linalg::BlockKind;

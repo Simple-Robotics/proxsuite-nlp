@@ -150,7 +150,7 @@ set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
 if(ENABLE_TEMPLATE_INSTANTIATION)
 
   set(LIB_TEMPLATE_SOURCES
-      ${PROJECT_SOURCE_DIR}/src/blocks.cpp
+      ${PROJECT_SOURCE_DIR}/src/block-ldlt.cpp
       ${PROJECT_SOURCE_DIR}/src/constraints.cpp
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
@@ -166,7 +166,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp
       ${PROJECT_SOURCE_DIR}/src/pdal.cpp)
   set(LIB_TEMPLATE_DECLARATIONS
-      ${LIB_HEADER_DIR}/linalg/blocks.txx
+      ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
       ${LIB_HEADER_DIR}/manifold-base.txx
       ${LIB_HEADER_DIR}/function-base.txx
       ${LIB_HEADER_DIR}/cost-function.txx

@@ -4,7 +4,7 @@
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "./blocks.hpp"
+#include "./block-ldlt.hpp"
 
 namespace proxnlp {
 namespace linalg {

@@ -4,7 +4,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/linalg/blocks.hpp"
+#include "proxnlp/linalg/block-ldlt.hpp"
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 #include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 #endif

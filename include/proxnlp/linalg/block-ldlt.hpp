@@ -337,8 +337,8 @@ public:
 } // namespace linalg
 } // namespace proxnlp
 
-#include "proxnlp/linalg/blocks.hxx"
+#include "./block-ldlt.hxx"
 
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
-#include "proxnlp/linalg/blocks.txx"
+#include "./block-ldlt.txx"
 #endif
