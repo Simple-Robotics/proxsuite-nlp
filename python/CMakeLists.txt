@@ -15,8 +15,6 @@ set(PY_SOURCES ${${PYLIB_NAME}_SOURCES})
 
 add_header_group(PY_HEADERS)
 
-message(STATUS "Python headers: ${PY_HEADERS}")
-
 function(MAKE_BINDINGS)
   add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
 
