@@ -7,4 +7,4 @@ namespace proxnlp {
 
 extern template struct WorkspaceTpl<context::Scalar>;
 
-}
+} // namespace proxnlp
