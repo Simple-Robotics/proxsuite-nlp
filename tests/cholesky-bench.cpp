@@ -53,7 +53,7 @@ struct ldlt_test_fixture {
   isize size;
 
   void init() {
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
     ldlt.compute(mat);
     size = mat.cols();
     rhs = MatrixXs::Random(size, ncols);

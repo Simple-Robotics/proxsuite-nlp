@@ -54,7 +54,7 @@ struct prob_data {
     size = std::accumulate(row_segments, row_segments + n, isize(0));
     isize ncols_rhs = size;
     rhs = MatrixXs::Random(size, ncols_rhs);
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
   }
 };
 
@@ -66,7 +66,7 @@ template <int _Mode> struct tri_fixture : prob_data {
     constexpr bool IsUpper = (Mode & Eigen::Upper) == Eigen::Upper;
     if (IsUpper)
       sym_mat = sym_mat.transpose();
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
     sol_eig = view().solve(rhs);
   }
 

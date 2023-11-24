@@ -10,7 +10,7 @@ using Scalar = double;
 
 PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 
-inline MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
+inline MatrixXs getRandomSymmetricBlockMatrix(SymbolicBlockMatrix const &sym) {
   isize *row_segments = sym.segment_lens;
   auto n = std::size_t(sym.nsegments());
   isize size = 0;
