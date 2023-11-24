@@ -532,6 +532,9 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
 
   template <bool Conjugate, typename RhsType, typename DstType>
   void _solve_impl_transposed(const RhsType &rhs, DstType &dst) const;
+
+  template <typename RhsType>
+  bool solveInPlace(Eigen::MatrixBase<RhsType> &bAndX) const;
 #endif
 
 private:
@@ -563,6 +566,15 @@ void BunchKaufman<MatrixType_, UpLo_>::_solve_impl_transposed(
   dst = rhs;
   internal::bunch_kaufman_solve_in_place<!Conjugate>(
       this->m_matrix, this->m_subdiag, this->m_pivots, dst);
+}
+
+template <typename MatrixType_, int UpLo_>
+template <typename RhsType>
+bool BunchKaufman<MatrixType_, UpLo_>::solveInPlace(
+    Eigen::MatrixBase<RhsType> &bAndX) const {
+  bAndX = this->solve(bAndX);
+
+  return true;
 }
 #endif
 
