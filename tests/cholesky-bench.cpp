@@ -23,13 +23,13 @@ using linalg::EigenLDLTWrapper;
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
 constexpr auto unit = benchmark::kMicrosecond;
-const isize ndx = 40;
+const isize ndx = 24;
 
 auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
   // clang-format off
   BlockKind *data = new BlockKind[n * n]{
-      BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
-      BlockKind::Zero, BlockKind::Dense, BlockKind::Diag,
+      BlockKind::Diag,  BlockKind::Dense, BlockKind::Dense,
+      BlockKind::Dense, BlockKind::Dense, BlockKind::Diag,
       BlockKind::Dense, BlockKind::Diag, BlockKind::Diag
   };
   // clang-format on
@@ -157,6 +157,23 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
 
   Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
   fmt::print("Dense err = {:.5e}\n", dense_err);
+  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
+  BOOST_CHECK(rhs.isApprox(mat * sol_dense));
+}
+
+BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
+  // dense LDLT
+  Eigen::BunchKaufman<MatrixXs, Eigen::Lower> lblt(mat);
+
+  // MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
+  // BOOST_CHECK(reconstr.isApprox(mat));
+
+  MatrixXs sol_dense = rhs;
+  lblt.solveInPlace(sol_dense);
+
+  Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
+  fmt::print("BunchKaufman err = {:.5e}\n", dense_err);
   BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 }
