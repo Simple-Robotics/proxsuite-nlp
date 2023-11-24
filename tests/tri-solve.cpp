@@ -4,7 +4,7 @@
 
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "block-test.hpp"
+#include "util.hpp"
 #include <random>
 
 #include <benchmark/benchmark.h>
@@ -14,6 +14,7 @@
 #include <boost/mpl/vector.hpp>
 
 namespace utf = boost::unit_test;
+using namespace proxnlp;
 
 using linalg::TriangularBlockMatrix;
 

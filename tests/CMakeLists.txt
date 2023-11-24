@@ -19,6 +19,12 @@ install(
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
   PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests)
 
+set(TEST_UTIL_LIB ${PROJECT_NAME}_test_util)
+add_library(${TEST_UTIL_LIB} STATIC util.cpp)
+target_link_libraries(${TEST_UTIL_LIB} PUBLIC ${PROJECT_NAME} EigenRand::EigenRand)
+target_include_directories(${TEST_UTIL_LIB} PRIVATE ./)
+set_target_properties(${TEST_UTIL_LIB} PROPERTIES LINKER_LANGUAGE CXX)
+
 macro(ADD_TEST_CFLAGS test_name flag)
   set_property(
     TARGET ${test_name}
@@ -54,6 +60,7 @@ function(add_proxnlp_test name)
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
   target_link_libraries(${test_name} PRIVATE benchmark::benchmark)
   target_link_libraries(${test_name} PRIVATE cnpy)
+  target_link_libraries(${test_name} PRIVATE ${TEST_UTIL_LIB})
 endfunction(add_proxnlp_test)
 
 # symlink test data file

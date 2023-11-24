@@ -5,7 +5,7 @@
 
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "block-test.hpp"
+#include "util.hpp"
 #include "proxnlp/ldlt-allocator.hpp"
 
 #include <benchmark/benchmark.h>
@@ -15,6 +15,7 @@
 #include "proxnlp/math.hpp"
 
 namespace utf = boost::unit_test;
+using namespace proxnlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
