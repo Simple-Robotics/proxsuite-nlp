@@ -400,6 +400,33 @@ ComputationInfo bunch_kaufman_in_place(MatrixType &a, VecType &subdiag,
   return Success;
 }
 
+template <typename MatrixType, bool Conjugate> struct BK_Traits;
+
+template <typename MatrixType> struct BK_Traits<MatrixType, false> {
+  typedef TriangularView<const MatrixType, UnitLower> MatrixL;
+  typedef TriangularView<const typename MatrixType::AdjointReturnType,
+                         UnitUpper>
+      MatrixU;
+  static inline MatrixL getL(const MatrixType &m) { return MatrixL(m); }
+  static inline MatrixU getU(const MatrixType &m) {
+    return MatrixU(m.adjoint());
+  }
+};
+
+template <typename MatrixType> struct BK_Traits<MatrixType, true> {
+  typedef typename MatrixType::ConjugateReturnType ConjugateReturnType;
+  typedef TriangularView<const ConjugateReturnType, UnitLower> MatrixL;
+  typedef TriangularView<const typename MatrixType::TransposeReturnType,
+                         UnitUpper>
+      MatrixU;
+  static inline MatrixL getL(const MatrixType &m) {
+    return MatrixL(m.conjugate());
+  }
+  static inline MatrixU getU(const MatrixType &m) {
+    return MatrixU(m.transpose());
+  }
+};
+
 template <bool Conjugate, typename MatrixType, typename VecType,
           typename IndicesType, typename Rhs>
 void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
@@ -421,12 +448,15 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
     }
   }
 
-  TriangularView<const MatrixType, UnitLower> Lview(L);
-  if (Conjugate) {
-    Lview.conjugate().solveInPlace(x);
-  } else {
-    Lview.solveInPlace(x);
-  }
+  using Traits = BK_Traits<MatrixType, Conjugate>;
+
+  Traits::getL(L).solveInPlace(x);
+  // TriangularView<const MatrixType, UnitLower> Lview(L);
+  // if (Conjugate) {
+  //   Lview.conjugate().solveInPlace(x);
+  // } else {
+  //   Lview.solveInPlace(x);
+  // }
 
   k = 0;
   while (k < n) {
@@ -458,12 +488,14 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
     }
   }
 
-  TriangularView<const Transpose<const MatrixType>, UnitUpper> Ltview(L.transpose());
-  if (!Conjugate) {
-    Ltview.conjugate().solveInPlace(x);
-  } else {
-    Ltview.solveInPlace(x);
-  }
+  Traits::getU(L).solveInPlace(x);
+  // TriangularView<const Transpose<const MatrixType>, UnitUpper> Ltview(
+  //     L.transpose());
+  // if (Conjugate) {
+  //   Ltview.solveInPlace(x);
+  // } else {
+  //   Ltview.conjugate().solveInPlace(x);
+  // }
 
   k = n;
   while (k > 0) {
