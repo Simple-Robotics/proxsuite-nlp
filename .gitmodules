@@ -1,3 +1,6 @@
 [submodule "jrl-cmakemodules"]
 	path = cmake
 	url = https://github.com/jrl-umi3218/jrl-cmakemodules
+[submodule "tests/external/EigenRand"]
+	path = tests/external/EigenRand
+	url = https://github.com/bab2min/EigenRand.git
