@@ -144,8 +144,7 @@ endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 set(LIB_HEADER_DIR ${PROJECT_SOURCE_DIR}/include/proxnlp)
 file(GLOB_RECURSE LIB_HEADERS ${LIB_HEADER_DIR}/*.hpp ${LIB_HEADER_DIR}/*.hxx)
 
-set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
-                ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp)
+set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
 
