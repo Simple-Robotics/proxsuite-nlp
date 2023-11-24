@@ -7,9 +7,6 @@
 
 #include "block-test.hpp"
 #include "proxnlp/ldlt-allocator.hpp"
-#if PROXNLP_ENABLE_PROXSUITE_LDLT
-#include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
-#endif
 
 #include <benchmark/benchmark.h>
 #define BOOST_TEST_NO_MAIN
@@ -26,7 +23,7 @@ using linalg::EigenLDLTWrapper;
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
 constexpr auto unit = benchmark::kMicrosecond;
-const isize ndx = 26;
+const isize ndx = 40;
 
 auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
   // clang-format off
@@ -95,6 +92,16 @@ BENCHMARK_DEFINE_F(ldlt_bench_fixture, recursive)(benchmark::State &s) {
       s.SkipWithError("DenseLDLT computation failed.");
       break;
     }
+  }
+}
+
+BENCHMARK_DEFINE_F(ldlt_bench_fixture, bunchkaufman)(benchmark::State &s) {
+  Eigen::BunchKaufman<MatrixXs> lblt(size);
+  auto b = rhs;
+  for (auto _ : s) {
+    lblt.compute(mat);
+    b = lblt.solve(rhs);
+    benchmark::DoNotOptimize(lblt);
   }
 }
 
@@ -234,6 +241,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, recursive)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
 BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
+BENCHMARK_REGISTER_F(ldlt_bench_fixture, bunchkaufman)->Unit(unit);
 
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
