@@ -421,9 +421,12 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
     }
   }
 
-  L.template triangularView<UnitLower>()
-      .template conjugateIf<Conjugate>()
-      .solveInPlace(x);
+  TriangularView<const MatrixType, UnitLower> Lview(L);
+  if (Conjugate) {
+    Lview.conjugate().solveInPlace(x);
+  } else {
+    Lview.solveInPlace(x);
+  }
 
   k = 0;
   while (k < n) {
@@ -455,10 +458,12 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
     }
   }
 
-  L.transpose()
-      .template triangularView<UnitUpper>()
-      .template conjugateIf<!Conjugate>()
-      .solveInPlace(x);
+  TriangularView<const Transpose<const MatrixType>, UnitUpper> Ltview(L.transpose());
+  if (!Conjugate) {
+    Ltview.conjugate().solveInPlace(x);
+  } else {
+    Ltview.solveInPlace(x);
+  }
 
   k = n;
   while (k > 0) {
@@ -509,11 +514,12 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
   }
 
   // EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT
-  // { return m_matrix.rows(); } EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index
-  // cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
+  // { return m_matrix.rows(); }
   EIGEN_DEVICE_FUNC inline Index rows() const EIGEN_NOEXCEPT {
     return m_matrix.rows();
   }
+  // EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT
+  // { return m_matrix.cols(); }
   EIGEN_DEVICE_FUNC inline Index cols() const EIGEN_NOEXCEPT {
     return m_matrix.cols();
   }

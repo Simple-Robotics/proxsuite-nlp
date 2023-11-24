@@ -5,6 +5,7 @@
 #pragma once
 
 #include "proxnlp/linalg/block-ldlt.hpp"
+#include "proxnlp/linalg/bunchkaufman.hpp"
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 #include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 #endif
@@ -13,7 +14,6 @@
 namespace proxnlp {
 
 namespace {
-using linalg::BlockLDLT;
 using linalg::isize;
 using linalg::SymbolicBlockMatrix;
 using std::unique_ptr;
@@ -54,7 +54,7 @@ allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
     SymbolicBlockMatrix structure =
         create_default_block_structure(nprims, nduals);
 
-    BlockLDLT<Scalar> *block_ldlt = new BlockLDLT<Scalar>(size, structure);
+    auto *block_ldlt = new linalg::BlockLDLT<Scalar>(size, structure);
     block_ldlt->findSparsifyingPermutation();
     return ldlt_ptr_t(block_ldlt);
   }
