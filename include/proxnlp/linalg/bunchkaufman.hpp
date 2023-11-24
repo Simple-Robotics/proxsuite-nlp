@@ -484,7 +484,7 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
   };
   using MatrixType = MatrixType_;
   using Base = SolverBase<BunchKaufman>;
-  EIGEN_GENERIC_PUBLIC_INTERFACE(BunchKaufman);
+  EIGEN_GENERIC_PUBLIC_INTERFACE(BunchKaufman)
   friend class SolverBase<BunchKaufman>;
 
   using IndicesType =
