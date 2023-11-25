@@ -5,7 +5,7 @@
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
 add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 set(EIGENRAND_BUILD_TEST OFF)
-add_subdirectory(external/EigenRand)
+add_subdirectory(external/EigenRand EXCLUDE_FROM_ALL)
 
 # create an object library just for cnpy
 add_library(cnpy STATIC cnpy.cpp)
