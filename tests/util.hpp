@@ -15,8 +15,5 @@ PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
 /// Sample for the GOE (Gaussian Orthogonal Ensemble)
 MatrixXs sampleGaussianOrhogonalEnsemble(Eigen::Index n);
 
-/// Sample from the Wishart distribution
-MatrixXs sampleWishart(Eigen::Index dim, Eigen::Index m);
-
 /// Get a random, symmetric block-sparse matrix
 MatrixXs getRandomSymmetricBlockMatrix(SymbolicBlockMatrix const &sym);

@@ -7,12 +7,6 @@ MatrixXs sampleGaussianOrhogonalEnsemble(Eigen::Index n) {
   return (A + A.transpose()) / Z;
 }
 
-MatrixXs sampleWishart(Eigen::Index n, Eigen::Index m) {
-  Eigen::Rand::P8_mt19937_64 urng{42};
-  MatrixXs Qroot = Eigen::Rand::normal<MatrixXs>(n, m, urng);
-  return Qroot * Qroot.transpose();
-}
-
 MatrixXs getRandomSymmetricBlockMatrix(SymbolicBlockMatrix const &sym) {
   isize *row_segments = sym.segment_lens;
   auto n = std::size_t(sym.nsegments());
