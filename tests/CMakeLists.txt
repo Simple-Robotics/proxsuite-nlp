@@ -71,6 +71,7 @@ function(symlink_data_file filename)
 endfunction()
 
 add_proxnlp_test(cholesky-bench)
+add_proxnlp_test(cholesky-dense-bench)
 add_proxnlp_test(tri-solve)
 add_proxnlp_test(constraints)
 add_proxnlp_test(costs)

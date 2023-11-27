@@ -164,6 +164,7 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;
+  using MatrixType = MatrixXs;
 
   DenseLDLT() = default;
   explicit DenseLDLT(isize size) : Base(), m_matrix(size, size) {
@@ -201,7 +202,7 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
   }
 
 protected:
-  MatrixXs m_matrix;
+  MatrixType m_matrix;
   using Base::m_info;
   using Base::m_sign;
 };
