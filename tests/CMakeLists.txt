@@ -89,7 +89,7 @@ function(add_proxnlp_bench name)
 
     target_link_libraries(${bench_name} PRIVATE ${PROJECT_NAME})
     target_link_libraries(${bench_name} PRIVATE benchmark::benchmark)
-    target_link_libraries(${bench_name} PRIVATE ${bench_UTIL_LIB})
+    target_link_libraries(${bench_name} PRIVATE ${TEST_UTIL_LIB})
   endif()
 endfunction()
 

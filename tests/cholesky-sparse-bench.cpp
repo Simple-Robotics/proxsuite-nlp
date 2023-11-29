@@ -18,10 +18,9 @@ using linalg::BlockLDLT;
 using linalg::DenseLDLT;
 using linalg::EigenLDLTWrapper;
 
+namespace {
 constexpr isize n = 3;
-constexpr double TOL = 1e-11;
 constexpr auto unit = benchmark::kMicrosecond;
-const isize ndx = 24;
 
 auto create_problem_structure(isize c1, isize c2, isize c3)
     -> linalg::SymbolicBlockMatrix {
@@ -33,126 +32,128 @@ auto create_problem_structure(isize c1, isize c2, isize c3)
   };
   // clang-format on
 
-  // isize row_segments[n] = {8, 16, 16};
   isize *row_segments = new isize[n]{c1, c2, c3};
   return {data, row_segments, n, n};
 }
 
-// isize ncols = ndx;
+/// Return true on solver.compute success
+template <typename LDLT> bool success(const LDLT &ldlt) {
+  return ldlt.info() == Eigen::Success;
+}
 
-// struct ldlt_test_fixture {
-//   ldlt_test_fixture() : mat(), rhs(), ldlt() { this->init(); }
-//   ~ldlt_test_fixture() = default;
+/// Eigen::BunchKaufman::info is not implemented
+bool success(const Eigen::BunchKaufman<MatrixXs> & /* ldlt */) { return true; }
 
-//   MatrixXs mat;
-//   MatrixXs rhs;
-//   Eigen::LDLT<MatrixXs> ldlt;
-//   MatrixXs sol_eig;
-//   isize size;
+/// Construct a standard LDLT problem
+template <typename LDLT>
+LDLT construct(isize matrix_size, const SymbolicBlockMatrix & /* sym_mat */) {
+  return LDLT(matrix_size);
+}
 
-//   void init() {
-//     mat = getRandomSymmetricBlockMatrix(sym_mat);
-//     ldlt.compute(mat);
-//     size = mat.cols();
-//     rhs = MatrixXs::Random(size, ncols);
-//     sol_eig = ldlt.solve(rhs);
-//   }
-// };
+/// BlockLDLT need SymbolicBlockMatrix as argument
+template <>
+BlockLDLT<Scalar>
+construct<BlockLDLT<Scalar>>(isize matrix_size,
+                             const SymbolicBlockMatrix &sym_mat) {
+  BlockLDLT<Scalar> b(matrix_size, sym_mat);
+  b.findSparsifyingPermutation();
+  return b;
+}
 
-// struct ldlt_bench_fixture : benchmark::Fixture, ldlt_test_fixture {
-//   void SetUp(const benchmark::State &) override { this->init(); }
-//   void TearDown(const benchmark::State &) override {}
-// };
+/// Store all problem variables
+/// TODO create_problem_structure must be able to return different matrix
+/// structure
+template <typename LDLT> struct Problem {
+  Problem(int64_t c1_size_)
+      : c1_size(static_cast<isize>(c1_size_)), c2c3_size(c1_size * 2),
+        matrix_size(c1_size + c2c3_size * 2),
+        sym_mat(create_problem_structure(c1_size, c2c3_size, c2c3_size)),
+        mat(getRandomSymmetricBlockMatrix(sym_mat)),
+        rhs(VectorXs::Random(matrix_size)),
+        ldlt(construct<LDLT>(matrix_size, sym_mat)) {}
 
-// BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
-//   BlockLDLT<Scalar> block_ldlt(size, sym_mat);
-//   block_ldlt.findSparsifyingPermutation();
-//   auto b = rhs;
-//   for (auto _ : s) {
-//     b = rhs;
-//     block_ldlt.compute(mat);
-//     block_ldlt.solveInPlace(b);
-//     if (block_ldlt.info() != Eigen::Success) {
-//       s.SkipWithError("BlockLDLT computation failed.");
-//       break;
-//     }
-//   }
-// }
+  const isize c1_size;
+  const isize c2c3_size;
+  const isize matrix_size;
+  const SymbolicBlockMatrix sym_mat;
+  const MatrixXs mat;
+  const VectorXs rhs;
+  LDLT ldlt;
+};
 
-static void ldlt_recursive(benchmark::State &s) {
-  const isize c1_size = static_cast<isize>(s.range(0));
-  const isize c2c3_size = c1_size * 2;
-  const isize matrix_size = c1_size + c2c3_size * 2;
-  VectorXs rhs = VectorXs::Random(matrix_size);
-  VectorXs b(matrix_size);
-  DenseLDLT<Scalar> dense_ldlt(matrix_size);
-  // Construct the matrix
-  auto sym_mat = create_problem_structure(c1_size, c2c3_size, c2c3_size);
-  MatrixXs mat = getRandomSymmetricBlockMatrix(sym_mat);
+/// Benchmark LDLT factorization (compute)
+template <typename LDLT> void ldlt_compute(benchmark::State &s) {
+  Problem<LDLT> p(s.range(0));
 
   for (auto _ : s) {
-    s.PauseTiming();
-    b = rhs;
-    s.ResumeTiming();
-    dense_ldlt.compute(mat);
-    dense_ldlt.solveInPlace(rhs);
-    s.PauseTiming();
-    if (dense_ldlt.info() != Eigen::Success) {
-      s.SkipWithError("DenseLDLT computation failed.");
+    p.ldlt.compute(p.mat);
+    if (!success(p.ldlt)) {
+      s.SkipWithError("computation failed.");
       break;
     }
   }
 }
 
-// BENCHMARK_DEFINE_F(ldlt_bench_fixture, bunchkaufman)(benchmark::State &s) {
-//   Eigen::BunchKaufman<MatrixXs> lblt(size);
-//   auto b = rhs;
-//   for (auto _ : s) {
-//     lblt.compute(mat);
-//     b = lblt.solve(rhs);
-//     benchmark::DoNotOptimize(lblt);
-//   }
-// }
+/// Benchmark solveInPlace
+template <typename LDLT> void ldlt_solve_in_place(benchmark::State &s) {
+  Problem<LDLT> p(s.range(0));
+  VectorXs b(p.matrix_size);
 
-// BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
-//   Eigen::LDLT<MatrixXs> ldlt(size);
-//   auto b = rhs;
-//   for (auto _ : s) {
-//     b = rhs;
-//     ldlt.compute(mat);
-//     ldlt.solveInPlace(b);
-//     if (ldlt.info() != Eigen::Success) {
-//       s.SkipWithError("Eigen::LDLT computation failed.");
-//       break;
-//     }
-//     benchmark::DoNotOptimize(ldlt);
-//   }
-// }
+  p.ldlt.compute(p.mat);
+  if (!success(p.ldlt)) {
+    s.SkipWithError("computation failed.");
+    return;
+  }
 
-BENCHMARK(ldlt_recursive)
-    ->RangeMultiplier(2)
-    ->Range(4, 512)
-    ->Unit(unit)
-    ->MinTime(2.)
-    ->MinWarmUpTime(0.1);
-// BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
-// BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
-// BENCHMARK_REGISTER_F(ldlt_bench_fixture, bunchkaufman)->Unit(unit);
+  for (auto _ : s) {
+    s.PauseTiming();
+    b = p.rhs;
+    s.ResumeTiming();
+    p.ldlt.solveInPlace(b);
+  }
+}
 
-// #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+/// Benchmark solve
+template <typename LDLT> void ldlt_solve(benchmark::State &s) {
+  Problem<LDLT> p(s.range(0));
 
-// BENCHMARK_DEFINE_F(ldlt_bench_fixture, proxsuite_ldlt)(benchmark::State &s) {
+  p.ldlt.compute(p.mat);
+  if (!success(p.ldlt)) {
+    s.SkipWithError("computation failed.");
+    return;
+  }
 
-//   linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
-//   auto sol_ps = rhs;
-//   for (auto _ : s) {
-//     sol_ps = rhs;
-//     ps_ldlt.compute(mat);
-//     ps_ldlt.solveInPlace(sol_ps);
-//   }
-// }
-// BENCHMARK_REGISTER_F(ldlt_bench_fixture, proxsuite_ldlt)->Unit(unit);
+  for (auto _ : s) {
+    p.ldlt.solve(p.rhs);
+  }
+}
 
-// #endif
+void default_arguments(benchmark::internal::Benchmark *b) {
+  // b->RangeMultiplier(2)->Range(4,
+  // 512)->Unit(unit)->MinTime(2.)->MinWarmUpTime(
+  //     0.1);
+  b->RangeMultiplier(2)->Range(4, 512)->Unit(unit);
+}
+
+} // namespace
+
+BENCHMARK(ldlt_compute<DenseLDLT<Scalar>>)->Apply(default_arguments);
+BENCHMARK(ldlt_compute<Eigen::LDLT<MatrixXs>>)->Apply(default_arguments);
+BENCHMARK(ldlt_compute<Eigen::BunchKaufman<MatrixXs>>)
+    ->Apply(default_arguments);
+BENCHMARK(ldlt_compute<BlockLDLT<Scalar>>)->Apply(default_arguments);
+BENCHMARK(ldlt_solve_in_place<DenseLDLT<Scalar>>)->Apply(default_arguments);
+BENCHMARK(ldlt_solve_in_place<Eigen::LDLT<MatrixXs>>)->Apply(default_arguments);
+BENCHMARK(ldlt_solve<Eigen::BunchKaufman<MatrixXs>>)->Apply(default_arguments);
+BENCHMARK(ldlt_solve_in_place<BlockLDLT<Scalar>>)->Apply(default_arguments);
+
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+
+BENCHMARK(ldlt_compute<linalg::ProxSuiteLDLTWrapper<Scalar>>)
+    ->Apply(default_arguments);
+BENCHMARK(ldlt_solve_in_place<linalg::ProxSuiteLDLTWrapper<Scalar>>)
+    ->Apply(default_arguments);
+
+#endif
 
 BENCHMARK_MAIN();
