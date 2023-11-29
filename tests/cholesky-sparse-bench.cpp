@@ -124,15 +124,13 @@ template <typename LDLT> void ldlt_solve(benchmark::State &s) {
   }
 
   for (auto _ : s) {
-    p.ldlt.solve(p.rhs);
+    VectorXs x(p.ldlt.solve(p.rhs));
   }
 }
 
 void default_arguments(benchmark::internal::Benchmark *b) {
-  // b->RangeMultiplier(2)->Range(4,
-  // 512)->Unit(unit)->MinTime(2.)->MinWarmUpTime(
-  //     0.1);
-  b->RangeMultiplier(2)->Range(4, 512)->Unit(unit);
+  b->RangeMultiplier(2)->Range(4, 512)->Unit(unit)->MinTime(2.)->MinWarmUpTime(
+      0.1);
 }
 
 } // namespace
