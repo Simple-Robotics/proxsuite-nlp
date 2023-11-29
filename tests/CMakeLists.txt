@@ -37,7 +37,7 @@ function(get_cpp_test_name name dir out_var)
   set(${out_var}
       "${prefix}-${name}"
       PARENT_SCOPE)
-endfunction(get_cpp_test_name)
+endfunction()
 
 function(add_proxnlp_test name)
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
@@ -58,10 +58,31 @@ function(add_proxnlp_test name)
 
   target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
-  target_link_libraries(${test_name} PRIVATE benchmark::benchmark)
   target_link_libraries(${test_name} PRIVATE cnpy)
   target_link_libraries(${test_name} PRIVATE ${TEST_UTIL_LIB})
-endfunction(add_proxnlp_test)
+endfunction()
+
+function(get_cpp_bench_name name dir out_var)
+  string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "bench-cpp" prefix ${dir})
+  set(${out_var}
+      "${prefix}-${name}"
+      PARENT_SCOPE)
+endfunction()
+
+function(add_proxnlp_bench name)
+  if(BUILD_BENCHMARK)
+    get_cpp_bench_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} bench_name)
+    set(bench_file ${name}.cpp)
+
+    add_unit_test(${bench_name} ${bench_file})
+    set_target_properties(${bench_name} PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories(${bench_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+    target_link_libraries(${bench_name} PRIVATE ${PROJECT_NAME})
+    target_link_libraries(${bench_name} PRIVATE benchmark::benchmark)
+    target_link_libraries(${bench_name} PRIVATE ${bench_UTIL_LIB})
+  endif()
+endfunction()
 
 # symlink test data file
 function(symlink_data_file filename)
@@ -70,8 +91,11 @@ function(symlink_data_file filename)
                           ${CMAKE_CURRENT_BINARY_DIR}/${filename})
 endfunction()
 
-add_proxnlp_test(cholesky-bench)
-add_proxnlp_test(cholesky-dense-bench)
+add_proxnlp_bench(cholesky-sparse-bench)
+add_proxnlp_bench(cholesky-dense-bench)
+add_proxnlp_bench(tri-solve-bench)
+
+add_proxnlp_test(cholesky-sparse)
 add_proxnlp_test(tri-solve)
 add_proxnlp_test(constraints)
 add_proxnlp_test(costs)

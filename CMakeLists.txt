@@ -64,6 +64,7 @@ option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_BENCHMARK "Build the benchmarks" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
