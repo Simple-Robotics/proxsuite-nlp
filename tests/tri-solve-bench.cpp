@@ -5,11 +5,8 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include <random>
 
 #include <benchmark/benchmark.h>
-
-#include <boost/mpl/vector.hpp>
 
 using namespace proxnlp;
 
@@ -71,14 +68,6 @@ template <int _Mode> struct tri_fixture : prob_data {
   MatrixXs sol_eig;
   auto view() { return mat.triangularView<Mode>(); }
 };
-
-// clang-format off
-using test_modes = boost::mpl::vector<
-      tri_fixture<Eigen::Lower>,
-      tri_fixture<Eigen::UnitLower>,
-      tri_fixture<Eigen::Upper>,
-      tri_fixture<Eigen::UnitUpper>>;
-// clang-format on
 
 template <int Mode> void BM_block_tri_solve(benchmark::State &state) {
   tri_fixture<Mode> fix{};
