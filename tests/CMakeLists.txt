@@ -4,8 +4,17 @@
 
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
 add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
-set(EIGENRAND_BUILD_TEST OFF)
-add_subdirectory(external/EigenRand EXCLUDE_FROM_ALL)
+
+include(FetchContent)
+# TODO use main bab2min/EigenRand when PR is merged
+FetchContent_Declare(EigenRand
+  GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
+  GIT_TAG 23d287e
+  )
+
+set(EIGENRAND_BUILD_TEST OFF CACHE INTERNAL "Enable EigenRand test")
+set(EIGENRAND_BUILD_BENCHMARK OFF CACHE INTERNAL "Enable EigenRand benchmark")
+FetchContent_MakeAvailable(EigenRand)
 
 # create an object library just for cnpy
 add_library(cnpy STATIC cnpy.cpp)
