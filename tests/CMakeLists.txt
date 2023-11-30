@@ -100,11 +100,11 @@ function(symlink_data_file filename)
                           ${CMAKE_CURRENT_BINARY_DIR}/${filename})
 endfunction()
 
-add_proxnlp_bench(cholesky-sparse-bench)
+add_proxnlp_bench(cholesky-block-sparse-bench)
 add_proxnlp_bench(cholesky-dense-bench)
 add_proxnlp_bench(tri-solve-bench)
 
-add_proxnlp_test(cholesky-sparse)
+add_proxnlp_test(cholesky-block-sparse)
 add_proxnlp_test(tri-solve)
 add_proxnlp_test(constraints)
 add_proxnlp_test(costs)
