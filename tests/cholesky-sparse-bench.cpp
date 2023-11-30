@@ -19,21 +19,45 @@ using linalg::DenseLDLT;
 using linalg::EigenLDLTWrapper;
 
 namespace {
-constexpr isize n = 3;
 constexpr auto unit = benchmark::kMicrosecond;
 
-auto create_problem_structure(isize c1, isize c2, isize c3)
+auto create_problem_structure(isize matrix_structure_type, isize pb_size)
     -> linalg::SymbolicBlockMatrix {
-  // clang-format off
-  BlockKind *data = new BlockKind[n * n]{
+
+  BlockKind *data = nullptr;
+  isize *row_segments = nullptr;
+  isize nb_blocks = 0;
+
+  switch (matrix_structure_type) {
+  case 0:
+    nb_blocks = 3;
+    // clang-format off
+    data = new BlockKind[static_cast<ulong>(nb_blocks * nb_blocks)]{
       BlockKind::Diag,  BlockKind::Dense, BlockKind::Dense,
       BlockKind::Dense, BlockKind::Dense, BlockKind::Diag,
       BlockKind::Dense, BlockKind::Diag, BlockKind::Diag
-  };
-  // clang-format on
+    };
+    // clang-format on
+    row_segments = new isize[static_cast<ulong>(nb_blocks)]{
+        pb_size, pb_size * 2, pb_size * 2};
+    break;
+  case 1:
+    nb_blocks = 3;
+    // clang-format off
+    data = new BlockKind[static_cast<ulong>(nb_blocks * nb_blocks)]{
+      BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
+      BlockKind::Dense, BlockKind::Diag, BlockKind::Zero,
+      BlockKind::Zero, BlockKind::Dense, BlockKind::Diag
+    };
+    // clang-format on
+    row_segments = new isize[static_cast<ulong>(nb_blocks)]{
+        pb_size, pb_size * 2, pb_size * 2};
+    break;
+  default:
+    throw std::runtime_error("Unknonw matrix_structure_type");
+  }
 
-  isize *row_segments = new isize[n]{c1, c2, c3};
-  return {data, row_segments, n, n};
+  return {data, row_segments, nb_blocks, nb_blocks};
 }
 
 /// Return true on solver.compute success
@@ -64,26 +88,26 @@ construct<BlockLDLT<Scalar>>(isize matrix_size,
 /// TODO create_problem_structure must be able to return different matrix
 /// structure
 template <typename LDLT> struct Problem {
-  Problem(int64_t c1_size_)
-      : c1_size(static_cast<isize>(c1_size_)), c2c3_size(c1_size * 2),
-        matrix_size(c1_size + c2c3_size * 2),
-        sym_mat(create_problem_structure(c1_size, c2c3_size, c2c3_size)),
-        mat(getRandomSymmetricBlockMatrix(sym_mat)),
+  Problem(int64_t pb_size_, int64_t matrix_structure_type_)
+      : pb_size(static_cast<isize>(pb_size_)),
+        sym_mat(
+            create_problem_structure(static_cast<isize>(matrix_structure_type_),
+                                     static_cast<isize>(pb_size_))),
+        mat(getRandomSymmetricBlockMatrix(sym_mat)), matrix_size(mat.cols()),
         rhs(VectorXs::Random(matrix_size)),
         ldlt(construct<LDLT>(matrix_size, sym_mat)) {}
 
-  const isize c1_size;
-  const isize c2c3_size;
-  const isize matrix_size;
+  const isize pb_size;
   const SymbolicBlockMatrix sym_mat;
   const MatrixXs mat;
+  const isize matrix_size;
   const VectorXs rhs;
   LDLT ldlt;
 };
 
 /// Benchmark LDLT factorization (compute)
 template <typename LDLT> void ldlt_compute(benchmark::State &s) {
-  Problem<LDLT> p(s.range(0));
+  Problem<LDLT> p(s.range(0), s.range(1));
 
   for (auto _ : s) {
     p.ldlt.compute(p.mat);
@@ -96,7 +120,7 @@ template <typename LDLT> void ldlt_compute(benchmark::State &s) {
 
 /// Benchmark solveInPlace
 template <typename LDLT> void ldlt_solve_in_place(benchmark::State &s) {
-  Problem<LDLT> p(s.range(0));
+  Problem<LDLT> p(s.range(0), s.range(1));
   VectorXs b(p.matrix_size);
 
   p.ldlt.compute(p.mat);
@@ -115,7 +139,7 @@ template <typename LDLT> void ldlt_solve_in_place(benchmark::State &s) {
 
 /// Benchmark solve
 template <typename LDLT> void ldlt_solve(benchmark::State &s) {
-  Problem<LDLT> p(s.range(0));
+  Problem<LDLT> p(s.range(0), s.range(1));
 
   p.ldlt.compute(p.mat);
   if (!success(p.ldlt)) {
@@ -129,17 +153,22 @@ template <typename LDLT> void ldlt_solve(benchmark::State &s) {
 }
 
 void default_arguments(benchmark::internal::Benchmark *b) {
-  b->RangeMultiplier(2)->Range(4, 512)->Unit(unit)->MinTime(2.)->MinWarmUpTime(
-      0.1);
+  b->Unit(unit)->MinWarmUpTime(0.1);
+  b->ArgsProduct({{4, 8, 16, 32, 64, 128, 256, 512}, {0, 1}});
+}
+void default_arguments_compute(benchmark::internal::Benchmark *b) {
+  default_arguments(b);
+  b->MinTime(2.);
 }
 
 } // namespace
 
-BENCHMARK(ldlt_compute<DenseLDLT<Scalar>>)->Apply(default_arguments);
-BENCHMARK(ldlt_compute<Eigen::LDLT<MatrixXs>>)->Apply(default_arguments);
+BENCHMARK(ldlt_compute<DenseLDLT<Scalar>>)->Apply(default_arguments_compute);
+BENCHMARK(ldlt_compute<Eigen::LDLT<MatrixXs>>)
+    ->Apply(default_arguments_compute);
 BENCHMARK(ldlt_compute<Eigen::BunchKaufman<MatrixXs>>)
-    ->Apply(default_arguments);
-BENCHMARK(ldlt_compute<BlockLDLT<Scalar>>)->Apply(default_arguments);
+    ->Apply(default_arguments_compute);
+BENCHMARK(ldlt_compute<BlockLDLT<Scalar>>)->Apply(default_arguments_compute);
 BENCHMARK(ldlt_solve_in_place<DenseLDLT<Scalar>>)->Apply(default_arguments);
 BENCHMARK(ldlt_solve_in_place<Eigen::LDLT<MatrixXs>>)->Apply(default_arguments);
 BENCHMARK(ldlt_solve<Eigen::BunchKaufman<MatrixXs>>)->Apply(default_arguments);
@@ -148,7 +177,7 @@ BENCHMARK(ldlt_solve_in_place<BlockLDLT<Scalar>>)->Apply(default_arguments);
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
 BENCHMARK(ldlt_compute<linalg::ProxSuiteLDLTWrapper<Scalar>>)
-    ->Apply(default_arguments);
+    ->Apply(default_arguments_compute);
 BENCHMARK(ldlt_solve_in_place<linalg::ProxSuiteLDLTWrapper<Scalar>>)
     ->Apply(default_arguments);
 
