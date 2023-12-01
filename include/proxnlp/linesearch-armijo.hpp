@@ -49,8 +49,7 @@ public:
   using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
   using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
 
-  ArmijoLinesearch(const typename Base::Options &options)
-      : Base(options), lu(alph_mat) {}
+  ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
 
   template <typename Fn>
   Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0, Scalar &alpha_try) {
@@ -182,8 +181,8 @@ public:
       alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
       alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
 
-      lu.compute(alph_mat);
-      coeffs_cubic_interpolant = lu.solve(alph_rhs);
+      decomp.compute(alph_mat);
+      coeffs_cubic_interpolant = decomp.solve(alph_rhs);
 
       const Scalar c3 = coeffs_cubic_interpolant(0);
       const Scalar c2 = coeffs_cubic_interpolant(1);
@@ -222,8 +221,8 @@ protected:
   Vector2s alph_rhs;
   Vector2s coeffs_cubic_interpolant;
   /// Solver for the 2x2 linear system
-  using LuType = Eigen::HouseholderQR<Eigen::Ref<Matrix2s>>;
-  LuType lu;
+  using DecompType = Eigen::HouseholderQR<Matrix2s>;
+  DecompType decomp;
 };
 
 } // namespace proxnlp

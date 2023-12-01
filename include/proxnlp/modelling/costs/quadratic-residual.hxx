@@ -13,6 +13,7 @@ QuadraticResidualCostTpl<Scalar>::QuadraticResidualCostTpl(
       gauss_newton_(true), err(residual_->nr()),
       Jres(residual_->nr(), this->ndx()), JtW(this->ndx(), residual_->nr()),
       H(this->ndx(), this->ndx()) {
+  Jres.setZero();
   err.setZero();
   tmp_w_err = err;
   H.setZero();
