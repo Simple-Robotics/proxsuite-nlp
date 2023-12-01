@@ -63,5 +63,10 @@ jobs:
     steps:
     - run: |
         cd $GITHUB_WORKSPACE
-        cd build/ && make uninstall
-        cd .. && rm -rf build/
+        if [ -d build ]; then
+          cd build/
+          make uninstall || echo "No uninstall target found"
+          cd .. && rm -rf build/
+        else
+          echo "build-dir did not exist"
+        fi
