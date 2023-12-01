@@ -36,6 +36,12 @@ using std::unique_ptr;
 
 namespace proxnlp {
 
+template <typename T, typename... Args>
+auto allocate_shared_eigen_aligned(Args &&...args) {
+  return std::allocate_shared<T>(Eigen::aligned_allocator<T>(),
+                                 std::forward<Args>(args)...);
+}
+
 // fwd BCLParams
 template <typename Scalar> struct BCLParamsTpl;
 
