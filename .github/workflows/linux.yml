@@ -64,4 +64,4 @@ jobs:
     - run: |
         cd $GITHUB_WORKSPACE
         cd build/ && make uninstall
-        cd .. && rm -r build/
+        cd .. && rm -rf build/
