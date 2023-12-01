@@ -53,6 +53,7 @@ jobs:
         micromamba activate
         micromamba install pytest casadi -y
         cd $GITHUB_WORKSPACE
+        echo "CURRENT DIRECTORY IS $PWD"
         cd build && ctest
 
   cleanup:
