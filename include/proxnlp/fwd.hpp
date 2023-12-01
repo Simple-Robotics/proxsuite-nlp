@@ -33,6 +33,7 @@ using std::unique_ptr;
 #include "proxnlp/math.hpp"
 #include "proxnlp/macros.hpp"
 #include "proxnlp/config.hpp"
+#include "proxnlp/deprecated.hpp"
 
 namespace proxnlp {
 
