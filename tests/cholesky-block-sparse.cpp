@@ -8,11 +8,11 @@
 #include "util.hpp"
 #include "proxnlp/ldlt-allocator.hpp"
 
-#include <benchmark/benchmark.h>
-#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 
 #include "proxnlp/math.hpp"
+
+BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 
 namespace utf = boost::unit_test;
 using namespace proxnlp;
@@ -23,7 +23,6 @@ using linalg::EigenLDLTWrapper;
 
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
-constexpr auto unit = benchmark::kMicrosecond;
 const isize ndx = 24;
 
 auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
@@ -61,65 +60,6 @@ struct ldlt_test_fixture {
     sol_eig = ldlt.solve(rhs);
   }
 };
-
-struct ldlt_bench_fixture : benchmark::Fixture, ldlt_test_fixture {
-  void SetUp(const benchmark::State &) override { this->init(); }
-  void TearDown(const benchmark::State &) override {}
-};
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
-  BlockLDLT<Scalar> block_ldlt(size, sym_mat);
-  block_ldlt.findSparsifyingPermutation();
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    block_ldlt.compute(mat);
-    block_ldlt.solveInPlace(b);
-    if (block_ldlt.info() != Eigen::Success) {
-      s.SkipWithError("BlockLDLT computation failed.");
-      break;
-    }
-  }
-}
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, recursive)(benchmark::State &s) {
-  DenseLDLT<Scalar> dense_ldlt(size);
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    dense_ldlt.compute(mat);
-    dense_ldlt.solveInPlace(b);
-    if (dense_ldlt.info() != Eigen::Success) {
-      s.SkipWithError("DenseLDLT computation failed.");
-      break;
-    }
-  }
-}
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, bunchkaufman)(benchmark::State &s) {
-  Eigen::BunchKaufman<MatrixXs> lblt(size);
-  auto b = rhs;
-  for (auto _ : s) {
-    lblt.compute(mat);
-    b = lblt.solve(rhs);
-    benchmark::DoNotOptimize(lblt);
-  }
-}
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
-  Eigen::LDLT<MatrixXs> ldlt(size);
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    ldlt.compute(mat);
-    ldlt.solveInPlace(b);
-    if (ldlt.info() != Eigen::Success) {
-      s.SkipWithError("Eigen::LDLT computation failed.");
-      break;
-    }
-    benchmark::DoNotOptimize(ldlt);
-  }
-}
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
@@ -256,24 +196,8 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
   linalg::print_sparsity_pattern(modified_structure);
 }
 
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, recursive)->Unit(unit);
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, bunchkaufman)->Unit(unit);
-
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, proxsuite_ldlt)(benchmark::State &s) {
-
-  linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
-  auto sol_ps = rhs;
-  for (auto _ : s) {
-    sol_ps = rhs;
-    ps_ldlt.compute(mat);
-    ps_ldlt.solveInPlace(sol_ps);
-  }
-}
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, proxsuite_ldlt)->Unit(unit);
 BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
   linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
@@ -297,9 +221,7 @@ int main(int argc, char **argv) {
   // https://www.boost.org/doc/libs/1_80_0/libs/test/doc/html/boost_test/adv_scenarios/shared_lib_customizations/entry_point.html
   int tests_result = utf::unit_test_main(&init_unit_test, argc, argv);
 
-  benchmark::Initialize(&argc, argv);
-  // run benchmarks
-  benchmark::RunSpecifiedBenchmarks();
-
   return tests_result;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
