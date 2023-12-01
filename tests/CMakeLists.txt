@@ -7,14 +7,25 @@ add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.
 
 include(FetchContent)
 # TODO use main bab2min/EigenRand when PR is merged
-FetchContent_Declare(EigenRand
+FetchContent_Declare(
+  eigenrand
   GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
   GIT_TAG 23d287e
-  )
+  GIT_PROGRESS TRUE)
 
-set(EIGENRAND_BUILD_TEST OFF CACHE INTERNAL "Enable EigenRand test")
-set(EIGENRAND_BUILD_BENCHMARK OFF CACHE INTERNAL "Enable EigenRand benchmark")
-FetchContent_MakeAvailable(EigenRand)
+FetchContent_GetProperties(eigenrand)
+if(NOT eigenrand_POPULATED)
+  set(EIGENRAND_BUILD_TEST
+      OFF
+      CACHE INTERNAL "Enable EigenRand test")
+  set(EIGENRAND_BUILD_BENCHMARK
+      OFF
+      CACHE INTERNAL "Enable EigenRand benchmark")
+  FetchContent_Populate(eigenrand)
+  message(STATUS "EIGENDRAND SOURCE DIR ${eigenrand_SOURCE_DIR}")
+  message(STATUS "EIGENDRAND BINARY DIR ${eigenrand_BINARY_DIR}")
+  add_subdirectory(${eigenrand_SOURCE_DIR} ${eigenrand_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 # create an object library just for cnpy
 add_library(cnpy STATIC cnpy.cpp)
