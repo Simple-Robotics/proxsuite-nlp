@@ -5,6 +5,7 @@
 #pragma once
 
 #include "proxnlp/math.hpp"
+#include "proxnlp/exceptions.hpp"
 #include "proxnlp/macros.hpp"
 
 #include <Eigen/Cholesky>

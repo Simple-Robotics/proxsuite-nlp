@@ -3,6 +3,8 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <limits>
+#include <vector>
 
 namespace proxnlp {
 
@@ -16,22 +18,6 @@ constexpr bool is_eigen_matrix_type =
 
 template <typename T, typename T2 = void>
 using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
-
-} // namespace proxnlp
-
-#include "proxnlp/utils/fmt-eigen.hpp"
-#include "proxnlp/exceptions.hpp"
-
-#include <limits>
-#include <vector>
-
-#define PROXNLP_RAISE_IF_NAN(value)                                            \
-  if (::proxnlp::math::check_value(value))                                     \
-  PROXNLP_RUNTIME_ERROR("Encountered NaN.\n")
-
-#define PROXNLP_RAISE_IF_NAN_NAME(value, name)                                 \
-  if (::proxnlp::math::check_value(value))                                     \
-  PROXNLP_RUNTIME_ERROR(fmt::format("Encountered NaN for value {:s}.\n", name))
 
 /// Macro typedefs for dynamic-sized vectors/matrices, used for cost funcs,
 /// merit funcs because we don't CRTP them and virtual members funcs can't be
@@ -50,8 +36,6 @@ using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
   using Matrix3Xs = Eigen::Matrix<Scalar, 3, Eigen::Dynamic>;                  \
   using Matrix6Xs = Eigen::Matrix<Scalar, 6, Eigen::Dynamic>;                  \
   using Matrix6s = Eigen::Matrix<Scalar, 6, 6>
-
-namespace proxnlp {
 
 ///  @brief  Typedefs for math (Eigen vectors, matrices) depending on scalar
 /// type.
@@ -108,5 +92,6 @@ bool check_value(const Eigen::MatrixBase<MatrixType> &x) {
 }
 
 } // namespace math
-
 } // namespace proxnlp
+
+#include "proxnlp/fmt-eigen.hpp"
