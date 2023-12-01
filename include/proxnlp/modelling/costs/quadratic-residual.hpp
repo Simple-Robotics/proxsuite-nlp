@@ -52,8 +52,9 @@ public:
   QuadraticResidualCostTpl(const ConstMatrixRef &weights,
                            const ConstVectorRef &slope, const Scalar constant,
                            ResidualArgs &...args)
-      : QuadraticResidualCostTpl(std::make_shared<Underlying>(args...), weights,
-                                 slope, constant) {}
+      : QuadraticResidualCostTpl(
+            allocate_shared_eigen_aligned<Underlying>(args...), weights, slope,
+            constant) {}
 
   Scalar call(const ConstVectorRef &x) const;
 

@@ -7,4 +7,4 @@ namespace proxnlp {
 
 extern template struct QuadraticResidualCostTpl<context::Scalar>;
 
-}
+} // namespace proxnlp
