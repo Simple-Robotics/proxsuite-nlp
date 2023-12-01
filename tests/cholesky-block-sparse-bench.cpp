@@ -85,8 +85,6 @@ construct<BlockLDLT<Scalar>>(isize matrix_size,
 }
 
 /// Store all problem variables
-/// TODO create_problem_structure must be able to return different matrix
-/// structure
 template <typename LDLT> struct Problem {
   Problem(int64_t pb_size_, int64_t matrix_structure_type_)
       : pb_size(static_cast<isize>(pb_size_)),
