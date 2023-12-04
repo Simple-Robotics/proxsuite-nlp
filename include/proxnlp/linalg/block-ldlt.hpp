@@ -295,7 +295,8 @@ public:
   }
 
   /// Solve for the right-hand side in-place.
-  bool solveInPlace(MatrixRef b) const override;
+  template <typename Derived>
+  bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
 
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 

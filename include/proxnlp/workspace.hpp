@@ -131,7 +131,7 @@ public:
         data_cstr_values(numdual), objective_gradient(ndx),
         objective_hessian(ndx, ndx), merit_gradient(ndx),
         merit_dual_gradient(numdual), data_jacobians(numdual, ndx),
-        data_hessians((int)numblocks * ndx, ndx), data_lams_plus(numdual),
+        data_hessians((long)numblocks * ndx, ndx), data_lams_plus(numdual),
         data_lams_plus_reproj(numdual), data_lams_pdal(numdual),
         tmp_dx_scaled(ndx) {
     init(prob);

@@ -69,7 +69,8 @@ BlockLDLT<Scalar>::reconstructedMatrix() const {
 }
 
 template <typename Scalar>
-bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
+template <typename Derived>
+bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
 
   b.noalias() = permutationP().transpose() * b;
   PROXNLP_NOMALLOC_BEGIN;

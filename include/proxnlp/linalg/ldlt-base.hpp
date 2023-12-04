@@ -31,7 +31,9 @@ template <typename Scalar> struct ldlt_base {
   }
 
   virtual ldlt_base &compute(const ConstMatrixRef &mat) = 0;
-  virtual bool solveInPlace(MatrixRef b) const = 0;
+  bool solveInPlace(MatrixRef) const {
+    PROXNLP_RUNTIME_ERROR("Not implemented");
+  }
   virtual DView vectorD() const = 0;
   virtual const MatrixXs &matrixLDLT() const {
     PROXNLP_RUNTIME_ERROR("Not implemented");
@@ -60,9 +62,7 @@ template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
     return *this;
   }
 
-  inline bool solveInPlace(MatrixRef b) const override {
-    return m_ldlt.solveInPlace(b);
-  }
+  inline bool solveInPlace(MatrixRef b) const { return m_ldlt.solveInPlace(b); }
 
   inline MatrixXs reconstructedMatrix() const override {
     return m_ldlt.reconstructedMatrix();
