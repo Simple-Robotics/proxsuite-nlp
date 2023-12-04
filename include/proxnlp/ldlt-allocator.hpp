@@ -16,12 +16,13 @@ namespace proxnlp {
 namespace {
 using linalg::isize;
 using linalg::SymbolicBlockMatrix;
-using std::unique_ptr;
 } // namespace
 
 enum class LDLTChoice {
   /// Use our dense LDLT.
   DENSE,
+  /// Use Bunch-Kaufman factorization
+  BUNCHKAUFMAN,
   /// Use blocked LDLT.
   BLOCKSPARSE,
   /// Use Eigen's implementation.
