@@ -23,7 +23,7 @@ enum class LDLTChoice {
   /// Use our dense LDLT.
   DENSE,
   /// Use blocked LDLT.
-  BLOCKED,
+  BLOCKSPARSE,
   /// Use Eigen's implementation.
   EIGEN,
   /// Use Proxsuite's LDLT.

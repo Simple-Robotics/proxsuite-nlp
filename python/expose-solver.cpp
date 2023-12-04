@@ -45,7 +45,7 @@ void exposeSolver() {
 
   bp::enum_<LDLTChoice>("LDLTChoice", "Choice of LDLT solver.")
       .value("LDLT_DENSE", LDLTChoice::DENSE)
-      .value("LDLT_BLOCKED", LDLTChoice::BLOCKED)
+      .value("LDLT_BLOCKSPARSE", LDLTChoice::BLOCKSPARSE)
       .value("LDLT_EIGEN", LDLTChoice::EIGEN)
       .value("LDLT_PROXSUITE", LDLTChoice::PROXSUITE)
       .export_values();
