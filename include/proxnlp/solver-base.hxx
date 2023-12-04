@@ -124,11 +124,8 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   return results.converged;
 }
 
-template <typename Scalar>
-auto SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const
-    -> InertiaFlag {
-  const int ndx = manifold().ndx();
-  const int numc = problem_->getTotalConstraintDim();
+InertiaFlag checkInertia(const int ndx, const int numc,
+                         const Eigen::VectorXi &signature) {
   const long n = signature.size();
   int numpos = 0;
   int numneg = 0;
@@ -407,7 +404,9 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       auto vecD = workspace.ldlt_->vectorD();
       workspace.signature.array() = vecD.array().sign().template cast<int>();
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
-      is_inertia_correct = checkInertia(workspace.signature);
+      is_inertia_correct =
+          checkInertia(manifold().ndx(), problem_->getTotalConstraintDim(),
+                       workspace.signature);
 
       if (is_inertia_correct == INERTIA_OK) {
         delta_last = delta;
