@@ -126,10 +126,12 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
 
 namespace internal {
 
+/// Compute signature of matrix from Bunch-Kaufman factorization.
 template <typename MatrixType, typename Signature, int UpLo>
 auto bunch_kaufman_compute_signature(
     Eigen::BunchKaufman<MatrixType, UpLo> const &factor, Signature &signature) {
-
+  // TODO: finish implementing this
+  PROXNLP_RUNTIME_ERROR("Not implemented yet.");
 }
 
 } // namespace internal
