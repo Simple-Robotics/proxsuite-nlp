@@ -433,7 +433,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_NOMALLOC_END;
     PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
 
-    //// Take the step
+    // Take the step
 
     workspace.dmerit_dir =
         workspace.merit_gradient.dot(workspace.prim_step) +
