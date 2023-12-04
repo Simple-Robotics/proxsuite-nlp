@@ -29,6 +29,8 @@ enum class HessianApprox {
   // BFGS
 };
 
+enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
+
 template <typename _Scalar> class SolverTpl {
 public:
   using Scalar = _Scalar;
@@ -41,8 +43,6 @@ public:
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetBase<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
-
-  enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
   enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
   /// Manifold on which to optimize.
@@ -252,15 +252,14 @@ public:
       cb->call(workspace, results);
     }
   }
-
-  /**
-   * @brief Check the matrix has the desired inertia.
-   * @param signature The computed inertia as a vector of ints valued -1, 0,
-   * or 1.
-   * @param delta     Scale factor for the identity matrix to add
-   */
-  InertiaFlag checkInertia(const Eigen::VectorXi &signature) const;
 };
+
+/// @brief Check the matrix has the desired inertia.
+/// @param signature The computed inertia as a vector of ints valued -1, 0,
+/// or 1.
+/// @param delta     Scale factor for the identity matrix to add
+inline InertiaFlag checkInertia(const int ndx, const int nc,
+                                const Eigen::VectorXi &signature);
 
 } // namespace proxnlp
 

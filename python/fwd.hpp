@@ -13,6 +13,11 @@ namespace proxnlp {
 namespace python {
 namespace bp = boost::python;
 
+/// User-defined literal for bp::arg
+inline bp::arg operator""_a(const char *argname, std::size_t) {
+  return bp::arg(argname);
+}
+
 void exposeFunctionTypes();
 void exposeManifolds();
 /// Expose defined residuals for modelling

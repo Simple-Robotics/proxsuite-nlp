@@ -9,28 +9,40 @@
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 #include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 #endif
-#include <memory>
+#include <boost/variant.hpp>
 
 namespace proxnlp {
 
 namespace {
 using linalg::isize;
-using linalg::SymbolicBlockMatrix;
-using std::unique_ptr;
 } // namespace
 
 enum class LDLTChoice {
   /// Use our dense LDLT.
   DENSE,
+  /// Use Bunch-Kaufman factorization
+  BUNCHKAUFMAN,
   /// Use blocked LDLT.
-  BLOCKED,
+  BLOCKSPARSE,
   /// Use Eigen's implementation.
   EIGEN,
   /// Use Proxsuite's LDLT.
   PROXSUITE
 };
 
-inline SymbolicBlockMatrix
+template <typename Scalar,
+          class MatrixType = typename math_types<Scalar>::MatrixXs>
+using LDLTVariant =
+    boost::variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>,
+                   linalg::EigenLDLTWrapper<Scalar>,
+                   Eigen::BunchKaufman<MatrixType>
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+                   ,
+                   linalg::ProxSuiteLDLTWrapper<Scalar>
+#endif
+                   >;
+
+inline linalg::SymbolicBlockMatrix
 create_default_block_structure(const std::vector<isize> &dims_primal,
                                const std::vector<isize> &dims_dual) {
 
@@ -40,7 +52,7 @@ create_default_block_structure(const std::vector<isize> &dims_primal,
   isize ndual_blocks = (isize)dims_dual.size();
   isize nblocks = nprim_blocks + ndual_blocks;
 
-  SymbolicBlockMatrix structure(nblocks, nblocks);
+  linalg::SymbolicBlockMatrix structure(nblocks, nblocks);
   isize *segment_lens = structure.segment_lens;
 
   for (unsigned int i = 0; i < nprim_blocks; ++i) {
@@ -86,36 +98,59 @@ inline isize get_total_dim_helper(const std::vector<isize> &nprims,
 }
 
 template <typename Scalar>
-unique_ptr<linalg::ldlt_base<Scalar>>
-allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
-                         const std::vector<isize> &nduals, LDLTChoice choice) {
-  using ldlt_ptr_t = unique_ptr<linalg::ldlt_base<Scalar>>;
+LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
+                                             const std::vector<isize> &nduals,
+                                             LDLTChoice choice) {
   const isize size = get_total_dim_helper(nprims, nduals);
 
   switch (choice) {
   case LDLTChoice::DENSE:
-    return ldlt_ptr_t(new linalg::DenseLDLT<Scalar>(size));
-  case LDLTChoice::BLOCKED: {
-    SymbolicBlockMatrix structure =
-        create_default_block_structure(nprims, nduals);
+    return linalg::DenseLDLT<Scalar>(size);
+  case LDLTChoice::BUNCHKAUFMAN:
+    return Eigen::BunchKaufman<typename math_types<Scalar>::MatrixXs>(size);
+  case LDLTChoice::BLOCKSPARSE: {
+    auto structure = create_default_block_structure(nprims, nduals);
 
-    auto *block_ldlt = new linalg::BlockLDLT<Scalar>(size, structure);
-    block_ldlt->findSparsifyingPermutation();
-    return ldlt_ptr_t(block_ldlt);
+    linalg::BlockLDLT<Scalar> block_ldlt(size, structure);
+    block_ldlt.findSparsifyingPermutation();
+    return block_ldlt;
   }
   case LDLTChoice::EIGEN:
-    return ldlt_ptr_t(new linalg::EigenLDLTWrapper<Scalar>(size));
+    return linalg::EigenLDLTWrapper<Scalar>(size);
   case LDLTChoice::PROXSUITE:
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
-    return ldlt_ptr_t(new linalg::ProxSuiteLDLTWrapper<Scalar>(size, size));
+    return linalg::ProxSuiteLDLTWrapper<Scalar>(size, size);
 #else
     PROXNLP_RUNTIME_ERROR(
         "ProxSuite support is not enabled. You should recompile ProxNLP with "
         "the BUILD_WITH_PROXSUITE flag.");
 #endif
-  default:
-    return nullptr;
   }
 }
+
+namespace internal {
+
+/// Compute signature of matrix from Bunch-Kaufman factorization.
+template <typename MatrixType, typename Signature, int UpLo>
+auto bunch_kaufman_compute_signature(
+    Eigen::BunchKaufman<MatrixType, UpLo> const &factor, Signature &signature) {
+  // TODO: finish implementing this
+  PROXNLP_RUNTIME_ERROR("Not implemented yet.");
+}
+
+} // namespace internal
+
+struct ComputeSignatureVisitor {
+  template <typename Fac> void operator()(const Fac &facto) const {
+    auto sign = facto.vectorD().cwiseSign();
+    signature = sign.template cast<int>();
+  }
+
+  template <typename MatType>
+  void operator()(const Eigen::BunchKaufman<MatType> &facto) const {
+    internal::bunch_kaufman_compute_signature(facto, signature);
+  }
+  Eigen::VectorXi &signature;
+};
 
 } // namespace proxnlp

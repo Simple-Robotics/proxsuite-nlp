@@ -57,13 +57,11 @@ void exposeWorkspace() {
       .def_readonly("alpha_opt", &Workspace::alpha_opt,
                     "Computed linesearch step length.")
       .def_readonly("dmerit_dir", &Workspace::dmerit_dir)
-      .def(
-          "ldlt",
-          +[](const Workspace &ws) -> const linalg::ldlt_base<Scalar> & {
-            return *ws.ldlt_;
-          },
-          policies::return_internal_reference,
-          "Returns a reference to the underlying LDLT solver.");
+      // .def(
+      //     "ldlt", +[](Workspace &ws) { return boost::ref(ws.ldlt_); },
+      //     policies::return_internal_reference,
+      //     "Returns a reference to the underlying LDLT solver.")
+      ;
 }
 
 } // namespace python

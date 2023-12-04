@@ -522,6 +522,8 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
   using MatrixType = MatrixType_;
   using Base = SolverBase<BunchKaufman>;
   EIGEN_GENERIC_PUBLIC_INTERFACE(BunchKaufman)
+  using VecType = Matrix<Scalar, RowsAtCompileTime, 1, Eigen::DontAlign,
+                         MaxRowsAtCompileTime>;
   friend class SolverBase<BunchKaufman>;
 
   using IndicesType =
@@ -556,6 +558,12 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
     return m_matrix.cols();
   }
 
+  inline const MatrixType &matrixLDLT() const { return m_matrix; }
+
+  inline const IndicesType &pivots() const { return m_pivots; }
+
+  inline const VecType &subdiag() const { return m_subdiag; }
+
   template <typename InputType>
   BunchKaufman &compute(const EigenBase<InputType> &matrix);
 
@@ -576,9 +584,6 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
 #endif
 
 private:
-  using VecType = Matrix<Scalar, RowsAtCompileTime, 1, Eigen::DontAlign,
-                         MaxRowsAtCompileTime>;
-
   MatrixType m_matrix;
   VecType m_subdiag;
   Index m_pivot_count;
