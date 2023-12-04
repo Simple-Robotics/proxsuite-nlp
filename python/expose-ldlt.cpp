@@ -21,9 +21,10 @@ struct LDLTVisitor : bp::def_visitor<LDLTVisitor<LDLTtype>> {
 
   template <typename... Args> void visit(bp::class_<Args...> &cl) const {
     cl.def("compute", compute_proxy, policies::return_internal_reference,
-           bp::args("self", "mat"))
-        .def("solveInPlace", solveInPlace_proxy, bp::args("self", "rhsAndX"))
+           ("self"_a, "mat"))
+        .def("solveInPlace", solveInPlace_proxy, ("self"_a, "rhsAndX"))
         .def("matrixLDLT", &LDLTtype::matrixLDLT, policies::return_by_value,
+             "self"_a,
              "Get the current value of the decomposition matrix. This makes a "
              "copy.");
   }
@@ -38,6 +39,7 @@ void exposeLdltRoutines() {
 
   using BunchKaufman_t = Eigen::BunchKaufman<context::MatrixXs, Eigen::Lower>;
   bp::class_<BunchKaufman_t>("BunchKaufman", bp::no_init)
+      .def(bp::init<>("self"_a))
       .def(LDLTVisitor<BunchKaufman_t>())
       .def("pivots", &BunchKaufman_t::pivots, bp::return_internal_reference<>())
       .def(
@@ -47,7 +49,7 @@ void exposeLdltRoutines() {
   using BlockLDLT = linalg::BlockLDLT<Scalar>;
   bp::class_<BlockLDLT>("BlockLDLT", bp::no_init)
       .def(LDLTVisitor<BlockLDLT>())
-      .def("print_sparsity", &BlockLDLT::print_sparsity, bp::args("self"),
+      .def("print_sparsity", &BlockLDLT::print_sparsity, "self"_a,
            "Print the sparsity pattern of the matrix to factorize.");
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
   using ProxSuiteLDLT = linalg::ProxSuiteLDLTWrapper<Scalar>;
