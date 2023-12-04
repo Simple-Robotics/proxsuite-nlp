@@ -45,11 +45,8 @@ jobs:
         make -j$NJOBS install
         python3 -c "import proxnlp"
 
-  test:
-    needs: build
-    runs-on: self-hosted
-    steps:
-    - run: |
+    - name: Run tests
+      run: |
         micromamba activate
         micromamba install pytest casadi -y
         cd $GITHUB_WORKSPACE
@@ -58,7 +55,7 @@ jobs:
 
   cleanup:
     name: Cleanup
-    needs: [build, test]
+    needs: build
     runs-on: self-hosted
     if: always()
     steps:
