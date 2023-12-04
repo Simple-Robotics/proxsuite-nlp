@@ -35,8 +35,12 @@ template <typename Scalar,
 using LDLTVariant =
     boost::variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>,
                    linalg::EigenLDLTWrapper<Scalar>,
-                   Eigen::BunchKaufman<MatrixType>,
-                   linalg::ProxSuiteLDLTWrapper<Scalar>>;
+                   Eigen::BunchKaufman<MatrixType>
+#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+                   ,
+                   linalg::ProxSuiteLDLTWrapper<Scalar>
+#endif
+                   >;
 
 inline linalg::SymbolicBlockMatrix
 create_default_block_structure(const std::vector<isize> &dims_primal,
