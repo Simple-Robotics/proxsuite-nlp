@@ -556,6 +556,8 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
     return m_matrix.cols();
   }
 
+  inline const MatrixType &matrixLDLT() const { return m_matrix; }
+
   template <typename InputType>
   BunchKaufman &compute(const EigenBase<InputType> &matrix);
 
