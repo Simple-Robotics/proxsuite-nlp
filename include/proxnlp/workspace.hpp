@@ -8,8 +8,8 @@
 namespace proxnlp {
 
 template <typename Scalar>
-unique_ptr<linalg::ldlt_base<Scalar>>
-allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob, LDLTChoice choice) {
+auto allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob,
+                                LDLTChoice choice) {
   std::vector<isize> nduals(prob.getNumConstraints());
   for (std::size_t i = 0; i < nduals.size(); ++i)
     nduals[i] = prob.getConstraintDim(i);
@@ -49,7 +49,7 @@ public:
   Eigen::VectorXi signature;
 
   /// LDLT storage
-  unique_ptr<linalg::ldlt_base<Scalar>> ldlt_;
+  LDLTVariant<Scalar> ldlt_;
 
   //// Data for proximal algorithm
 

@@ -400,9 +400,11 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       if (delta > 0.)
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
 
-      workspace.ldlt_->compute(workspace.kkt_matrix);
-      auto vecD = workspace.ldlt_->vectorD();
-      workspace.signature.array() = vecD.array().sign().template cast<int>();
+      boost::apply_visitor(
+          [&](auto &&fac) { fac.compute(workspace.kkt_matrix); },
+          workspace.ldlt_);
+      boost::apply_visitor(ComputeSignatureVisitor{workspace.signature},
+                           workspace.ldlt_);
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
       is_inertia_correct =
           checkInertia(manifold().ndx(), problem_->getTotalConstraintDim(),
@@ -526,13 +528,16 @@ void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
 template <typename Scalar>
 bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
-  workspace.ldlt_->solveInPlace(workspace.pd_step);
+  boost::apply_visitor([&](auto &&fac) { fac.solveInPlace(workspace.pd_step); },
+                       workspace.ldlt_);
   for (std::size_t n = 0; n < max_refinement_steps_; n++) {
     workspace.kkt_err = -workspace.kkt_rhs;
     workspace.kkt_err.noalias() -= workspace.kkt_matrix * workspace.pd_step;
     if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
       return true;
-    workspace.ldlt_->solveInPlace(workspace.kkt_err);
+    boost::apply_visitor(
+        [&](auto &&fac) { fac.solveInPlace(workspace.kkt_err); },
+        workspace.ldlt_);
     workspace.pd_step += workspace.kkt_err;
   }
   return false;
