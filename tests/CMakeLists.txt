@@ -111,7 +111,7 @@ function(add_proxnlp_bench name)
     get_cpp_bench_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} bench_name)
     set(bench_file ${name}.cpp)
 
-    add_unit_test(${bench_name} ${bench_file})
+    add_executable(${bench_name} ${bench_file})
     set_target_properties(${bench_name} PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(${bench_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
