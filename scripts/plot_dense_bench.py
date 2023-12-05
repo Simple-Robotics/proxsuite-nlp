@@ -33,8 +33,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="plot_bench", description="Plot ProxNLP benchmarks"
     )
-    parser.add_argument(
-        "bench_results", type=argparse.FileType("r"), nargs="+")
+    parser.add_argument("bench_results", type=argparse.FileType("r"), nargs="+")
     args = parser.parse_args()
 
     values = []
@@ -60,8 +59,9 @@ def main():
 
             cpu_time = int(e["cpu_time"])
             values.append(
-                ResultEntry(source, problem_type, solver_name,
-                            size, rank_reduction, cpu_time)
+                ResultEntry(
+                    source, problem_type, solver_name, size, rank_reduction, cpu_time
+                )
             )
 
     frame = pd.DataFrame(values)
@@ -81,26 +81,25 @@ def main():
             rank_reductions = ptf["rank_reduction"].sort_values().unique()
             for rank_red in rank_reductions:
                 p1 = figure(
-                    title=f"Compute on problem {
-                        pb_type} rank reduction {rank_red}",
-                    tools=TOOLS, y_axis_type="log"
+                    title=f"Compute on problem {pb_type} rank reduction {rank_red}",
+                    tools=TOOLS,
+                    y_axis_type="log",
                 )
                 for s, color in zip(solver_names, Colorblind8):
-                    v = ptf[(ptf["solver_name"] == s)
-                            & (ptf["source"] == source)
-                            & (ptf["rank_reduction"] == rank_red)
-                            ].sort_values("problem_size")
+                    v = ptf[
+                        (ptf["solver_name"] == s)
+                        & (ptf["source"] == source)
+                        & (ptf["rank_reduction"] == rank_red)
+                    ].sort_values("problem_size")
                     y = v["cpu_time"]
                     p1.circle(problem_sizes, y, legend_label=s, color=color)
-                    p1.line(problem_sizes, y, legend_label=s,
-                            color=color, width=2)
+                    p1.line(problem_sizes, y, legend_label=s, color=color, width=2)
                 p1.legend.location = "top_left"
                 p1.legend.click_policy = "hide"
                 p1.xaxis.axis_label = "problem size"
                 p1.yaxis.axis_label = "cpu time (us)"
-                plot_lines.append((p1, ))
-        bench_plot = gridplot(
-            plot_lines, sizing_mode="stretch_width", height=600)
+                plot_lines.append((p1,))
+        bench_plot = gridplot(plot_lines, sizing_mode="stretch_width", height=600)
         tabs.append(TabPanel(child=bench_plot, title=source))
 
     # Plot performance of the same solver on different sources
@@ -112,28 +111,28 @@ def main():
         rank_reductions = ptf["rank_reduction"].sort_values().unique()
         for rank_red in rank_reductions:
             for s in solver_names:
-                p1 = figure(title=f"Compute on solver {
-                    s} rank reduction {rank_red}", tools=TOOLS, y_axis_type="log")
+                p1 = figure(
+                    title=f"Compute on solver {s} rank reduction {rank_red}",
+                    tools=TOOLS,
+                    y_axis_type="log",
+                )
                 for source, color in zip(sources, Colorblind8):
-                    v = ptf[(ptf["solver_name"] == s)
-                            & (ptf["source"] == source)
-                            & (ptf["rank_reduction"] == rank_red)
-                            ].sort_values("problem_size")
+                    v = ptf[
+                        (ptf["solver_name"] == s)
+                        & (ptf["source"] == source)
+                        & (ptf["rank_reduction"] == rank_red)
+                    ].sort_values("problem_size")
                     y = v["cpu_time"]
-                    p1.circle(problem_sizes, y,
-                              legend_label=source, color=color)
-                    p1.line(problem_sizes, y, legend_label=source,
-                            color=color, width=2)
+                    p1.circle(problem_sizes, y, legend_label=source, color=color)
+                    p1.line(problem_sizes, y, legend_label=source, color=color, width=2)
                 p1.legend.location = "top_left"
                 p1.legend.click_policy = "hide"
                 p1.xaxis.axis_label = "problem size"
                 p1.yaxis.axis_label = "cpu time (us)"
-                plot_lines.append((p1, ))
+                plot_lines.append((p1,))
 
-        bench_plot = gridplot(
-            plot_lines, sizing_mode="stretch_width", height=600)
-        tabs.append(TabPanel(child=bench_plot,
-                    title=f"Solver on problem {pb_type}"))
+        bench_plot = gridplot(plot_lines, sizing_mode="stretch_width", height=600)
+        tabs.append(TabPanel(child=bench_plot, title=f"Solver on problem {pb_type}"))
 
     output_name = "_".join(sources)
     output_file(f"dense_{output_name}.html", title=output_name)
