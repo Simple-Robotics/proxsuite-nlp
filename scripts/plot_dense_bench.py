@@ -136,7 +136,7 @@ def main():
                     title=f"Solver on problem {pb_type}"))
 
     output_name = "_".join(sources)
-    output_file(f"{output_name}.html", title=output_name)
+    output_file(f"dense_{output_name}.html", title=output_name)
 
     show(Tabs(tabs=tabs, sizing_mode="stretch_width"))
 
