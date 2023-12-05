@@ -39,48 +39,16 @@ template <typename Scalar> struct ldlt_base {
     PROXNLP_RUNTIME_ERROR("Not implemented");
   }
   virtual MatrixXs reconstructedMatrix() const = 0;
-  virtual Eigen::ComputationInfo info() const { return m_info; }
+  Eigen::ComputationInfo info() const { return m_info; }
   SignMatrix sign() const { return m_sign; }
-  virtual ~ldlt_base() = default;
+  virtual ~ldlt_base() = 0;
 
 protected:
   Eigen::ComputationInfo m_info;
   SignMatrix m_sign = SignMatrix::ZeroSign;
 };
 
-template <typename Scalar> struct EigenLDLTWrapper : ldlt_base<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-  using Base = ldlt_base<Scalar>;
-  using DView = typename Base::DView;
-
-  EigenLDLTWrapper(isize size) : Base(), m_ldlt(size) {}
-  EigenLDLTWrapper(const MatrixRef &mat) : m_ldlt(mat) {}
-  EigenLDLTWrapper(const Eigen::LDLT<MatrixXs> &ldlt) : m_ldlt(ldlt) {}
-
-  inline EigenLDLTWrapper &compute(const ConstMatrixRef &mat) override {
-    m_ldlt.compute(mat);
-    return *this;
-  }
-
-  inline bool solveInPlace(MatrixRef b) const { return m_ldlt.solveInPlace(b); }
-
-  inline MatrixXs reconstructedMatrix() const override {
-    return m_ldlt.reconstructedMatrix();
-  }
-
-  inline const MatrixXs &matrixLDLT() const override {
-    return m_ldlt.matrixLDLT();
-  }
-
-  inline Eigen::ComputationInfo info() const override { return m_ldlt.info(); }
-
-  inline DView vectorD() const override {
-    return Base::diag_view_impl(m_ldlt.matrixLDLT());
-  }
-
-protected:
-  Eigen::LDLT<MatrixXs> m_ldlt;
-};
+template <typename Scalar> ldlt_base<Scalar>::~ldlt_base() {}
 
 } // namespace linalg
 } // namespace proxnlp

@@ -16,7 +16,6 @@ using namespace proxnlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
-using linalg::EigenLDLTWrapper;
 
 namespace {
 constexpr auto unit = benchmark::kMicrosecond;

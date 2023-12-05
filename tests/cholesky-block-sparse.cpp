@@ -19,7 +19,6 @@ using namespace proxnlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
-using linalg::EigenLDLTWrapper;
 
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
@@ -71,7 +70,7 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
-  EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
+  Eigen::LDLT<MatrixXs> ldlt_wrap(mat);
   BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
 
   MatrixXs reconstr = ldlt_wrap.reconstructedMatrix();

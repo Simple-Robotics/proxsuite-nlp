@@ -34,8 +34,7 @@ template <typename Scalar,
           class MatrixType = typename math_types<Scalar>::MatrixXs>
 using LDLTVariant =
     boost::variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>,
-                   linalg::EigenLDLTWrapper<Scalar>,
-                   Eigen::BunchKaufman<MatrixType>
+                   Eigen::LDLT<MatrixType>, Eigen::BunchKaufman<MatrixType>
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
                    ,
                    linalg::ProxSuiteLDLTWrapper<Scalar>
@@ -102,12 +101,13 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
                                              const std::vector<isize> &nduals,
                                              LDLTChoice choice) {
   const isize size = get_total_dim_helper(nprims, nduals);
+  using MatrixXs = typename math_types<Scalar>::MatrixXs;
 
   switch (choice) {
   case LDLTChoice::DENSE:
     return linalg::DenseLDLT<Scalar>(size);
   case LDLTChoice::BUNCHKAUFMAN:
-    return Eigen::BunchKaufman<typename math_types<Scalar>::MatrixXs>(size);
+    return Eigen::BunchKaufman<MatrixXs>(size);
   case LDLTChoice::BLOCKSPARSE: {
     auto structure = create_default_block_structure(nprims, nduals);
 
@@ -116,7 +116,7 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
     return block_ldlt;
   }
   case LDLTChoice::EIGEN:
-    return linalg::EigenLDLTWrapper<Scalar>(size);
+    return Eigen::LDLT<MatrixXs>(size);
   case LDLTChoice::PROXSUITE:
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
     return linalg::ProxSuiteLDLTWrapper<Scalar>(size, size);
