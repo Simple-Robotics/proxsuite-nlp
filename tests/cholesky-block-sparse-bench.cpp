@@ -16,6 +16,7 @@ using namespace proxnlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
+using linalg::ProxSuiteLDLTWrapper;
 
 namespace {
 constexpr auto unit = benchmark::kMicrosecond;
@@ -71,6 +72,13 @@ bool success(const Eigen::BunchKaufman<MatrixXs> & /* ldlt */) { return true; }
 template <typename LDLT>
 LDLT construct(isize matrix_size, const SymbolicBlockMatrix & /* sym_mat */) {
   return LDLT(matrix_size);
+}
+
+template <>
+ProxSuiteLDLTWrapper<Scalar>
+construct<ProxSuiteLDLTWrapper<Scalar>>(isize matrix_size,
+                                        const SymbolicBlockMatrix &) {
+  return ProxSuiteLDLTWrapper<Scalar>(matrix_size, matrix_size);
 }
 
 /// BlockLDLT need SymbolicBlockMatrix as argument
@@ -179,9 +187,9 @@ BENCHMARK_TEMPLATE(ldlt_solve_in_place, BlockLDLT<Scalar>)
 
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
-BENCHMARK_TEMPLATE(ldlt_compute, linalg::ProxSuiteLDLTWrapper<Scalar>)
+BENCHMARK_TEMPLATE(ldlt_compute, ProxSuiteLDLTWrapper<Scalar>)
     ->Apply(default_arguments_compute);
-BENCHMARK_TEMPLATE(ldlt_solve_in_place, linalg::ProxSuiteLDLTWrapper<Scalar>)
+BENCHMARK_TEMPLATE(ldlt_solve_in_place, ProxSuiteLDLTWrapper<Scalar>)
     ->Apply(default_arguments);
 
 #endif
