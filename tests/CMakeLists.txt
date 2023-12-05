@@ -3,16 +3,17 @@
 #
 
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
-add_project_dependency(benchmark REQUIRED PKG_CONFIG_REQUIRES "benchmark >= 1.5.0")
 
+# Fetch private dependencies
 include(FetchContent)
+
+# Add eigenrand dependency
 # TODO use main bab2min/EigenRand when PR is merged
 FetchContent_Declare(
   eigenrand
   GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
   GIT_TAG 23d287e
   GIT_PROGRESS TRUE)
-
 FetchContent_GetProperties(eigenrand)
 if(NOT eigenrand_POPULATED)
   set(EIGENRAND_BUILD_TEST
@@ -22,9 +23,25 @@ if(NOT eigenrand_POPULATED)
       OFF
       CACHE INTERNAL "Enable EigenRand benchmark")
   FetchContent_Populate(eigenrand)
-  message(STATUS "EIGENDRAND SOURCE DIR ${eigenrand_SOURCE_DIR}")
-  message(STATUS "EIGENDRAND BINARY DIR ${eigenrand_BINARY_DIR}")
   add_subdirectory(${eigenrand_SOURCE_DIR} ${eigenrand_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# Add benchmark dependency
+if(BUILD_BENCHMARK)
+  FetchContent_Declare(
+    benchmark
+    GIT_REPOSITORY https://github.com/google/benchmark.git
+    GIT_TAG v1.8.3
+    GIT_PROGRESS TRUE)
+  FetchContent_GetProperties(benchmark)
+  if(NOT benchmark_POPULATED)
+    set(BENCHMARK_ENABLE_WERROR OFF
+      CACHE INTERNAL "Disable -Werror flag in benchmark")
+    set(BENCHMARK_ENABLE_TESTING OFF
+      CACHE INTERNAL "Disable testing of the benchmark library")
+    FetchContent_Populate(benchmark)
+    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
 endif()
 
 # create an object library just for cnpy
