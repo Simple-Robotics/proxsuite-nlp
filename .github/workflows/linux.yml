@@ -20,7 +20,7 @@ defaults:
     shell: bash -leo pipefail {0} {0}
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: self-hosted-linux-x64
     steps:
 
     - uses: actions/cache@v3
@@ -47,7 +47,7 @@ jobs:
 
   test:
     needs: build
-    runs-on: self-hosted
+    runs-on: self-hosted-linux-x64
     steps:
     - run: |
         micromamba activate
@@ -58,7 +58,7 @@ jobs:
   cleanup:
     name: Cleanup
     needs: [build, test]
-    runs-on: self-hosted
+    runs-on: self-hosted-linux-x64
     if: always()
     steps:
     - run: |
