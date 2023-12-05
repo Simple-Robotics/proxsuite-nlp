@@ -160,22 +160,28 @@ void default_arguments_compute(benchmark::internal::Benchmark *b) {
 
 } // namespace
 
-BENCHMARK(ldlt_compute<DenseLDLT<Scalar>>)->Apply(default_arguments_compute);
-BENCHMARK(ldlt_compute<Eigen::LDLT<MatrixXs>>)
+BENCHMARK_TEMPLATE(ldlt_compute, DenseLDLT<Scalar>)
     ->Apply(default_arguments_compute);
-BENCHMARK(ldlt_compute<Eigen::BunchKaufman<MatrixXs>>)
+BENCHMARK_TEMPLATE(ldlt_compute, Eigen::LDLT<MatrixXs>)
     ->Apply(default_arguments_compute);
-BENCHMARK(ldlt_compute<BlockLDLT<Scalar>>)->Apply(default_arguments_compute);
-BENCHMARK(ldlt_solve_in_place<DenseLDLT<Scalar>>)->Apply(default_arguments);
-BENCHMARK(ldlt_solve_in_place<Eigen::LDLT<MatrixXs>>)->Apply(default_arguments);
-BENCHMARK(ldlt_solve<Eigen::BunchKaufman<MatrixXs>>)->Apply(default_arguments);
-BENCHMARK(ldlt_solve_in_place<BlockLDLT<Scalar>>)->Apply(default_arguments);
+BENCHMARK_TEMPLATE(ldlt_compute, Eigen::BunchKaufman<MatrixXs>)
+    ->Apply(default_arguments_compute);
+BENCHMARK_TEMPLATE(ldlt_compute, BlockLDLT<Scalar>)
+    ->Apply(default_arguments_compute);
+BENCHMARK_TEMPLATE(ldlt_solve_in_place, DenseLDLT<Scalar>)
+    ->Apply(default_arguments);
+BENCHMARK_TEMPLATE(ldlt_solve_in_place, Eigen::LDLT<MatrixXs>)
+    ->Apply(default_arguments);
+BENCHMARK_TEMPLATE(ldlt_solve, Eigen::BunchKaufman<MatrixXs>)
+    ->Apply(default_arguments);
+BENCHMARK_TEMPLATE(ldlt_solve_in_place, BlockLDLT<Scalar>)
+    ->Apply(default_arguments);
 
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
-BENCHMARK(ldlt_compute<linalg::ProxSuiteLDLTWrapper<Scalar>>)
+BENCHMARK_TEMPLATE(ldlt_compute, linalg::ProxSuiteLDLTWrapper<Scalar>)
     ->Apply(default_arguments_compute);
-BENCHMARK(ldlt_solve_in_place<linalg::ProxSuiteLDLTWrapper<Scalar>>)
+BENCHMARK_TEMPLATE(ldlt_solve_in_place, linalg::ProxSuiteLDLTWrapper<Scalar>)
     ->Apply(default_arguments);
 
 #endif
