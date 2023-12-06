@@ -190,4 +190,31 @@ struct ComputeSignatureVisitor {
   Eigen::VectorXi &signature;
 };
 
+inline std::array<int, 3>
+computeInertiaTuple(const Eigen::Ref<Eigen::VectorXi const> &signature) {
+  using Eigen::Index;
+  Index n = signature.size();
+  int np = 0;
+  int n0 = 0;
+  int nn = 0;
+  for (Index i = 0; i < n; i++) {
+    switch (signature(i)) {
+    case 1:
+      np++;
+      break;
+    case 0:
+      n0++;
+      break;
+    case -1:
+      nn++;
+      break;
+    default:
+      PROXNLP_RUNTIME_ERROR(
+          "Signature vector should only contain values O, 1, -1.");
+      break;
+    }
+  }
+  return {np, nn, n0};
+}
+
 } // namespace proxnlp

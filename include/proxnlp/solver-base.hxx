@@ -126,26 +126,10 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
 
 InertiaFlag checkInertia(const int ndx, const int numc,
                          const Eigen::VectorXi &signature) {
-  const long n = signature.size();
-  int numpos = 0;
-  int numneg = 0;
-  int numzer = 0;
-  for (long i = 0; i < n; i++) {
-    switch (signature(i)) {
-    case 1:
-      numpos++;
-      break;
-    case 0:
-      numzer++;
-      break;
-    case -1:
-      numneg++;
-      break;
-    default:
-      PROXNLP_RUNTIME_ERROR(
-          "Matrix signature should only have Os, 1s, and -1s.");
-    }
-  }
+  auto inertiaTuple = computeInertiaTuple(signature);
+  int numpos = inertiaTuple[0];
+  int numneg = inertiaTuple[1];
+  int numzer = inertiaTuple[2];
   InertiaFlag flag = INERTIA_OK;
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
