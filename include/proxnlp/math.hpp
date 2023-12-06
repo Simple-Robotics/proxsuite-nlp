@@ -91,6 +91,11 @@ bool check_value(const Eigen::MatrixBase<MatrixType> &x) {
   return (x.hasNaN() || (!x.allFinite()));
 }
 
+template <typename T> T sign(const T &x) {
+  static_assert(std::is_scalar<T>::value, "Parameter T should be scalar.");
+  return T((x > T(0)) - (x < T(0)));
+}
+
 } // namespace math
 } // namespace proxnlp
 
