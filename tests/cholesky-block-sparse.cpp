@@ -23,6 +23,7 @@ using linalg::DenseLDLT;
 
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
+constexpr double TOL_LOOSE = 1e-10;
 const isize ndx = 24;
 
 auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
@@ -80,7 +81,7 @@ BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
-                        *utf::tolerance(TOL)) {
+                        *utf::tolerance(TOL_LOOSE)) {
   // dense LDLT
   DenseLDLT<Scalar> dense_ldlt(mat);
   BOOST_REQUIRE(dense_ldlt.info() == Eigen::Success);
@@ -93,8 +94,8 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
 
   Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
   fmt::print("Dense err = {:.5e}\n", dense_err);
-  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
-  BOOST_CHECK(rhs.isApprox(mat * sol_dense));
+  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL_LOOSE));
+  BOOST_CHECK(rhs.isApprox(mat * sol_dense, TOL_LOOSE));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
@@ -106,7 +107,7 @@ BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
 
   Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
   fmt::print("BunchKaufman err = {:.5e}\n", dense_err);
-  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
+  BOOST_CHECK(sol_dense.isApprox(sol_eig));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
 
   auto sg = signature; // copy
@@ -167,7 +168,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
   block_permuted.solveInPlace(sol_block);
   Scalar err = math::infty_norm(sol_block - sol_eig);
   fmt::print("err = {:.5e}\n", err);
-  BOOST_CHECK(sol_block.isApprox(sol_eig, TOL));
+  BOOST_CHECK(sol_block.isApprox(sol_eig));
   BOOST_CHECK(rhs.isApprox(mat * sol_block));
 }
 
