@@ -164,7 +164,7 @@ void bunch_kaufman_compute_signature(
       } else {
         // det < 0
         signature[k] = -1;
-        signature[k] = +1;
+        signature[k + 1] = +1;
       }
 
       k += 2;
