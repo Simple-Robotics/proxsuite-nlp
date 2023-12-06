@@ -132,10 +132,47 @@ namespace internal {
 
 /// Compute signature of matrix from Bunch-Kaufman factorization.
 template <typename MatrixType, typename Signature, int UpLo>
-auto bunch_kaufman_compute_signature(
+void bunch_kaufman_compute_signature(
     Eigen::BunchKaufman<MatrixType, UpLo> const &factor, Signature &signature) {
-  // TODO: finish implementing this
-  PROXNLP_RUNTIME_ERROR("Not implemented yet.");
+  using Eigen::Index;
+  using Scalar = typename MatrixType::Scalar;
+  using Real = typename Eigen::NumTraits<Scalar>::Real;
+
+  Index n = factor.rows();
+  signature.conservativeResize(n);
+
+  Index k = 0;
+  const MatrixType &a = factor.matrixLDLT();
+
+  while (k < n) {
+    Index p = factor.pivots()[k];
+    if (p < 0) {
+      // 2x2 block
+      Real ak = Eigen::numext::real(a(k, k));
+      Real akp1 = Eigen::numext::real(a(k + 1, k + 1));
+      Scalar akp1k = factor.subdiag()[k];
+      Real tr = ak + akp1;
+      Real det = ak * akp1 - Eigen::numext::abs2(akp1k);
+
+      if (std::abs(det) <= std::numeric_limits<Scalar>::epsilon()) {
+        signature[k] = 0;
+        signature[k + 1] = int(math::sign(tr));
+      } else if (det > Scalar(0)) {
+        signature[k] = int(math::sign(tr));
+        signature[k + 1] = signature[k];
+      } else {
+        // det < 0
+        signature[k] = -1;
+        signature[k] = +1;
+      }
+
+      k += 2;
+    } else {
+      Real ak = Eigen::numext::real(a(k, k));
+      signature[k] = int(math::sign(ak));
+      k += 1;
+    }
+  }
 }
 
 } // namespace internal
