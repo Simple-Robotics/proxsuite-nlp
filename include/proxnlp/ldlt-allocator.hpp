@@ -10,6 +10,7 @@
 #include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 #endif
 #include <boost/variant.hpp>
+#include <array>
 
 namespace proxnlp {
 
