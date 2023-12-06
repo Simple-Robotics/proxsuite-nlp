@@ -451,12 +451,6 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
   using Traits = BK_Traits<MatrixType, Conjugate>;
 
   Traits::getL(L).solveInPlace(x);
-  // TriangularView<const MatrixType, UnitLower> Lview(L);
-  // if (Conjugate) {
-  //   Lview.conjugate().solveInPlace(x);
-  // } else {
-  //   Lview.solveInPlace(x);
-  // }
 
   k = 0;
   while (k < n) {
@@ -489,13 +483,6 @@ void bunch_kaufman_solve_in_place(MatrixType const &L, VecType const &subdiag,
   }
 
   Traits::getU(L).solveInPlace(x);
-  // TriangularView<const Transpose<const MatrixType>, UnitUpper> Ltview(
-  //     L.transpose());
-  // if (Conjugate) {
-  //   Ltview.solveInPlace(x);
-  // } else {
-  //   Ltview.conjugate().solveInPlace(x);
-  // }
 
   k = n;
   while (k > 0) {
