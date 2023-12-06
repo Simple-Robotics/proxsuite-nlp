@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "proxnlp/math.hpp"
+#include <fmt/ranges.h>
 
 BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 
@@ -50,6 +51,7 @@ struct ldlt_test_fixture {
   Eigen::LDLT<MatrixXs> ldlt;
   MatrixXs sol_eig;
   isize size;
+  Eigen::VectorXi signature;
 
   void init() {
     mat = getRandomSymmetricBlockMatrix(sym_mat);
@@ -57,30 +59,24 @@ struct ldlt_test_fixture {
     size = mat.cols();
     rhs = MatrixXs::Random(size, ncols);
     sol_eig = ldlt.solve(rhs);
+    ComputeSignatureVisitor{signature}(ldlt);
   }
 };
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
-  MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_REQUIRE(ldlt.info() == Eigen::Success);
-  BOOST_CHECK(reconstr.isApprox(mat, TOL));
-  BOOST_CHECK(rhs.isApprox(mat * sol_eig, TOL));
-}
 
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
-                        *utf::tolerance(TOL)) {
-  Eigen::LDLT<MatrixXs> ldlt_wrap(mat);
-  BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
-
-  MatrixXs reconstr = ldlt_wrap.reconstructedMatrix();
+  MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));
 
   MatrixXs sol_wrap = rhs;
-  ldlt_wrap.solveInPlace(sol_wrap);
+  ldlt.solveInPlace(sol_wrap);
 
   BOOST_CHECK(sol_wrap.isApprox(sol_eig));
-  BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+  BOOST_CHECK(ldlt.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+  auto t = computeInertiaTuple(signature);
+  fmt::print("Signature: {}\n", fmt::join(t, " "));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
@@ -103,11 +99,7 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
 
 BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
-  // dense LDLT
   Eigen::BunchKaufman<MatrixXs, Eigen::Lower> lblt(mat);
-
-  // MatrixXs reconstr = dense_ldlt.reconstructedMatrix();
-  // BOOST_CHECK(reconstr.isApprox(mat));
 
   MatrixXs sol_dense = rhs;
   lblt.solveInPlace(sol_dense);
@@ -116,6 +108,16 @@ BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
   fmt::print("BunchKaufman err = {:.5e}\n", dense_err);
   BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
+
+  auto sg = signature; // copy
+  internal::bunch_kaufman_compute_signature(lblt, sg);
+  std::array<int, 3> t_eigen = computeInertiaTuple(signature);
+  std::array<int, 3> t_bk = computeInertiaTuple(sg);
+  fmt::print("Eig. Signature: {}\n", fmt::join(t_eigen, " "));
+  fmt::print("BK Signature: {}\n", fmt::join(t_bk, " "));
+
+  BOOST_CHECK((t_eigen[0] == t_bk[0]) && (t_eigen[1] == t_bk[1]) &&
+              (t_eigen[2] == t_bk[2]));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
