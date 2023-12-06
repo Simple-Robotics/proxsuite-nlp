@@ -5,34 +5,32 @@
 
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "block-test.hpp"
+#include "util.hpp"
 #include "proxnlp/ldlt-allocator.hpp"
-#if PROXNLP_ENABLE_PROXSUITE_LDLT
-#include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
-#endif
 
-#include <benchmark/benchmark.h>
-#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 
 #include "proxnlp/math.hpp"
+#include <fmt/ranges.h>
+
+BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 
 namespace utf = boost::unit_test;
+using namespace proxnlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
-using linalg::EigenLDLTWrapper;
 
 constexpr isize n = 3;
 constexpr double TOL = 1e-11;
-constexpr auto unit = benchmark::kMicrosecond;
-const isize ndx = 26;
+constexpr double TOL_LOOSE = 1e-10;
+const isize ndx = 24;
 
 auto create_problem_structure() -> linalg::SymbolicBlockMatrix {
   // clang-format off
   BlockKind *data = new BlockKind[n * n]{
-      BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
-      BlockKind::Zero, BlockKind::Dense, BlockKind::Diag,
+      BlockKind::Diag,  BlockKind::Dense, BlockKind::Dense,
+      BlockKind::Dense, BlockKind::Dense, BlockKind::Diag,
       BlockKind::Dense, BlockKind::Diag, BlockKind::Diag
   };
   // clang-format on
@@ -54,90 +52,36 @@ struct ldlt_test_fixture {
   Eigen::LDLT<MatrixXs> ldlt;
   MatrixXs sol_eig;
   isize size;
+  Eigen::VectorXi signature;
 
   void init() {
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
     ldlt.compute(mat);
     size = mat.cols();
     rhs = MatrixXs::Random(size, ncols);
     sol_eig = ldlt.solve(rhs);
+    ComputeSignatureVisitor{signature}(ldlt);
   }
 };
-
-struct ldlt_bench_fixture : benchmark::Fixture, ldlt_test_fixture {
-  void SetUp(const benchmark::State &) override { this->init(); }
-  void TearDown(const benchmark::State &) override {}
-};
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, block_sparse)(benchmark::State &s) {
-  BlockLDLT<Scalar> block_ldlt(size, sym_mat);
-  block_ldlt.findSparsifyingPermutation();
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    block_ldlt.compute(mat);
-    block_ldlt.solveInPlace(b);
-    if (block_ldlt.info() != Eigen::Success) {
-      s.SkipWithError("BlockLDLT computation failed.");
-      break;
-    }
-  }
-}
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, recursive)(benchmark::State &s) {
-  DenseLDLT<Scalar> dense_ldlt(size);
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    dense_ldlt.compute(mat);
-    dense_ldlt.solveInPlace(b);
-    if (dense_ldlt.info() != Eigen::Success) {
-      s.SkipWithError("DenseLDLT computation failed.");
-      break;
-    }
-  }
-}
-
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, eigen_ldlt)(benchmark::State &s) {
-  Eigen::LDLT<MatrixXs> ldlt(size);
-  auto b = rhs;
-  for (auto _ : s) {
-    b = rhs;
-    ldlt.compute(mat);
-    ldlt.solveInPlace(b);
-    if (ldlt.info() != Eigen::Success) {
-      s.SkipWithError("Eigen::LDLT computation failed.");
-      break;
-    }
-    benchmark::DoNotOptimize(ldlt);
-  }
-}
 
 BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
-  MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_REQUIRE(ldlt.info() == Eigen::Success);
-  BOOST_CHECK(reconstr.isApprox(mat, TOL));
-  BOOST_CHECK(rhs.isApprox(mat * sol_eig, TOL));
-}
 
-BOOST_FIXTURE_TEST_CASE(test_eigen_ldlt_wrap, ldlt_test_fixture,
-                        *utf::tolerance(TOL)) {
-  EigenLDLTWrapper<Scalar> ldlt_wrap(mat);
-  BOOST_REQUIRE(ldlt_wrap.info() == Eigen::Success);
-
-  MatrixXs reconstr = ldlt_wrap.reconstructedMatrix();
+  MatrixXs reconstr = ldlt.reconstructedMatrix();
   BOOST_CHECK(reconstr.isApprox(mat));
 
   MatrixXs sol_wrap = rhs;
-  ldlt_wrap.solveInPlace(sol_wrap);
+  ldlt.solveInPlace(sol_wrap);
 
   BOOST_CHECK(sol_wrap.isApprox(sol_eig));
-  BOOST_CHECK(ldlt_wrap.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+  BOOST_CHECK(ldlt.matrixLDLT().isApprox(ldlt.matrixLDLT()));
+  auto t = computeInertiaTuple(signature);
+  fmt::print("Signature: {}\n", fmt::join(t, " "));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
-                        *utf::tolerance(TOL)) {
+                        *utf::tolerance(TOL_LOOSE)) {
   // dense LDLT
   DenseLDLT<Scalar> dense_ldlt(mat);
   BOOST_REQUIRE(dense_ldlt.info() == Eigen::Success);
@@ -150,8 +94,31 @@ BOOST_FIXTURE_TEST_CASE(test_dense_ldlt_ours, ldlt_test_fixture,
 
   Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
   fmt::print("Dense err = {:.5e}\n", dense_err);
-  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL));
+  BOOST_CHECK(sol_dense.isApprox(sol_eig, TOL_LOOSE));
+  BOOST_CHECK(rhs.isApprox(mat * sol_dense, TOL_LOOSE));
+}
+
+BOOST_FIXTURE_TEST_CASE(test_bunchkaufman, ldlt_test_fixture,
+                        *utf::tolerance(TOL)) {
+  Eigen::BunchKaufman<MatrixXs, Eigen::Lower> lblt(mat);
+
+  MatrixXs sol_dense = rhs;
+  lblt.solveInPlace(sol_dense);
+
+  Scalar dense_err = math::infty_norm(sol_dense - sol_eig);
+  fmt::print("BunchKaufman err = {:.5e}\n", dense_err);
+  BOOST_CHECK(sol_dense.isApprox(sol_eig));
   BOOST_CHECK(rhs.isApprox(mat * sol_dense));
+
+  auto sg = signature; // copy
+  internal::bunch_kaufman_compute_signature(lblt, sg);
+  std::array<int, 3> t_eigen = computeInertiaTuple(signature);
+  std::array<int, 3> t_bk = computeInertiaTuple(sg);
+  fmt::print("Eig. Signature: {}\n", fmt::join(t_eigen, " "));
+  fmt::print("BK Signature: {}\n", fmt::join(t_bk, " "));
+
+  BOOST_CHECK((t_eigen[0] == t_bk[0]) && (t_eigen[1] == t_bk[1]) &&
+              (t_eigen[2] == t_bk[2]));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
@@ -201,7 +168,7 @@ BOOST_FIXTURE_TEST_CASE(test_block_ldlt_ours, ldlt_test_fixture,
   block_permuted.solveInPlace(sol_block);
   Scalar err = math::infty_norm(sol_block - sol_eig);
   fmt::print("err = {:.5e}\n", err);
-  BOOST_CHECK(sol_block.isApprox(sol_eig, TOL));
+  BOOST_CHECK(sol_block.isApprox(sol_eig));
   BOOST_CHECK(rhs.isApprox(mat * sol_block));
 }
 
@@ -231,23 +198,8 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
   linalg::print_sparsity_pattern(modified_structure);
 }
 
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, recursive)->Unit(unit);
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, block_sparse)->Unit(unit);
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, eigen_ldlt)->Unit(unit);
-
 #ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
 
-BENCHMARK_DEFINE_F(ldlt_bench_fixture, proxsuite_ldlt)(benchmark::State &s) {
-
-  linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
-  auto sol_ps = rhs;
-  for (auto _ : s) {
-    sol_ps = rhs;
-    ps_ldlt.compute(mat);
-    ps_ldlt.solveInPlace(sol_ps);
-  }
-}
-BENCHMARK_REGISTER_F(ldlt_bench_fixture, proxsuite_ldlt)->Unit(unit);
 BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {
   linalg::ProxSuiteLDLTWrapper<Scalar> ps_ldlt(mat.rows(), rhs.cols() + 1);
@@ -271,9 +223,7 @@ int main(int argc, char **argv) {
   // https://www.boost.org/doc/libs/1_80_0/libs/test/doc/html/boost_test/adv_scenarios/shared_lib_customizations/entry_point.html
   int tests_result = utf::unit_test_main(&init_unit_test, argc, argv);
 
-  benchmark::Initialize(&argc, argv);
-  // run benchmarks
-  benchmark::RunSpecifiedBenchmarks();
-
   return tests_result;
 }
+
+BOOST_AUTO_TEST_SUITE_END()

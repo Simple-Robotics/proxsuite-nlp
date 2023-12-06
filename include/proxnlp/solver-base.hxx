@@ -124,31 +124,12 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   return results.converged;
 }
 
-template <typename Scalar>
-auto SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const
-    -> InertiaFlag {
-  const int ndx = manifold().ndx();
-  const int numc = problem_->getTotalConstraintDim();
-  const long n = signature.size();
-  int numpos = 0;
-  int numneg = 0;
-  int numzer = 0;
-  for (long i = 0; i < n; i++) {
-    switch (signature(i)) {
-    case 1:
-      numpos++;
-      break;
-    case 0:
-      numzer++;
-      break;
-    case -1:
-      numneg++;
-      break;
-    default:
-      PROXNLP_RUNTIME_ERROR(
-          "Matrix signature should only have Os, 1s, and -1s.");
-    }
-  }
+InertiaFlag checkInertia(const int ndx, const int numc,
+                         const Eigen::VectorXi &signature) {
+  auto inertiaTuple = computeInertiaTuple(signature);
+  int numpos = inertiaTuple[0];
+  int numneg = inertiaTuple[1];
+  int numzer = inertiaTuple[2];
   InertiaFlag flag = INERTIA_OK;
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
@@ -403,11 +384,15 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       if (delta > 0.)
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
 
-      workspace.ldlt_->compute(workspace.kkt_matrix);
-      auto vecD = workspace.ldlt_->vectorD();
-      workspace.signature.array() = vecD.array().sign().template cast<int>();
+      boost::apply_visitor(
+          [&](auto &&fac) { fac.compute(workspace.kkt_matrix); },
+          workspace.ldlt_);
+      boost::apply_visitor(ComputeSignatureVisitor{workspace.signature},
+                           workspace.ldlt_);
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
-      is_inertia_correct = checkInertia(workspace.signature);
+      is_inertia_correct =
+          checkInertia(manifold().ndx(), problem_->getTotalConstraintDim(),
+                       workspace.signature);
 
       if (is_inertia_correct == INERTIA_OK) {
         delta_last = delta;
@@ -432,7 +417,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_NOMALLOC_END;
     PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
 
-    //// Take the step
+    // Take the step
 
     workspace.dmerit_dir =
         workspace.merit_gradient.dot(workspace.prim_step) +
@@ -527,13 +512,16 @@ void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
 template <typename Scalar>
 bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
-  workspace.ldlt_->solveInPlace(workspace.pd_step);
+  boost::apply_visitor([&](auto &&fac) { fac.solveInPlace(workspace.pd_step); },
+                       workspace.ldlt_);
   for (std::size_t n = 0; n < max_refinement_steps_; n++) {
     workspace.kkt_err = -workspace.kkt_rhs;
     workspace.kkt_err.noalias() -= workspace.kkt_matrix * workspace.pd_step;
     if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
       return true;
-    workspace.ldlt_->solveInPlace(workspace.kkt_err);
+    boost::apply_visitor(
+        [&](auto &&fac) { fac.solveInPlace(workspace.kkt_err); },
+        workspace.ldlt_);
     workspace.pd_step += workspace.kkt_err;
   }
   return false;

@@ -24,16 +24,18 @@ using Model = pin::ModelTpl<Scalar>;
 using Data = pin::DataTpl<Scalar>;
 using Space = MultibodyConfiguration<Scalar>;
 using Cost = CostFunctionBaseTpl<Scalar>;
+const boost::filesystem::path URDF_PATH(EXAMPLE_ROBOT_DATA_MODEL_DIR);
 
 Model loadModel() {
-  boost::filesystem::path URDF_PATH(EXAMPLE_ROBOT_DATA_MODEL_DIR);
-  URDF_PATH /= "ur_description/urdf/ur5_robot.urdf";
+  auto path = URDF_PATH;
+  path /= "ur_description/urdf/ur5_robot.urdf";
   Model out;
-  pin::urdf::buildModel(URDF_PATH.string(), out);
+  pin::urdf::buildModel(path.string(), out);
   return out;
 }
 
 struct FramePosition : C2FunctionTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   using Base = C2FunctionTpl<Scalar>;
 
   shared_ptr<Space> space_;
@@ -73,7 +75,7 @@ int main() {
   pin::FrameIndex fid = model.getFrameId(ee_link_name);
 
   Vector3s ref(1.0, 0., 0.2);
-  auto fn = std::make_shared<FramePosition>(space, fid, ref);
+  auto fn = allocate_shared_eigen_aligned<FramePosition>(space, fid, ref);
 
   auto q0 = pin::neutral(model);
   MatrixXs w1(3, 3);
@@ -83,9 +85,10 @@ int main() {
   w2.setIdentity();
   w2 *= 1e-2;
 
-  auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
-  auto cost2 =
-      std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
+  auto cost1 =
+      allocate_shared_eigen_aligned<QuadraticResidualCostTpl<Scalar>>(fn, w1);
+  auto cost2 = allocate_shared_eigen_aligned<QuadraticDistanceCostTpl<Scalar>>(
+      space, q0, w2);
   auto cost = std::make_shared<CostSumTpl<Scalar>>(space->nx(), space->ndx());
   cost->addComponent(cost1);
   cost->addComponent(cost2);

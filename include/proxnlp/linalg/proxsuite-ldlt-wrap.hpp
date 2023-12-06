@@ -76,7 +76,8 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
     return *this;
   }
 
-  bool solveInPlace(MatrixRef rhs) const {
+  template <typename Derived>
+  bool solveInPlace(Eigen::MatrixBase<Derived> &rhs) const {
     using veg::dynstack::DynStackMut;
     isize nrows = rhs.rows();
     isize ncols = rhs.cols();
@@ -86,18 +87,12 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
                       const_cast<StackType &>(ldl_stack).as_mut()};
     LDLT_TEMP_MAT_UNINIT(Scalar, work, nrows, ncols, stack);
 
-    // for (isize i = 0; i < nrows; ++i) {
-    //   work.row(i) = rhs.row(perm[i]);
-    // }
     work = perm_inv * rhs;
 
     solve_impl(m_ldlt.ld_col(), work);
 
     rhs = perm * work;
 
-    // for (isize i = 0; i < nrows; ++i) {
-    //   rhs.row(i) = work.row(perm_inv[i]);
-    // }
     return true;
   }
 

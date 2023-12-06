@@ -5,14 +5,9 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include <random>
 
-#include <boost/test/unit_test.hpp>
-#include <boost/mpl/vector.hpp>
+#include <benchmark/benchmark.h>
 
-BOOST_AUTO_TEST_SUITE(tri_solve)
-
-namespace utf = boost::unit_test;
 using namespace proxnlp;
 
 using linalg::TriangularBlockMatrix;
@@ -74,27 +69,47 @@ template <int _Mode> struct tri_fixture : prob_data {
   auto view() { return mat.triangularView<Mode>(); }
 };
 
-// clang-format off
-using test_modes = boost::mpl::vector<
-      tri_fixture<Eigen::Lower>,
-      tri_fixture<Eigen::UnitLower>,
-      tri_fixture<Eigen::Upper>,
-      tri_fixture<Eigen::UnitUpper>>;
-// clang-format on
+template <int Mode> void BM_block_tri_solve(benchmark::State &state) {
+  tri_fixture<Mode> fix{};
+  MatrixXs loc_mat = fix.view();
+  TriangularBlockMatrix<MatrixXs, Mode> tri_block_mat(loc_mat, fix.sym_mat);
 
-BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_block_tri, Fix, test_modes, Fix) {
-
-  MatrixXs loc_mat = Fix::view();
-  linalg::print_sparsity_pattern(Fix::sym_mat);
-
-  TriangularBlockMatrix<MatrixXs, Fix::Mode> tri_mat(loc_mat, Fix::sym_mat);
-
-  MatrixXs sol_ours = Fix::rhs;
-  bool flag = tri_mat.solveInPlace(sol_ours);
-
-  BOOST_REQUIRE(flag);
-
-  BOOST_CHECK(Fix::sol_eig.isApprox(sol_ours));
+  for (auto _ : state) {
+    auto sol_ours = fix.rhs;
+    bool flag = tri_block_mat.solveInPlace(sol_ours);
+    if (!flag) {
+      state.SkipWithError("Solve in place failed.");
+      break;
+    }
+    if (!sol_ours.isApprox(fix.sol_eig)) {
+      state.SkipWithError("Got wrong solution.");
+      break;
+    }
+  }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+template <int Mode> void BM_tri_solve(benchmark::State &state) {
+  tri_fixture<Mode> fix{};
+  auto loc_mat_tri_view = fix.view();
+
+  for (auto _ : state) {
+    auto sol_ours = fix.rhs;
+    loc_mat_tri_view.solveInPlace(sol_ours);
+    if (!sol_ours.isApprox(fix.sol_eig)) {
+      state.SkipWithError("Got wrong solution.");
+      break;
+    }
+  }
+}
+
+const auto unit = benchmark::kMicrosecond;
+BENCHMARK_TEMPLATE(BM_block_tri_solve, Eigen::Lower)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_block_tri_solve, Eigen::UnitLower)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_block_tri_solve, Eigen::Upper)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_block_tri_solve, Eigen::UnitUpper)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::Lower)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::UnitLower)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::Upper)->Unit(unit);
+BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::UnitUpper)->Unit(unit);
+
+BENCHMARK_MAIN();

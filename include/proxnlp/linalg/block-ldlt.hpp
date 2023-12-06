@@ -295,7 +295,8 @@ public:
   }
 
   /// Solve for the right-hand side in-place.
-  bool solveInPlace(MatrixRef b) const override;
+  template <typename Derived>
+  bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
 
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 
@@ -337,8 +338,8 @@ public:
 } // namespace linalg
 } // namespace proxnlp
 
-#include "proxnlp/linalg/blocks.hxx"
+#include "./block-ldlt.hxx"
 
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
-#include "proxnlp/linalg/blocks.txx"
+#include "./block-ldlt.txx"
 #endif

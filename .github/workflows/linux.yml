@@ -45,23 +45,26 @@ jobs:
         make -j$NJOBS install
         python3 -c "import proxnlp"
 
-  test:
-    needs: build
-    runs-on: self-hosted-linux-x64
-    steps:
-    - run: |
+    - name: Run tests
+      run: |
         micromamba activate
         micromamba install pytest casadi -y
         cd $GITHUB_WORKSPACE
+        echo "CURRENT DIRECTORY IS $PWD"
         cd build && ctest
 
   cleanup:
     name: Cleanup
-    needs: [build, test]
+    needs: build
     runs-on: self-hosted-linux-x64
     if: always()
     steps:
     - run: |
         cd $GITHUB_WORKSPACE
-        cd build/ && make uninstall
-        cd .. && rm -r build/
+        if [ -d build ]; then
+          cd build/
+          make uninstall || echo "No uninstall target found"
+          cd .. && rm -rf build/
+        else
+          echo "build-dir did not exist"
+        fi

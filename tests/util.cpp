@@ -1,16 +1,13 @@
-#pragma once
+#include "./util.hpp"
 
-#include "proxnlp/linalg/blocks.hpp"
+MatrixXs sampleGaussianOrhogonalEnsemble(Eigen::Index n) {
+  Eigen::Rand::P8_mt19937_64 urng{42};
+  MatrixXs A = Eigen::Rand::normal<MatrixXs>(n, n, urng);
+  double Z = std::sqrt(2.0 * int(n));
+  return (A + A.transpose()) / Z;
+}
 
-using namespace proxnlp;
-using linalg::BlockKind;
-using linalg::isize;
-using linalg::SymbolicBlockMatrix;
-using Scalar = double;
-
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
-
-inline MatrixXs get_block_matrix(SymbolicBlockMatrix const &sym) {
+MatrixXs getRandomSymmetricBlockMatrix(SymbolicBlockMatrix const &sym) {
   isize *row_segments = sym.segment_lens;
   auto n = std::size_t(sym.nsegments());
   isize size = 0;

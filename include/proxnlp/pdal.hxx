@@ -37,7 +37,7 @@ void ALMeritFunctionTpl<Scalar>::computeGradient(
   for (std::size_t i = 0; i < workspace.numblocks; i++) {
     const ConstraintObject &cstr = problem_.getConstraint(i);
     Scalar mu = cstr.set_->mu();
-    workspace.merit_dual_gradient.noalias() +=
+    problem_.getSegment(workspace.merit_dual_gradient, i).noalias() +=
         beta_ * mu * (lams[i] - workspace.lams_pdal[i]);
   }
 }

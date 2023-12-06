@@ -14,6 +14,14 @@
   PROXNLP_RUNTIME_ERROR(fmt::format(                                           \
       "Input size invalid (expected {:d}, got {:d})", nx, x.size()))
 
+#define PROXNLP_RAISE_IF_NAN(value)                                            \
+  if (::proxnlp::math::check_value(value))                                     \
+  PROXNLP_RUNTIME_ERROR("Encountered NaN.\n")
+
+#define PROXNLP_RAISE_IF_NAN_NAME(value, name)                                 \
+  if (::proxnlp::math::check_value(value))                                     \
+  PROXNLP_RUNTIME_ERROR(fmt::format("Encountered NaN for value {:s}.\n", name))
+
 namespace proxnlp {
 
 class RuntimeError : public std::runtime_error {

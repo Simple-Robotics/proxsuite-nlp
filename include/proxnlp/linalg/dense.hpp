@@ -164,18 +164,20 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;
+  using MatrixType = MatrixXs;
 
   DenseLDLT() = default;
   explicit DenseLDLT(isize size) : Base(), m_matrix(size, size) {
     m_matrix.setZero();
   }
+
   explicit DenseLDLT(MatrixRef a) : Base(), m_matrix(a) {
     m_info = backend::dense_ldlt_in_place(m_matrix, m_sign)
                  ? Eigen::Success
                  : Eigen::NumericalIssue;
   }
 
-  DenseLDLT &compute(const ConstMatrixRef &mat) override {
+  DenseLDLT &compute(const ConstMatrixRef &mat) {
     m_matrix = mat;
     m_info = backend::dense_ldlt_in_place(m_matrix, m_sign)
                  ? Eigen::Success
@@ -183,25 +185,24 @@ template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
     return *this;
   }
 
-  const MatrixXs &matrixLDLT() const override { return m_matrix; }
+  const MatrixXs &matrixLDLT() const { return m_matrix; }
 
-  bool solveInPlace(MatrixRef b) const override {
+  template <typename Derived>
+  bool solveInPlace(Eigen::MatrixBase<Derived> &b) const {
     return backend::dense_ldlt_solve_in_place(m_matrix, b);
   }
 
-  MatrixXs reconstructedMatrix() const override {
+  MatrixXs reconstructedMatrix() const {
     MatrixXs res(m_matrix.rows(), m_matrix.cols());
     res.setIdentity();
     backend::dense_ldlt_reconstruct<Scalar>(m_matrix, res);
     return res;
   }
 
-  inline DView vectorD() const override {
-    return Base::diag_view_impl(m_matrix);
-  }
+  inline DView vectorD() const { return Base::diag_view_impl(m_matrix); }
 
 protected:
-  MatrixXs m_matrix;
+  MatrixType m_matrix;
   using Base::m_info;
   using Base::m_sign;
 };

@@ -4,7 +4,7 @@
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "./blocks.hpp"
+#include "./block-ldlt.hpp"
 
 namespace proxnlp {
 namespace linalg {
@@ -69,7 +69,8 @@ BlockLDLT<Scalar>::reconstructedMatrix() const {
 }
 
 template <typename Scalar>
-bool BlockLDLT<Scalar>::solveInPlace(MatrixRef b) const {
+template <typename Derived>
+bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
 
   b.noalias() = permutationP().transpose() * b;
   PROXNLP_NOMALLOC_BEGIN;

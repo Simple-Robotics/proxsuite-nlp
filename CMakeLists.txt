@@ -64,6 +64,7 @@ option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
 option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
+option(BUILD_BENCHMARK "Build the benchmarks" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
@@ -144,13 +145,12 @@ endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 set(LIB_HEADER_DIR ${PROJECT_SOURCE_DIR}/include/proxnlp)
 file(GLOB_RECURSE LIB_HEADERS ${LIB_HEADER_DIR}/*.hpp ${LIB_HEADER_DIR}/*.hxx)
 
-set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp
-                ${PROJECT_SOURCE_DIR}/src/ldlt-allocator.cpp)
+set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
 
   set(LIB_TEMPLATE_SOURCES
-      ${PROJECT_SOURCE_DIR}/src/blocks.cpp
+      ${PROJECT_SOURCE_DIR}/src/block-ldlt.cpp
       ${PROJECT_SOURCE_DIR}/src/constraints.cpp
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
@@ -166,7 +166,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp
       ${PROJECT_SOURCE_DIR}/src/pdal.cpp)
   set(LIB_TEMPLATE_DECLARATIONS
-      ${LIB_HEADER_DIR}/linalg/blocks.txx
+      ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
       ${LIB_HEADER_DIR}/manifold-base.txx
       ${LIB_HEADER_DIR}/function-base.txx
       ${LIB_HEADER_DIR}/cost-function.txx
