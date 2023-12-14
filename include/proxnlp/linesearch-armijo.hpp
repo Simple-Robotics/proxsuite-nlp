@@ -75,7 +75,7 @@ public:
     }
 
     if (std::abs(dphi0) < options().dphi_thresh) {
-      return alpha_try;
+      latest.phi;
     }
 
     for (std::size_t i = 0; i < options().max_num_steps; i++) {
@@ -137,6 +137,7 @@ public:
         break;
       }
     }
+    alpha_try = std::max(alpha_try, options().alpha_min);
     return latest.phi;
   }
 
