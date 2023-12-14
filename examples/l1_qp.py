@@ -48,17 +48,11 @@ print("x0:", x0)
 
 problem = proxnlp.Problem(space, rcost, [penalty])
 
-tol = 1e-9
+tol = 1e-5
 mu_init = 0.01
-rho_init = 0.0
+rho_init = 0.001
 solver = proxnlp.Solver(problem, tol, mu_init, rho_init)
 solver.verbose = proxnlp.VERBOSE
-solver.mul_update_mode = proxnlp.MUL_NEWTON
-solver.kkt_system = proxnlp.KktSystem.CLASSIC
-solver.ls_options.alpha_min = 0.01
-solver.max_al_iters = 100
-solver.reg_init = 1e-10
-solver.max_iters = 20
 print((solver.kkt_system, solver.mul_update_mode))
 
 cb = HistoryCallback()
