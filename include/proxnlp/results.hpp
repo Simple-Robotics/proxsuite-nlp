@@ -4,11 +4,10 @@
 
 #include "proxnlp/problem-base.hpp"
 
-#include <fmt/ostream.h>
-
 namespace proxnlp {
 
 enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
+inline auto format_as(ConvergenceFlag fl) { return fmt::underlying(fl); }
 
 /**
  * @brief   Results struct, holding the returned data from the solver.
@@ -79,3 +78,11 @@ template <typename _Scalar> struct ResultsTpl {
 };
 
 } // namespace proxnlp
+
+template <typename Scalar>
+struct fmt::formatter<::proxnlp::ResultsTpl<Scalar>> : fmt::ostream_formatter {
+};
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/results.txx"
+#endif

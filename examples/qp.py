@@ -18,7 +18,7 @@ space = EuclideanSpace(nx)
 nres = 2
 A = np.random.randn(nres, nx)
 b = np.random.randn(nres)
-x0 = np.linalg.lstsq(A, -b)[0]
+x0 = np.linalg.lstsq(A, -b, rcond=None)[0]
 x1 = np.random.randn(nx) * 3
 v0 = np.random.randn(nres) * 2
 
@@ -90,7 +90,7 @@ plt.scatter(
     label="target $\\bar{x}$",
     facecolor=(0.8, 0, 0, 0.5),
     edgecolors="k",
-    zorder=2
+    zorder=2,
 )
 plt.legend()
 

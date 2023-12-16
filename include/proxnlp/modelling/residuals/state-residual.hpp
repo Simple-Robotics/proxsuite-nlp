@@ -31,7 +31,12 @@ public:
   ManifoldDifferenceToPoint(const shared_ptr<Manifold> &space,
                             const ConstVectorRef &target)
       : Base(space->nx(), space->ndx(), space->ndx()), target_(target),
-        space_(space) {}
+        space_(space) {
+    if (!space->isNormalized(target_)) {
+      PROXNLP_RUNTIME_ERROR(
+          "Target parameter is not a valid element of the manifold.");
+    }
+  }
 
   VectorXs operator()(const ConstVectorRef &x) const {
     return space_->difference(target_, x);

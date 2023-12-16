@@ -9,7 +9,16 @@
 #include <ostream>
 
 namespace proxnlp {
-template <typename Scalar> struct func_to_cost;
+
+template <typename Scalar>
+auto downcast_function_to_cost(const shared_ptr<C2FunctionTpl<Scalar>> &func)
+    -> shared_ptr<CostFunctionBaseTpl<Scalar>> {
+  if (func->nr() != 1) {
+    PROXNLP_RUNTIME_ERROR(
+        "Function cannot be cast to cost (codimension nr != 1).");
+  }
+  return std::make_shared<func_to_cost<Scalar>>(func);
+}
 
 /** @brief    Base class for differentiable cost functions.
  *  @remark   Cost functions derive from differentiable functions,
@@ -24,7 +33,8 @@ public:
   using Base = C2FunctionTpl<Scalar>;
 
   CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
-  CostFunctionBaseTpl(const CostFunctionBaseTpl<Scalar> &) = default;
+  explicit CostFunctionBaseTpl(const ManifoldAbstractTpl<Scalar> &manifold)
+      : Base(manifold, 1) {}
 
   /* Define cost function-specific API */
 
@@ -68,11 +78,7 @@ public:
     Hout *= v(0);
   }
 
-  virtual ~CostFunctionBaseTpl<Scalar>() = default;
-
-  /// @brief    Conversion from C2FunctionTpl.
-  CostFunctionBaseTpl(const C2FunctionTpl<Scalar> &func)
-      : CostFunctionBaseTpl<Scalar>(func_to_cost<Scalar>(func)) {}
+  virtual ~CostFunctionBaseTpl() = default;
 
   friend std::ostream &operator<<(std::ostream &ostr,
                                   const CostFunctionBaseTpl<Scalar> &cost) {
@@ -83,33 +89,31 @@ public:
 };
 
 template <typename _Scalar> struct func_to_cost : CostFunctionBaseTpl<_Scalar> {
-private:
-  const C2FunctionTpl<_Scalar> &underlying_;
-
-public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  using Base = CostFunctionBaseTpl<Scalar>;
+  using C2Function = C2FunctionTpl<Scalar>;
 
   /** @brief    Constructor.
    *  @details  This defines an implicit conversion from the C2FunctionTpl type.
    */
-  func_to_cost(const C2FunctionTpl<Scalar> &func)
-      : CostFunctionBaseTpl<Scalar>(func.nx(), func.ndx()), underlying_(func) {
-    assert(func.nr() == 1);
-  }
+  func_to_cost(const shared_ptr<C2Function> &func)
+      : Base(func->nx(), func->ndx()), underlying_(func) {}
 
-  const C2FunctionTpl<Scalar> &underlying() const { return underlying_; }
-
-  Scalar call(const ConstVectorRef &x) const { return underlying_(x)(0); }
+  Scalar call(const ConstVectorRef &x) const { return underlying()(x)(0); }
 
   void computeGradient(const ConstVectorRef &x, VectorRef out) const {
-    underlying_.computeJacobian(x, out.transpose());
+    underlying().computeJacobian(x, out.transpose());
   }
 
   void computeHessian(const ConstVectorRef &x, MatrixRef Hout) const {
     VectorXs v = VectorXs::Ones(1);
-    underlying_.vectorHessianProduct(x, v, Hout);
+    underlying().vectorHessianProduct(x, v, Hout);
   }
+
+private:
+  shared_ptr<C2Function> underlying_;
+  const C2Function &underlying() const { return *underlying_; }
 };
 
 } // namespace proxnlp

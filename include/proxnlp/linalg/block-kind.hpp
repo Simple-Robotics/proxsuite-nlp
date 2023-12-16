@@ -6,13 +6,14 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <numeric>
+#include <vector>
 
 namespace proxnlp {
 namespace linalg {
 
-namespace {
 using isize = Eigen::Index;
-}
+using usize = std::make_unsigned<isize>::type;
 
 /// Kind of matrix block: zeros, diagonal, lower/upper triangular or dense.
 enum BlockKind {
@@ -42,7 +43,7 @@ BlockKind mul(BlockKind a, BlockKind b) noexcept;
 /// @details  This struct describes the block-wise layout of a matrix, in
 /// row-major format.
 struct SymbolicBlockMatrix {
-  BlockKind *data;
+  BlockKind *m_data;
   isize *segment_lens;
   isize segments_count;
   isize outer_stride;
@@ -50,25 +51,57 @@ struct SymbolicBlockMatrix {
   /// This should be checked when attempting to factorize.
   bool performed_llt = false;
 
-  SymbolicBlockMatrix() = delete;
+private:
+  void alloc() {
+    m_data = new BlockKind[usize(size())];
+    segment_lens = new isize[usize(nsegments())];
+  }
+
+public:
+  SymbolicBlockMatrix() {}
+  /// Allocating constructor.
+  SymbolicBlockMatrix(isize nc, isize os)
+      : segments_count(nc), outer_stride(os) {
+    alloc();
+  }
+  /// Constructor from external data.
+  SymbolicBlockMatrix(BlockKind *data, isize *lens, isize nc, isize os)
+      : m_data(data), segment_lens(lens), segments_count(nc), outer_stride(os) {
+  }
   /// Shallow copy constructor.
   SymbolicBlockMatrix(SymbolicBlockMatrix const &other) = default;
   SymbolicBlockMatrix &operator=(SymbolicBlockMatrix const &other) = default;
+  SymbolicBlockMatrix(const std::vector<isize> &lens)
+      : segments_count(static_cast<isize>(lens.size())) {
+    outer_stride = segments_count;
+
+    alloc();
+
+    std::fill_n(m_data, size(), BlockKind::Dense);
+    std::copy_n(lens.begin(), nsegments(), segment_lens);
+  }
 
   /// Deep copy.
   SymbolicBlockMatrix copy() const;
 
   isize nsegments() const noexcept { return segments_count; }
   isize size() const noexcept { return segments_count * outer_stride; }
-  BlockKind *ptr(isize i, isize j) const noexcept {
-    return data + (i + j * outer_stride);
+  BlockKind *ptr(isize i, isize j) noexcept {
+    return m_data + (i + j * outer_stride);
+  }
+  BlockKind const *ptr(isize i, isize j) const noexcept {
+    return m_data + (i + j * outer_stride);
   }
 
-  /// Get the symbolic submatrix of size (n, n) starting from the block in
-  /// position (i, i).
-  SymbolicBlockMatrix submatrix(isize i, isize n) const noexcept;
+  /// Get the lower-right submatrix of size (n, n) starting from the
+  /// block in position (i, i). This is a view of the original data.
+  SymbolicBlockMatrix submatrix(isize i, isize n) noexcept;
   /// Get a reference to the block in position (i, j).
-  BlockKind &operator()(isize i, isize j) const noexcept { return *ptr(i, j); }
+  BlockKind &operator()(isize i, isize j) noexcept { return *ptr(i, j); }
+  /// @copybrief operator()
+  const BlockKind &operator()(isize i, isize j) const noexcept {
+    return *ptr(i, j);
+  }
 
   /// Brute-force search of the best permutation possible in the block matrix,
   /// with respect to the final sparsity of the LLT decomposition.
@@ -87,17 +120,16 @@ struct SymbolicBlockMatrix {
 
   SymbolicBlockMatrix transpose() const {
     const auto &self = *this;
-    SymbolicBlockMatrix s2(copy());
+    SymbolicBlockMatrix out(self.copy());
     for (isize i = 0; i < nsegments(); ++i) {
       for (isize j = 0; j < nsegments(); ++j) {
-        s2(i, j) = trans(self(j, i));
+        out(i, j) = trans(self(j, i));
       }
     }
-    return s2;
+    return out;
   }
 };
 
-/// TODO: print triangles for triangular blocks
 void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
 
 /// Deep copy of a SymbolicBlockMatrix, possibily with a permutation.

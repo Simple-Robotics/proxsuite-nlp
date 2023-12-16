@@ -2,64 +2,69 @@ name: CI - Linux via CMake
 
 on:
   push:
+    branches:
+      - main
+      - devel
+      - 'topic/**'
   pull_request:
+  workflow_dispatch:
   workflow_call:
+env:
+  CCACHE_DIR: ~/.ccache
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_PARALLEL_LEVEL: 4
+  NJOBS: 8
 
+defaults:
+  run:
+    shell: bash -leo pipefail {0} {0}
 jobs:
   build:
-
-    runs-on: self-hosted
-
-    env:
-      CCACHE_DIR: /github/home/.ccache
-
+    runs-on: self-hosted-linux-x64
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        submodules: recursive
 
-    - name: Setup ccache
-      uses: actions/cache@v3
+    - uses: actions/cache@v3
       with:
         key: ${{ runner.os }}
         path: ${{ env.CCACHE_DIR }}
 
-    # extract branch name
-    - name: Get branch name (merge)
-      if: github.event_name != 'pull_request'
-      shell: bash
-      run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-    # extract branch name on pull request
-    - name: Get branch name (pull request)
-      if: github.event_name == 'pull_request'
-      shell: bash
-      run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $GITHUB_ENV
-
-    # print branch name
-    - name: Debug
-      run: echo ${{ env.BRANCH_NAME }}
-
-    - name: Set env variables
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Build and install proxnlp
       run: |
-        echo "PYTHONPATH=/builds/custom_install/lib/python3/dist-packages/" >> $GITHUB_ENV
-        echo "CTEST_OUTPUT_ON_FAILURE=1" >> $GITHUB_ENV
-        echo "CTEST_PARALLEL_LEVEL=4" >> $GITHUB_ENV
+        micromamba activate
 
-    - name: Install proxnlp
-      run: |
         cd $GITHUB_WORKSPACE
-        mkdir build
-        cd build
+        mkdir build && cd build
 
-        cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=~/custom_install -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python3)
-        make -j3 install
-  test:
+        cmake .. -DBUILD_DOCUMENTATION=OFF \
+          -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+          -DCMAKE_BUILD_TYPE=Release
+        make -j$NJOBS install
+        python3 -c "import proxnlp"
+
+    - name: Run tests
+      run: |
+        micromamba activate
+        micromamba install pytest casadi -y
+        cd $GITHUB_WORKSPACE
+        echo "CURRENT DIRECTORY IS $PWD"
+        cd build && ctest
+
+  cleanup:
+    name: Cleanup
     needs: build
-    runs-on: self-hosted
+    runs-on: self-hosted-linux-x64
+    if: always()
     steps:
     - run: |
-        cd $GITHUB_WORKSPACE/build
-        pip install casadi --no-input
-        make test
+        cd $GITHUB_WORKSPACE
+        if [ -d build ]; then
+          cd build/
+          make uninstall || echo "No uninstall target found"
+          cd .. && rm -rf build/
+        else
+          echo "build-dir did not exist"
+        fi

@@ -19,13 +19,13 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
                              const Scalar dual_alpha, const Scalar dual_beta,
                              LDLTChoice ldlt_choice,
                              const LinesearchOptions ls_options)
-    : problem_(prob), merit_fun(problem_, mu_init, 1.),
+    : problem_(prob), merit_fun(*problem_, pdal_beta_),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
       verbose(verbose), ldlt_choice_(ldlt_choice), rho_init_(rho_init),
-      mu_init_(mu_init), mu_lower_(mu_lower), bcl_params{prim_alpha, prim_beta,
-                                                         dual_alpha, dual_beta},
+      mu_init_(mu_init), mu_lower_(mu_lower),
+      bcl_params{prim_alpha, prim_beta, dual_alpha, dual_beta},
       ls_options(ls_options), target_tol(tol) {}
 
 template <typename Scalar>
@@ -79,12 +79,10 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   std::size_t &al_iter = results.al_iters;
   i = 0;
   al_iter = 0;
+  logger.start();
   while ((i < max_iters) && (al_iter < max_al_iters)) {
     results.mu = mu_;
     results.rho = rho_;
-    if (i == 0) {
-      logger.start();
-    }
     innerLoop(workspace, results);
 
     // accept new primal iterate
@@ -126,31 +124,12 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   return results.converged;
 }
 
-template <typename Scalar>
-typename SolverTpl<Scalar>::InertiaFlag
-SolverTpl<Scalar>::checkInertia(const Eigen::VectorXi &signature) const {
-  const int ndx = manifold().ndx();
-  const int numc = problem_->getTotalConstraintDim();
-  const long n = signature.size();
-  int numpos = 0;
-  int numneg = 0;
-  int numzer = 0;
-  for (long i = 0; i < n; i++) {
-    switch (signature(i)) {
-    case 1:
-      numpos++;
-      break;
-    case 0:
-      numzer++;
-      break;
-    case -1:
-      numneg++;
-      break;
-    default:
-      PROXNLP_RUNTIME_ERROR(
-          "Matrix signature should only have Os, 1s, and -1s.");
-    }
-  }
+InertiaFlag checkInertia(const int ndx, const int numc,
+                         const Eigen::VectorXi &signature) {
+  auto inertiaTuple = computeInertiaTuple(signature);
+  int numpos = inertiaTuple[0];
+  int numneg = inertiaTuple[1];
+  int numzer = inertiaTuple[2];
   InertiaFlag flag = INERTIA_OK;
   bool pos_ok = numpos == ndx;
   bool neg_ok = numneg == numc;
@@ -196,37 +175,61 @@ void SolverTpl<Scalar>::computeMultipliers(
     const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
     // apply proximal op to shifted constraint
     cstr_set.normalConeProjection(workspace.shift_cstr_values[i],
-                                  workspace.shift_cstr_proj[i]);
+                                  workspace.lams_plus[i]);
   }
-  workspace.data_lams_plus = mu_inv_ * workspace.data_shift_cstr_proj;
-  workspace.data_dual_prox_err =
-      mu_ * (workspace.data_lams_plus - inner_lams_data);
-  workspace.data_lams_pdal = workspace.data_lams_plus +
-                             merit_fun.gamma_ * workspace.data_dual_prox_err;
+  workspace.data_lams_plus = mu_inv_ * workspace.data_lams_plus;
+  // compute primal-dual multiplier estimates:
+  // normalConeProj(w), w = c(x) + mu(lambda_k - (beta-1)lambda)
+  workspace.data_shift_cstr_pdal =
+      workspace.data_shift_cstr_values - 0.5 * mu_ * inner_lams_data;
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    cstr_set.normalConeProjection(workspace.shift_cstr_pdal[i],
+                                  workspace.lams_pdal[i]);
+  }
+  workspace.data_lams_pdal *= mu_inv_ / pdal_beta_;
+
+  workspace.data_lams_plus_reproj = workspace.data_lams_plus;
+  workspace.data_lams_pdal_reproj = workspace.data_lams_pdal;
+  for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    // reapply the prox operator Jacobian to multiplier estimate
+    cstr_set.applyProjectionJacobian(workspace.shift_cstr_values[i],
+                                     workspace.lams_plus_reproj[i]);
+    cstr_set.applyProjectionJacobian(workspace.shift_cstr_pdal[i],
+                                     workspace.lams_pdal_reproj[i]);
+  }
   PROXNLP_NOMALLOC_END;
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeConstraintDerivatives(const ConstVectorRef &x,
-                                                     Workspace &workspace,
-                                                     bool second_order) const {
+void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
+                                                  Workspace &workspace,
+                                                  boost::mpl::false_) const {
   problem_->computeDerivatives(x, workspace);
-  if (second_order) {
-    problem_->cost().computeHessian(x, workspace.objective_hessian);
-  }
+
   workspace.data_jacobians_proj = workspace.data_jacobians;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    cstr.set_->applyNormalConeProjectionJacobian(
-        workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
-
-    bool use_vhp = !cstr.set_->disableGaussNewton() ||
-                   (hess_approx == HessianApprox::EXACT);
-    if (second_order && use_vhp) {
-      cstr.func().vectorHessianProduct(x, workspace.lams_pdal[i],
-                                       workspace.cstr_vector_hessian_prod[i]);
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      cstr_set.applyNormalConeProjectionJacobian(
+          workspace.shift_cstr_values[i], workspace.cstr_jacobians_proj[i]);
+      break;
+    case KKT_PRIMAL_DUAL:
+      cstr_set.applyNormalConeProjectionJacobian(
+          workspace.shift_cstr_pdal[i], workspace.cstr_jacobians_proj[i]);
+      break;
     }
   }
+}
+
+template <typename Scalar>
+void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
+                                                  Workspace &workspace,
+                                                  boost::mpl::true_) const {
+  this->computeProblemDerivatives(x, workspace, boost::mpl::false_());
+  problem_->computeHessians(x, workspace, hess_approx == HessianApprox::EXACT);
 }
 
 template <typename Scalar>
@@ -266,7 +269,6 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
   Scalar delta_last = 0.;
   Scalar delta = delta_last;
-  Scalar old_delta = 0.;
   Scalar phi_new = 0.;
 
   // lambda for evaluating the merit function
@@ -275,8 +277,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     problem_->evaluate(workspace.x_trial, workspace);
     computeMultipliers(workspace.data_lams_trial, workspace);
     return merit_fun.evaluate(workspace.x_trial, workspace.lams_trial,
-                              workspace.shift_cstr_values,
-                              workspace.shift_cstr_proj) +
+                              workspace) +
            prox_penalty.call(workspace.x_trial);
   };
 
@@ -284,7 +285,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     problem_->evaluate(results.x_opt, workspace);
     computeMultipliers(results.data_lams_opt, workspace);
-    computeConstraintDerivatives(results.x_opt, workspace, true);
+    computeProblemDerivatives(results.x_opt, workspace, boost::mpl::true_());
 
     for (std::size_t i = 0; i < num_c; i++) {
       const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
@@ -293,9 +294,8 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     }
 
     results.value = workspace.objective_value;
-    results.merit = merit_fun.evaluate(results.x_opt, results.lams_opt,
-                                       workspace.shift_cstr_values,
-                                       workspace.shift_cstr_proj);
+    results.merit =
+        merit_fun.evaluate(results.x_opt, results.lams_opt, workspace);
 
     if (rho_ > 0.) {
       results.merit += prox_penalty.call(results.x_opt);
@@ -306,20 +306,25 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_NOMALLOC_BEGIN;
     //// fill in KKT RHS
     workspace.kkt_rhs.setZero();
+    workspace.kkt_rhs_corr.setZero();
 
     // add jacobian-vector products to gradients
     workspace.kkt_rhs.head(ndx) = workspace.objective_gradient;
     workspace.kkt_rhs.head(ndx).noalias() +=
-        workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
 
-    workspace.kkt_rhs.tail(ndual) = workspace.data_dual_prox_err;
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      workspace.kkt_rhs.tail(ndual) =
+          mu_ * (workspace.data_lams_plus - results.data_lams_opt);
+      break;
+    case KKT_PRIMAL_DUAL:
+      workspace.kkt_rhs.tail(ndual) =
+          0.5 * mu_ * (workspace.data_lams_pdal - results.data_lams_opt);
+      break;
+    }
 
-    workspace.merit_gradient = workspace.objective_gradient;
-    workspace.merit_gradient.noalias() +=
-        workspace.data_jacobians.transpose() * workspace.data_lams_plus;
-
-    workspace.dual_residual = workspace.kkt_rhs.head(ndx);
-
+    merit_fun.computeGradient(results.lams_opt, workspace);
     // add proximal penalty terms
     if (rho_ > 0.) {
       workspace.kkt_rhs.head(ndx) += workspace.prox_grad;
@@ -330,6 +335,11 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_matrix, "kkt_matrix");
 
     computePrimalResiduals(workspace, results);
+
+    // compute dual residual
+    workspace.dual_residual = workspace.objective_gradient;
+    workspace.dual_residual.noalias() +=
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
     results.dual_infeas = math::infty_norm(workspace.dual_residual);
     Scalar inner_crit = math::infty_norm(workspace.kkt_rhs);
     Scalar outer_crit = std::max(results.prim_infeas, results.dual_infeas);
@@ -342,29 +352,28 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 
     // If not optimal: compute the step
 
-    // fill in KKT matrix
+    // correct the rhs for the symmetric system
+    workspace.kkt_rhs_corr.head(ndx).noalias() -=
+        workspace.data_jacobians.transpose() * results.data_lams_opt;
+    workspace.kkt_rhs_corr.head(ndx).noalias() +=
+        workspace.data_jacobians_proj.transpose() * results.data_lams_opt;
+    switch (kkt_system_) {
+    case KKT_CLASSIC:
+      workspace.kkt_rhs_corr.head(ndx).noalias() +=
+          workspace.data_jacobians.transpose() *
+          workspace.data_lams_plus_reproj;
+      break;
+    case KKT_PRIMAL_DUAL:
+      workspace.kkt_rhs_corr.head(ndx).noalias() +=
+          workspace.data_jacobians.transpose() *
+          workspace.data_lams_pdal_reproj;
+      break;
+    }
+    // apply correction
+    workspace.kkt_rhs += workspace.kkt_rhs_corr;
 
-    workspace.kkt_matrix.setZero();
-    workspace.kkt_matrix.topLeftCorner(ndx, ndx) = workspace.objective_hessian;
-    workspace.kkt_matrix.topRightCorner(ndx, ndual) =
-        workspace.data_jacobians_proj.transpose();
-    workspace.kkt_matrix.bottomLeftCorner(ndual, ndx) =
-        workspace.data_jacobians_proj;
-    workspace.kkt_matrix.bottomRightCorner(ndual, ndual)
-        .diagonal()
-        .setConstant(-mu_);
-    if (rho_ > 0.) {
-      workspace.kkt_matrix.topLeftCorner(ndx, ndx) += workspace.prox_hess;
-    }
-    for (std::size_t i = 0; i < num_c; i++) {
-      const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
-      bool use_vhp = !cstr_set.disableGaussNewton() ||
-                     (hess_approx == HessianApprox::EXACT);
-      if (use_vhp) {
-        workspace.kkt_matrix.topLeftCorner(ndx, ndx) +=
-            workspace.cstr_vector_hessian_prod[i];
-      }
-    }
+    // fill in KKT matrix
+    assembleKktMatrix(workspace);
 
     // choose regularisation level
 
@@ -375,17 +384,15 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
       if (delta > 0.)
         workspace.kkt_matrix.diagonal().head(ndx).array() += delta;
 
-#ifdef PROXNLP_CUSTOM_LDLT
-      workspace.ldlt_->compute(workspace.kkt_matrix);
-      auto vecD = workspace.ldlt_->vectorD();
-#else
-      workspace.ldlt_.compute(workspace.kkt_matrix);
-      auto vecD(workspace.ldlt_.vectorD());
-#endif
-      workspace.signature.array() = vecD.array().sign().template cast<int>();
+      boost::apply_visitor(
+          [&](auto &&fac) { fac.compute(workspace.kkt_matrix); },
+          workspace.ldlt_);
+      boost::apply_visitor(ComputeSignatureVisitor{workspace.signature},
+                           workspace.ldlt_);
       workspace.kkt_matrix.diagonal().head(ndx).array() -= delta;
-      is_inertia_correct = checkInertia(workspace.signature);
-      old_delta = delta;
+      is_inertia_correct =
+          checkInertia(manifold().ndx(), problem_->getTotalConstraintDim(),
+                       workspace.signature);
 
       if (is_inertia_correct == INERTIA_OK) {
         delta_last = delta;
@@ -410,11 +417,11 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
     PROXNLP_NOMALLOC_END;
     PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
 
-    //// Take the step
+    // Take the step
 
-    workspace.dmerit_dir = workspace.merit_gradient.dot(workspace.prim_step) -
-                           merit_fun.gamma_ * workspace.data_dual_prox_err.dot(
-                                                  workspace.dual_step);
+    workspace.dmerit_dir =
+        workspace.merit_gradient.dot(workspace.prim_step) +
+        workspace.merit_dual_gradient.dot(workspace.dual_step);
 
     Scalar phi0 = results.merit;
     Scalar dphi0 = workspace.dmerit_dir;
@@ -450,7 +457,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
                      dphi0,
                      results.merit,
                      phi_new - phi0,
-                     results.al_iters};
+                     results.al_iters + 1};
 
     logger.log(record);
 
@@ -465,23 +472,56 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 }
 
 template <typename Scalar>
+void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
+  const long ndx = (long)manifold().ndx();
+  const long ndual = workspace.numdual;
+  workspace.kkt_matrix.setZero();
+  workspace.kkt_matrix.topLeftCorner(ndx, ndx) = workspace.objective_hessian;
+  workspace.kkt_matrix.topRightCorner(ndx, ndual) =
+      workspace.data_jacobians_proj.transpose();
+  workspace.kkt_matrix.bottomLeftCorner(ndual, ndx) =
+      workspace.data_jacobians_proj;
+  auto lower_right_block = workspace.kkt_matrix.bottomRightCorner(ndual, ndual);
+  lower_right_block.diagonal().setConstant(-mu_);
+
+  if (rho_ > 0.) {
+    workspace.kkt_matrix.topLeftCorner(ndx, ndx) += workspace.prox_hess;
+  }
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintSet &cstr_set = *problem_->getConstraint(i).set_;
+    bool use_vhp =
+        !cstr_set.disableGaussNewton() || (hess_approx == HessianApprox::EXACT);
+    if (use_vhp) {
+      workspace.kkt_matrix.topLeftCorner(ndx, ndx) +=
+          workspace.cstr_vector_hessian_prod[i];
+    }
+    if (kkt_system_ == KKT_PRIMAL_DUAL) {
+      // correct lower right corner in primal-dual case
+      int idx = problem_->getIndex(i);
+      int nr = problem_->getConstraintDim(i);
+      auto d_sub = lower_right_block.diagonal().segment(idx, nr);
+      VectorXs d_sub2(d_sub);
+      // apply normal cone jacobian op
+      cstr_set.applyNormalConeProjectionJacobian(workspace.shift_cstr_pdal[i],
+                                                 d_sub2);
+      d_sub = 0.5 * (d_sub + d_sub2);
+    }
+  }
+}
+
+template <typename Scalar>
 bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
-#ifdef PROXNLP_CUSTOM_LDLT
-  workspace.ldlt_->solveInPlace(workspace.pd_step);
-#else
-  workspace.ldlt_.solveInPlace(workspace.pd_step);
-#endif
+  boost::apply_visitor([&](auto &&fac) { fac.solveInPlace(workspace.pd_step); },
+                       workspace.ldlt_);
   for (std::size_t n = 0; n < max_refinement_steps_; n++) {
     workspace.kkt_err = -workspace.kkt_rhs;
     workspace.kkt_err.noalias() -= workspace.kkt_matrix * workspace.pd_step;
     if (math::infty_norm(workspace.kkt_err) < kkt_tolerance_)
       return true;
-#ifdef PROXNLP_CUSTOM_LDLT
-    workspace.ldlt_->solveInPlace(workspace.kkt_err);
-#else
-    workspace.ldlt_.solveInPlace(workspace.kkt_err);
-#endif
+    boost::apply_visitor(
+        [&](auto &&fac) { fac.solveInPlace(workspace.kkt_err); },
+        workspace.ldlt_);
     workspace.pd_step += workspace.kkt_err;
   }
   return false;
@@ -491,10 +531,9 @@ template <typename Scalar>
 void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
-  merit_fun.setPenalty(mu_);
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    cstr.set_->setProxParameters(mu_);
+    const ConstraintObject &cstr = problem_->getConstraint(i);
+    cstr.set_->setProxParameter(mu_);
   }
 }
 

@@ -54,20 +54,29 @@ cstrs_ = [
 
 problem = proxnlp.Problem(space, cost_, cstrs_)
 
-mu_init = 0.01
+mu_init = 0.1
 rho_init = 0.0
 solver = proxnlp.Solver(
     problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
-solver.ldlt_is_blocked = True
-solver.setup()
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
+solver.mul_update_mode = proxnlp.MUL_NEWTON
+solver.kkt_system = proxnlp.KktSystem.PRIMAL_DUAL
+try:
+    solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
+    solver.setup()
+except RuntimeError as e:
+    print("Got exception: {}".format(e))
+    print("Will proceed using LDLT_DENSE")
+    solver.ldlt_choice = proxnlp.LDLT_DENSE
+    solver.setup()
 callback = proxnlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]
-solver.solve(p1, lams0)
+flag = solver.solve(p1, lams0)
+print("FLAG = {}".format(flag))
 results = solver.getResults()
 workspace = solver.getWorkspace()
 
@@ -76,6 +85,7 @@ print("Complementarity:", workspace.cstr_values[0] * results.lamsopt[0])
 print("Result x:  ", results.xopt)
 print("Target was:", p0)
 print("Results:", results)
+print("Merit grads:", workspace.merit_gradient, "dual:", workspace.merit_dual_gradient)
 
 
 if __name__ == "__main__":

@@ -36,6 +36,9 @@ public:
   virtual PointType neutral() const { return PointType::Zero(nx()); }
   /// @brief    Sample a random point \f$x \in M\f$ on the manifold.
   virtual PointType rand() const { return PointType::Random(nx()); }
+  /// @brief    Check if the input vector @p x is a viable element of the
+  /// manifold.
+  virtual bool isNormalized(const ConstVectorRef & /*x*/) const { return true; }
 
   /// Typedef for the tangent space, as a manifold.
   using TangentSpaceType = VectorSpaceTpl<Scalar, Eigen::Dynamic, Options>;

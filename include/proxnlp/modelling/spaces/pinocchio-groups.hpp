@@ -83,6 +83,11 @@ public:
   PointType neutral() const { return lg_.neutral(); }
 
   PointType rand() const { return lg_.random(); }
+  bool isNormalized(const ConstVectorRef &x) const {
+    if (x.size() < nx())
+      return false;
+    return lg_.isNormalized(x);
+  }
 };
 
 template <int D, typename Scalar>

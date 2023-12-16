@@ -10,12 +10,11 @@ void exposeProblem() {
   using context::Problem;
 
   bp::class_<Problem, shared_ptr<Problem>>(
-      "Problem", "Problem definition class.",
-      bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>,
-               const std::vector<Constraint> &>(
-          bp::args("self", "space", "cost", "constraints")))
-      .def(bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>>(
-          bp::args("self", "space", "cost")))
+      "Problem", "Problem definition class.", bp::no_init)
+      .def(bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>,
+                    const std::vector<Constraint> &>(
+          (bp::arg("self"), bp::arg("space"), bp::arg("cost"),
+           bp::arg("constraints") = bp::list())))
       .def_readwrite("cost", &Problem::cost_, "The cost function instance.")
       .def_readwrite("manifold", &Problem::manifold_, "Problem manifold.")
       .add_property("num_constraint_blocks", &Problem::getNumConstraints,

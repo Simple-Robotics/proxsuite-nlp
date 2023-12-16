@@ -30,7 +30,6 @@ def test_product():
 
 
 def test_configspace():
-
     model = pin.buildSampleModelHumanoid()
     config_space = manifolds.MultibodyConfiguration(model)
     assert model.nq == config_space.nx

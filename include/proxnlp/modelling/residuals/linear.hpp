@@ -16,8 +16,8 @@ template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   using Base = C2FunctionTpl<Scalar>;
   using Base::computeJacobian;
 
-  const MatrixXs mat;
-  const VectorXs b;
+  MatrixXs mat;
+  VectorXs b;
 
   LinearFunctionTpl(const ConstMatrixRef &A, const ConstVectorRef &b)
       : Base((int)A.cols(), (int)A.cols(), (int)A.rows()), mat(A), b(b) {}
@@ -50,7 +50,7 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
       : Base(std::make_shared<LinearFunctionTpl<Scalar>>(A, b),
              std::make_shared<ManifoldDifferenceToPoint<Scalar>>(space,
                                                                  target)) {
-    proxnlp_dim_check(target, space->nx());
+    PROXNLP_DIM_CHECK(target, space->nx());
   }
 };
 

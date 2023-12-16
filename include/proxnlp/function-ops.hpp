@@ -23,6 +23,10 @@ public:
                      const shared_ptr<Base> &right)
       : Base(right->nx(), right->ndx(), left->nr()), left_(left),
         right_(right) {
+    if (left->nx() != right->nr()) {
+      PROXNLP_RUNTIME_ERROR(fmt::format(
+          "Incompatible dimensions ({:d} and {:d}).", left->nx(), right->nr()));
+    }
     assert(left->nx() == right->nr());
   }
 
@@ -31,15 +35,16 @@ public:
   }
 
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const {
-    left().computeJacobian(right()(x), Jout);
-    Jout = Jout * right().computeJacobian(x);
+    MatrixXs Jleft = left().computeJacobian(right()(x));
+    Jout.noalias() = Jleft * right().computeJacobian(x);
   }
 
-private:
-  shared_ptr<const Base> left_;
-  shared_ptr<const Base> right_;
   const Base &left() const { return *left_; }
   const Base &right() const { return *right_; }
+
+private:
+  shared_ptr<Base> left_;
+  shared_ptr<Base> right_;
 };
 
 /// @brief    Compose two function objects.
@@ -47,10 +52,13 @@ private:
 /// @return   ComposeFunctionTpl object representing the composition of @p left
 /// and @p right.
 template <typename Scalar>
-ComposeFunctionTpl<Scalar>
-compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
-        const shared_ptr<C2FunctionTpl<Scalar>> &right) {
-  return ComposeFunctionTpl<Scalar>(left, right);
+auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
+             const shared_ptr<C2FunctionTpl<Scalar>> &right) {
+  return std::make_shared<ComposeFunctionTpl<Scalar>>(left, right);
 }
 
 } // namespace proxnlp
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/function-ops.txx"
+#endif

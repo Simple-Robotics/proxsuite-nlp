@@ -25,7 +25,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N) {
 using namespace proxnlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraint<double>;
-using Constraint = ConstraintObject<double>;
+using Constraint = ConstraintObjectTpl<double>;
 
 template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
@@ -47,10 +47,10 @@ template <int N, int M = 1> int submain() {
 
   auto res1 = std::make_shared<LinearFunctionTpl<double>>(A, b);
 
-  auto cost = std::make_shared<QuadraticDistanceCost<double>>(
+  auto cost = std::make_shared<QuadraticDistanceCostTpl<double>>(
       space_, space.neutral(), Q_);
 
-  std::vector<Problem::ConstraintType> constraints;
+  std::vector<Problem::ConstraintObject> constraints;
   if (M > 0) {
     constraints.emplace_back(res1, std::make_shared<EqualityType>());
   }

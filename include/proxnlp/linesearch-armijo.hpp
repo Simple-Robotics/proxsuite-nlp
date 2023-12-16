@@ -28,18 +28,19 @@ template <typename T> struct PolynomialTpl {
   }
   PolynomialTpl derivative() const {
     if (degree() == 0) {
-      return PolynomialTpl({0.});
+      return PolynomialTpl(VectorXs::Zero(1));
     }
     VectorXs out(degree());
     for (int i = 0; i < coeffs.size() - 1; i++) {
-      out(i) = coeffs(i) * (degree() - i);
+      out(i) = coeffs(i) * (T(degree()) - i);
     }
     return PolynomialTpl(out);
   }
 };
 
 /// @brief  Basic backtracking Armijo line-search strategy.
-template <typename Scalar> struct ArmijoLinesearch final : Linesearch<Scalar> {
+template <typename Scalar>
+class ArmijoLinesearch final : public Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
   using FunctionSample = typename Base::FunctionSample;
@@ -48,8 +49,7 @@ public:
   using Matrix2s = Eigen::Matrix<Scalar, 2, 2>;
   using Vector2s = Eigen::Matrix<Scalar, 2, 1>;
 
-  ArmijoLinesearch(const typename Base::Options &options)
-      : Base(options), lu(alph_mat) {}
+  ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
 
   template <typename Fn>
   Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0, Scalar &alpha_try) {
@@ -75,7 +75,7 @@ public:
     }
 
     if (std::abs(dphi0) < options().dphi_thresh) {
-      return alpha_try;
+      latest.phi;
     }
 
     for (std::size_t i = 0; i < options().max_num_steps; i++) {
@@ -137,6 +137,7 @@ public:
         break;
       }
     }
+    alpha_try = std::max(alpha_try, options().alpha_min);
     return latest.phi;
   }
 
@@ -181,8 +182,8 @@ public:
       alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
       alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
 
-      lu.compute(alph_mat);
-      coeffs_cubic_interpolant = lu.solve(alph_rhs);
+      decomp.compute(alph_mat);
+      coeffs_cubic_interpolant = decomp.solve(alph_rhs);
 
       const Scalar c3 = coeffs_cubic_interpolant(0);
       const Scalar c2 = coeffs_cubic_interpolant(1);
@@ -221,8 +222,8 @@ protected:
   Vector2s alph_rhs;
   Vector2s coeffs_cubic_interpolant;
   /// Solver for the 2x2 linear system
-  using LuType = Eigen::HouseholderQR<Eigen::Ref<Matrix2s>>;
-  LuType lu;
+  using DecompType = Eigen::HouseholderQR<Matrix2s>;
+  DecompType decomp;
 };
 
 } // namespace proxnlp

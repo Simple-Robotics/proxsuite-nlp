@@ -1,38 +1,45 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxnlp/pdal.hpp"
 
 namespace proxnlp {
 template <typename Scalar>
-PDALFunction<Scalar>::PDALFunction(shared_ptr<Problem> prob, const Scalar mu,
-                                   const Scalar gamma)
-    : problem_(prob), mu_(mu), gamma_(gamma) {}
+ALMeritFunctionTpl<Scalar>::ALMeritFunctionTpl(const Problem &prob,
+                                               const Scalar &beta)
+    : beta_(beta), problem_(prob) {}
 
 template <typename Scalar>
-Scalar
-PDALFunction<Scalar>::evaluate(const ConstVectorRef &x, const VectorOfRef &lams,
-                               const std::vector<VectorRef> &shift_cvals,
-                               const std::vector<VectorRef> &proj_cvals) const {
-  Scalar res = problem_->cost().call(x);
-  const std::size_t nc = problem_->getNumConstraints();
-  for (std::size_t i = 0; i < nc; i++) {
-    const ConstraintObject<Scalar> &cstr = problem_->getConstraint(i);
-    res += cstr.set_->evaluateMoreauEnvelope(shift_cvals[i], proj_cvals[i],
-                                             mu_inv_);
-    if (gamma_ > 0.) {
-      res += 0.5 * gamma_ * mu_inv_ *
-             (proj_cvals[i] - mu_ * lams[i]).squaredNorm();
-    }
+Scalar ALMeritFunctionTpl<Scalar>::evaluate(const ConstVectorRef & /*x*/,
+                                            const std::vector<VectorRef> &lams,
+                                            Workspace &workspace) const {
+  Scalar res = workspace.objective_value;
+  // value c(x) + \mu\lambda_e
+  const auto &pd_scv = workspace.shift_cstr_pdal;
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintObject &cstr = problem_.getConstraint(i);
+    Scalar mu = cstr.set_->mu();
+    VectorXs scv_tmp = pd_scv[i];
+    res += 2.0 * cstr.set_->computeMoreauEnvelope(pd_scv[i], scv_tmp);
+    res += mu * lams[i].squaredNorm() / 4.0;
   }
   return res;
 }
 
 template <typename Scalar>
-void PDALFunction<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
-  mu_ = new_mu;
-  mu_inv_ = 1. / new_mu;
+void ALMeritFunctionTpl<Scalar>::computeGradient(
+    const std::vector<VectorRef> &lams, Workspace &workspace) const {
+  workspace.merit_gradient = workspace.objective_gradient;
+  workspace.merit_gradient.noalias() +=
+      workspace.data_jacobians.transpose() * workspace.data_lams_pdal;
+  workspace.merit_dual_gradient.setZero();
+  for (std::size_t i = 0; i < workspace.numblocks; i++) {
+    const ConstraintObject &cstr = problem_.getConstraint(i);
+    Scalar mu = cstr.set_->mu();
+    problem_.getSegment(workspace.merit_dual_gradient, i).noalias() +=
+        beta_ * mu * (lams[i] - workspace.lams_pdal[i]);
+  }
 }
 
 } // namespace proxnlp

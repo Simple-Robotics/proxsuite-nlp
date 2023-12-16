@@ -70,11 +70,12 @@ class NegEntropyFunc(proxnlp.C2Function):
 
 
 fun2 = NegEntropyFunc(nx, nx)
-nr = 1
 space = EuclideanSpace(nx)
 x1 = space.rand()
 
-sum_to_one_res = LinearFunction(np.ones((1, nx)), np.array([-1.0]))
+A = np.ones((1, nx))
+sum_to_one_res = LinearFunction(A, np.array([-1.0]))
+nr = sum_to_one_res.nr
 cstr = createEqualityConstraint(sum_to_one_res)
 
 x0 = np.array([1.0, 2.0])
@@ -96,7 +97,7 @@ grad = np.zeros(nx)
 cH = np.zeros((nx, nx))
 
 
-def plot_fun():
+def plot_fun(xopt=None):
     import matplotlib.pyplot as plt
 
     Ngx = 31
@@ -107,6 +108,8 @@ def plot_fun():
     zvals = np.stack([fun2(u) for u in grid.swapaxes(0, -1).reshape(-1, 2)])
     zvals = zvals.reshape(Ngx, Ngx)
     cs_ = plt.contourf(grid[0], grid[1], zvals, levels=40, alpha=0.5)
+    if xopt is not None:
+        plt.scatter(*xopt, s=40, marker="o", edgecolors="k")
     plt.colorbar(cs_)
     print("shape:", zvals.shape)
 
@@ -118,18 +121,17 @@ def plot_fun():
     plt.show()
 
 
-plot_fun()
+prob = proxnlp.Problem(space, cs, [cstr])
 
-# prob = proxnlp.Problem(cs)
-prob = proxnlp.Problem(cs, [cstr])
-ws = proxnlp.Workspace(prob)
-rs = proxnlp.Results(prob)
-
-solver = proxnlp.Solver(space, prob)
-x0 = np.array([2.0, 2.0])
-flag = solver.solve(ws, rs, x0, rs.lamsopt)
+solver = proxnlp.Solver(prob)
+solver.setup()
+x0 = np.array([0.1, 0.1])
+lam0 = [np.array([0.0])]
+flag = solver.solve(x0, lam0)
+rs = solver.getResults()
+plot_fun(rs.xopt)
 
 print("Flag:   ", flag)
-
+print(rs)
 print("xopt:   ", rs.xopt)
 print("lamsopt:", rs.lamsopt.tolist())

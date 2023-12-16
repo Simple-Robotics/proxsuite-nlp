@@ -2,7 +2,9 @@
 /// @copyright Copyright (C) 2023 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/linalg/blocks.hpp"
+#include "proxnlp/linalg/block-kind.hpp"
+#include "proxnlp/math.hpp"
+#include "proxnlp/linalg/gemmt.hpp"
 
 namespace proxnlp {
 namespace linalg {

@@ -11,6 +11,8 @@
 #include "proxnlp/logger.hpp"
 #include "proxnlp/bcl-params.hpp"
 
+#include <boost/mpl/bool.hpp>
+
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 
 #include "proxnlp/linesearch-base.hpp"
@@ -27,6 +29,8 @@ enum class HessianApprox {
   // BFGS
 };
 
+enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
+
 template <typename _Scalar> class SolverTpl {
 public:
   using Scalar = _Scalar;
@@ -38,15 +42,15 @@ public:
   using LinesearchOptions = typename Linesearch<Scalar>::Options;
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetBase<Scalar>;
-
-  enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
+  using ConstraintObject = ConstraintObjectTpl<Scalar>;
+  enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
   /// Merit function.
-  PDALFunction<Scalar> merit_fun;
+  ALMeritFunctionTpl<Scalar> merit_fun;
   /// Proximal regularization penalty.
-  QuadraticDistanceCost<Scalar> prox_penalty;
+  QuadraticDistanceCostTpl<Scalar> prox_penalty;
 
   /// Level of verbosity of the solver.
   VerboseLevel verbose = QUIET;
@@ -60,6 +64,7 @@ public:
   std::size_t max_refinement_steps_ = 5;
   Scalar kkt_tolerance_ = 1e-13;
   LDLTChoice ldlt_choice_;
+  KktSystem kkt_system_ = KKT_CLASSIC;
 
   //// Algorithm proximal parameters
 
@@ -67,19 +72,20 @@ public:
   Scalar prim_tol0 = 1.;
   Scalar inner_tol_ = inner_tol0;
   Scalar prim_tol_ = prim_tol0;
-  Scalar rho_init_; // Initial primal proximal penalty parameter.
-  Scalar mu_init_;  // Initial penalty parameter.
+  Scalar rho_init_; //< Initial primal proximal penalty parameter.
+  Scalar mu_init_;  //< Initial penalty parameter.
 private:
-  Scalar rho_ = rho_init_;   // Primal proximal penalty parameter.
-  Scalar mu_ = mu_init_;     // Penalty parameter.
-  Scalar mu_inv_ = 1. / mu_; // Inverse penalty parameter.
+  Scalar rho_ = rho_init_;   //< Primal proximal penalty parameter.
+  Scalar mu_ = mu_init_;     //< Penalty parameter.
+  Scalar mu_inv_ = 1. / mu_; //< Inverse penalty parameter.
 public:
-  Scalar inner_tol_min = 1e-9; // Lower safeguard for the subproblem tolerance.
-  Scalar mu_upper_ = 1.;
-  Scalar mu_lower_ = 1e-9; // Lower safeguard for the penalty parameter.
+  Scalar inner_tol_min = 1e-9; //< Lower safeguard for the subproblem tolerance.
+  Scalar mu_upper_ = 1.;       //< Upper safeguard for the penalty parameter.
+  Scalar mu_lower_ = 1e-9;     //< Lower safeguard for the penalty parameter.
+  Scalar pdal_beta_ = 0.5;     //< primal-dual weight for the dual variables.
 
   /// BCL strategy parameters.
-  BCLParams<Scalar> bcl_params;
+  BCLParamsTpl<Scalar> bcl_params;
 
   /// Linesearch options.
   LinesearchOptions ls_options;
@@ -153,6 +159,8 @@ public:
 
   void innerLoop(Workspace &workspace, Results &results);
 
+  void assembleKktMatrix(Workspace &workspace);
+
   /// Iterative refinement of the KKT linear system.
   PROXNLP_INLINE bool iterativeRefinement(Workspace &workspace) const;
 
@@ -161,7 +169,7 @@ public:
   inline void updatePenalty();
 
   /// @brief Set the dual penalty weight for the merit function.
-  void setDualPenalty(const Scalar gamma) { merit_fun.gamma_ = gamma; }
+  void setDualPenalty(const Scalar beta) { pdal_beta_ = beta; }
 
   /// @brief Set penalty parameter, its inverse and update the merit function.
   /// @param new_mu The new penalty parameter.
@@ -216,9 +224,11 @@ public:
    * @param second_order Whether to compute the second-order information; set to
    * false for e.g. linesearch.
    */
-  void computeConstraintDerivatives(const ConstVectorRef &x,
-                                    Workspace &workspace,
-                                    bool second_order) const;
+  void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                 boost::mpl::false_) const;
+  /// @copydoc computeProblemDerivatives()
+  void computeProblemDerivatives(const ConstVectorRef &x, Workspace &workspace,
+                                 boost::mpl::true_) const;
 
   /**
    * Compute the primal residuals at the current primal-dual pair \f$(x,
@@ -242,16 +252,19 @@ public:
       cb->call(workspace, results);
     }
   }
-
-  /**
-   * @brief Check the matrix has the desired inertia.
-   * @param signature The computed inertia as a vector of ints valued -1, 0,
-   * or 1.
-   * @param delta     Scale factor for the identity matrix to add
-   */
-  InertiaFlag checkInertia(const Eigen::VectorXi &signature) const;
 };
+
+/// @brief Check the matrix has the desired inertia.
+/// @param signature The computed inertia as a vector of ints valued -1, 0,
+/// or 1.
+/// @param delta     Scale factor for the identity matrix to add
+inline InertiaFlag checkInertia(const int ndx, const int nc,
+                                const Eigen::VectorXi &signature);
 
 } // namespace proxnlp
 
 #include "proxnlp/solver-base.hxx"
+
+#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#include "proxnlp/solver-base.txx"
+#endif

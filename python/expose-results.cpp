@@ -8,6 +8,7 @@ void exposeResults() {
   using context::Results;
 
   bp::enum_<ConvergenceFlag>("ConvergenceFlag", "Convergence flag enum.")
+      .value("uninit", ConvergenceFlag::UNINIT)
       .value("success", ConvergenceFlag::SUCCESS)
       .value("max_iters_reached", ConvergenceFlag::MAX_ITERS_REACHED);
 
@@ -17,6 +18,7 @@ void exposeResults() {
       .def_readonly("merit", &Results::merit, "Merit function value.")
       .def_readonly("value", &Results::value)
       .def_readonly("xopt", &Results::x_opt)
+      .def_readonly("data_lamsopt", &Results::data_lams_opt)
       .def_readonly("lamsopt", &Results::lams_opt)
       .def_readonly("activeset", &Results::active_set)
       .def_readonly("num_iters", &Results::num_iters)

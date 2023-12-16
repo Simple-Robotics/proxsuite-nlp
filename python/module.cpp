@@ -39,6 +39,9 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 
   bp::import("warnings");
+#ifdef PROXNLP_WITH_PINOCCHIO
+  bp::import("pinocchio");
+#endif
 
   exposeContainerTypes();
   exposeFunctionTypes();
@@ -49,6 +52,9 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   {
     bp::scope res_cope = get_namespace("residuals");
     exposeResiduals();
+#ifdef PROXNLP_WITH_PINOCCHIO
+    exposePinocchioResiduals();
+#endif
   }
   {
     bp::scope cost_scope = get_namespace("costs");
@@ -61,6 +67,7 @@ BOOST_PYTHON_MODULE(pyproxnlp) {
   exposeProblem();
   exposeResults();
   exposeWorkspace();
+  exposeLdltRoutines();
   exposeSolver();
   {
     bp::scope in_scope = get_namespace("helpers");

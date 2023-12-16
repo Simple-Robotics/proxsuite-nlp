@@ -1,14 +1,10 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #include "proxnlp/python/fwd.hpp"
 
-// #define PROXNLP_HAS_L1
-
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
 #include "proxnlp/modelling/constraints/box-constraint.hpp"
-#ifdef PROXNLP_HAS_L1
 #include "proxnlp/modelling/constraints/l1-penalty.hpp"
-#endif
 
 #include <eigenpy/std-vector.hpp>
 
@@ -18,6 +14,7 @@ namespace python {
 using context::C2Function;
 using context::Constraint;
 using context::ConstraintSet;
+using context::ConstVectorRef;
 using context::Scalar;
 using eigenpy::StdVectorPythonVisitor;
 
@@ -55,21 +52,38 @@ void exposeConstraints() {
            "on the projection/prox map of :math:`z`.")
       .def("projection", &ConstraintSet::projection,
            bp::args("self", "z", "zout"))
+      .def(
+          "projection",
+          +[](const ConstraintSet &c, const ConstVectorRef &z) {
+            context::VectorXs zout(z.size());
+            c.projection(z, zout);
+            return zout;
+          },
+          bp::args("self", "z"))
       .def("normalConeProjection", &ConstraintSet::normalConeProjection,
            bp::args("self", "z", "zout"))
-      .def("applyJacobian", &ConstraintSet::applyProjectionJacobian,
+      .def(
+          "normalConeProjection",
+          +[](const ConstraintSet &c, const ConstVectorRef &z) {
+            context::VectorXs zout(z.size());
+            c.normalConeProjection(z, zout);
+            return zout;
+          },
+          bp::args("self", "z"))
+      .def("applyProjectionJacobian", &ConstraintSet::applyProjectionJacobian,
            bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
-      .def("applyNormalJacobian",
+      .def("applyNormalProjectionJacobian",
            &ConstraintSet::applyNormalConeProjectionJacobian,
            bp::args("self", "z", "Jout"),
            "Apply the normal cone projection Jacobian.")
       .def("computeActiveSet", &ConstraintSet::computeActiveSet,
            bp::args("self", "z", "out"))
       .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
-           bp::args("self", "zin", "zproj", "inv_mu"),
+           bp::args("self", "zin", "zproj"),
            "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
-      .def("setProxParameters", &ConstraintSet::setProxParameters,
+      .def("setProxParameter", &ConstraintSet::setProxParameter,
            bp::args("self", "mu"), "Set proximal parameter.")
+      .add_property("mu", &ConstraintSet::mu, "Current proximal parameter.")
       .def(bp::self == bp::self);
 
   bp::class_<Constraint>(
@@ -111,10 +125,9 @@ static void exposeConstraintTypes() {
           "Convenience function to create an inequality constraint from a "
           "C2Function.");
 
-#ifdef PROXNLP_HAS_L1
-  exposeSpecificConstraintSet<L1Penalty<Scalar>>("L1Penalty",
-                                                 "1-norm penalty function.");
-#endif
+  using L1Penalty_t = NonsmoothPenaltyL1Tpl<Scalar>;
+  exposeSpecificConstraintSet<L1Penalty_t>("NonsmoothPenaltyL1",
+                                           "1-norm penalty function.");
 }
 
 } // namespace python

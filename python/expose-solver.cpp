@@ -8,6 +8,7 @@ void exposeSolver() {
   using context::Manifold;
   using context::Scalar;
   using Solver = context::Solver;
+  using context::BCLParams;
   using context::ConstVectorRef;
   using context::Problem;
   using context::VectorRef;
@@ -44,8 +45,10 @@ void exposeSolver() {
 
   bp::enum_<LDLTChoice>("LDLTChoice", "Choice of LDLT solver.")
       .value("LDLT_DENSE", LDLTChoice::DENSE)
-      .value("LDLT_BLOCKED", LDLTChoice::BLOCKED)
+      .value("LDLT_BUNCHKAUFMAN", LDLTChoice::BUNCHKAUFMAN)
+      .value("LDLT_BLOCKSPARSE", LDLTChoice::BLOCKSPARSE)
       .value("LDLT_EIGEN", LDLTChoice::EIGEN)
+      .value("LDLT_PROXSUITE", LDLTChoice::PROXSUITE)
       .export_values();
 
   using LinesearchOptions = Linesearch<Scalar>::Options;
@@ -118,7 +121,8 @@ void exposeSolver() {
       .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
       .def("setDualPenalty", &Solver::setDualPenalty, bp::args("self", "gamma"),
-           "Set the dual variable penalty for the linesearch merit function.")
+           "Set the dual variable penalty for the linesearch merit "
+           "function.")
       .def("setProxParameter", &Solver::setProxParameter,
            bp::args("self", "rho"),
            "Set the primal proximal penalty parameter.")
@@ -126,9 +130,9 @@ void exposeSolver() {
                      "Initial AL parameter value.")
       .def_readwrite("rho_init", &Solver::rho_init_,
                      "Initial proximal parameter value.")
-      .def_readwrite(
-          "mu_lower", &Solver::mu_lower_,
-          "Lower bound :math:`\\underline{\\mu} > 0` for the AL parameter.")
+      .def_readwrite("mu_lower", &Solver::mu_lower_,
+                     "Lower bound :math:`\\underline{\\mu} > 0` for the "
+                     "AL parameter.")
       .def_readwrite("mu_upper", &Solver::mu_upper_,
                      "Upper bound :math:`\\bar{\\mu}` for the AL parameter. "
                      "The tolerances for "
@@ -140,6 +144,7 @@ void exposeSolver() {
       .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
       .def_readwrite("mul_update_mode", &Solver::mul_update_mode,
                      "Type of multiplier update.")
+      .def_readwrite("kkt_system", &Solver::kkt_system_, "KKT system type.")
       .def_readwrite("max_refinement_steps", &Solver::max_refinement_steps_,
                      "Maximum number of iterative refinement steps.")
       .def_readwrite("kkt_tolerance", &Solver::kkt_tolerance_,
@@ -147,21 +152,25 @@ void exposeSolver() {
                      "(threshold for iterative refinement).")
       .def_readwrite("max_iters", &Solver::max_iters,
                      "Maximum number of iterations.")
+      .def_readwrite("max_al_iters", &Solver::max_al_iters,
+                     "Max augmented Lagrangian iterations.")
       .def_readwrite("reg_init", &Solver::DELTA_INIT,
                      "Initial regularization.");
+  bp::enum_<Solver::KktSystem>("KktSystem")
+      .value("CLASSIC", Solver::KKT_CLASSIC)
+      .value("PRIMAL_DUAL", Solver::KKT_PRIMAL_DUAL);
 
-  using BCLType = BCLParams<Scalar>;
-  bp::class_<BCLType>("BCLParams",
-                      "Parameters for the bound-constrained Lagrangian (BCL) "
-                      "penalty update strategy.",
-                      bp::init<>(bp::args("self")))
-      .def_readwrite("prim_alpha", &BCLType::prim_alpha)
-      .def_readwrite("prim_beta", &BCLType::prim_beta)
-      .def_readwrite("dual_alpha", &BCLType::dual_alpha)
-      .def_readwrite("dual_beta", &BCLType::dual_beta)
-      .def_readwrite("mu_factor", &BCLType::mu_update_factor,
+  bp::class_<BCLParams>("BCLParams",
+                        "Parameters for the bound-constrained Lagrangian (BCL) "
+                        "penalty update strategy.",
+                        bp::init<>(bp::args("self")))
+      .def_readwrite("prim_alpha", &BCLParams::prim_alpha)
+      .def_readwrite("prim_beta", &BCLParams::prim_beta)
+      .def_readwrite("dual_alpha", &BCLParams::dual_alpha)
+      .def_readwrite("dual_beta", &BCLParams::dual_beta)
+      .def_readwrite("mu_factor", &BCLParams::mu_update_factor,
                      "Multiplier update factor.")
-      .def_readwrite("rho_factor", &BCLType::rho_update_factor,
+      .def_readwrite("rho_factor", &BCLParams::rho_update_factor,
                      "Proximal penalty update factor.");
 }
 } // namespace python

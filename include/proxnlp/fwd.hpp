@@ -1,12 +1,13 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 /// @brief     Forward declarations and configuration macros.
 #pragma once
 
 #ifdef EIGEN_DEFAULT_IO_FORMAT
 #undef EIGEN_DEFAULT_IO_FORMAT
 #endif
-#define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
+#define EIGEN_DEFAULT_IO_FORMAT                                                \
+  Eigen::IOFormat(Eigen::StreamPrecision, 0, ",", "\n", "[", "]")
 
 #include <memory>
 
@@ -30,10 +31,21 @@ using std::unique_ptr;
 } // namespace proxnlp
 
 #include "proxnlp/math.hpp"
+#include "proxnlp/exceptions.hpp"
 #include "proxnlp/macros.hpp"
 #include "proxnlp/config.hpp"
+#include "proxnlp/deprecated.hpp"
 
 namespace proxnlp {
+
+template <typename T, typename... Args>
+auto allocate_shared_eigen_aligned(Args &&...args) {
+  return std::allocate_shared<T>(Eigen::aligned_allocator<T>(),
+                                 std::forward<Args>(args)...);
+}
+
+// fwd BCLParams
+template <typename Scalar> struct BCLParamsTpl;
 
 /* Function types */
 
@@ -46,8 +58,15 @@ template <typename Scalar> struct C1FunctionTpl;
 // fwd C2FunctionTpl
 template <typename Scalar> struct C2FunctionTpl;
 
+// fwd func_to_cost
+template <typename Scalar> struct func_to_cost;
+
 // fwd ComposeFunctionTpl
 template <typename Scalar> struct ComposeFunctionTpl;
+
+template <typename Scalar>
+auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
+             const shared_ptr<C2FunctionTpl<Scalar>> &right);
 
 // fwd Cost
 template <typename Scalar> struct CostFunctionBaseTpl;
@@ -60,13 +79,15 @@ template <typename Scalar, int Options = 0> struct ManifoldAbstractTpl;
 template <typename Scalar, int Dim = Eigen::Dynamic, int Options = 0>
 struct VectorSpaceTpl;
 
+template <typename Scalar> struct CartesianProductTpl;
+
 template <typename Base> struct TangentBundleTpl;
 
-// fwd ConstraintObject
+// fwd ConstraintSetBase
 template <typename Scalar> struct ConstraintSetBase;
 
 // fwd ConstraintObject
-template <typename Scalar> struct ConstraintObject;
+template <typename Scalar> struct ConstraintObjectTpl;
 
 /* Solver structs */
 

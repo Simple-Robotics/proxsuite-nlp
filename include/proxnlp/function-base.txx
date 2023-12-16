@@ -11,4 +11,4 @@ extern template struct C1FunctionTpl<context::Scalar>;
 
 extern template struct C2FunctionTpl<context::Scalar>;
 
-}
+} // namespace proxnlp

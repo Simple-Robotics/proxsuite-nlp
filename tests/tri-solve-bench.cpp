@@ -4,18 +4,11 @@
 
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
-#include "block-test.hpp"
-#include <random>
+#include "util.hpp"
 
 #include <benchmark/benchmark.h>
-#define BOOST_TEST_NO_MAIN
-#include <boost/test/unit_test.hpp>
 
-#include <fmt/ostream.h>
-#include <fmt/ranges.h>
-#include <boost/mpl/vector.hpp>
-
-namespace utf = boost::unit_test;
+using namespace proxnlp;
 
 using linalg::TriangularBlockMatrix;
 
@@ -56,7 +49,7 @@ struct prob_data {
     size = std::accumulate(row_segments, row_segments + n, isize(0));
     isize ncols_rhs = size;
     rhs = MatrixXs::Random(size, ncols_rhs);
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
   }
 };
 
@@ -68,36 +61,13 @@ template <int _Mode> struct tri_fixture : prob_data {
     constexpr bool IsUpper = (Mode & Eigen::Upper) == Eigen::Upper;
     if (IsUpper)
       sym_mat = sym_mat.transpose();
-    mat = get_block_matrix(sym_mat);
+    mat = getRandomSymmetricBlockMatrix(sym_mat);
     sol_eig = view().solve(rhs);
   }
 
   MatrixXs sol_eig;
   auto view() { return mat.triangularView<Mode>(); }
 };
-
-// clang-format off
-using test_modes = boost::mpl::vector<
-      tri_fixture<Eigen::Lower>,
-      tri_fixture<Eigen::UnitLower>,
-      tri_fixture<Eigen::Upper>,
-      tri_fixture<Eigen::UnitUpper>>;
-// clang-format on
-
-BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_block_tri, Fix, test_modes, Fix) {
-
-  MatrixXs loc_mat = Fix::view();
-  linalg::print_sparsity_pattern(Fix::sym_mat);
-
-  TriangularBlockMatrix<MatrixXs, Fix::Mode> tri_mat(loc_mat, Fix::sym_mat);
-
-  MatrixXs sol_ours = Fix::rhs;
-  bool flag = tri_mat.solveInPlace(sol_ours);
-
-  BOOST_REQUIRE(flag);
-
-  BOOST_CHECK(Fix::sol_eig.isApprox(sol_ours));
-}
 
 template <int Mode> void BM_block_tri_solve(benchmark::State &state) {
   tri_fixture<Mode> fix{};
@@ -142,15 +112,4 @@ BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::UnitLower)->Unit(unit);
 BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::Upper)->Unit(unit);
 BENCHMARK_TEMPLATE(BM_tri_solve, Eigen::UnitUpper)->Unit(unit);
 
-int main(int argc, char **argv) {
-
-  // call default test initialization function
-  // see Boost.Test docs:
-  // https://www.boost.org/doc/libs/1_80_0/libs/test/doc/html/boost_test/adv_scenarios/shared_lib_customizations/entry_point.html
-  bool tests_result = utf::unit_test_main(&init_unit_test, argc, argv);
-
-  benchmark::Initialize(&argc, argv);
-  benchmark::RunSpecifiedBenchmarks();
-
-  return tests_result;
-}
+BENCHMARK_MAIN();
