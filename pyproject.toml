@@ -34,4 +34,4 @@ exclude = [".git", "build*", "cmake"]
 fixable = ["E"]
 
 [tool.ruff.per-file-ignores]
-"python/proxsuite_nlp/__init__.py" = ["F401", "F403"]
+"bindings/python/proxsuite_nlp/__init__.py" = ["F401", "F403"]

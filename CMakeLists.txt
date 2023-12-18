@@ -248,10 +248,7 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
-# Python interface
-if(BUILD_PYTHON_INTERFACE)
-  add_subdirectory(python)
-endif()
+add_subdirectory(bindings)
 
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
