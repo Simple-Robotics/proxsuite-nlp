@@ -6,5 +6,7 @@ foreach(pyfile ${PYTHON_TESTS})
   get_filename_component(test_name ${pyfile} NAME_WE)
   string(REGEX REPLACE "^test_" "test-py-" test_name ${test_name})
   string(REGEX REPLACE "_" "-" test_name ${test_name})
-  add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python")
+  # We must addd tests/python because in the futur we can create per test
+  # bindings
+  add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "python")
 endforeach()
