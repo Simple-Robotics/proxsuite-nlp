@@ -156,9 +156,10 @@ void exposeSolver() {
                      "Max augmented Lagrangian iterations.")
       .def_readwrite("reg_init", &Solver::DELTA_INIT,
                      "Initial regularization.");
-  bp::enum_<Solver::KktSystem>("KktSystem")
-      .value("CLASSIC", Solver::KKT_CLASSIC)
-      .value("PRIMAL_DUAL", Solver::KKT_PRIMAL_DUAL);
+  bp::enum_<KktSystem>("KktSystem")
+      .value("KKT_CLASSIC", KKT_CLASSIC)
+      .value("KKT_PRIMAL_DUAL", KKT_PRIMAL_DUAL)
+      .export_values();
 
   bp::class_<BCLParams>("BCLParams",
                         "Parameters for the bound-constrained Lagrangian (BCL) "

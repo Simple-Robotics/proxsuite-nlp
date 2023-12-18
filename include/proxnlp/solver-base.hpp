@@ -26,10 +26,11 @@ enum class HessianApprox {
   EXACT,
   /// Gauss-Newton (or rather SCQP) approximation
   GAUSS_NEWTON,
-  // BFGS
 };
 
 enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
+
+enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
 template <typename _Scalar> class SolverTpl {
 public:
@@ -43,7 +44,6 @@ public:
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetBase<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
-  enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
   /// Manifold on which to optimize.
   shared_ptr<Problem> problem_;
@@ -122,7 +122,7 @@ public:
             const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
             const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,
             const Scalar dual_alpha = 1., const Scalar dual_beta = 1.,
-            LDLTChoice ldlt_blocked = LDLTChoice::DENSE,
+            LDLTChoice ldlt_blocked = LDLTChoice::BUNCHKAUFMAN,
             const LinesearchOptions ls_options = LinesearchOptions());
 
   const Manifold &manifold() const { return *problem_->manifold_; }

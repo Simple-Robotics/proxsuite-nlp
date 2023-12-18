@@ -62,7 +62,7 @@ solver = proxnlp.Solver(
 solver.max_iters = 20
 solver.hess_approx = proxnlp.HESSIAN_EXACT
 solver.mul_update_mode = proxnlp.MUL_NEWTON
-solver.kkt_system = proxnlp.KktSystem.PRIMAL_DUAL
+solver.kkt_system = proxnlp.KKT_PRIMAL_DUAL
 try:
     solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
     solver.setup()

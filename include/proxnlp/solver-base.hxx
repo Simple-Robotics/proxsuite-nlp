@@ -5,8 +5,6 @@
 
 #include "proxnlp/solver-base.hpp"
 
-#include "proxnlp/exceptions.hpp"
-
 #include <fmt/ostream.h>
 #include <fmt/color.h>
 

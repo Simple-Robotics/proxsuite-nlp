@@ -2,8 +2,6 @@
 
 #include "proxnlp/modelling/spaces/vector-space.hpp"
 
-#include "proxnlp/exceptions.hpp"
-
 #include <type_traits>
 
 namespace proxnlp {
