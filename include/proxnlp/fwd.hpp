@@ -33,8 +33,9 @@ using std::unique_ptr;
 #include "proxnlp/math.hpp"
 #include "proxnlp/exceptions.hpp"
 #include "proxnlp/macros.hpp"
-#include "proxnlp/config.hpp"
-#include "proxnlp/deprecated.hpp"
+#include "proxsuite-nlp/config.hpp"
+#include "proxsuite-nlp/deprecated.hpp"
+#include "proxsuite-nlp/warning.hpp"
 
 namespace proxnlp {
 

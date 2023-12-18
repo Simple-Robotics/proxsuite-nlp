@@ -2,7 +2,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxnlp/config.hpp"
+#include "proxsuite-nlp/config.hpp"
 
 #include <string>
 #include <sstream>
@@ -13,8 +13,8 @@ namespace proxnlp {
 /// components.
 inline std::string printVersion(const std::string &delimiter = ".") {
   std::ostringstream oss;
-  oss << PROXNLP_MAJOR_VERSION << delimiter << PROXNLP_MINOR_VERSION
-      << delimiter << PROXNLP_PATCH_VERSION;
+  oss << PROXSUITE_NLP_MAJOR_VERSION << delimiter << PROXSUITE_NLP_MINOR_VERSION
+      << delimiter << PROXSUITE_NLP_PATCH_VERSION;
   return oss.str();
 }
 
