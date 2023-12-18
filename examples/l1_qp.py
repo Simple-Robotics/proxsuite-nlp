@@ -1,12 +1,12 @@
 """
 Solve an L1-penalized QP using PROXNLP.
 """
-import proxnlp
+import proxsuite_nlp
 import numpy as np
 import cvxpy
 
-from proxnlp import manifolds, costs, constraints
-from proxnlp.helpers import HistoryCallback
+from proxsuite_nlp import manifolds, costs, constraints
+from proxsuite_nlp.helpers import HistoryCallback
 
 import matplotlib.pyplot as plt
 import pprint
@@ -21,7 +21,7 @@ print("TARGET:", target)
 rcost = costs.QuadraticDistanceCost(space, target, w_x)
 
 A = np.array([[1.3, 0.3], [0.0, 1.0]])
-lin_fun = proxnlp.residuals.LinearFunction(A)
+lin_fun = proxsuite_nlp.residuals.LinearFunction(A)
 assert np.allclose(A @ target, lin_fun(target))
 uppr = np.array([1.0, 0.4])
 lowr = np.array([0.0, -0.1])
@@ -46,13 +46,13 @@ x0 = target.copy()
 print("x0:", x0)
 
 
-problem = proxnlp.Problem(space, rcost, [penalty])
+problem = proxsuite_nlp.Problem(space, rcost, [penalty])
 
 tol = 1e-5
 mu_init = 0.01
 rho_init = 0.001
-solver = proxnlp.ProxNLPSolver(problem, tol, mu_init, rho_init)
-solver.verbose = proxnlp.VERBOSE
+solver = proxsuite_nlp.ProxNLPSolver(problem, tol, mu_init, rho_init)
+solver.verbose = proxsuite_nlp.VERBOSE
 print((solver.kkt_system, solver.mul_update_mode))
 
 cb = HistoryCallback()

@@ -1,9 +1,9 @@
 """
 Inverse kinematics with box constraints.
 """
-import proxnlp
-from proxnlp import manifolds, costs, constraints
-from proxnlp import C2Function
+import proxsuite_nlp
+from proxsuite_nlp import manifolds, costs, constraints
+from proxsuite_nlp import C2Function
 
 import numpy as np
 import pinocchio as pin
@@ -67,7 +67,9 @@ M_ref = rdata.oMi[ee_id].copy()
 
 frame_pl_fun = FramePlacement(model, ee_id, M_ref)
 
-frame_pl_autodiff = proxnlp.autodiff.FiniteDifferenceHelperC2(space, frame_pl_fun, 1e-6)
+frame_pl_autodiff = proxsuite_nlp.autodiff.FiniteDifferenceHelperC2(
+    space, frame_pl_fun, 1e-6
+)
 
 
 def test_fd():
@@ -85,19 +87,21 @@ for _ in range(10):
 
 
 cstr1 = constraints.createEqualityConstraint(frame_pl_autodiff)
-fun2 = proxnlp.residuals.LinearFunction(np.eye(space.ndx))
+fun2 = proxsuite_nlp.residuals.LinearFunction(np.eye(space.ndx))
 cstr2 = constraints.ConstraintObject(
     fun2, constraints.BoxConstraint(model.lowerPositionLimit, model.upperPositionLimit)
 )
-problem = proxnlp.Problem(space, cost, [cstr1, cstr2])
+problem = proxsuite_nlp.Problem(space, cost, [cstr1, cstr2])
 
 tol = 1e-3
 mu_init = 1e-4
 rho_init = 0.0
-solver = proxnlp.ProxNLPSolver(problem, tol, mu_init, rho_init, verbose=proxnlp.VERBOSE)
-solver.mul_update_mode = proxnlp.MUL_PRIMAL_DUAL
+solver = proxsuite_nlp.ProxNLPSolver(
+    problem, tol, mu_init, rho_init, verbose=proxsuite_nlp.VERBOSE
+)
+solver.mul_update_mode = proxsuite_nlp.MUL_PRIMAL_DUAL
 
-solver.register_callback(proxnlp.helpers.HistoryCallback())
+solver.register_callback(proxsuite_nlp.helpers.HistoryCallback())
 solver.setup()
 solver.solve(q_ref)
 rs = solver.getResults()

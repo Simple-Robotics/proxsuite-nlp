@@ -29,10 +29,10 @@ import casadi
 import numpy as np
 import example_robot_data as robex
 
-import proxnlp
-from proxnlp.manifolds import MultibodyPhaseSpace
-from proxnlp.utils import plot_pd_errs
-from proxnlp.casadi_utils import CasadiFunction
+import proxsuite_nlp
+from proxsuite_nlp.manifolds import MultibodyPhaseSpace
+from proxsuite_nlp.utils import plot_pd_errs
+from proxsuite_nlp.casadi_utils import CasadiFunction
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -232,13 +232,15 @@ ineq_rg_constr_fun = CasadiFunction(
 # ----------------------------------------------------------------------------- ###
 # Solver Setup
 
-cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
-eq_constr1_ = proxnlp.constraints.createEqualityConstraint(eq_st_constr_fun)
-eq_constr2_ = proxnlp.constraints.createEqualityConstraint(eq_sw_constr_fun)
+cost_fun_ = proxsuite_nlp.costs.CostFromFunction(cost_fun)
+eq_constr1_ = proxsuite_nlp.constraints.createEqualityConstraint(eq_st_constr_fun)
+eq_constr2_ = proxsuite_nlp.constraints.createEqualityConstraint(eq_sw_constr_fun)
 
-ineq_constr1_ = proxnlp.constraints.createInequalityConstraint(ineq_sw_constr_fun)
-ineq_constr2_ = proxnlp.constraints.createInequalityConstraint(ineq_rg_constr_fun)
-ineq_constr3_ = proxnlp.constraints.createInequalityConstraint(ineq_com_constr_fun)
+ineq_constr1_ = proxsuite_nlp.constraints.createInequalityConstraint(ineq_sw_constr_fun)
+ineq_constr2_ = proxsuite_nlp.constraints.createInequalityConstraint(ineq_rg_constr_fun)
+ineq_constr3_ = proxsuite_nlp.constraints.createInequalityConstraint(
+    ineq_com_constr_fun
+)
 
 constraints = []
 constraints.append(eq_constr1_)
@@ -247,22 +249,22 @@ constraints.append(ineq_constr1_)
 constraints.append(ineq_constr2_)
 constraints.append(ineq_constr3_)
 
-prob = proxnlp.Problem(pb_space, cost_fun_, constraints)
+prob = proxsuite_nlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", prob.total_constraint_dim)
 
-callback = proxnlp.helpers.HistoryCallback()
+callback = proxsuite_nlp.helpers.HistoryCallback()
 tol = 1e-6
 rho_init = 1e-8
 mu_init = 0.001
 
-solver = proxnlp.ProxNLPSolver(
+solver = proxsuite_nlp.ProxNLPSolver(
     prob,
     mu_init=mu_init,
     rho_init=rho_init,
     tol=tol,
-    verbose=proxnlp.VERYVERBOSE,
+    verbose=proxsuite_nlp.VERYVERBOSE,
 )
 solver.setup()
 solver.register_callback(callback)

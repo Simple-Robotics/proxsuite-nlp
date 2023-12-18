@@ -1,21 +1,21 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
 
-@file   In this file, we show how to overload function objects from proxnlp.
+@file   In this file, we show how to overload function objects from proxsuite_nlp.
 """
-import proxnlp
+import proxsuite_nlp
 import numpy as np
 import casadi as cas
 
-from proxnlp.residuals import LinearFunction
-from proxnlp.constraints import createEqualityConstraint
-from proxnlp.manifolds import EuclideanSpace
+from proxsuite_nlp.residuals import LinearFunction
+from proxsuite_nlp.constraints import createEqualityConstraint
+from proxsuite_nlp.manifolds import EuclideanSpace
 
 
 # 1: Overload a base function (not differentiable)
 
 
-class MyFunction(proxnlp.BaseFunction):
+class MyFunction(proxsuite_nlp.BaseFunction):
     def __init__(self, nx, ndx, nr):
         super().__init__(nx, ndx, nr)
 
@@ -38,7 +38,7 @@ assert np.allclose(fun1(x0), np.log(np.abs(x0 - 1.0)))
 # 2: Overload a twice-differentiable function
 
 
-class NegEntropyFunc(proxnlp.C2Function):
+class NegEntropyFunc(proxsuite_nlp.C2Function):
     def __init__(self, nx, ndx):
         x = cas.SX.sym("x", nx)
         dx = cas.SX.sym("dx", ndx)
@@ -92,7 +92,7 @@ fun2.vectorHessianProduct(x0, v0, H_)
 print(f"Hessian: \n{H_}")
 print(fun2.nx, fun2.ndx, fun2.nr)
 
-cs = proxnlp.costs.CostFromFunction(fun2)
+cs = proxsuite_nlp.costs.CostFromFunction(fun2)
 grad = np.zeros(nx)
 cH = np.zeros((nx, nx))
 
@@ -121,9 +121,9 @@ def plot_fun(xopt=None):
     plt.show()
 
 
-prob = proxnlp.Problem(space, cs, [cstr])
+prob = proxsuite_nlp.Problem(space, cs, [cstr])
 
-solver = proxnlp.ProxNLPSolver(prob)
+solver = proxsuite_nlp.ProxNLPSolver(prob)
 solver.setup()
 x0 = np.array([0.1, 0.1])
 lam0 = [np.array([0.0])]
