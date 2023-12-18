@@ -16,7 +16,7 @@ namespace proxnlp {
 template <typename _Scalar>
 struct QuadraticDistanceCostTpl : QuadraticResidualCostTpl<_Scalar> {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using FunctionType = ManifoldDifferenceToPoint<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
   using Base = QuadraticResidualCostTpl<Scalar>;
@@ -47,6 +47,6 @@ struct QuadraticDistanceCostTpl : QuadraticResidualCostTpl<_Scalar> {
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/modelling/costs/squared-distance.txx"
 #endif

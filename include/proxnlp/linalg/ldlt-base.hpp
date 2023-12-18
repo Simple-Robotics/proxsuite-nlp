@@ -21,7 +21,7 @@ using Eigen::internal::SignMatrix;
 
 /// @brief  Base interface for LDLT solvers.
 template <typename Scalar> struct ldlt_base {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using DView = Eigen::Map<const VectorXs, Eigen::Unaligned,
                            Eigen::InnerStride<Eigen::Dynamic>>;
 
@@ -32,11 +32,11 @@ template <typename Scalar> struct ldlt_base {
 
   virtual ldlt_base &compute(const ConstMatrixRef &mat) = 0;
   bool solveInPlace(MatrixRef) const {
-    PROXNLP_RUNTIME_ERROR("Not implemented");
+    PROXSUITE_NLP_RUNTIME_ERROR("Not implemented");
   }
   virtual DView vectorD() const = 0;
   virtual const MatrixXs &matrixLDLT() const {
-    PROXNLP_RUNTIME_ERROR("Not implemented");
+    PROXSUITE_NLP_RUNTIME_ERROR("Not implemented");
   }
   virtual MatrixXs reconstructedMatrix() const = 0;
   Eigen::ComputationInfo info() const { return m_info; }

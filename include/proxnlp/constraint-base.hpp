@@ -16,7 +16,7 @@ namespace proxnlp {
 template <typename _Scalar> struct ConstraintSetBase {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
   using Self = ConstraintSetBase<Scalar>;
 
@@ -117,7 +117,7 @@ protected:
  */
 template <typename _Scalar> struct ConstraintObjectTpl {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using FunctionType = C2FunctionTpl<Scalar>;
   using ConstraintSet = ConstraintSetBase<Scalar>;

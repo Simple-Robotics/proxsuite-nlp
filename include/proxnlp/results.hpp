@@ -17,7 +17,7 @@ inline auto format_as(ConvergenceFlag fl) { return fmt::underlying(fl); }
  */
 template <typename _Scalar> struct ResultsTpl {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
   using VecBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
@@ -83,6 +83,6 @@ template <typename Scalar>
 struct fmt::formatter<::proxnlp::ResultsTpl<Scalar>> : fmt::ostream_formatter {
 };
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/results.txx"
 #endif

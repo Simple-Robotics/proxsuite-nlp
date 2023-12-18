@@ -38,7 +38,7 @@ enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 template <typename _Scalar> class ProxNLPSolverTpl {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
   using Workspace = WorkspaceTpl<Scalar>;
   using Results = ResultsTpl<Scalar>;
@@ -166,7 +166,7 @@ public:
   void assembleKktMatrix(Workspace &workspace);
 
   /// Iterative refinement of the KKT linear system.
-  PROXNLP_INLINE bool iterativeRefinement(Workspace &workspace) const;
+  PROXSUITE_NLP_INLINE bool iterativeRefinement(Workspace &workspace) const;
 
   /// Update penalty parameter using the provided factor (with a safeguard
   /// ProxNLPSolverTpl::mu_lower).
@@ -269,6 +269,6 @@ inline InertiaFlag checkInertia(const int ndx, const int nc,
 
 #include "proxnlp/prox-solver.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/prox-solver.txx"
 #endif

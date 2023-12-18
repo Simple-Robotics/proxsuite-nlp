@@ -17,7 +17,7 @@ protected:
 
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   BaseFunctionTpl(const int nx, const int ndx, const int nr)
       : nx_(nx), ndx_(ndx), nr_(nr) {}
@@ -46,7 +46,7 @@ public:
   using Scalar = _Scalar;
   using Base = BaseFunctionTpl<_Scalar>;
   using Base::Base;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /// @brief      Jacobian matrix of the constraint function.
   virtual void computeJacobian(const ConstVectorRef &x,
@@ -72,7 +72,7 @@ public:
   using Scalar = _Scalar;
   using Base = C1FunctionTpl<_Scalar>;
   using Base::Base;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /// @brief      Vector-hessian product.
   virtual void vectorHessianProduct(const ConstVectorRef &,
@@ -84,6 +84,6 @@ public:
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/function-base.txx"
 #endif

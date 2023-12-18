@@ -7,7 +7,7 @@ namespace context {
 
 using Scalar = double;
 
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
 using BCLParams = ::proxnlp::BCLParamsTpl<Scalar>;

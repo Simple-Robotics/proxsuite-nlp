@@ -21,7 +21,7 @@ public:
   using Self = MultibodyConfiguration<Scalar, Options>;
   using ModelType = pinocchio::ModelTpl<Scalar, Options>;
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   MultibodyConfiguration(const ModelType &model) : model_(model){};
 
@@ -119,6 +119,6 @@ struct MultibodyPhaseSpace
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "./multibody.txx"
 #endif

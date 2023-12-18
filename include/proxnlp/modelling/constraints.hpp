@@ -5,7 +5,7 @@
 #include "proxnlp/modelling/constraints/box-constraint.hpp"
 #include "proxnlp/modelling/constraints/l1-penalty.hpp"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/context.hpp"
 
 namespace proxnlp {

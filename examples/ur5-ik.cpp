@@ -15,7 +15,7 @@
 #include <boost/filesystem/path.hpp>
 
 using Scalar = double;
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
 using namespace proxnlp;
 namespace pin = pinocchio;

@@ -9,7 +9,7 @@ using proxnlp::linalg::BlockKind;
 using proxnlp::linalg::isize;
 using proxnlp::linalg::SymbolicBlockMatrix;
 using Scalar = double;
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 } // namespace
 
 /// Sample for the GOE (Gaussian Orthogonal Ensemble)

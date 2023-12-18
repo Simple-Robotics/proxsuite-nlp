@@ -19,7 +19,7 @@ using context::VectorRef;
 using context::VectorXs;
 
 struct CostWrapper : Cost, bp::wrapper<Cost> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Cost::Cost;
 

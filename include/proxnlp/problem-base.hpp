@@ -12,7 +12,7 @@ namespace proxnlp {
 template <typename _Scalar> struct ProblemTpl {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /// Generic constraint type
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
@@ -156,6 +156,6 @@ void allocateMultipliersOrResiduals(
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/problem-base.txx"
 #endif

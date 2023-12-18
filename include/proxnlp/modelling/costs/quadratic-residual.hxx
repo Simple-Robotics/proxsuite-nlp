@@ -23,12 +23,12 @@ template <typename Scalar>
 Scalar QuadraticResidualCostTpl<Scalar>::call(const ConstVectorRef &x) const {
   err = (*residual_)(x);
 
-  PROXNLP_NOMALLOC_BEGIN;
+  PROXSUITE_NLP_NOMALLOC_BEGIN;
 
   tmp_w_err.noalias() = weights_ * err;
   Scalar res = Scalar(0.5) * err.dot(tmp_w_err) + err.dot(slope_) + constant_;
 
-  PROXNLP_NOMALLOC_END;
+  PROXSUITE_NLP_NOMALLOC_END;
 
   return res;
 }

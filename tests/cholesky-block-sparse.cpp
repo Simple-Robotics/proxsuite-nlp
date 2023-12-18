@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
   linalg::print_sparsity_pattern(modified_structure);
 }
 
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
 
 BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {

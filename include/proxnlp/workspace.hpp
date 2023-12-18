@@ -23,7 +23,7 @@ template <typename Scalar> struct WorkspaceTpl {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
 
   /// Newton iteration variables
@@ -199,6 +199,6 @@ template <typename Scalar>
 struct fmt::formatter<proxnlp::WorkspaceTpl<Scalar>> : fmt::ostream_formatter {
 };
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/workspace.txx"
 #endif

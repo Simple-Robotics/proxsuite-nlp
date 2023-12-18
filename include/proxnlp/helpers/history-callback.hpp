@@ -17,7 +17,7 @@ template <typename Scalar> struct history_callback : base_callback<Scalar> {
       : store_primal_dual_vars_(store_pd_vars), store_values_(store_values),
         store_residuals_(store_residuals) {}
 
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   struct {
     std::vector<VectorXs> xs;

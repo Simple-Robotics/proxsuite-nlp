@@ -6,7 +6,7 @@
 
 #include "proxnlp/linalg/block-ldlt.hpp"
 #include "proxnlp/linalg/bunchkaufman.hpp"
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
 #include "proxnlp/linalg/proxsuite-ldlt-wrap.hpp"
 #endif
 #include <boost/variant.hpp>
@@ -36,7 +36,7 @@ template <typename Scalar,
 using LDLTVariant =
     boost::variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>,
                    Eigen::LDLT<MatrixType>, Eigen::BunchKaufman<MatrixType>
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
                    ,
                    linalg::ProxSuiteLDLTWrapper<Scalar>
 #endif
@@ -119,10 +119,10 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   case LDLTChoice::EIGEN:
     return Eigen::LDLT<MatrixXs>(size);
   case LDLTChoice::PROXSUITE:
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
     return linalg::ProxSuiteLDLTWrapper<Scalar>(size, size);
 #else
-    PROXNLP_RUNTIME_ERROR(
+    PROXSUITE_NLP_RUNTIME_ERROR(
         "ProxSuite support is not enabled. You should recompile ProxNLP with "
         "the BUILD_WITH_PROXSUITE flag.");
 #endif
@@ -210,7 +210,7 @@ computeInertiaTuple(const Eigen::Ref<Eigen::VectorXi const> &signature) {
       nn++;
       break;
     default:
-      PROXNLP_RUNTIME_ERROR(
+      PROXSUITE_NLP_RUNTIME_ERROR(
           "Signature vector should only contain values O, 1, -1.");
       break;
     }

@@ -14,7 +14,7 @@ template <typename Scalar>
 auto downcast_function_to_cost(const shared_ptr<C2FunctionTpl<Scalar>> &func)
     -> shared_ptr<CostFunctionBaseTpl<Scalar>> {
   if (func->nr() != 1) {
-    PROXNLP_RUNTIME_ERROR(
+    PROXSUITE_NLP_RUNTIME_ERROR(
         "Function cannot be cast to cost (codimension nr != 1).");
   }
   return std::make_shared<func_to_cost<Scalar>>(func);
@@ -29,7 +29,7 @@ template <typename _Scalar>
 struct CostFunctionBaseTpl : public C2FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = C2FunctionTpl<Scalar>;
 
   CostFunctionBaseTpl(const int nx, const int ndx) : Base(nx, ndx, 1) {}
@@ -90,7 +90,7 @@ public:
 
 template <typename _Scalar> struct func_to_cost : CostFunctionBaseTpl<_Scalar> {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = CostFunctionBaseTpl<Scalar>;
   using C2Function = C2FunctionTpl<Scalar>;
 
@@ -118,6 +118,6 @@ private:
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/cost-function.txx"
 #endif

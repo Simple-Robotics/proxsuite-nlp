@@ -73,7 +73,7 @@ template <typename Derived>
 bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
 
   b.noalias() = permutationP().transpose() * b;
-  PROXNLP_NOMALLOC_BEGIN;
+  PROXSUITE_NLP_NOMALLOC_BEGIN;
   BlockTriL mat_blk_L(m_matrix, m_structure);
   bool flag = mat_blk_L.solveInPlace(b);
 
@@ -91,7 +91,7 @@ bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
   BlockTriU mat_blk_U(m_matrix.transpose(), m_struct_tr);
   flag |= mat_blk_U.solveInPlace(b);
 
-  PROXNLP_NOMALLOC_END;
+  PROXSUITE_NLP_NOMALLOC_END;
   b.noalias() = permutationP() * b;
   return flag;
 }

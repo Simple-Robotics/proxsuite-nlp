@@ -1,4 +1,4 @@
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 #include <pinocchio/fwd.hpp>
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/spaces/multibody.hpp"
@@ -129,7 +129,7 @@ exposeTangentBundle(const char *name, const char *docstring, Init init) {
 
 void exposeCartesianProduct();
 
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 /// Expose a Pinocchio Lie group with a specified name, docstring,
 /// and no-arg default constructor.
 template <typename LieGroup>
@@ -222,7 +222,7 @@ void exposeManifolds() {
       .def(bp::init<const int>(bp::args("self", "dim")));
 
   exposeCartesianProduct();
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
   exposePinocchioSpaces();
 #endif
 }

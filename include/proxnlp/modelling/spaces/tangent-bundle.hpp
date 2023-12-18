@@ -17,7 +17,7 @@ public:
   using Scalar = typename Base::Scalar;
   enum { Options = Base::Options };
 
-  PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   /// Constructor using base space instance.
   TangentBundleTpl(Base base) : base_(base){};
@@ -79,7 +79,7 @@ public:
 
   template <typename Point>
   typename Point::SegmentReturnType getBasePointWrite(const Point &x) const {
-    return PROXNLP_EIGEN_CONST_CAST(Point, x).head(base_.nx());
+    return PROXSUITE_NLP_EIGEN_CONST_CAST(Point, x).head(base_.nx());
   }
 
   template <typename Tangent>
@@ -91,14 +91,14 @@ public:
   template <typename Tangent>
   typename Tangent::SegmentReturnType
   getTangentHeadWrite(const Tangent &v) const {
-    return PROXNLP_EIGEN_CONST_CAST(Tangent, v).head(base_.ndx());
+    return PROXSUITE_NLP_EIGEN_CONST_CAST(Tangent, v).head(base_.ndx());
   }
 
   template <typename Jac>
   Eigen::Block<Jac, Eigen::Dynamic, Eigen::Dynamic>
   getBaseJacobian(const Jac &J) const {
-    return PROXNLP_EIGEN_CONST_CAST(Jac, J).topLeftCorner(base_.ndx(),
-                                                          base_.ndx());
+    return PROXSUITE_NLP_EIGEN_CONST_CAST(Jac, J).topLeftCorner(base_.ndx(),
+                                                                base_.ndx());
   }
 };
 

@@ -7,7 +7,7 @@ namespace python {
 
 struct FunctionWrap : context::Function, bp::wrapper<context::Function> {
 public:
-  PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
   using context::Function::BaseFunctionTpl;
 
@@ -18,7 +18,7 @@ public:
 };
 
 struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function> {
-  PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
   using context::C1Function::C1FunctionTpl;
 
@@ -34,7 +34,7 @@ struct C1FunctionWrap : context::C1Function, bp::wrapper<context::C1Function> {
 };
 
 struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
-  PROXNLP_DYNAMIC_TYPEDEFS(context::Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(context::Scalar);
 
   using context::C2Function::C2FunctionTpl;
 

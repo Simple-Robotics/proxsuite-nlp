@@ -10,7 +10,7 @@ namespace proxnlp {
  *
  */
 template <typename Scalar> struct BoxConstraintTpl : ConstraintSetBase<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 

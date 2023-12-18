@@ -11,7 +11,7 @@ namespace proxnlp {
 template <typename _Scalar> struct CostSumTpl : CostFunctionBaseTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = CostFunctionBaseTpl<Scalar>;
   using BasePtr = shared_ptr<Base>;
 
@@ -114,6 +114,6 @@ public:
 
 #include "proxnlp/cost-sum.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/cost-sum.txx"
 #endif

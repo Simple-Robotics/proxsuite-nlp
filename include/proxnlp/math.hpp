@@ -22,7 +22,7 @@ using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
 /// Macro typedefs for dynamic-sized vectors/matrices, used for cost funcs,
 /// merit funcs because we don't CRTP them and virtual members funcs can't be
 /// templated.
-#define PROXNLP_DYNAMIC_TYPEDEFS(Scalar)                                       \
+#define PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar)                                 \
   using VectorXs = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;                   \
   using MatrixXs = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;      \
   using VectorOfVectors = std::vector<VectorXs>;                               \
@@ -41,7 +41,7 @@ using enable_if_eigen_dense = std::enable_if_t<is_eigen_dense_type<T>, T2>;
 /// type.
 template <typename _Scalar> struct math_types {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(_Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(_Scalar);
 };
 
 /// Math utilities
