@@ -1,6 +1,6 @@
 """
 Inverse kinematics with friction cone constraint.
-We compare PROXNLP with the solver IPOPT.
+We compare proxsuite_nlp with the solver IPOPT.
 
 min Dq, f || q - q0 ||**2 + || f ||**2
 
@@ -213,7 +213,7 @@ if viz is not None:
     viz.display(qopt_ipopt)
 
 
-# Problem PROXNLP
+# Problem proxsuite_nlp
 
 xspace = MultibodyPhaseSpace(model)
 pb_space = VectorSpace(4 * 3 + (xspace.ndx))

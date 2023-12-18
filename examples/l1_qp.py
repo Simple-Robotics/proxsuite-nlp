@@ -1,5 +1,5 @@
 """
-Solve an L1-penalized QP using PROXNLP.
+Solve an L1-penalized QP using proxsuite_nlp.
 """
 import proxsuite_nlp
 import numpy as np
