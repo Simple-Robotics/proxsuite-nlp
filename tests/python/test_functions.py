@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-import proxnlp
+import proxsuite_nlp
 
-from proxnlp import manifolds, residuals
+from proxsuite_nlp import manifolds, residuals
 
 
 def test_state_residual():
@@ -30,7 +30,7 @@ class TestCompose:
         assert np.allclose(0.0, linear_op.b)
 
         # use compose struct
-        c1 = proxnlp.ComposeFunction(linear_op, fn)
+        c1 = proxsuite_nlp.ComposeFunction(linear_op, fn)
 
         assert c1.ndx == fn.ndx
         assert c1.nr == A.shape[0]
@@ -45,7 +45,7 @@ class TestCompose:
         A = self.A
         linear_op = self.linear_op
         # use compose function
-        c2 = proxnlp.compose(linear_op, self.fn)
+        c2 = proxsuite_nlp.compose(linear_op, self.fn)
         assert c2.ndx == self.fn.ndx
         assert c2.nr == A.shape[0]
 

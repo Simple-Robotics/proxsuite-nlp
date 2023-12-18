@@ -4,7 +4,7 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 Author:
     Wilson Jallet
 """
-import proxnlp
+import proxsuite_nlp
 
 import pinocchio as pin
 import pinocchio.casadi as cpin
@@ -15,9 +15,9 @@ import casadi as cas
 import example_robot_data as erd
 import matplotlib.pyplot as plt
 
-from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
-from proxnlp.utils import plot_pd_errs
-from proxnlp.casadi_utils import CasadiFunction
+from proxsuite_nlp.manifolds import MultibodyPhaseSpace, VectorSpace
+from proxsuite_nlp.utils import plot_pd_errs
+from proxsuite_nlp.casadi_utils import CasadiFunction
 
 from tap import Tap
 
@@ -39,7 +39,7 @@ print(args)
 
 USE_VIEWER = args.view
 
-print("Package version: {}".format(proxnlp.__version__))
+print("Package version: {}".format(proxsuite_nlp.__version__))
 robot = erd.load("double_pendulum_simple")
 # robot = erd.load("double_pendulum")
 model = robot.model
@@ -140,28 +140,28 @@ class MultipleShootingProblem:
 
 
 probdef = MultipleShootingProblem(x0, xtarget)
-cost_fun = proxnlp.costs.CostFromFunction(probdef.cost_fun)
-dynamical_constraint = proxnlp.constraints.createEqualityConstraint(
+cost_fun = proxsuite_nlp.costs.CostFromFunction(probdef.cost_fun)
+dynamical_constraint = proxsuite_nlp.constraints.createEqualityConstraint(
     probdef.dynamics_fun
 )
-bound_constraint = proxnlp.constraints.createInequalityConstraint(
+bound_constraint = proxsuite_nlp.constraints.createInequalityConstraint(
     probdef.control_bound_fun
 )
 
 constraints_ = []
 constraints_.append(dynamical_constraint)
 constraints_.append(bound_constraint)
-problem = proxnlp.Problem(pb_space, cost_fun, constraints_)
+problem = proxsuite_nlp.Problem(pb_space, cost_fun, constraints_)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", problem.total_constraint_dim)
 
-callback = proxnlp.helpers.HistoryCallback()
+callback = proxsuite_nlp.helpers.HistoryCallback()
 tol = 1e-5
 rho_init = 1e-8
 mu_init = 0.9
-solver = proxnlp.ProxNLPSolver(
-    problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
+solver = proxsuite_nlp.ProxNLPSolver(
+    problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxsuite_nlp.VERBOSE
 )
 solver.setup()
 solver.register_callback(callback)

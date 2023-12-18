@@ -29,7 +29,7 @@ void exposeContainerTypes() {
 } // namespace python
 } // namespace proxnlp
 
-BOOST_PYTHON_MODULE(pyproxnlp) {
+BOOST_PYTHON_MODULE(MODULE_NAME) {
   using namespace proxnlp::python;
 
   bp::docstring_options module_docstring_options(true, true, true);

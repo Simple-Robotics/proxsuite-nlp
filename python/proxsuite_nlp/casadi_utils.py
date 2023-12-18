@@ -2,11 +2,11 @@
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
 import casadi
-import proxnlp
+import proxsuite_nlp
 import numpy as np
 
 
-class CasadiFunction(proxnlp.C2Function):
+class CasadiFunction(proxsuite_nlp.C2Function):
     def __init__(
         self,
         nx: int,

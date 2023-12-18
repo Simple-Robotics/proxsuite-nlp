@@ -1,29 +1,31 @@
-import proxnlp
+import proxsuite_nlp
 import pytest
 import numpy as np
 
 
 class TestClass:
-    space = proxnlp.manifolds.VectorSpace(1)
-    cost = proxnlp.costs.CostSum(1, 1)
+    space = proxsuite_nlp.manifolds.VectorSpace(1)
+    cost = proxsuite_nlp.costs.CostSum(1, 1)
     cost.add_component(
-        proxnlp.costs.QuadraticDistanceCost(space, space.neutral(), np.zeros((1, 1)))
+        proxsuite_nlp.costs.QuadraticDistanceCost(
+            space, space.neutral(), np.zeros((1, 1))
+        )
     )
-    problem = proxnlp.Problem(space, cost, [])
+    problem = proxsuite_nlp.Problem(space, cost, [])
 
     def test_print_options(self):
-        options = proxnlp.LinesearchOptions()
+        options = proxsuite_nlp.LinesearchOptions()
         print(options)
 
     def test_print_sum_cost(self):
         print(self.cost)
 
     def test_print_results(self):
-        res = proxnlp.Results(self.problem)
+        res = proxsuite_nlp.Results(self.problem)
         print(res)
 
     def test_print_solver(self):
-        solver = proxnlp.ProxNLPSolver(self.problem)
+        solver = proxsuite_nlp.ProxNLPSolver(self.problem)
         print(solver)
 
 

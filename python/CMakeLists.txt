@@ -2,6 +2,10 @@
 # Copyright (C) 2022 LAAS-CNRS, INRIA
 #
 
+# use underscore for Python to parse module name
+set(PYLIB_NAME "pyproxsuite_nlp")
+set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/proxsuite_nlp)
+
 include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
 
@@ -21,7 +25,7 @@ function(MAKE_BINDINGS)
   target_include_directories(${PYLIB_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
   set_target_properties(
     ${PYLIB_NAME}
-    PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_NAME}
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
                PREFIX ""
                SUFFIX ${PYTHON_EXT_SUFFIX}
                VERSION ${PROJECT_VERSION})
@@ -31,6 +35,7 @@ function(MAKE_BINDINGS)
   endif()
 
   target_compile_options(${PYLIB_NAME} PRIVATE -Wno-conversion -Wno-comment)
+  target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
 
   # link solver, eigenpy, Boost.Python
   target_link_libraries(${PYLIB_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
@@ -42,18 +47,19 @@ endfunction()
 
 make_bindings()
 
-file(MAKE_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python
-     ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/utils)
+file(MAKE_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python
+     ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python/utils)
 
 # copy headers to build/include/ directory
+# TODO: fix include path
 foreach(pyheader ${PY_HEADERS})
   string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
   get_filename_component(headerPath ${pyheader} PATH)
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
-                          ${${PROJECT_NAME}_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
+                          ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python/${pyheader})
   install(
     FILES ${pyheader}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/python/${headerPath}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/proxnlp/python/${headerPath}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 endforeach(pyheader)
 
@@ -61,11 +67,11 @@ endforeach(pyheader)
 set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py)
 
 foreach(pyfile ${${PYLIB_NAME}_PYFILES})
-  python_install_on_site(${PROJECT_NAME} ${pyfile})
+  python_install_on_site(proxsuite_nlp ${pyfile})
 endforeach()
 
 # Generate stubs
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${PYTHON_SITELIB} ${PYLIB_NAME})
+  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME})
 endif(GENERATE_PYTHON_STUBS)

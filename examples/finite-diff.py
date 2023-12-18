@@ -2,14 +2,14 @@
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
 import numpy as np
-import proxnlp
+import proxsuite_nlp
 
-from proxnlp.manifolds import EuclideanSpace
-from proxnlp.autodiff import FiniteDifferenceHelper, FiniteDifferenceHelperC2
+from proxsuite_nlp.manifolds import EuclideanSpace
+from proxsuite_nlp.autodiff import FiniteDifferenceHelper, FiniteDifferenceHelperC2
 
 
 def test_fd_one_dim():
-    class MyFunction(proxnlp.BaseFunction):
+    class MyFunction(proxsuite_nlp.BaseFunction):
         def __init__(self, nx):
             super().__init__(nx, nx, nx)
 
