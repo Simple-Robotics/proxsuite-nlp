@@ -86,7 +86,7 @@ public:
   ///              \f[ M_{\mu g}(z) := g(\prox_{\mu g}(z)) + \frac{1}{2\mu} \| z
   ///              - \prox_{\mu g}(z) \|^2. \f]
   ///
-  /// @param zin    		The input.
+  /// @param zin       The input.
   /// @param zproj     Projection of the input to the normal.
   ///
   Scalar evaluateMoreauEnvelope(const ConstVectorRef &zin,

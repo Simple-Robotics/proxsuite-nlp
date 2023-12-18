@@ -34,7 +34,7 @@ template <typename Scalar> struct GemmT<Scalar, Diag, TriL> {
   // dst is triu
   PROXNLP_GEMMT_SIGNATURE(Scalar, dst, lhs, rhs, alpha) {
     // dst.template triangularView<Eigen::Upper>() +=
-    // 		alpha * (lhs.diagonal().asDiagonal() *
+    //     alpha * (lhs.diagonal().asDiagonal() *
     //              rhs.template triangularView<Eigen::Lower>().transpose());
 
     isize n = dst.cols();
@@ -51,7 +51,7 @@ template <typename Scalar> struct GemmT<Scalar, Diag, TriU> {
   // dst is tril
   PROXNLP_GEMMT_SIGNATURE(Scalar, dst, lhs, rhs, alpha) {
     // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.diagonal().asDiagonal() *
+    //     alpha * (lhs.diagonal().asDiagonal() *
     //              rhs.template triangularView<Eigen::Upper>().transpose());
 
     isize m = dst.rows();
@@ -77,7 +77,7 @@ template <typename Scalar> struct GemmT<Scalar, TriL, Diag> {
   // dst is tril
   PROXNLP_GEMMT_SIGNATURE(Scalar, dst, lhs, rhs, alpha) {
     // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Lower>() *
+    //     alpha * (lhs.template triangularView<Eigen::Lower>() *
     //              rhs.diagonal().asDiagonal());
 
     isize m = dst.rows();
@@ -129,7 +129,7 @@ template <typename Scalar> struct GemmT<Scalar, TriU, Diag> {
   // dst is triu
   PROXNLP_GEMMT_SIGNATURE(Scalar, dst, lhs, rhs, alpha) {
     // dst.template triangularView<Eigen::Lower>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Lower>() *
+    //     alpha * (lhs.template triangularView<Eigen::Lower>() *
     //              rhs.diagonal().asDiagonal());
 
     isize n = dst.cols();
@@ -146,7 +146,7 @@ template <typename Scalar> struct GemmT<Scalar, TriU, TriL> {
   PROXNLP_GEMMT_SIGNATURE(Scalar, dst, lhs, rhs, alpha) {
     // PERF
     // dst.template triangularView<Eigen::Upper>() +=
-    // 		alpha * (lhs.template triangularView<Eigen::Upper>() *
+    //     alpha * (lhs.template triangularView<Eigen::Upper>() *
     //              rhs.transpose().triangularView<Eigen::Upper>());
     dst.template triangularView<Eigen::Upper>() +=
         alpha * (lhs * rhs.transpose().template triangularView<Eigen::Upper>());

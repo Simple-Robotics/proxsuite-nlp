@@ -51,4 +51,13 @@ For easy dependency management, I suggest using the [conda](https://github.com/c
 
 ## Credits
 
-**Copyright (C) 2022 LAAS-CNRS, INRIA**
+The following people have been involved in the development of **proxsuite-nlp** and are warmly thanked for their contributions:
+
+-   [Wilson Jallet](https://github.com/ManifoldFR) (LAAS-CNRS/Inria): main developer and manager of the project
+-   [Sarah El Kazdadi](https://github.com/sarah-ek) (Inria): linear algebra modules developer
+-   [Fabian Schramm](https://github.com/fabinsch) (Inria): core developper
+-   [Joris Vaillant](https://github.com/jorisv) (Inria): core developer
+
+## Acknowledgments
+
+The development of **proxsuite-nlp** is actively supported by the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](http://www.inria.fr) and the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr).

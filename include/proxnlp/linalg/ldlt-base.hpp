@@ -13,7 +13,7 @@
 namespace proxnlp {
 
 /// @brief    Specific linear algebra routines.
-/// @details	Block-wise Cholesky and LDLT factorisation routines.
+/// @details  Block-wise Cholesky and LDLT factorisation routines.
 namespace linalg {
 
 using isize = Eigen::Index;

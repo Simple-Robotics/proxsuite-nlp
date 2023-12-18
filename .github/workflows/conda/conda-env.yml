@@ -1,0 +1,16 @@
+name: proxsuite-nlp
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - cmake
+  - ninja
+  - cxx-compiler
+  - ccache
+  - eigenpy
+  - pinocchio
+  - eigen
+  - fmt
+  - example-robot-data
+  - pytest
+  - casadi
