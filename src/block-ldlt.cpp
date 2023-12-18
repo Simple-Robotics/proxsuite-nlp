@@ -1,4 +1,4 @@
-#include "proxnlp/linalg/block-ldlt.hpp"
+#include "proxsuite-nlp/linalg/block-ldlt.hpp"
 
 namespace proxnlp {
 namespace linalg {

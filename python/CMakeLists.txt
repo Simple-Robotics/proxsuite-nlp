@@ -47,8 +47,8 @@ endfunction()
 
 make_bindings()
 
-file(MAKE_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python
-     ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python/utils)
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python
+     ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python/utils)
 
 # copy headers to build/include/ directory
 # TODO: fix include path
@@ -56,10 +56,10 @@ foreach(pyheader ${PY_HEADERS})
   string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
   get_filename_component(headerPath ${pyheader} PATH)
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
-                          ${${PROJECT_NAME}_BINARY_DIR}/include/proxnlp/python/${pyheader})
+                          ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
   install(
     FILES ${pyheader}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/proxnlp/python/${headerPath}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/proxsuite-nlp/python/${headerPath}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 endforeach(pyheader)
 

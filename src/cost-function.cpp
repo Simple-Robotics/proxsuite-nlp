@@ -1,5 +1,5 @@
 
-#include "proxnlp/cost-function.hpp"
+#include "proxsuite-nlp/cost-function.hpp"
 
 namespace proxnlp {
 

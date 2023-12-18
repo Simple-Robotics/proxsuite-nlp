@@ -1,4 +1,4 @@
-#include "proxnlp/math.hpp"
+#include "proxsuite-nlp/math.hpp"
 
 #include <boost/test/unit_test.hpp>
 

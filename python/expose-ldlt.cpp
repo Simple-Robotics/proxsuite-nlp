@@ -1,7 +1,7 @@
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/python/policies.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/policies.hpp"
 
-#include "proxnlp/ldlt-allocator.hpp"
+#include "proxsuite-nlp/ldlt-allocator.hpp"
 
 namespace proxnlp {
 namespace python {

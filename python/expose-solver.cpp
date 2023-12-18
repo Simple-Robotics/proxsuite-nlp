@@ -1,5 +1,5 @@
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/prox-solver.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 namespace proxnlp {
 namespace python {

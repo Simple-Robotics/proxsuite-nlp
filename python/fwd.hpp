@@ -5,7 +5,7 @@
 #ifdef byte
 #undef byte
 #endif
-#include "proxnlp/context.hpp"
+#include "proxsuite-nlp/context.hpp"
 
 namespace proxnlp {
 

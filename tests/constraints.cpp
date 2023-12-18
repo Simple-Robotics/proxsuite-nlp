@@ -1,9 +1,9 @@
-#include "proxnlp/constraint-base.hpp"
-#include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/constraints/negative-orthant.hpp"
-// #include "proxnlp/modelling/constraints/l1-penalty.hpp"
+#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
+#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
+// #include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
 
-#include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Eigen/Cholesky"
 #include <chrono>
-#include "proxnlp/linalg/bunchkaufman.hpp"
+#include "proxsuite-nlp/linalg/bunchkaufman.hpp"
 
 template <typename F> auto time1(F f) -> double {
   auto start = std::chrono::steady_clock::now();

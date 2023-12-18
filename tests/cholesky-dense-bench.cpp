@@ -3,8 +3,8 @@
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 
-#include "proxnlp/linalg/bunchkaufman.hpp"
-#include "proxnlp/linalg/dense.hpp"
+#include "proxsuite-nlp/linalg/bunchkaufman.hpp"
+#include "proxsuite-nlp/linalg/dense.hpp"
 #include "util.hpp"
 
 #include <benchmark/benchmark.h>

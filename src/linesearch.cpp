@@ -1,4 +1,4 @@
-#include "proxnlp/linesearch-base.hpp"
+#include "proxsuite-nlp/linesearch-base.hpp"
 
 namespace proxnlp {
 

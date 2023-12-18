@@ -1,4 +1,4 @@
-#include "proxnlp/modelling/costs/quadratic-residual.hpp"
+#include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
 
 namespace proxnlp {
 

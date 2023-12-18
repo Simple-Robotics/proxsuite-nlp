@@ -1,6 +1,6 @@
 /// @file
 /// @copyright Copyright (C) 2023 LAAS-CNRS, INRIA
-#include "proxnlp/pdal.hpp"
+#include "proxsuite-nlp/pdal.hpp"
 
 namespace proxnlp {
 

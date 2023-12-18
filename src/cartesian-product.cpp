@@ -1,4 +1,4 @@
-#include "proxnlp/modelling/spaces/cartesian-product.hpp"
+#include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 namespace proxnlp {
 

@@ -1,6 +1,6 @@
-#include "proxnlp/modelling/spaces/cartesian-product.hpp"
+#include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
 namespace proxnlp {
 namespace python {

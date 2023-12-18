@@ -1,4 +1,4 @@
-#include "proxnlp/workspace.hpp"
+#include "proxsuite-nlp/workspace.hpp"
 
 namespace proxnlp {
 

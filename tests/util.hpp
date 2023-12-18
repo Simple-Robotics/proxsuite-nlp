@@ -1,7 +1,7 @@
 #pragma once
 
-#include "proxnlp/math.hpp"
-#include "proxnlp/linalg/block-ldlt.hpp"
+#include "proxsuite-nlp/math.hpp"
+#include "proxsuite-nlp/linalg/block-ldlt.hpp"
 #include <EigenRand/EigenRand>
 
 namespace {

@@ -1,4 +1,4 @@
-#include "proxnlp/prox-solver.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include <boost/test/unit_test.hpp>
 
