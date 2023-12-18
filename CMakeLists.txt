@@ -9,6 +9,7 @@ set(PROJECT_DESCRIPTION
     "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.")
 set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
+set(PROJECT_CUSTOM_HEADER_DIR "proxsuite-nlp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 set(CXX_DISABLE_WERROR True)
