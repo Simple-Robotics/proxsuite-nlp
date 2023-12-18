@@ -1,7 +1,7 @@
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
-#include "proxnlp/manifold-base.hpp"
-#include "proxnlp/modelling/autodiff/finite-difference.hpp"
+#include "proxsuite-nlp/manifold-base.hpp"
+#include "proxsuite-nlp/modelling/autodiff/finite-difference.hpp"
 
 namespace proxnlp {
 namespace python {

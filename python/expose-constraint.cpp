@@ -1,10 +1,10 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
-#include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/constraints/negative-orthant.hpp"
-#include "proxnlp/modelling/constraints/box-constraint.hpp"
-#include "proxnlp/modelling/constraints/l1-penalty.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
+#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
+#include "proxsuite-nlp/modelling/constraints/box-constraint.hpp"
+#include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
 
 #include <eigenpy/std-vector.hpp>
 

@@ -1,4 +1,4 @@
-#include "proxnlp/modelling/spaces/multibody.hpp"
+#include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 
 namespace proxnlp {
 

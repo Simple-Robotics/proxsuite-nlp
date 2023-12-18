@@ -1,4 +1,4 @@
-#include "proxnlp/results.hpp"
+#include "proxsuite-nlp/results.hpp"
 
 namespace proxnlp {
 

@@ -1,6 +1,6 @@
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/helpers-base.hpp"
-#include "proxnlp/helpers/history-callback.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/helpers-base.hpp"
+#include "proxsuite-nlp/helpers/history-callback.hpp"
 
 namespace proxnlp {
 namespace python {

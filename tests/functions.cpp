@@ -1,6 +1,6 @@
-#include "proxnlp/modelling/residuals/linear.hpp"
-#include "proxnlp/function-ops.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/residuals/linear.hpp"
+#include "proxsuite-nlp/function-ops.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>

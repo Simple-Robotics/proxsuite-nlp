@@ -2,9 +2,9 @@
  * Optimize a quadratic function on a circle, or on a disk.
  *
  */
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/prox-solver.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"

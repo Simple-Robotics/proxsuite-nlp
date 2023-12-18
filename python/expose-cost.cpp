@@ -1,7 +1,7 @@
 
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/cost-function.hpp"
-#include "proxnlp/cost-sum.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/cost-function.hpp"
+#include "proxsuite-nlp/cost-sum.hpp"
 
 #include "boost/python/operators.hpp"
 

@@ -1,10 +1,10 @@
 /* Copyright (C) 2022 LAAS-CNRS, INRIA
  */
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/modelling/residuals/linear.hpp"
-#include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/prox-solver.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/residuals/linear.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include "example-base.hpp"
 

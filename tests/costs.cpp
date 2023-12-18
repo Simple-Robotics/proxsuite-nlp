@@ -1,5 +1,5 @@
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/cost-sum.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/cost-sum.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -7,7 +7,7 @@
 #include <boost/test/unit_test.hpp>
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
 
 using namespace proxnlp;

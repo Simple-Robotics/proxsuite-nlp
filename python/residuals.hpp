@@ -1,4 +1,4 @@
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
 namespace proxnlp {
 namespace python {

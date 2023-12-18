@@ -6,11 +6,11 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include "proxnlp/ldlt-allocator.hpp"
+#include "proxsuite-nlp/ldlt-allocator.hpp"
 
 #include <benchmark/benchmark.h>
 
-#include "proxnlp/math.hpp"
+#include "proxsuite-nlp/math.hpp"
 
 using namespace proxnlp;
 

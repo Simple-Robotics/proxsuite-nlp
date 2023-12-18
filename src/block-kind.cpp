@@ -2,7 +2,7 @@
 /// @author Sarah El-Kazdadi
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxnlp/linalg/block-kind.hpp"
+#include "proxsuite-nlp/linalg/block-kind.hpp"
 
 #include <iostream>
 

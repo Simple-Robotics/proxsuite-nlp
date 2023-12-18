@@ -1,8 +1,8 @@
-#include "proxnlp/modelling/autodiff/finite-difference.hpp"
+#include "proxsuite-nlp/modelling/autodiff/finite-difference.hpp"
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
-#include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 #include <boost/test/unit_test.hpp>
 

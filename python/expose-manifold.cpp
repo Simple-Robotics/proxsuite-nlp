@@ -1,14 +1,14 @@
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 #include <pinocchio/fwd.hpp>
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
-#include "proxnlp/modelling/spaces/multibody.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 #endif
 
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/manifold-base.hpp"
-#include "proxnlp/modelling/spaces/cartesian-product.hpp"
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/modelling/spaces/tangent-bundle.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/manifold-base.hpp"
+#include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/tangent-bundle.hpp"
 
 namespace proxnlp {
 namespace python {

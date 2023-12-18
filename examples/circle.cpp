@@ -2,13 +2,13 @@
  * Optimize a quadratic function on a circle, or on a disk.
  *
  */
-#include "proxnlp/cost-function.hpp"
-#include "proxnlp/pdal.hpp"
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/modelling/costs/quadratic-residual.hpp"
-#include "proxnlp/modelling/constraints/negative-orthant.hpp"
-#include "proxnlp/prox-solver.hpp"
+#include "proxsuite-nlp/cost-function.hpp"
+#include "proxsuite-nlp/pdal.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
+#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include "example-base.hpp"
 

@@ -6,11 +6,11 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include "proxnlp/ldlt-allocator.hpp"
+#include "proxsuite-nlp/ldlt-allocator.hpp"
 
 #include <boost/test/unit_test.hpp>
 
-#include "proxnlp/math.hpp"
+#include "proxsuite-nlp/math.hpp"
 #include <fmt/ranges.h>
 
 BOOST_AUTO_TEST_SUITE(cholesky_sparse)

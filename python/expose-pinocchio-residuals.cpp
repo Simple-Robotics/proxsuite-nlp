@@ -1,7 +1,7 @@
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
-#include "proxnlp/python/residuals.hpp"
+#include "proxsuite-nlp/python/residuals.hpp"
 
-#include "proxnlp/modelling/residuals/rigid-transform-point.hpp"
+#include "proxsuite-nlp/modelling/residuals/rigid-transform-point.hpp"
 
 namespace proxnlp {
 namespace python {

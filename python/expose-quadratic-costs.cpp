@@ -1,7 +1,7 @@
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
-#include "proxnlp/modelling/costs/quadratic-residual.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 
 namespace proxnlp {
 namespace python {

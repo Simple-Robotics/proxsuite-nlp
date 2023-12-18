@@ -1,4 +1,4 @@
-#include "proxnlp/cost-sum.hpp"
+#include "proxsuite-nlp/cost-sum.hpp"
 
 namespace proxnlp {
 

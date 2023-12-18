@@ -1,6 +1,6 @@
-#include "proxnlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
 
-#include "proxnlp/function-base.hpp"
+#include "proxsuite-nlp/function-base.hpp"
 
 namespace proxnlp {
 namespace python {

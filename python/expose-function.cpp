@@ -1,6 +1,6 @@
-#include "proxnlp/python/function.hpp"
-#include "proxnlp/function-ops.hpp"
-#include "proxnlp/manifold-base.hpp"
+#include "proxsuite-nlp/python/function.hpp"
+#include "proxsuite-nlp/function-ops.hpp"
+#include "proxsuite-nlp/manifold-base.hpp"
 
 namespace proxnlp {
 namespace python {

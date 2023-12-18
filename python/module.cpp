@@ -1,8 +1,8 @@
 #include <eigenpy/std-vector.hpp>
 
-#include "proxnlp/python/fwd.hpp"
-#include "proxnlp/python/utils/namespace.hpp"
-#include "proxnlp/version.hpp"
+#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/utils/namespace.hpp"
+#include "proxsuite-nlp/version.hpp"
 
 namespace context = proxnlp::context;
 

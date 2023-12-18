@@ -1,4 +1,4 @@
-#include "proxnlp/modelling/constraints.hpp"
+#include "proxsuite-nlp/modelling/constraints.hpp"
 
 namespace proxnlp {
 
