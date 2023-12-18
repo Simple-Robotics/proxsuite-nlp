@@ -4,10 +4,10 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-set(PROJECT_NAME proxnlp)
+set(PROJECT_NAME proxsuite-nlp)
 set(PROJECT_DESCRIPTION
     "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.")
-set(PROJECT_URL "https://github.com/Simple-Robotics/proxnlp")
+set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
@@ -123,9 +123,7 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
-  set(PYLIB_NAME "py${PROJECT_NAME}")
   add_project_dependency(eigenpy 3.1.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.1.0")
-  set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
 
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
@@ -197,6 +195,7 @@ function(create_library)
   get_directory_property(CURRENT_COMPILE_DEFINITIONS COMPILE_DEFINITIONS)
 
   add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
+  add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
 
