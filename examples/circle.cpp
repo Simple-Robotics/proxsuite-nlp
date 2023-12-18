@@ -8,7 +8,7 @@
 #include "proxnlp/modelling/costs/squared-distance.hpp"
 #include "proxnlp/modelling/costs/quadratic-residual.hpp"
 #include "proxnlp/modelling/constraints/negative-orthant.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/prox-solver.hpp"
 
 #include "example-base.hpp"
 
@@ -95,7 +95,7 @@ int main() {
 
   // gradient of merit fun
 
-  SolverTpl<double> solver(prob);
+  ProxNLPSolverTpl<double> solver(prob);
   solver.verbose = VERYVERBOSE;
   solver.setPenalty(1. / 50);
 

@@ -266,7 +266,7 @@ callback = proxnlp.helpers.HistoryCallback()
 rho_init = 1e-12
 mu_init = 1e-2
 
-solver = proxnlp.Solver(
+solver = proxnlp.ProxNLPSolver(
     problem,
     mu_init=mu_init,
     rho_init=rho_init,

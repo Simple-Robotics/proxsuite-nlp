@@ -9,7 +9,7 @@
 #include <proxnlp/modelling/costs/quadratic-residual.hpp>
 #include <proxnlp/modelling/costs/squared-distance.hpp>
 #include <proxnlp/cost-sum.hpp>
-#include <proxnlp/solver-base.hpp>
+#include <proxnlp/prox-solver.hpp>
 #include <proxnlp/modelling/constraints.hpp>
 
 #include <boost/filesystem/path.hpp>
@@ -105,7 +105,7 @@ int main() {
     problem->addConstraint(cstrobj);
   }
 
-  SolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0, proxnlp::VERBOSE);
+  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0, proxnlp::VERBOSE);
   solver.setup();
   solver.solve(q0);
 

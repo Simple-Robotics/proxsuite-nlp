@@ -56,7 +56,7 @@ problem = proxnlp.Problem(space, cost_, cstrs_)
 
 mu_init = 0.1
 rho_init = 0.0
-solver = proxnlp.Solver(
+solver = proxnlp.ProxNLPSolver(
     problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
 )
 solver.max_iters = 20

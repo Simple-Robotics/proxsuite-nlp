@@ -57,7 +57,7 @@ cb = proxnlp.helpers.HistoryCallback()
 
 tol = 1e-6
 mu_init = 1e-4
-solver = proxnlp.Solver(problem, tol, mu_init)
+solver = proxnlp.ProxNLPSolver(problem, tol, mu_init)
 solver.register_callback(cb)
 
 x_init = np.random.randn(nx) * 10

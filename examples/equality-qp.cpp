@@ -4,7 +4,7 @@
 #include "proxnlp/modelling/residuals/linear.hpp"
 #include "proxnlp/modelling/constraints/equality-constraint.hpp"
 #include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/prox-solver.hpp"
 
 #include "example-base.hpp"
 
@@ -57,7 +57,7 @@ template <int N, int M = 1> int submain() {
 
   auto problem = std::make_shared<Problem>(space_, cost, constraints);
 
-  using Solver_t = SolverTpl<double>;
+  using Solver_t = ProxNLPSolverTpl<double>;
 
   Solver_t solver(problem);
   solver.setPenalty(1e-4);

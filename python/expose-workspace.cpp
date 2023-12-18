@@ -9,7 +9,7 @@ void exposeWorkspace() {
   using context::Scalar;
   using context::Workspace;
   bp::class_<Workspace, boost::noncopyable>(
-      "Workspace", "SolverTpl workspace.",
+      "Workspace", "ProxNLPSolverTpl workspace.",
       bp::init<const context::Problem &>(bp::args("self", "problem")))
       .def_readonly("kkt_matrix", &Workspace::kkt_matrix, "KKT matrix buffer.")
       .def_readonly("kkt_rhs", &Workspace::kkt_rhs,
@@ -57,10 +57,8 @@ void exposeWorkspace() {
       .def_readonly("alpha_opt", &Workspace::alpha_opt,
                     "Computed linesearch step length.")
       .def_readonly("dmerit_dir", &Workspace::dmerit_dir)
-      // .def(
-      //     "ldlt", +[](Workspace &ws) { return boost::ref(ws.ldlt_); },
-      //     policies::return_internal_reference,
-      //     "Returns a reference to the underlying LDLT solver.")
+      // TODO: expose Workspace::ldlt_ once boost::variant can be exposed in
+      // eigenpy
       ;
 }
 

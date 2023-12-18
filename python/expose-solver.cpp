@@ -1,5 +1,5 @@
 #include "proxnlp/python/fwd.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/prox-solver.hpp"
 
 namespace proxnlp {
 namespace python {
@@ -7,7 +7,7 @@ namespace python {
 void exposeSolver() {
   using context::Manifold;
   using context::Scalar;
-  using Solver = context::Solver;
+  using ProxNLPSolver = context::ProxNLPSolverTpl;
   using context::BCLParams;
   using context::ConstVectorRef;
   using context::Problem;
@@ -75,13 +75,16 @@ void exposeSolver() {
 
   using context::Results;
   using context::Workspace;
-  using solve_std_vec_ins_t = ConvergenceFlag (Solver::*)(
+  using solve_std_vec_ins_t = ConvergenceFlag (ProxNLPSolver::*)(
       const ConstVectorRef &, const std::vector<VectorRef> &);
-  using solve_eig_vec_ins_t = ConvergenceFlag (Solver::*)(
+  using solve_eig_vec_ins_t = ConvergenceFlag (ProxNLPSolver::*)(
       const ConstVectorRef &, const ConstVectorRef &);
 
-  bp::class_<Solver, boost::noncopyable>(
-      "Solver", "The numerical solver.",
+  bp::class_<ProxNLPSolver, boost::noncopyable>(
+      "ProxNLPSolver",
+      "Semi-smooth Newton-based solver for nonlinear optimization using a "
+      "primal-dual method of multipliers. This solver works by approximately "
+      "solving the proximal subproblems in the method of multipliers.",
       bp::init<shared_ptr<Problem>, Scalar, Scalar, Scalar, VerboseLevel,
                Scalar, Scalar, Scalar, Scalar, Scalar, LDLTChoice>(
           (bp::arg("self"), bp::arg("problem"), bp::arg("tol") = 1e-6,
@@ -91,70 +94,77 @@ void exposeSolver() {
            bp::arg("dual_alpha") = 1., bp::arg("dual_beta") = 1.,
            bp::arg("ldlt_choice") = LDLTChoice::DENSE)))
       .add_property("manifold",
-                    bp::make_function(&Solver::manifold,
+                    bp::make_function(&ProxNLPSolver::manifold,
                                       bp::return_internal_reference<>()),
                     "The solver's working manifold.")
-      .def_readwrite("hess_approx", &Solver::hess_approx)
-      .def_readwrite("ls_strat", &Solver::ls_strat)
-      .def("register_callback", &Solver::registerCallback,
+      .def_readwrite("hess_approx", &ProxNLPSolver::hess_approx)
+      .def_readwrite("ls_strat", &ProxNLPSolver::ls_strat)
+      .def("register_callback", &ProxNLPSolver::registerCallback,
            bp::args("self", "cb"), "Add a callback to the solver.")
-      .def("clear_callbacks", &Solver::clearCallbacks, "Clear callbacks.",
-           bp::args("self"))
-      .def_readwrite("verbose", &Solver::verbose, "Solver verbose setting.")
-      .def_readwrite("ldlt_choice", &Solver::ldlt_choice_,
+      .def("clear_callbacks", &ProxNLPSolver::clearCallbacks,
+           "Clear callbacks.", bp::args("self"))
+      .def_readwrite("verbose", &ProxNLPSolver::verbose,
+                     "Solver verbose setting.")
+      .def_readwrite("ldlt_choice", &ProxNLPSolver::ldlt_choice_,
                      "Use the BlockLDLT solver.")
-      .def("setup", &Solver::setup, bp::args("self"),
+      .def("setup", &ProxNLPSolver::setup, bp::args("self"),
            "Initialize the solver workspace and results.")
-      .def("getResults", &Solver::getResults, bp::args("self"),
+      .def("getResults", &ProxNLPSolver::getResults, bp::args("self"),
            bp::return_internal_reference<>(),
            "Get a reference to the results object.")
-      .def("getWorkspace", &Solver::getWorkspace, bp::args("self"),
+      .def("getWorkspace", &ProxNLPSolver::getWorkspace, bp::args("self"),
            bp::return_internal_reference<>(),
            "Get a reference to the workspace object.")
       .def<solve_std_vec_ins_t>(
-          "solve", &Solver::solve, bp::args("self", "x0", "lams0"),
+          "solve", &ProxNLPSolver::solve, bp::args("self", "x0", "lams0"),
           "Run the solver (multiplier guesses given as a list).")
-      .def<solve_eig_vec_ins_t>("solve", &Solver::solve,
+      .def<solve_eig_vec_ins_t>("solve", &ProxNLPSolver::solve,
                                 (bp::arg("self"), bp::arg("x0"),
                                  bp::arg("lams0") = context::VectorXs(0)),
                                 "Run the solver.")
-      .def("setPenalty", &Solver::setPenalty, bp::args("self", "mu"),
+      .def("setPenalty", &ProxNLPSolver::setPenalty, bp::args("self", "mu"),
            "Set the augmented Lagrangian penalty parameter.")
-      .def("setDualPenalty", &Solver::setDualPenalty, bp::args("self", "gamma"),
+      .def("setDualPenalty", &ProxNLPSolver::setDualPenalty,
+           bp::args("self", "gamma"),
            "Set the dual variable penalty for the linesearch merit "
            "function.")
-      .def("setProxParameter", &Solver::setProxParameter,
+      .def("setProxParameter", &ProxNLPSolver::setProxParameter,
            bp::args("self", "rho"),
            "Set the primal proximal penalty parameter.")
-      .def_readwrite("mu_init", &Solver::mu_init_,
+      .def_readwrite("mu_init", &ProxNLPSolver::mu_init_,
                      "Initial AL parameter value.")
-      .def_readwrite("rho_init", &Solver::rho_init_,
+      .def_readwrite("rho_init", &ProxNLPSolver::rho_init_,
                      "Initial proximal parameter value.")
-      .def_readwrite("mu_lower", &Solver::mu_lower_,
+      .def_readwrite("mu_lower", &ProxNLPSolver::mu_lower_,
                      "Lower bound :math:`\\underline{\\mu} > 0` for the "
                      "AL parameter.")
-      .def_readwrite("mu_upper", &Solver::mu_upper_,
+      .def_readwrite("mu_upper", &ProxNLPSolver::mu_upper_,
                      "Upper bound :math:`\\bar{\\mu}` for the AL parameter. "
                      "The tolerances for "
                      "each subproblem will be updated as :math:`\\eta^0 (\\mu "
                      "/ \\bar{\\mu})^\\gamma`")
       // BCL parameters
-      .def_readwrite("bcl_params", &Solver::bcl_params, "BCL parameters.")
-      .def_readwrite("target_tol", &Solver::target_tol, "Target tolerance.")
-      .def_readwrite("ls_options", &Solver::ls_options, "Linesearch options.")
-      .def_readwrite("mul_update_mode", &Solver::mul_update_mode,
+      .def_readwrite("bcl_params", &ProxNLPSolver::bcl_params,
+                     "BCL parameters.")
+      .def_readwrite("target_tol", &ProxNLPSolver::target_tol,
+                     "Target tolerance.")
+      .def_readwrite("ls_options", &ProxNLPSolver::ls_options,
+                     "Linesearch options.")
+      .def_readwrite("mul_update_mode", &ProxNLPSolver::mul_update_mode,
                      "Type of multiplier update.")
-      .def_readwrite("kkt_system", &Solver::kkt_system_, "KKT system type.")
-      .def_readwrite("max_refinement_steps", &Solver::max_refinement_steps_,
+      .def_readwrite("kkt_system", &ProxNLPSolver::kkt_system_,
+                     "KKT system type.")
+      .def_readwrite("max_refinement_steps",
+                     &ProxNLPSolver::max_refinement_steps_,
                      "Maximum number of iterative refinement steps.")
-      .def_readwrite("kkt_tolerance", &Solver::kkt_tolerance_,
+      .def_readwrite("kkt_tolerance", &ProxNLPSolver::kkt_tolerance_,
                      "Acceptable tolerance for the KKT linear system "
                      "(threshold for iterative refinement).")
-      .def_readwrite("max_iters", &Solver::max_iters,
+      .def_readwrite("max_iters", &ProxNLPSolver::max_iters,
                      "Maximum number of iterations.")
-      .def_readwrite("max_al_iters", &Solver::max_al_iters,
+      .def_readwrite("max_al_iters", &ProxNLPSolver::max_al_iters,
                      "Max augmented Lagrangian iterations.")
-      .def_readwrite("reg_init", &Solver::DELTA_INIT,
+      .def_readwrite("reg_init", &ProxNLPSolver::DELTA_INIT,
                      "Initial regularization.");
   bp::enum_<KktSystem>("KktSystem")
       .value("KKT_CLASSIC", KKT_CLASSIC)

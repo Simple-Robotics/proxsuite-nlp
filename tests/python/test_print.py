@@ -23,7 +23,7 @@ class TestClass:
         print(res)
 
     def test_print_solver(self):
-        solver = proxnlp.Solver(self.problem)
+        solver = proxnlp.ProxNLPSolver(self.problem)
         print(solver)
 
 
