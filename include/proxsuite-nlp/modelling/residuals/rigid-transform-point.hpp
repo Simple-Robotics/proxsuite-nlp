@@ -4,7 +4,8 @@
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #include <pinocchio/spatial/se3-tpl.hpp>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 struct RigidTransformationPointActionTpl : C2FunctionTpl<Scalar> {
@@ -42,7 +43,8 @@ private:
   Matrix33s skew_point_;
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/modelling/residuals/rigid-transform-point.hpp"

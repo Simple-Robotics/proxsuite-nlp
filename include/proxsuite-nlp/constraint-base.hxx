@@ -2,7 +2,8 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 void ConstraintSetBase<Scalar>::applyProjectionJacobian(const ConstVectorRef &z,
@@ -34,4 +35,5 @@ void ConstraintSetBase<Scalar>::applyNormalConeProjectionJacobian(
   }
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

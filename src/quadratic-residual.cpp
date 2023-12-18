@@ -1,7 +1,9 @@
 #include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct QuadraticResidualCostTpl<context::Scalar>;
 
 }
+} // namespace proxsuite

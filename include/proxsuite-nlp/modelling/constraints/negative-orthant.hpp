@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/constraint-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief   Negative orthant, for constraints \f$h(x)\leq 0\f$.
@@ -37,6 +38,7 @@ struct NegativeOrthant : ConstraintSetBase<_Scalar> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/modelling/constraints.hpp"

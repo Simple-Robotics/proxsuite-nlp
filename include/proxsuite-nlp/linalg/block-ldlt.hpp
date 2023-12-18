@@ -12,7 +12,8 @@
 
 #include <numeric>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 namespace backend {
@@ -336,7 +337,8 @@ public:
 };
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "./block-ldlt.hxx"
 

@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// Macro which brings manifold typedefs up into the constraint, cost type, etc.
 #define PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(M)                                 \
@@ -133,7 +134,8 @@ protected:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/manifold-base.hxx"
 

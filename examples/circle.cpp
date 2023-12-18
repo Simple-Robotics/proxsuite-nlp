@@ -12,7 +12,7 @@
 
 #include "example-base.hpp"
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Manifold = VectorSpaceTpl<double>;
 using Problem = ProblemTpl<double>;
 

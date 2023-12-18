@@ -4,9 +4,10 @@
 #include "proxsuite-nlp/python/utils/namespace.hpp"
 #include "proxsuite-nlp/version.hpp"
 
-namespace context = proxnlp::context;
+namespace context = proxsuite::nlp::context;
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 /// Expose some useful container types
 void exposeContainerTypes() {
@@ -27,14 +28,15 @@ void exposeContainerTypes() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 BOOST_PYTHON_MODULE(MODULE_NAME) {
-  using namespace proxnlp::python;
+  using namespace proxsuite::nlp::python;
 
   bp::docstring_options module_docstring_options(true, true, true);
 
-  bp::scope().attr("__version__") = proxnlp::printVersion();
+  bp::scope().attr("__version__") = proxsuite::nlp::printVersion();
   eigenpy::enableEigenPy();
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 

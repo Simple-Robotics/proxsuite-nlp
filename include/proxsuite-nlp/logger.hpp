@@ -7,7 +7,8 @@
 #include <fmt/color.h>
 #include <fmt/ranges.h>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 constexpr int NUM_KEYS = 10;
 const std::array<std::string, NUM_KEYS> BASIC_KEYS = {
@@ -76,4 +77,5 @@ struct BaseLogger {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

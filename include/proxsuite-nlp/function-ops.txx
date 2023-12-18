@@ -3,8 +3,10 @@
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/function-ops.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 extern template struct ComposeFunctionTpl<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

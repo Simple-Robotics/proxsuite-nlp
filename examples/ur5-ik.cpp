@@ -17,7 +17,7 @@
 using Scalar = double;
 PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 namespace pin = pinocchio;
 
 using Model = pin::ModelTpl<Scalar>;
@@ -105,7 +105,8 @@ int main() {
     problem->addConstraint(cstrobj);
   }
 
-  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0, proxnlp::VERBOSE);
+  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
+                                  proxsuite::nlp::VERBOSE);
   solver.setup();
   solver.solve(q0);
 

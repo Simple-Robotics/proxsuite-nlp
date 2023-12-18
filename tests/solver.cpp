@@ -4,7 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(solver)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 BOOST_AUTO_TEST_CASE(solve) {}
 

@@ -12,7 +12,7 @@
 
 #include "proxsuite-nlp/math.hpp"
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;

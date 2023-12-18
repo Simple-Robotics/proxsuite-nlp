@@ -6,7 +6,8 @@
 #include <limits>
 #include <vector>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename T>
 constexpr bool is_eigen_dense_type =
@@ -97,6 +98,7 @@ template <typename T> T sign(const T &x) {
 }
 
 } // namespace math
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/fmt-eigen.hpp"

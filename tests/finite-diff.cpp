@@ -11,7 +11,7 @@
 
 BOOST_AUTO_TEST_SUITE(finite_diff)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 PROXSUITE_NLP_DYNAMIC_TYPEDEFS(double);
 static const double fd_eps = 1e-4;

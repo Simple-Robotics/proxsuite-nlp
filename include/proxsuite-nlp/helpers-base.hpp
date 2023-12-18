@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace helpers {
 
 template <typename Scalar> struct base_callback {
@@ -14,4 +15,5 @@ template <typename Scalar> struct base_callback {
 };
 
 } // namespace helpers
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

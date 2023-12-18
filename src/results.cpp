@@ -1,7 +1,9 @@
 #include "proxsuite-nlp/results.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct ResultsTpl<context::Scalar>;
 
-} // namespace proxnlp
+}
+} // namespace proxsuite

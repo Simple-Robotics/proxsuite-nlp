@@ -39,7 +39,8 @@ template <typename Mat, typename Rhs> void solve_impl(Mat &&ld_, Rhs &&rhs_) {
 
 } // anonymous namespace
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 /// @brief Use the LDLT from proxsuite.
@@ -116,4 +117,5 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
 };
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

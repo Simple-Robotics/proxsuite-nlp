@@ -7,7 +7,7 @@
 
 BOOST_AUTO_TEST_SUITE(residual)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 BOOST_AUTO_TEST_CASE(test_linear) {
   BOOST_TEST_MESSAGE("Test linear function:");

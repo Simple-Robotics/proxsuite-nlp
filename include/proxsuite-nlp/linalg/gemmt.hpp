@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/linalg/block-kind.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 namespace backend {
 
@@ -318,4 +319,5 @@ inline void gemmt(Eigen::MatrixBase<DstDerived> &dst,
 
 } // namespace backend
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

@@ -7,7 +7,8 @@
 #include "proxsuite-nlp/constraint-base.hpp"
 #include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename _Scalar> struct ProblemTpl {
 public:
@@ -154,7 +155,8 @@ void allocateMultipliersOrResiduals(
 
 } // namespace helpers
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/problem-base.txx"

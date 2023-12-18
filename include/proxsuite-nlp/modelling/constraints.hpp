@@ -8,7 +8,8 @@
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/context.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 extern template struct ConstraintSetBase<context::Scalar>;
 extern template struct ConstraintObjectTpl<context::Scalar>;
@@ -17,5 +18,6 @@ extern template struct NegativeOrthant<context::Scalar>;
 extern template struct BoxConstraintTpl<context::Scalar>;
 extern template struct NonsmoothPenaltyL1Tpl<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 #endif

@@ -15,7 +15,8 @@
 ///
 /// A primal-dual augmented Lagrangian-type solver and its utilities
 /// (e.g. modelling, memory management, helpers...)
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// Automatic differentiation utilities.
 namespace autodiff {}
@@ -28,7 +29,8 @@ using std::shared_ptr;
 /// Use the STL unique_ptr.
 using std::unique_ptr;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/math.hpp"
 #include "proxsuite-nlp/exceptions.hpp"
@@ -37,7 +39,8 @@ using std::unique_ptr;
 #include "proxsuite-nlp/deprecated.hpp"
 #include "proxsuite-nlp/warning.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename T, typename... Args>
 auto allocate_shared_eigen_aligned(Args &&...args) {
@@ -106,4 +109,5 @@ enum VerboseLevel { QUIET = 0, VERBOSE = 1, VERYVERBOSE = 2 };
 
 template <typename Scalar> class ProxNLPSolverTpl;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

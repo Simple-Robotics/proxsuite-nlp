@@ -7,7 +7,8 @@
 #include <string>
 #include <sstream>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 /// @brief    Pretty-print the package version number.
 /// @param    delimiter   The delimiter between the major/minor/patch version
 /// components.
@@ -18,4 +19,5 @@ inline std::string printVersion(const std::string &delimiter = ".") {
   return oss.str();
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

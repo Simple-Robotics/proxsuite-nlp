@@ -5,7 +5,8 @@
 
 #include "proxsuite-nlp/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 /**
  * @brief Base function type.
  */
@@ -82,7 +83,8 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/function-base.txx"

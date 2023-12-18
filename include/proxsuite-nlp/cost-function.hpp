@@ -8,7 +8,8 @@
 #include <boost/core/demangle.hpp>
 #include <ostream>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 auto downcast_function_to_cost(const shared_ptr<C2FunctionTpl<Scalar>> &func)
@@ -116,7 +117,8 @@ private:
   const C2Function &underlying() const { return *underlying_; }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/cost-function.txx"

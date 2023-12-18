@@ -6,7 +6,8 @@
 
 #include "./block-ldlt.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 template <typename Scalar>
@@ -97,4 +98,5 @@ bool BlockLDLT<Scalar>::solveInPlace(Eigen::MatrixBase<Derived> &b) const {
 }
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace context {
 
 using Scalar = double;
@@ -10,7 +11,7 @@ using Scalar = double;
 PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 using VectorXBool = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
-using BCLParams = ::proxnlp::BCLParamsTpl<Scalar>;
+using BCLParams = ::proxsuite::nlp::BCLParamsTpl<Scalar>;
 using Problem = ProblemTpl<Scalar>;
 using Results = ResultsTpl<Scalar>;
 using Workspace = WorkspaceTpl<Scalar>;
@@ -37,4 +38,5 @@ using VHPFuncRetType = MatrixXs(const ConstVectorRef &,
                                 const ConstVectorRef &) const;
 
 } // namespace context
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

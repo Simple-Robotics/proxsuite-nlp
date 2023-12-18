@@ -16,7 +16,7 @@
 
 BOOST_AUTO_TEST_SUITE(manifold)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Manifold = ManifoldAbstractTpl<double>;
 
 BOOST_AUTO_TEST_CASE(test_vectorspace) {

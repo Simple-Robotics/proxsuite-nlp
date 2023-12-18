@@ -1,7 +1,8 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/results.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 void exposeResults() {
@@ -32,4 +33,5 @@ void exposeResults() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

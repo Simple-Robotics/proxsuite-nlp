@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <int _Dim, typename _Scalar, int _Options = 0>
 struct Sphere : ManifoldAbstractTpl<Scalar, Options> {
@@ -32,4 +33,5 @@ struct Sphere<3, _Scalar, _Options>
                        VectorRef out) const {}
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

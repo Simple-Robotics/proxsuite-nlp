@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/constraint-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief   Box constraint set \f$z \in [z_\min, z_\max]\f$.
@@ -39,6 +40,7 @@ template <typename Scalar> struct BoxConstraintTpl : ConstraintSetBase<Scalar> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/modelling/constraints.hpp"

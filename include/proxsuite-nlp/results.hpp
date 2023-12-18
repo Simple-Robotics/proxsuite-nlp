@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/problem-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 enum ConvergenceFlag { UNINIT = -1, SUCCESS = 0, MAX_ITERS_REACHED = 1 };
 inline auto format_as(ConvergenceFlag fl) { return fmt::underlying(fl); }
@@ -77,11 +78,12 @@ template <typename _Scalar> struct ResultsTpl {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 template <typename Scalar>
-struct fmt::formatter<::proxnlp::ResultsTpl<Scalar>> : fmt::ostream_formatter {
-};
+struct fmt::formatter<::proxsuite::nlp::ResultsTpl<Scalar>>
+    : fmt::ostream_formatter {};
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/results.txx"

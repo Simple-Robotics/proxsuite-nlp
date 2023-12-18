@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/cost-function.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// @brief    Defines the sum of one or more cost functions \f$c_1 + c_2 +
 /// \cdots\f$
@@ -110,7 +111,8 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/cost-sum.hxx"
 

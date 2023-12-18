@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/modelling/residuals/linear.hpp"
 #include "proxsuite-nlp/modelling/residuals/state-residual.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 using context::C2Function;
 using context::ConstMatrixRef;
@@ -40,4 +41,5 @@ void exposeResiduals() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

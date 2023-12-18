@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/pdal.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 template <typename Scalar>
 ALMeritFunctionTpl<Scalar>::ALMeritFunctionTpl(const Problem &prob,
                                                const Scalar &beta)
@@ -42,4 +43,5 @@ void ALMeritFunctionTpl<Scalar>::computeGradient(
   }
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

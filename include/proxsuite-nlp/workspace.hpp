@@ -5,7 +5,8 @@
 #include "proxsuite-nlp/problem-base.hpp"
 #include "proxsuite-nlp/ldlt-allocator.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 auto allocate_ldlt_from_problem(const ProblemTpl<Scalar> &prob,
@@ -193,11 +194,12 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 template <typename Scalar>
-struct fmt::formatter<proxnlp::WorkspaceTpl<Scalar>> : fmt::ostream_formatter {
-};
+struct fmt::formatter<proxsuite::nlp::WorkspaceTpl<Scalar>>
+    : fmt::ostream_formatter {};
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/workspace.txx"

@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/ldlt-allocator.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 template <class LDLTtype>
@@ -60,4 +61,5 @@ void exposeLdltRoutines() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

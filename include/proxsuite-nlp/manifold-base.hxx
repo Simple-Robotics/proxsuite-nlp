@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /* Integrate */
 
@@ -48,4 +49,5 @@ void ManifoldAbstractTpl<Scalar, Options>::interpolate(const ConstVectorRef &x0,
   interpolate_impl(x0, x1, u, out);
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

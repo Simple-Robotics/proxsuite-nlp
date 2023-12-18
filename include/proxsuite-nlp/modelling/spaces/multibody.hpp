@@ -6,7 +6,8 @@
 
 #include "proxsuite-nlp/modelling/spaces/tangent-bundle.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /** @brief    Multibody configuration group \f$\mathcal{Q}\f$, defined using the
  * Pinocchio library.
@@ -117,7 +118,8 @@ struct MultibodyPhaseSpace
       : TangentBundleTpl<ConfigSpace>(ConfigSpace(model)) {}
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "./multibody.txx"

@@ -4,7 +4,8 @@
 
 #pragma once
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 namespace bp = boost::python;
@@ -15,4 +16,5 @@ constexpr auto return_internal_reference = bp::return_internal_reference<>();
 } // namespace policies
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

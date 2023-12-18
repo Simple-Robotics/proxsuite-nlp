@@ -1,7 +1,8 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/problem-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 void exposeProblem() {
@@ -28,4 +29,5 @@ void exposeProblem() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

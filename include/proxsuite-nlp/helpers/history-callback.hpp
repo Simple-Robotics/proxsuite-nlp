@@ -7,7 +7,8 @@
 #include "proxsuite-nlp/workspace.hpp"
 #include "proxsuite-nlp/results.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace helpers {
 /** @brief  Store the history of results.
  */
@@ -62,4 +63,5 @@ protected:
 };
 
 } // namespace helpers
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

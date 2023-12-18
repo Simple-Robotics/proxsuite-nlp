@@ -5,7 +5,8 @@
 #include "proxsuite-nlp/fwd.hpp"
 #include "proxsuite-nlp/workspace.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 ///
 /// @brief   Primal-dual augmented Lagrangian-type merit function.
@@ -41,7 +42,8 @@ private:
   const Problem &problem_;
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/pdal.hxx"
 

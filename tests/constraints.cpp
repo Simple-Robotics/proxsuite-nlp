@@ -12,7 +12,7 @@
 
 BOOST_AUTO_TEST_SUITE(constraint)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 const int N = 20;
 VectorSpaceTpl<double> space(N);

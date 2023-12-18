@@ -10,7 +10,8 @@
 
 #include <Eigen/Cholesky>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// @brief    Specific linear algebra routines.
 /// @details  Block-wise Cholesky and LDLT factorisation routines.
@@ -51,4 +52,5 @@ protected:
 template <typename Scalar> ldlt_base<Scalar>::~ldlt_base() {}
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

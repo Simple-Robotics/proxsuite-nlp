@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief     Tangent bundle of a base manifold M.
@@ -102,6 +103,7 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/modelling/spaces/tangent-bundle.hxx"

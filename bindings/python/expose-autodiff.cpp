@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/manifold-base.hpp"
 #include "proxsuite-nlp/modelling/autodiff/finite-difference.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 /// Expose finite difference helpers.
@@ -39,4 +40,5 @@ void expose_finite_differences() {
 void exposeAutodiff() { expose_finite_differences(); }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
