@@ -160,7 +160,7 @@ callback = proxnlp.helpers.HistoryCallback()
 tol = 1e-5
 rho_init = 1e-8
 mu_init = 0.9
-solver = proxnlp.Solver(
+solver = proxnlp.ProxNLPSolver(
     problem, mu_init=mu_init, rho_init=rho_init, tol=tol, verbose=proxnlp.VERBOSE
 )
 solver.setup()

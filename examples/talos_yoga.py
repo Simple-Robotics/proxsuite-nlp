@@ -257,7 +257,7 @@ tol = 1e-6
 rho_init = 1e-8
 mu_init = 0.001
 
-solver = proxnlp.Solver(
+solver = proxnlp.ProxNLPSolver(
     prob,
     mu_init=mu_init,
     rho_init=rho_init,

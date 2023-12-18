@@ -22,7 +22,7 @@ using C1Function = C1FunctionTpl<Scalar>;
 using C2Function = C2FunctionTpl<Scalar>;
 
 using Manifold = ManifoldAbstractTpl<Scalar>;
-using Solver = SolverTpl<Scalar>;
+using ProxNLPSolverTpl = ProxNLPSolverTpl<Scalar>;
 
 // func pointer signatures
 using VecFuncType = void(const ConstVectorRef &, VectorRef) const;

@@ -51,7 +51,7 @@ problem = proxnlp.Problem(space, rcost, [penalty])
 tol = 1e-5
 mu_init = 0.01
 rho_init = 0.001
-solver = proxnlp.Solver(problem, tol, mu_init, rho_init)
+solver = proxnlp.ProxNLPSolver(problem, tol, mu_init, rho_init)
 solver.verbose = proxnlp.VERBOSE
 print((solver.kkt_system, solver.mul_update_mode))
 

@@ -32,7 +32,7 @@ def test_quad1d(ls_strat, ls_interp_type):
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
-    solver = proxnlp.Solver(problem, 1e-5)
+    solver = proxnlp.ProxNLPSolver(problem, 1e-5)
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type
     solver.setup()
@@ -59,7 +59,7 @@ def test_cubic1d(ls_strat, ls_interp_type):
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxnlp.Problem(space, cost_fun)
-    solver = proxnlp.Solver(problem, 1e-5)
+    solver = proxnlp.ProxNLPSolver(problem, 1e-5)
     x0 = np.array([1.0])
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type

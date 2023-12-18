@@ -94,7 +94,7 @@ problem = proxnlp.Problem(space, cost, [cstr1, cstr2])
 tol = 1e-3
 mu_init = 1e-4
 rho_init = 0.0
-solver = proxnlp.Solver(problem, tol, mu_init, rho_init, verbose=proxnlp.VERBOSE)
+solver = proxnlp.ProxNLPSolver(problem, tol, mu_init, rho_init, verbose=proxnlp.VERBOSE)
 solver.mul_update_mode = proxnlp.MUL_PRIMAL_DUAL
 
 solver.register_callback(proxnlp.helpers.HistoryCallback())

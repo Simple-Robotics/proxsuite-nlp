@@ -34,7 +34,7 @@ rs = proxnlp.Results(prob)
 
 mu_init = 1e-2
 tol = 1e-4
-solver = proxnlp.Solver(prob, tol, mu_init=mu_init)
+solver = proxnlp.ProxNLPSolver(prob, tol, mu_init=mu_init)
 
 x0 = space.neutral()
 lam0 = np.zeros([1])

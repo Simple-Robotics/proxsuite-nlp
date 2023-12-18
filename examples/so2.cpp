@@ -4,7 +4,7 @@
  */
 #include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/prox-solver.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"
@@ -74,7 +74,7 @@ int main() {
              "1st mul = {}\n",
              lams.size(), lams[0]);
 
-  SolverTpl<double> solver(prob, 0.01);
+  ProxNLPSolverTpl<double> solver(prob, 0.01);
   solver.setup();
   solver.solve(space.rand());
 

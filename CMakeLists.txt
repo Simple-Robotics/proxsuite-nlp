@@ -159,7 +159,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
-      ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
       ${PROJECT_SOURCE_DIR}/src/linesearch.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
@@ -171,7 +171,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/function-base.txx
       ${LIB_HEADER_DIR}/cost-function.txx
       ${LIB_HEADER_DIR}/cost-sum.txx
-      ${LIB_HEADER_DIR}/solver-base.txx
+      ${LIB_HEADER_DIR}/prox-solver.txx
       ${LIB_HEADER_DIR}/results.txx
       ${LIB_HEADER_DIR}/problem-base.txx
       ${LIB_HEADER_DIR}/workspace.txx

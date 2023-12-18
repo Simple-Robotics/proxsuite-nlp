@@ -47,7 +47,7 @@ print(total_cost.call(T0))
 
 
 problem = proxnlp.Problem(space, total_cost, [])
-solver = proxnlp.Solver(problem, 1e-4, 0.01, verbose=proxnlp.VERBOSE)
+solver = proxnlp.ProxNLPSolver(problem, 1e-4, 0.01, verbose=proxnlp.VERBOSE)
 solver.setup()
 
 flag = solver.solve(T0)

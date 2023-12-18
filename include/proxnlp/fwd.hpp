@@ -103,6 +103,6 @@ template <typename Scalar> struct WorkspaceTpl;
 /// Verbosity level.
 enum VerboseLevel { QUIET = 0, VERBOSE = 1, VERYVERBOSE = 2 };
 
-template <typename Scalar> class SolverTpl;
+template <typename Scalar> class ProxNLPSolverTpl;
 
 } // namespace proxnlp

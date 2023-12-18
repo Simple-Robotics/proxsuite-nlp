@@ -123,7 +123,7 @@ def plot_fun(xopt=None):
 
 prob = proxnlp.Problem(space, cs, [cstr])
 
-solver = proxnlp.Solver(prob)
+solver = proxnlp.ProxNLPSolver(prob)
 solver.setup()
 x0 = np.array([0.1, 0.1])
 lam0 = [np.array([0.0])]

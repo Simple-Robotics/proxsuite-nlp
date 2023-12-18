@@ -32,7 +32,10 @@ enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
 
 enum KktSystem { KKT_CLASSIC, KKT_PRIMAL_DUAL };
 
-template <typename _Scalar> class SolverTpl {
+/// Semi-smooth Newton-based solver for nonlinear optimization using a
+/// primal-dual method of multipliers. This solver works by approximately
+/// solving the proximal subproblems in the method of multipliers.
+template <typename _Scalar> class ProxNLPSolverTpl {
 public:
   using Scalar = _Scalar;
   PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
@@ -117,13 +120,14 @@ public:
   unique_ptr<Workspace> workspace_;
   unique_ptr<Results> results_;
 
-  SolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
-            const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
-            const VerboseLevel verbose = QUIET, const Scalar mu_lower = 1e-9,
-            const Scalar prim_alpha = 0.1, const Scalar prim_beta = 0.9,
-            const Scalar dual_alpha = 1., const Scalar dual_beta = 1.,
-            LDLTChoice ldlt_blocked = LDLTChoice::BUNCHKAUFMAN,
-            const LinesearchOptions ls_options = LinesearchOptions());
+  ProxNLPSolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
+                   const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
+                   const VerboseLevel verbose = QUIET,
+                   const Scalar mu_lower = 1e-9, const Scalar prim_alpha = 0.1,
+                   const Scalar prim_beta = 0.9, const Scalar dual_alpha = 1.,
+                   const Scalar dual_beta = 1.,
+                   LDLTChoice ldlt_blocked = LDLTChoice::BUNCHKAUFMAN,
+                   const LinesearchOptions ls_options = LinesearchOptions());
 
   const Manifold &manifold() const { return *problem_->manifold_; }
 
@@ -165,7 +169,7 @@ public:
   PROXNLP_INLINE bool iterativeRefinement(Workspace &workspace) const;
 
   /// Update penalty parameter using the provided factor (with a safeguard
-  /// SolverTpl::mu_lower).
+  /// ProxNLPSolverTpl::mu_lower).
   inline void updatePenalty();
 
   /// @brief Set the dual penalty weight for the merit function.
@@ -263,8 +267,8 @@ inline InertiaFlag checkInertia(const int ndx, const int nc,
 
 } // namespace proxnlp
 
-#include "proxnlp/solver-base.hxx"
+#include "proxnlp/prox-solver.hxx"
 
 #ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
-#include "proxnlp/solver-base.txx"
+#include "proxnlp/prox-solver.txx"
 #endif

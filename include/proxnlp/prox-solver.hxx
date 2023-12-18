@@ -3,20 +3,19 @@
 /// @brief     Implementations for the prox solver.
 #pragma once
 
-#include "proxnlp/solver-base.hpp"
+#include "proxnlp/prox-solver.hpp"
 
 #include <fmt/ostream.h>
 #include <fmt/color.h>
 
 namespace proxnlp {
 template <typename Scalar>
-SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
-                             const Scalar mu_init, const Scalar rho_init,
-                             const VerboseLevel verbose, const Scalar mu_lower,
-                             const Scalar prim_alpha, const Scalar prim_beta,
-                             const Scalar dual_alpha, const Scalar dual_beta,
-                             LDLTChoice ldlt_choice,
-                             const LinesearchOptions ls_options)
+ProxNLPSolverTpl<Scalar>::ProxNLPSolverTpl(
+    shared_ptr<Problem> prob, const Scalar tol, const Scalar mu_init,
+    const Scalar rho_init, const VerboseLevel verbose, const Scalar mu_lower,
+    const Scalar prim_alpha, const Scalar prim_beta, const Scalar dual_alpha,
+    const Scalar dual_beta, LDLTChoice ldlt_choice,
+    const LinesearchOptions ls_options)
     : problem_(prob), merit_fun(*problem_, pdal_beta_),
       prox_penalty(prob->manifold_, manifold().neutral(),
                    rho_init *
@@ -27,8 +26,9 @@ SolverTpl<Scalar>::SolverTpl(shared_ptr<Problem> prob, const Scalar tol,
       ls_options(ls_options), target_tol(tol) {}
 
 template <typename Scalar>
-ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
-                                         const std::vector<VectorRef> &lams0) {
+ConvergenceFlag
+ProxNLPSolverTpl<Scalar>::solve(const ConstVectorRef &x0,
+                                const std::vector<VectorRef> &lams0) {
   VectorXs new_lam(problem_->getTotalConstraintDim());
   new_lam.setZero();
   int nr = 0;
@@ -45,8 +45,8 @@ ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
 }
 
 template <typename Scalar>
-ConvergenceFlag SolverTpl<Scalar>::solve(const ConstVectorRef &x0,
-                                         const ConstVectorRef &lams0) {
+ConvergenceFlag ProxNLPSolverTpl<Scalar>::solve(const ConstVectorRef &x0,
+                                                const ConstVectorRef &lams0) {
   if (verbose == 0)
     logger.active = false;
 
@@ -144,8 +144,8 @@ InertiaFlag checkInertia(const int ndx, const int numc,
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::acceptMultipliers(Results &results,
-                                          Workspace &workspace) const {
+void ProxNLPSolverTpl<Scalar>::acceptMultipliers(Results &results,
+                                                 Workspace &workspace) const {
   switch (mul_update_mode) {
   case MultiplierUpdateMode::NEWTON:
     workspace.data_lams_prev = results.data_lams_opt;
@@ -163,7 +163,7 @@ void SolverTpl<Scalar>::acceptMultipliers(Results &results,
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeMultipliers(
+void ProxNLPSolverTpl<Scalar>::computeMultipliers(
     const ConstVectorRef &inner_lams_data, Workspace &workspace) const {
   PROXNLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
@@ -201,9 +201,8 @@ void SolverTpl<Scalar>::computeMultipliers(
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
-                                                  Workspace &workspace,
-                                                  boost::mpl::false_) const {
+void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
+    const ConstVectorRef &x, Workspace &workspace, boost::mpl::false_) const {
   problem_->computeDerivatives(x, workspace);
 
   workspace.data_jacobians_proj = workspace.data_jacobians;
@@ -223,16 +222,15 @@ void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computeProblemDerivatives(const ConstVectorRef &x,
-                                                  Workspace &workspace,
-                                                  boost::mpl::true_) const {
+void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
+    const ConstVectorRef &x, Workspace &workspace, boost::mpl::true_) const {
   this->computeProblemDerivatives(x, workspace, boost::mpl::false_());
   problem_->computeHessians(x, workspace, hess_approx == HessianApprox::EXACT);
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
-                                               Results &results) const {
+void ProxNLPSolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
+                                                      Results &results) const {
   PROXNLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * results.data_lams_opt;
@@ -250,7 +248,7 @@ void SolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
   PROXNLP_NOMALLOC_END;
 }
 
-template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
+template <typename Scalar> void ProxNLPSolverTpl<Scalar>::updatePenalty() {
   if (mu_ == mu_lower_) {
     setPenalty(mu_init_);
   } else {
@@ -259,7 +257,8 @@ template <typename Scalar> void SolverTpl<Scalar>::updatePenalty() {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
+void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
+                                         Results &results) {
   const int ndx = manifold().ndx();
   const long ntot = workspace.kkt_rhs.size();
   const long ndual = ntot - ndx;
@@ -470,7 +469,7 @@ void SolverTpl<Scalar>::innerLoop(Workspace &workspace, Results &results) {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
+void ProxNLPSolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
   const long ndx = (long)manifold().ndx();
   const long ndual = workspace.numdual;
   workspace.kkt_matrix.setZero();
@@ -508,7 +507,7 @@ void SolverTpl<Scalar>::assembleKktMatrix(Workspace &workspace) {
 }
 
 template <typename Scalar>
-bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
+bool ProxNLPSolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
   workspace.pd_step = -workspace.kkt_rhs;
   boost::apply_visitor([&](auto &&fac) { fac.solveInPlace(workspace.pd_step); },
                        workspace.ldlt_);
@@ -526,7 +525,7 @@ bool SolverTpl<Scalar>::iterativeRefinement(Workspace &workspace) const {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
+void ProxNLPSolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
   mu_ = new_mu;
   mu_inv_ = 1. / mu_;
   for (std::size_t i = 0; i < problem_->getNumConstraints(); i++) {
@@ -536,35 +535,36 @@ void SolverTpl<Scalar>::setPenalty(const Scalar &new_mu) noexcept {
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::setProxParameter(const Scalar &new_rho) noexcept {
+void ProxNLPSolverTpl<Scalar>::setProxParameter(
+    const Scalar &new_rho) noexcept {
   rho_ = new_rho;
   prox_penalty.weights_.setZero();
   prox_penalty.weights_.diagonal().setConstant(rho_);
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::updateToleranceFailure() noexcept {
+void ProxNLPSolverTpl<Scalar>::updateToleranceFailure() noexcept {
   prim_tol_ = prim_tol0 * std::pow(mu_, bcl_params.prim_alpha);
   inner_tol_ = inner_tol0 * std::pow(mu_, bcl_params.dual_alpha);
   tolerancePostUpdate();
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::updateToleranceSuccess() noexcept {
+void ProxNLPSolverTpl<Scalar>::updateToleranceSuccess() noexcept {
   prim_tol_ = prim_tol_ * std::pow(mu_ / mu_upper_, bcl_params.prim_beta);
   inner_tol_ = inner_tol_ * std::pow(mu_ / mu_upper_, bcl_params.dual_beta);
   tolerancePostUpdate();
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::tolerancePostUpdate() noexcept {
+void ProxNLPSolverTpl<Scalar>::tolerancePostUpdate() noexcept {
   inner_tol_ = std::max(inner_tol_, inner_tol_min);
   prim_tol_ = std::max(prim_tol_, target_tol);
 }
 
 template <typename Scalar>
-void SolverTpl<Scalar>::tryStep(Workspace &workspace, const Results &results,
-                                Scalar alpha) {
+void ProxNLPSolverTpl<Scalar>::tryStep(Workspace &workspace,
+                                       const Results &results, Scalar alpha) {
   PROXNLP_NOMALLOC_BEGIN;
   workspace.tmp_dx_scaled = alpha * workspace.prim_step;
   manifold().integrate(results.x_opt, workspace.tmp_dx_scaled,

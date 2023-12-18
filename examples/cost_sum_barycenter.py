@@ -73,7 +73,7 @@ def test_cost_sum():
     print("sum3 init:", sum_3)
 
     problem = proxnlp.Problem(space, sum_3)
-    solver = proxnlp.Solver(problem, mu_init=0.1)
+    solver = proxnlp.ProxNLPSolver(problem, mu_init=0.1)
     callback = proxnlp.helpers.HistoryCallback()
     solver.setup()
     solver.register_callback(callback)
