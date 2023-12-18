@@ -22,7 +22,7 @@ namespace proxnlp {
 template <typename _Scalar> struct ALMeritFunctionTpl {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Problem = ProblemTpl<Scalar>;
   using Workspace = WorkspaceTpl<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
@@ -45,6 +45,6 @@ private:
 
 #include "proxnlp/pdal.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/pdal.txx"
 #endif

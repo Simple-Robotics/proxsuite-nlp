@@ -8,7 +8,7 @@ namespace proxnlp {
 
 template <typename Scalar>
 struct RigidTransformationPointActionTpl : C2FunctionTpl<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   // convenience for rigid-body transformations
   using SE3 = pin::SE3Tpl<Scalar>;
   using QuatConstMap = Eigen::Map<const typename SE3::Quaternion>;
@@ -44,6 +44,6 @@ private:
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/modelling/residuals/rigid-transform-point.hpp"
 #endif

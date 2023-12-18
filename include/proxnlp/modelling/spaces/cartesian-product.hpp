@@ -17,7 +17,7 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
   using Scalar = _Scalar;
 
   using Base = ManifoldAbstractTpl<Scalar>;
-  PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
 private:
   std::vector<shared_ptr<Base>> components;
@@ -164,6 +164,6 @@ CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
 // implementation details
 #include "proxnlp/modelling/spaces/cartesian-product.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/modelling/spaces/cartesian-product.txx"
 #endif

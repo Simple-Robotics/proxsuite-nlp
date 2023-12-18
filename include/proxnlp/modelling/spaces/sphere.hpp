@@ -16,7 +16,7 @@ struct Sphere<3, _Scalar, _Options>
   using Scalar = _Scalar;
   enum { Options = _Options };
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   /**
    * Geodesics on the 3D sphere are given by the great circles.

@@ -11,7 +11,7 @@ namespace proxnlp {
  */
 template <typename _Scalar> struct LinearFunctionTpl : C2FunctionTpl<_Scalar> {
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = C2FunctionTpl<Scalar>;
   using Base::computeJacobian;
@@ -39,7 +39,7 @@ template <typename _Scalar>
 struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
   using Scalar = _Scalar;
   using Base = ComposeFunctionTpl<Scalar>;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Manifold = ManifoldAbstractTpl<Scalar>;
 
@@ -50,7 +50,7 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
       : Base(std::make_shared<LinearFunctionTpl<Scalar>>(A, b),
              std::make_shared<ManifoldDifferenceToPoint<Scalar>>(space,
                                                                  target)) {
-    PROXNLP_DIM_CHECK(target, space->nx());
+    PROXSUITE_NLP_DIM_CHECK(target, space->nx());
   }
 };
 

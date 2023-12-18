@@ -15,7 +15,7 @@ template <typename _Scalar>
 struct EqualityConstraint : ConstraintSetBase<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;

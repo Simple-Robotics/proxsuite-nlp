@@ -34,8 +34,9 @@ ProxNLPSolverTpl<Scalar>::solve(const ConstVectorRef &x0,
   int nr = 0;
   const std::size_t numc = problem_->getNumConstraints();
   if (numc != lams0.size()) {
-    PROXNLP_RUNTIME_ERROR("Specified number of constraints is not the same "
-                          "as the provided number of multipliers!");
+    PROXSUITE_NLP_RUNTIME_ERROR(
+        "Specified number of constraints is not the same "
+        "as the provided number of multipliers!");
   }
   for (std::size_t i = 0; i < numc; i++) {
     nr = problem_->getConstraintDim(i);
@@ -51,7 +52,7 @@ ConvergenceFlag ProxNLPSolverTpl<Scalar>::solve(const ConstVectorRef &x0,
     logger.active = false;
 
   if ((results_ == nullptr) || (workspace_ == nullptr)) {
-    PROXNLP_RUNTIME_ERROR(
+    PROXSUITE_NLP_RUNTIME_ERROR(
         "Either Results or Workspace are unitialized. Call setup() first.");
   }
 
@@ -165,7 +166,7 @@ void ProxNLPSolverTpl<Scalar>::acceptMultipliers(Results &results,
 template <typename Scalar>
 void ProxNLPSolverTpl<Scalar>::computeMultipliers(
     const ConstVectorRef &inner_lams_data, Workspace &workspace) const {
-  PROXNLP_NOMALLOC_BEGIN;
+  PROXSUITE_NLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * workspace.data_lams_prev;
   // project multiplier estimate
@@ -197,7 +198,7 @@ void ProxNLPSolverTpl<Scalar>::computeMultipliers(
     cstr_set.applyProjectionJacobian(workspace.shift_cstr_pdal[i],
                                      workspace.lams_pdal_reproj[i]);
   }
-  PROXNLP_NOMALLOC_END;
+  PROXSUITE_NLP_NOMALLOC_END;
 }
 
 template <typename Scalar>
@@ -231,7 +232,7 @@ void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
 template <typename Scalar>
 void ProxNLPSolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
                                                       Results &results) const {
-  PROXNLP_NOMALLOC_BEGIN;
+  PROXSUITE_NLP_NOMALLOC_BEGIN;
   workspace.data_shift_cstr_values =
       workspace.data_cstr_values + mu_ * results.data_lams_opt;
 
@@ -245,7 +246,7 @@ void ProxNLPSolverTpl<Scalar>::computePrimalResiduals(Workspace &workspace,
     results.constraint_violations(long(i)) = math::infty_norm(cstr_prox_err);
   }
   results.prim_infeas = math::infty_norm(results.constraint_violations);
-  PROXNLP_NOMALLOC_END;
+  PROXSUITE_NLP_NOMALLOC_END;
 }
 
 template <typename Scalar> void ProxNLPSolverTpl<Scalar>::updatePenalty() {
@@ -300,7 +301,7 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
       prox_penalty.computeHessian(results.x_opt, workspace.prox_hess);
     }
 
-    PROXNLP_NOMALLOC_BEGIN;
+    PROXSUITE_NLP_NOMALLOC_BEGIN;
     //// fill in KKT RHS
     workspace.kkt_rhs.setZero();
     workspace.kkt_rhs_corr.setZero();
@@ -328,8 +329,8 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
       workspace.merit_gradient += workspace.prox_grad;
     }
 
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_rhs, "kkt_rhs");
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.kkt_matrix, "kkt_matrix");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.kkt_rhs, "kkt_rhs");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.kkt_matrix, "kkt_matrix");
 
     computePrimalResiduals(workspace, results);
 
@@ -411,8 +412,8 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
 
     iterativeRefinement(workspace);
 
-    PROXNLP_NOMALLOC_END;
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
+    PROXSUITE_NLP_NOMALLOC_END;
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.pd_step, "pd_step");
 
     // Take the step
 
@@ -429,19 +430,19 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
       break;
     }
     default:
-      PROXNLP_RUNTIME_ERROR("Unrecognized linesearch alternative.\n");
+      PROXSUITE_NLP_RUNTIME_ERROR("Unrecognized linesearch alternative.\n");
       break;
     }
 
     tryStep(workspace, results, workspace.alpha_opt);
 
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.alpha_opt, "alpha_opt");
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.x_trial, "x_trial");
-    PROXNLP_RAISE_IF_NAN_NAME(workspace.data_lams_trial, "lams_trial");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.alpha_opt, "alpha_opt");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.x_trial, "x_trial");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(workspace.data_lams_trial, "lams_trial");
     results.x_opt = workspace.x_trial;
     results.data_lams_opt = workspace.data_lams_trial;
     results.merit = phi_new;
-    PROXNLP_RAISE_IF_NAN_NAME(results.merit, "merit");
+    PROXSUITE_NLP_RAISE_IF_NAN_NAME(results.merit, "merit");
 
     invokeCallbacks(workspace, results);
 
@@ -565,12 +566,12 @@ void ProxNLPSolverTpl<Scalar>::tolerancePostUpdate() noexcept {
 template <typename Scalar>
 void ProxNLPSolverTpl<Scalar>::tryStep(Workspace &workspace,
                                        const Results &results, Scalar alpha) {
-  PROXNLP_NOMALLOC_BEGIN;
+  PROXSUITE_NLP_NOMALLOC_BEGIN;
   workspace.tmp_dx_scaled = alpha * workspace.prim_step;
   manifold().integrate(results.x_opt, workspace.tmp_dx_scaled,
                        workspace.x_trial);
   workspace.data_lams_trial =
       results.data_lams_opt + alpha * workspace.dual_step;
-  PROXNLP_NOMALLOC_END;
+  PROXSUITE_NLP_NOMALLOC_END;
 }
 } // namespace proxnlp

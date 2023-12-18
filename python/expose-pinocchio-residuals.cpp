@@ -1,4 +1,4 @@
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 #include "proxnlp/python/residuals.hpp"
 
 #include "proxnlp/modelling/residuals/rigid-transform-point.hpp"

@@ -19,7 +19,7 @@ namespace backend {
 
 /// Implementation struct for the recursive block LDLT algorithm.
 template <typename Scalar> struct block_impl {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   MatrixRef mat;
   SymbolicBlockMatrix sym_structure;
   /// @returns bool whether the decomposition was successful.
@@ -194,7 +194,7 @@ template <typename Scalar> struct block_impl {
 /// of structure should lead to recalculating the expected sparsity pattern of
 /// the factorization, and even recomputing the sparsity-optimal permutation.
 template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;
   using Traits = LDLT_Traits<MatrixXs, Eigen::Lower>;
@@ -340,6 +340,6 @@ public:
 
 #include "./block-ldlt.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "./block-ldlt.txx"
 #endif

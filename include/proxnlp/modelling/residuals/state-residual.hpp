@@ -17,7 +17,7 @@ template <typename _Scalar>
 struct ManifoldDifferenceToPoint : C2FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   using Base = C2FunctionTpl<Scalar>;
   using Base::operator();
@@ -33,7 +33,7 @@ public:
       : Base(space->nx(), space->ndx(), space->ndx()), target_(target),
         space_(space) {
     if (!space->isNormalized(target_)) {
-      PROXNLP_RUNTIME_ERROR(
+      PROXSUITE_NLP_RUNTIME_ERROR(
           "Target parameter is not a valid element of the manifold.");
     }
   }

@@ -109,7 +109,7 @@ public:
           break;
         }
         default:
-          PROXNLP_RUNTIME_ERROR(
+          PROXSUITE_NLP_RUNTIME_ERROR(
               "Unrecognized interpolation type in this context.\n");
           break;
         }

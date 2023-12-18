@@ -28,7 +28,7 @@ struct finite_difference_impl;
 
 template <typename Scalar>
 struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using FuncType = BaseFunctionTpl<Scalar>;
   using Base = C1FunctionTpl<Scalar>;
   using Base::computeJacobian;
@@ -59,7 +59,7 @@ struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
 
 template <typename Scalar>
 struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar> {
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using FuncType = C1FunctionTpl<Scalar>;
   using Base = C2FunctionTpl<Scalar>;
   using Base::vectorHessianProduct;
@@ -114,7 +114,7 @@ struct finite_difference_wrapper<_Scalar, TOC1>
   using Base = internal::finite_difference_impl<Scalar, TOC1>;
   using Base::computeJacobian;
 
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
                             const InputType &func, const Scalar fd_eps)
@@ -143,7 +143,7 @@ struct finite_difference_wrapper<_Scalar, TOC2>
   using Base1::computeJacobian;
   using Base2::vectorHessianProduct;
 
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
                             const InputType &func, const Scalar fd_eps)

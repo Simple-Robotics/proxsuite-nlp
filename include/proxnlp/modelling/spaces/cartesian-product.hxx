@@ -41,7 +41,7 @@ bool CartesianProductTpl<Scalar>::isNormalized(const ConstVectorRef &x) const {
 template <typename Scalar>
 template <class VectorType, class U>
 std::vector<U> CartesianProductTpl<Scalar>::split_impl(VectorType &x) const {
-  PROXNLP_DIM_CHECK(x, this->nx());
+  PROXSUITE_NLP_DIM_CHECK(x, this->nx());
   std::vector<U> out;
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
@@ -56,7 +56,7 @@ template <typename Scalar>
 template <class VectorType, class U>
 std::vector<U>
 CartesianProductTpl<Scalar>::split_vector_impl(VectorType &v) const {
-  PROXNLP_DIM_CHECK(v, this->ndx());
+  PROXSUITE_NLP_DIM_CHECK(v, this->ndx());
   std::vector<U> out;
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {

@@ -17,14 +17,14 @@ public:
   using Base::computeJacobian;
   using Base::vectorHessianProduct;
 
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   ComposeFunctionTpl(const shared_ptr<Base> &left,
                      const shared_ptr<Base> &right)
       : Base(right->nx(), right->ndx(), left->nr()), left_(left),
         right_(right) {
     if (left->nx() != right->nr()) {
-      PROXNLP_RUNTIME_ERROR(fmt::format(
+      PROXSUITE_NLP_RUNTIME_ERROR(fmt::format(
           "Incompatible dimensions ({:d} and {:d}).", left->nx(), right->nr()));
     }
     assert(left->nx() == right->nr());
@@ -59,6 +59,6 @@ auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
 
 } // namespace proxnlp
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/function-ops.txx"
 #endif

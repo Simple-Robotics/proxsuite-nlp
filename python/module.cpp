@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(MODULE_NAME) {
   eigenpy::enableEigenPySpecific<context::VectorXBool>();
 
   bp::import("warnings");
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
   bp::import("pinocchio");
 #endif
 
@@ -52,7 +52,7 @@ BOOST_PYTHON_MODULE(MODULE_NAME) {
   {
     bp::scope res_cope = get_namespace("residuals");
     exposeResiduals();
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
     exposePinocchioResiduals();
 #endif
   }

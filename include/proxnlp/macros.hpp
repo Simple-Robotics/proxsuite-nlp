@@ -3,25 +3,25 @@
 #pragma once
 
 /// @brief Macro empty arg
-#define PROXNLP_MACRO_EMPTY_ARG
+#define PROXSUITE_NLP_MACRO_EMPTY_ARG
 
-#define PROXNLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj)
+#define PROXSUITE_NLP_EIGEN_CONST_CAST(type, obj) const_cast<type &>(obj)
 
-#ifdef PROXNLP_EIGEN_CHECK_MALLOC
-#define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)                                    \
+#ifdef PROXSUITE_NLP_EIGEN_CHECK_MALLOC
+#define PROXSUITE_NLP_EIGEN_ALLOW_MALLOC(allowed)                              \
   ::Eigen::internal::set_is_malloc_allowed(allowed)
 #else
-#define PROXNLP_EIGEN_ALLOW_MALLOC(allowed)
+#define PROXSUITE_NLP_EIGEN_ALLOW_MALLOC(allowed)
 #endif
 
 /// @brief Entering performance-critical code.
-#define PROXNLP_NOMALLOC_BEGIN PROXNLP_EIGEN_ALLOW_MALLOC(false)
+#define PROXSUITE_NLP_NOMALLOC_BEGIN PROXSUITE_NLP_EIGEN_ALLOW_MALLOC(false)
 
 /// @brief Exiting performance-critical code.
-#define PROXNLP_NOMALLOC_END PROXNLP_EIGEN_ALLOW_MALLOC(true)
+#define PROXSUITE_NLP_NOMALLOC_END PROXSUITE_NLP_EIGEN_ALLOW_MALLOC(true)
 
 #ifdef __GNUC__
-#define PROXNLP_INLINE inline __attribute__((always_inline))
+#define PROXSUITE_NLP_INLINE inline __attribute__((always_inline))
 #else
-#define PROXNLP_INLINE inline
+#define PROXSUITE_NLP_INLINE inline
 #endif

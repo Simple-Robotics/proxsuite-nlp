@@ -85,12 +85,12 @@ endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
-  add_compile_definitions(PROXNLP_EIGEN_CHECK_MALLOC)
+  add_compile_definitions(PROXSUITE_NLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
-  add_definitions(-DPROXNLP_ENABLE_TEMPLATE_INSTANTIATION)
+  add_definitions(-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION)
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 macro(TAG_LIBRARY_VERSION target)
@@ -105,7 +105,7 @@ add_project_dependency(fmt "9.1.0...<11" REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.
 
 if(BUILD_WITH_PROXSUITE)
   add_project_dependency(proxsuite REQUIRED)
-  add_definitions(-DPROXNLP_ENABLE_PROXSUITE_LDLT)
+  add_definitions(-DPROXSUITE_NLP_USE_PROXSUITE_LDLT)
 endif()
 
 # Variable containing all the cflags definition relative to optional dependencies
@@ -113,7 +113,7 @@ set(CFLAGS_DEPENDENCIES)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
   find_package(OpenMP REQUIRED)
-  add_compile_definitions(PROXNLP_MULTITHREADING)
+  add_compile_definitions(PROXSUITE_NLP_MULTITHREADING)
 endif(BUILD_WITH_OPENMP_SUPPORT)
 
 set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
@@ -137,7 +137,7 @@ endif(BUILD_PYTHON_INTERFACE)
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
   add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
-  add_compile_definitions(PROXNLP_WITH_PINOCCHIO)
+  add_compile_definitions(PROXSUITE_NLP_WITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # --- MAIN LIBRARY ----------------------------------------
@@ -278,13 +278,13 @@ endmacro(
   var_value)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  export_variable(PROXNLP_WITH_PINOCCHIO_SUPPORT ON)
+  export_variable(PROXSUITE_NLP_WITH_PINOCCHIO_SUPPORT ON)
 endif()
 if(BUILD_WITH_CASADI_SUPPORT)
-  export_variable(PROXNLP_USE_CASADI ON)
+  export_variable(PROXSUITE_NLP_USE_CASADI ON)
 endif()
 if(BUILD_PYTHON_INTERFACE)
-  export_variable(PROXNLP_WITH_PYTHON_INTERFACE ON)
+  export_variable(PROXSUITE_NLP_WITH_PYTHON_INTERFACE ON)
 endif()
 
 pkg_config_append_libs(${PROJECT_NAME})

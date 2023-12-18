@@ -5,22 +5,23 @@
 #include <stdexcept>
 #include <fmt/core.h>
 
-#define PROXNLP_RUNTIME_ERROR(msg)                                             \
+#define PROXSUITE_NLP_RUNTIME_ERROR(msg)                                       \
   throw ::proxnlp::RuntimeError(                                               \
       fmt::format("{}({}): {}", __FILE__, __LINE__, msg))
 
-#define PROXNLP_DIM_CHECK(x, nx)                                               \
+#define PROXSUITE_NLP_DIM_CHECK(x, nx)                                         \
   if (x.size() != nx)                                                          \
-  PROXNLP_RUNTIME_ERROR(fmt::format(                                           \
+  PROXSUITE_NLP_RUNTIME_ERROR(fmt::format(                                     \
       "Input size invalid (expected {:d}, got {:d})", nx, x.size()))
 
-#define PROXNLP_RAISE_IF_NAN(value)                                            \
+#define PROXSUITE_NLP_RAISE_IF_NAN(value)                                      \
   if (::proxnlp::math::check_value(value))                                     \
-  PROXNLP_RUNTIME_ERROR("Encountered NaN.\n")
+  PROXSUITE_NLP_RUNTIME_ERROR("Encountered NaN.\n")
 
-#define PROXNLP_RAISE_IF_NAN_NAME(value, name)                                 \
+#define PROXSUITE_NLP_RAISE_IF_NAN_NAME(value, name)                           \
   if (::proxnlp::math::check_value(value))                                     \
-  PROXNLP_RUNTIME_ERROR(fmt::format("Encountered NaN for value {:s}.\n", name))
+  PROXSUITE_NLP_RUNTIME_ERROR(                                                 \
+      fmt::format("Encountered NaN for value {:s}.\n", name))
 
 namespace proxnlp {
 

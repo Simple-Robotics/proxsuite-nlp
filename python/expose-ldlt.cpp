@@ -51,7 +51,7 @@ void exposeLdltRoutines() {
       .def(LDLTVisitor<BlockLDLT>())
       .def("print_sparsity", &BlockLDLT::print_sparsity, "self"_a,
            "Print the sparsity pattern of the matrix to factorize.");
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
   using ProxSuiteLDLT = linalg::ProxSuiteLDLTWrapper<Scalar>;
   bp::class_<ProxSuiteLDLT>(
       "ProxSuiteLDLT", "Wrapper around ProxSuite's custom LDLT.", bp::no_init)

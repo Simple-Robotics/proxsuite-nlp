@@ -22,7 +22,7 @@ public:
   using Scalar = typename LieGroup::Scalar;
   enum { Options = LieGroup::Options };
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXNLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   LieGroup lg_;
   PinocchioLieGroup() {}

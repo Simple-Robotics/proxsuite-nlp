@@ -20,7 +20,7 @@ struct QuadraticResidualCostTpl : public CostFunctionBaseTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using FunctionType = C2FunctionTpl<Scalar>; // base constraint func to use
-  PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using RowMatrixXs = Eigen::Matrix<Scalar, -1, -1, Eigen::RowMajor>;
   using Base = CostFunctionBaseTpl<Scalar>;
   using Base::computeGradient;
@@ -74,6 +74,6 @@ protected:
 
 #include "proxnlp/modelling/costs/quadratic-residual.hxx"
 
-#ifdef PROXNLP_ENABLE_TEMPLATE_INSTANTIATION
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxnlp/modelling/costs/quadratic-residual.txx"
 #endif
