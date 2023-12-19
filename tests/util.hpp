@@ -1,15 +1,15 @@
 #pragma once
 
-#include "proxnlp/math.hpp"
-#include "proxnlp/linalg/block-ldlt.hpp"
+#include "proxsuite-nlp/math.hpp"
+#include "proxsuite-nlp/linalg/block-ldlt.hpp"
 #include <EigenRand/EigenRand>
 
 namespace {
-using proxnlp::linalg::BlockKind;
-using proxnlp::linalg::isize;
-using proxnlp::linalg::SymbolicBlockMatrix;
+using proxsuite::nlp::linalg::BlockKind;
+using proxsuite::nlp::linalg::isize;
+using proxsuite::nlp::linalg::SymbolicBlockMatrix;
 using Scalar = double;
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 } // namespace
 
 /// Sample for the GOE (Gaussian Orthogonal Ensemble)

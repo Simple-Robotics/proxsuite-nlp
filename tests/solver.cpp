@@ -1,10 +1,10 @@
-#include "proxnlp/solver-base.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(solver)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 BOOST_AUTO_TEST_CASE(solve) {}
 

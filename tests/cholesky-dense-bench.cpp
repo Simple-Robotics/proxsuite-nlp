@@ -3,8 +3,8 @@
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 
-#include "proxnlp/linalg/bunchkaufman.hpp"
-#include "proxnlp/linalg/dense.hpp"
+#include "proxsuite-nlp/linalg/bunchkaufman.hpp"
+#include "proxsuite-nlp/linalg/dense.hpp"
 #include "util.hpp"
 
 #include <benchmark/benchmark.h>
@@ -89,7 +89,7 @@ BENCHMARK(BM_pos_sem_def<Eigen::BunchKaufman<Eigen::MatrixXd>>)
 BENCHMARK(BM_indefinite<Eigen::LDLT<Eigen::MatrixXd>>)->Apply(custom_args);
 BENCHMARK(BM_indefinite<Eigen::BunchKaufman<Eigen::MatrixXd>>)
     ->Apply(custom_args);
-BENCHMARK(BM_indefinite<proxnlp::linalg::DenseLDLT<double>>)
+BENCHMARK(BM_indefinite<proxsuite::nlp::linalg::DenseLDLT<double>>)
     ->Apply(custom_args);
 
 BENCHMARK_MAIN();

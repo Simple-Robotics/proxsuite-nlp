@@ -1,13 +1,13 @@
-#include "proxnlp/modelling/residuals/linear.hpp"
-#include "proxnlp/function-ops.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/residuals/linear.hpp"
+#include "proxsuite-nlp/function-ops.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
 BOOST_AUTO_TEST_SUITE(residual)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 BOOST_AUTO_TEST_CASE(test_linear) {
   BOOST_TEST_MESSAGE("Test linear function:");

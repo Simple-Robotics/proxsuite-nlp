@@ -2,11 +2,11 @@
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
 import numpy as np
-import proxnlp
-from proxnlp.residuals import ManifoldDifferenceToPoint
-from proxnlp.costs import QuadraticDistanceCost, QuadraticResidualCost
-from proxnlp.manifolds import VectorSpace
-from proxnlp.constraints import createInequalityConstraint
+import proxsuite_nlp
+from proxsuite_nlp.residuals import ManifoldDifferenceToPoint
+from proxsuite_nlp.costs import QuadraticDistanceCost, QuadraticResidualCost
+from proxsuite_nlp.manifolds import VectorSpace
+from proxsuite_nlp.constraints import createInequalityConstraint
 
 import matplotlib.pyplot as plt
 
@@ -52,26 +52,26 @@ cstrs_ = [
     createInequalityConstraint(res3),
 ]
 
-problem = proxnlp.Problem(space, cost_, cstrs_)
+problem = proxsuite_nlp.Problem(space, cost_, cstrs_)
 
 mu_init = 0.1
 rho_init = 0.0
-solver = proxnlp.Solver(
-    problem, mu_init=mu_init, rho_init=rho_init, verbose=proxnlp.VERBOSE
+solver = proxsuite_nlp.ProxNLPSolver(
+    problem, mu_init=mu_init, rho_init=rho_init, verbose=proxsuite_nlp.VERBOSE
 )
 solver.max_iters = 20
-solver.hess_approx = proxnlp.HESSIAN_EXACT
-solver.mul_update_mode = proxnlp.MUL_NEWTON
-solver.kkt_system = proxnlp.KktSystem.PRIMAL_DUAL
+solver.hess_approx = proxsuite_nlp.HESSIAN_EXACT
+solver.mul_update_mode = proxsuite_nlp.MUL_NEWTON
+solver.kkt_system = proxsuite_nlp.KKT_PRIMAL_DUAL
 try:
-    solver.ldlt_choice = proxnlp.LDLT_PROXSUITE
+    solver.ldlt_choice = proxsuite_nlp.LDLT_PROXSUITE
     solver.setup()
 except RuntimeError as e:
     print("Got exception: {}".format(e))
     print("Will proceed using LDLT_DENSE")
-    solver.ldlt_choice = proxnlp.LDLT_DENSE
+    solver.ldlt_choice = proxsuite_nlp.LDLT_DENSE
     solver.setup()
-callback = proxnlp.helpers.HistoryCallback()
+callback = proxsuite_nlp.helpers.HistoryCallback()
 solver.register_callback(callback)
 
 lams0 = [np.zeros(cs.nr) for cs in cstrs_]

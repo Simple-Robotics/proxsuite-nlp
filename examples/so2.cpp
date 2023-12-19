@@ -2,16 +2,16 @@
  * Optimize a quadratic function on a circle, or on a disk.
  *
  */
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
 #include "example-base.hpp"
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Manifold = PinocchioLieGroup<SO2>;
 using Problem = ProblemTpl<double>;
 
@@ -74,7 +74,7 @@ int main() {
              "1st mul = {}\n",
              lams.size(), lams[0]);
 
-  SolverTpl<double> solver(prob, 0.01);
+  ProxNLPSolverTpl<double> solver(prob, 0.01);
   solver.setup();
   solver.solve(space.rand());
 

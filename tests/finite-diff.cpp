@@ -1,8 +1,8 @@
-#include "proxnlp/modelling/autodiff/finite-difference.hpp"
-#ifdef PROXNLP_WITH_PINOCCHIO
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/autodiff/finite-difference.hpp"
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
-#include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -11,9 +11,9 @@
 
 BOOST_AUTO_TEST_SUITE(finite_diff)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
-PROXNLP_DYNAMIC_TYPEDEFS(double);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(double);
 static const double fd_eps = 1e-4;
 static const double prec = std::sqrt(fd_eps);
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test1) {
   fmt::print("Hessian:\n{}\n", H0);
 }
 
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 BOOST_AUTO_TEST_CASE(test2) {
   PinocchioLieGroup<pin::SpecialEuclideanOperationTpl<2, double>> space;
 

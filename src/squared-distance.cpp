@@ -1,7 +1,9 @@
-#include "proxnlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct QuadraticDistanceCostTpl<context::Scalar>;
 
 }
+} // namespace proxsuite

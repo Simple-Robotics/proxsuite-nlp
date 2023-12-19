@@ -2,11 +2,12 @@
 /// @author Sarah El-Kazdadi
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxnlp/linalg/block-kind.hpp"
+#include "proxsuite-nlp/linalg/block-kind.hpp"
 
 #include <iostream>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 /// BlockKind of the transpose of a matrix.
@@ -277,4 +278,5 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
 }
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

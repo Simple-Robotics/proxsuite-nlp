@@ -5,19 +5,19 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
-#include <proxnlp/modelling/spaces/multibody.hpp>
-#include <proxnlp/modelling/costs/quadratic-residual.hpp>
-#include <proxnlp/modelling/costs/squared-distance.hpp>
-#include <proxnlp/cost-sum.hpp>
-#include <proxnlp/solver-base.hpp>
-#include <proxnlp/modelling/constraints.hpp>
+#include <proxsuite-nlp/modelling/spaces/multibody.hpp>
+#include <proxsuite-nlp/modelling/costs/quadratic-residual.hpp>
+#include <proxsuite-nlp/modelling/costs/squared-distance.hpp>
+#include <proxsuite-nlp/cost-sum.hpp>
+#include <proxsuite-nlp/prox-solver.hpp>
+#include <proxsuite-nlp/modelling/constraints.hpp>
 
 #include <boost/filesystem/path.hpp>
 
 using Scalar = double;
-PROXNLP_DYNAMIC_TYPEDEFS(Scalar);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 namespace pin = pinocchio;
 
 using Model = pin::ModelTpl<Scalar>;
@@ -105,7 +105,8 @@ int main() {
     problem->addConstraint(cstrobj);
   }
 
-  SolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0, proxnlp::VERBOSE);
+  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
+                                  proxsuite::nlp::VERBOSE);
   solver.setup();
   solver.solve(q0);
 

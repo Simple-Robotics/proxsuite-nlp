@@ -1,9 +1,9 @@
-#include "proxnlp/constraint-base.hpp"
-#include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/constraints/negative-orthant.hpp"
-// #include "proxnlp/modelling/constraints/l1-penalty.hpp"
+#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
+#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
+// #include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
 
-#include "proxnlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -12,11 +12,11 @@
 
 BOOST_AUTO_TEST_SUITE(constraint)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 const int N = 20;
 VectorSpaceTpl<double> space(N);
-PROXNLP_DYNAMIC_TYPEDEFS(double);
+PROXSUITE_NLP_DYNAMIC_TYPEDEFS(double);
 
 BOOST_AUTO_TEST_CASE(test_equality) {
   VectorXs x0 = space.neutral();

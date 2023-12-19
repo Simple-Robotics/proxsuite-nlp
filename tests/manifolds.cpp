@@ -1,12 +1,12 @@
-#include "proxnlp/manifold-base.hpp"
+#include "proxsuite-nlp/manifold-base.hpp"
 
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/modelling/spaces/cartesian-product.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 #include <pinocchio/parsers/sample-models.hpp>
-#include "proxnlp/modelling/spaces/pinocchio-groups.hpp"
-#include "proxnlp/modelling/spaces/multibody.hpp"
+#include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
+#include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 #endif
 
 #include <fmt/core.h>
@@ -16,7 +16,7 @@
 
 BOOST_AUTO_TEST_SUITE(manifold)
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Manifold = ManifoldAbstractTpl<double>;
 
 BOOST_AUTO_TEST_CASE(test_vectorspace) {
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
   x1 = prod2->rand();
 }
 
-#ifdef PROXNLP_WITH_PINOCCHIO
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 
 BOOST_AUTO_TEST_CASE(test_lg_vecspace) {
   const int N = 4;

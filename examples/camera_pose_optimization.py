@@ -1,6 +1,6 @@
-from proxnlp import residuals, costs
+from proxsuite_nlp import residuals, costs
 
-import proxnlp
+import proxsuite_nlp
 import pinocchio
 import numpy as np
 
@@ -14,8 +14,8 @@ base_fun = residuals.RigidTransformationPointAction(point)
 view = np.random.randn(3)
 # view = point
 lin_op = residuals.LinearFunction(np.eye(3), -view)
-resdl = proxnlp.compose(lin_op, base_fun)
-space: proxnlp.manifolds.SE3() = base_fun.space
+resdl = proxsuite_nlp.compose(lin_op, base_fun)
+space: proxsuite_nlp.manifolds.SE3() = base_fun.space
 T0 = space.neutral()
 print(resdl(T0))
 
@@ -46,8 +46,8 @@ assert total_cost.num_components == 2
 print(total_cost.call(T0))
 
 
-problem = proxnlp.Problem(space, total_cost, [])
-solver = proxnlp.Solver(problem, 1e-4, 0.01, verbose=proxnlp.VERBOSE)
+problem = proxsuite_nlp.Problem(space, total_cost, [])
+solver = proxsuite_nlp.ProxNLPSolver(problem, 1e-4, 0.01, verbose=proxsuite_nlp.VERBOSE)
 solver.setup()
 
 flag = solver.solve(T0)

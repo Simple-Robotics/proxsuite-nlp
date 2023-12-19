@@ -6,17 +6,22 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include "proxnlp/ldlt-allocator.hpp"
+#include "proxsuite-nlp/ldlt-allocator.hpp"
 
 #include <benchmark/benchmark.h>
 
-#include "proxnlp/math.hpp"
+#include "proxsuite-nlp/math.hpp"
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
+
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
+
 using linalg::ProxSuiteLDLTWrapper;
+
+#endif
 
 namespace {
 constexpr auto unit = benchmark::kMicrosecond;
@@ -74,12 +79,16 @@ LDLT construct(isize matrix_size, const SymbolicBlockMatrix & /* sym_mat */) {
   return LDLT(matrix_size);
 }
 
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
+
 template <>
 ProxSuiteLDLTWrapper<Scalar>
 construct<ProxSuiteLDLTWrapper<Scalar>>(isize matrix_size,
                                         const SymbolicBlockMatrix &) {
   return ProxSuiteLDLTWrapper<Scalar>(matrix_size, matrix_size);
 }
+
+#endif
 
 /// BlockLDLT need SymbolicBlockMatrix as argument
 template <>
@@ -185,7 +194,7 @@ BENCHMARK_TEMPLATE(ldlt_solve, Eigen::BunchKaufman<MatrixXs>)
 BENCHMARK_TEMPLATE(ldlt_solve_in_place, BlockLDLT<Scalar>)
     ->Apply(default_arguments);
 
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
 
 BENCHMARK_TEMPLATE(ldlt_compute, ProxSuiteLDLTWrapper<Scalar>)
     ->Apply(default_arguments_compute);

@@ -4,11 +4,12 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-set(PROJECT_NAME proxnlp)
+set(PROJECT_NAME proxsuite-nlp)
 set(PROJECT_DESCRIPTION
     "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.")
-set(PROJECT_URL "https://github.com/Simple-Robotics/proxnlp")
+set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
+set(PROJECT_CUSTOM_HEADER_DIR "proxsuite-nlp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 set(CXX_DISABLE_WERROR True)
@@ -31,14 +32,6 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
-
-if(APPLE) # Use the handmade approach
-  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
-elseif(UNIX)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.20.0" OR ${CMAKE_VERSION} VERSION_EQUAL "3.20.0")
-    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
-  endif()
-endif(APPLE)
 include(CMakeDependentOption)
 
 apply_default_apple_configuration()
@@ -68,7 +61,6 @@ option(BUILD_BENCHMARK "Build the benchmarks" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
-option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
 option(BUILD_WITH_PROXSUITE "Build the library with ProxSuite's LDLT" OFF)
 cmake_dependent_option(
   GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF
@@ -84,12 +76,13 @@ endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
-  add_compile_definitions(PROXNLP_EIGEN_CHECK_MALLOC)
+  add_compile_definitions(PROXSUITE_NLP_EIGEN_CHECK_MALLOC)
   add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
-  add_definitions(-DPROXNLP_ENABLE_TEMPLATE_INSTANTIATION)
+  add_definitions(-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION)
+  list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION")
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 macro(TAG_LIBRARY_VERSION target)
@@ -104,16 +97,12 @@ add_project_dependency(fmt "9.1.0...<11" REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.
 
 if(BUILD_WITH_PROXSUITE)
   add_project_dependency(proxsuite REQUIRED)
-  add_definitions(-DPROXNLP_ENABLE_PROXSUITE_LDLT)
+  add_definitions(-DPROXSUITE_NLP_USE_PROXSUITE_LDLT)
+  list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_USE_PROXSUITE_LDLT")
 endif()
 
 # Variable containing all the cflags definition relative to optional dependencies
 set(CFLAGS_DEPENDENCIES)
-
-if(BUILD_WITH_OPENMP_SUPPORT)
-  find_package(OpenMP REQUIRED)
-  add_compile_definitions(PROXNLP_MULTITHREADING)
-endif(BUILD_WITH_OPENMP_SUPPORT)
 
 set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
 
@@ -123,26 +112,23 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
-  set(PYLIB_NAME "py${PROJECT_NAME}")
   add_project_dependency(eigenpy 3.1.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.1.0")
-  set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
 
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
   message(STATUS "Python compiler: ${_python_implementation_value}")
-
 endif(BUILD_PYTHON_INTERFACE)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
   add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
-  add_compile_definitions(PROXNLP_WITH_PINOCCHIO)
+  add_compile_definitions(PROXSUITE_NLP_WITH_PINOCCHIO)
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # --- MAIN LIBRARY ----------------------------------------
-set(LIB_HEADER_DIR ${PROJECT_SOURCE_DIR}/include/proxnlp)
+set(LIB_HEADER_DIR ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
 file(GLOB_RECURSE LIB_HEADERS ${LIB_HEADER_DIR}/*.hpp ${LIB_HEADER_DIR}/*.hxx)
 
 set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp)
@@ -159,7 +145,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
-      ${PROJECT_SOURCE_DIR}/src/solver-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
       ${PROJECT_SOURCE_DIR}/src/linesearch.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
@@ -171,7 +157,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/function-base.txx
       ${LIB_HEADER_DIR}/cost-function.txx
       ${LIB_HEADER_DIR}/cost-sum.txx
-      ${LIB_HEADER_DIR}/solver-base.txx
+      ${LIB_HEADER_DIR}/prox-solver.txx
       ${LIB_HEADER_DIR}/results.txx
       ${LIB_HEADER_DIR}/problem-base.txx
       ${LIB_HEADER_DIR}/workspace.txx
@@ -197,7 +183,8 @@ function(create_library)
   get_directory_property(CURRENT_COMPILE_DEFINITIONS COMPILE_DEFINITIONS)
 
   add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
   target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
 
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX VERSION ${PROJECT_VERSION})
@@ -210,14 +197,11 @@ function(create_library)
   endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::system Boost::serialization)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
   if(BUILD_WITH_PROXSUITE)
     target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
   endif(BUILD_WITH_PROXSUITE)
-  if(BUILD_WITH_OPENMP_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
-  endif()
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   if(MSVC)
@@ -242,17 +226,13 @@ add_header_group(LIB_HEADERS)
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${TARGETS_EXPORT_NAME}
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
   INCLUDES
   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
-# Python interface
-if(BUILD_PYTHON_INTERFACE)
-  add_subdirectory(python)
-endif()
+add_subdirectory(bindings)
 
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
@@ -272,27 +252,21 @@ macro(EXPORT_VARIABLE var_name var_value)
     set(${var_name} ${var_value})
   endif()
   string(APPEND PACKAGE_EXTRA_MACROS "\nset(${var_name} ${var_value})")
-endmacro(
-  EXPORT_VARIABLE
-  var_name
-  var_value)
+endmacro()
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  export_variable(PROXNLP_WITH_PINOCCHIO_SUPPORT ON)
-endif()
-if(BUILD_WITH_CASADI_SUPPORT)
-  export_variable(PROXNLP_USE_CASADI ON)
+  export_variable(PROXSUITE_NLP_WITH_PINOCCHIO_SUPPORT ON)
 endif()
 if(BUILD_PYTHON_INTERFACE)
-  export_variable(PROXNLP_WITH_PYTHON_INTERFACE ON)
+  export_variable(PROXSUITE_NLP_WITH_PYTHON_INTERFACE ON)
+endif()
+if(BUILD_WITH_PROXSUITE)
+  export_variable(PROXSUITE_NLP_WITH_PROXSUITE ON)
 endif()
 
 pkg_config_append_libs(${PROJECT_NAME})
 pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
-
-foreach(cflags ${CFLAGS_DEPENDENCIES})
-  pkg_config_append_cflags(${cflags})
-endforeach(cflags ${CFLAGS_DEPENDENCIES})
+pkg_config_append_cflags("${CFLAGS_DEPENDENCIES}")
 
 # Install catkin package.xml
 install(FILES package.xml DESTINATION share/${PROJECT_NAME})

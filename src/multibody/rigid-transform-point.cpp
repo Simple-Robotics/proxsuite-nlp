@@ -1,8 +1,10 @@
-#include "proxnlp/modelling/residuals/rigid-transform-point.hpp"
-#include "proxnlp/context.hpp"
+#include "proxsuite-nlp/modelling/residuals/rigid-transform-point.hpp"
+#include "proxsuite-nlp/context.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct RigidTransformationPointActionTpl<context::Scalar>;
 
-}
+} // namespace nlp
+} // namespace proxsuite

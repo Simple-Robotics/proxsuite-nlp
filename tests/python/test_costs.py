@@ -1,6 +1,6 @@
 import numpy as np
 
-from proxnlp import manifolds, costs
+from proxsuite_nlp import manifolds, costs
 
 
 def test_cost_ops():

@@ -4,11 +4,14 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 A simple QP with equality and inequality constraints.
 """
 import numpy as np
-import proxnlp
-from proxnlp.residuals import LinearFunction
-from proxnlp.costs import QuadraticDistanceCost
-from proxnlp.manifolds import EuclideanSpace
-from proxnlp.constraints import createEqualityConstraint, createInequalityConstraint
+import proxsuite_nlp
+from proxsuite_nlp.residuals import LinearFunction
+from proxsuite_nlp.costs import QuadraticDistanceCost
+from proxsuite_nlp.manifolds import EuclideanSpace
+from proxsuite_nlp.constraints import (
+    createEqualityConstraint,
+    createInequalityConstraint,
+)
 
 import matplotlib.pyplot as plt
 
@@ -47,17 +50,17 @@ cstr2 = createInequalityConstraint(resdl)
 # DEFINE A PROBLEM AND SOLVE IT
 x_target = np.random.randn(nx) * 10
 cost_ = QuadraticDistanceCost(space, x_target, np.eye(nx))
-problem = proxnlp.Problem(space, cost_)
+problem = proxsuite_nlp.Problem(space, cost_)
 print("Problem:", problem)
 print("Target :", x_target)
-problem = proxnlp.Problem(space, cost_, [cstr1])
+problem = proxsuite_nlp.Problem(space, cost_, [cstr1])
 
 
-cb = proxnlp.helpers.HistoryCallback()
+cb = proxsuite_nlp.helpers.HistoryCallback()
 
 tol = 1e-6
 mu_init = 1e-4
-solver = proxnlp.Solver(problem, tol, mu_init)
+solver = proxsuite_nlp.ProxNLPSolver(problem, tol, mu_init)
 solver.register_callback(cb)
 
 x_init = np.random.randn(nx) * 10

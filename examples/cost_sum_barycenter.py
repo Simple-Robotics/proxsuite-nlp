@@ -1,12 +1,12 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
-import proxnlp
+import proxsuite_nlp
 import numpy as np
 
-from proxnlp import manifolds
-from proxnlp.costs import CostSum, QuadraticDistanceCost
-from proxnlp.utils import plot_pd_errs
+from proxsuite_nlp import manifolds
+from proxsuite_nlp.costs import CostSum, QuadraticDistanceCost
+from proxsuite_nlp.utils import plot_pd_errs
 
 import matplotlib.pyplot as plt
 
@@ -72,9 +72,9 @@ def test_cost_sum():
     sum_3 = sum_2 + dist_to_p2
     print("sum3 init:", sum_3)
 
-    problem = proxnlp.Problem(space, sum_3)
-    solver = proxnlp.Solver(problem, mu_init=0.1)
-    callback = proxnlp.helpers.HistoryCallback()
+    problem = proxsuite_nlp.Problem(space, sum_3)
+    solver = proxsuite_nlp.ProxNLPSolver(problem, mu_init=0.1)
+    callback = proxsuite_nlp.helpers.HistoryCallback()
     solver.setup()
     solver.register_callback(callback)
     flag = solver.solve(p0)

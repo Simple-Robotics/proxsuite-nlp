@@ -13,7 +13,7 @@
 BOOST_AUTO_TEST_SUITE(tri_solve)
 
 namespace utf = boost::unit_test;
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::TriangularBlockMatrix;
 

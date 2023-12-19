@@ -1,0 +1,67 @@
+name: CI - OSX/Linux via Conda
+
+on: [push,pull_request]
+
+jobs:
+  proxsuite-nlp-conda:
+    name: proxsuite-nlp on ${{ matrix.os }} in ${{ matrix.build_type }} mode with Conda
+    runs-on: ${{ matrix.os }}
+    env:
+      CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
+      BUILD_ADVANCED_TESTING: ${{ matrix.BUILD_ADVANCED_TESTING }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        build_type: [Release, Debug]
+        python-version: ["3.8", "3.12"]
+
+        include:
+          CCACHE_DIR: /home/runner/.ccache
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - uses: actions/cache@v3
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
+
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: proxsuite-nlp
+        auto-update-conda: true
+        environment-file: .github/workflows/conda/conda-env.yml
+        python-version: ${{ matrix.python-version }}
+
+    - name: Build proxsuite-nlp
+      shell: bash -l {0}
+      run: |
+        conda activate proxsuite-nlp
+        echo $CONDA_PREFIX
+
+        mkdir build
+        cd build
+
+        cmake .. \
+          -GNinja \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DPYTHON_EXECUTABLE=$(which python3) \
+          -DBUILD_PYTHON_INTERFACE=ON \
+          -DGENERATE_PYTHON_STUBS=ON \
+          -DBUILD_BENCHMARK=ON
+        cmake --build .
+        ctest --output-on-failure
+        cmake --install
+
+    - name: Uninstall proxsuite-nlp
+      shell: bash -l {0}
+      run: |
+        conda activate proxsuite-nlp
+        cd build
+        cmake --build . --target uninstall

@@ -1,10 +1,10 @@
 /* Copyright (C) 2022 LAAS-CNRS, INRIA
  */
-#include "proxnlp/modelling/costs/squared-distance.hpp"
-#include "proxnlp/modelling/residuals/linear.hpp"
-#include "proxnlp/modelling/constraints/equality-constraint.hpp"
-#include "proxnlp/modelling/spaces/vector-space.hpp"
-#include "proxnlp/solver-base.hpp"
+#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/residuals/linear.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/prox-solver.hpp"
 
 #include "example-base.hpp"
 
@@ -22,7 +22,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N) {
   return Q.template topLeftCorner<-1, -1>(M, N);
 }
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraint<double>;
 using Constraint = ConstraintObjectTpl<double>;
@@ -57,7 +57,7 @@ template <int N, int M = 1> int submain() {
 
   auto problem = std::make_shared<Problem>(space_, cost, constraints);
 
-  using Solver_t = SolverTpl<double>;
+  using Solver_t = ProxNLPSolverTpl<double>;
 
   Solver_t solver(problem);
   solver.setPenalty(1e-4);

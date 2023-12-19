@@ -4,8 +4,8 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 import pytest
 import numpy as np
 
-from proxnlp.manifolds import SO2, SO3, SE2, SE3, CartesianProduct
-from proxnlp import autodiff, residuals
+from proxsuite_nlp.manifolds import SO2, SO3, SE2, SE3, CartesianProduct
+from proxsuite_nlp import autodiff, residuals
 
 
 def test_is_normalized():

@@ -1,6 +1,6 @@
-import proxnlp
-from proxnlp import manifolds, costs
-from proxnlp.casadi_utils import CasadiFunction
+import proxsuite_nlp
+from proxsuite_nlp import manifolds, costs
+from proxsuite_nlp.casadi_utils import CasadiFunction
 import casadi as cas
 import numpy as np
 import pytest
@@ -10,12 +10,12 @@ import itertools
 space = manifolds.R()
 nx = space.nx
 
-linesearch_strategies = [proxnlp.LinesearchStrategy.ARMIJO]
+linesearch_strategies = [proxsuite_nlp.LinesearchStrategy.ARMIJO]
 
 linesearch_interp_type = [
-    proxnlp.LSInterpolation.BISECTION,
-    proxnlp.LSInterpolation.QUADRATIC,
-    proxnlp.LSInterpolation.CUBIC,
+    proxsuite_nlp.LSInterpolation.BISECTION,
+    proxsuite_nlp.LSInterpolation.QUADRATIC,
+    proxsuite_nlp.LSInterpolation.CUBIC,
 ]
 
 linesearch_opts = itertools.product(linesearch_strategies, linesearch_interp_type)
@@ -31,8 +31,8 @@ def test_quad1d(ls_strat, ls_interp_type):
     fs = CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
-    problem = proxnlp.Problem(space, cost_fun)
-    solver = proxnlp.Solver(problem, 1e-5)
+    problem = proxsuite_nlp.Problem(space, cost_fun)
+    solver = proxsuite_nlp.ProxNLPSolver(problem, 1e-5)
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type
     solver.setup()
@@ -43,7 +43,7 @@ def test_quad1d(ls_strat, ls_interp_type):
 
     print(rs.xopt)
     print("real sol:", real_solution)
-    assert flag == proxnlp.ConvergenceFlag.success
+    assert flag == proxsuite_nlp.ConvergenceFlag.success
     assert rs.xopt[0] == real_solution
 
 
@@ -58,15 +58,15 @@ def test_cubic1d(ls_strat, ls_interp_type):
     fs = CasadiFunction(1, 1, f, x_sm, True)
 
     cost_fun = costs.CostFromFunction(fs)
-    problem = proxnlp.Problem(space, cost_fun)
-    solver = proxnlp.Solver(problem, 1e-5)
+    problem = proxsuite_nlp.Problem(space, cost_fun)
+    solver = proxsuite_nlp.ProxNLPSolver(problem, 1e-5)
     x0 = np.array([1.0])
     solver.ls_strat = ls_strat
     solver.ls_options.interp_type = ls_interp_type
     solver.setup()
     flag = solver.solve(x0, [])
     rs = solver.getResults()
-    assert flag == proxnlp.ConvergenceFlag.success
+    assert flag == proxsuite_nlp.ConvergenceFlag.success
     assert rs.num_iters <= 7
     print(rs)
     # obtained from wolfram

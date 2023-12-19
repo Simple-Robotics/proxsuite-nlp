@@ -6,17 +6,17 @@
 #define EIGEN_DEFAULT_IO_FORMAT Eigen::IOFormat(3, 0, ",", "\n", "[", "]")
 
 #include "util.hpp"
-#include "proxnlp/ldlt-allocator.hpp"
+#include "proxsuite-nlp/ldlt-allocator.hpp"
 
 #include <boost/test/unit_test.hpp>
 
-#include "proxnlp/math.hpp"
+#include "proxsuite-nlp/math.hpp"
 #include <fmt/ranges.h>
 
 BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 
 namespace utf = boost::unit_test;
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
 
   BOOST_TEST_MESSAGE("Default structure:");
   linalg::SymbolicBlockMatrix default_structure =
-      proxnlp::create_default_block_structure(nprims, nduals);
+      proxsuite::nlp::create_default_block_structure(nprims, nduals);
   linalg::print_sparsity_pattern(default_structure);
 
   BOOST_TEST_MESSAGE("Modified structure:");
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
   linalg::print_sparsity_pattern(modified_structure);
 }
 
-#ifdef PROXNLP_ENABLE_PROXSUITE_LDLT
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
 
 BOOST_FIXTURE_TEST_CASE(test_proxsuite_ldlt, ldlt_test_fixture,
                         *utf::tolerance(TOL)) {

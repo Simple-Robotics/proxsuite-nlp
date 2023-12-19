@@ -1,8 +1,10 @@
-#include "proxnlp/problem-base.hpp"
-#include "proxnlp/workspace.hpp"
+#include "proxsuite-nlp/problem-base.hpp"
+#include "proxsuite-nlp/workspace.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct ProblemTpl<context::Scalar>;
 
-}
+} // namespace nlp
+} // namespace proxsuite

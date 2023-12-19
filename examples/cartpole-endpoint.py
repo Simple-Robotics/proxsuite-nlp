@@ -1,9 +1,9 @@
-import proxnlp
+import proxsuite_nlp
 
 import numpy as np
-from proxnlp import manifolds, constraints
-from proxnlp import C2Function
-from proxnlp import costs, autodiff
+from proxsuite_nlp import manifolds, constraints
+from proxsuite_nlp import C2Function
+from proxsuite_nlp import costs, autodiff
 
 
 space = manifolds.R() * manifolds.SO2()
@@ -28,13 +28,13 @@ inst_good = autodiff.FiniteDifferenceHelperC2(space, inst, eps)
 
 eq_cstr = constraints.createEqualityConstraint(inst_good)
 
-prob = proxnlp.Problem(space, sq_cost, [eq_cstr])
-ws = proxnlp.Workspace(prob)
-rs = proxnlp.Results(prob)
+prob = proxsuite_nlp.Problem(space, sq_cost, [eq_cstr])
+ws = proxsuite_nlp.Workspace(prob)
+rs = proxsuite_nlp.Results(prob)
 
 mu_init = 1e-2
 tol = 1e-4
-solver = proxnlp.Solver(prob, tol, mu_init=mu_init)
+solver = proxsuite_nlp.ProxNLPSolver(prob, tol, mu_init=mu_init)
 
 x0 = space.neutral()
 lam0 = np.zeros([1])

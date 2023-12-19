@@ -1,6 +1,6 @@
 """
 Inverse kinematics with friction cone constraint.
-We compare PROXNLP with the solver IPOPT.
+We compare proxsuite_nlp with the solver IPOPT.
 
 min Dq, f || q - q0 ||**2 + || f ||**2
 
@@ -26,9 +26,9 @@ import example_robot_data as robex
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import proxnlp
-from proxnlp.manifolds import MultibodyPhaseSpace, VectorSpace
-from proxnlp.casadi_utils import CasadiFunction
+import proxsuite_nlp
+from proxsuite_nlp.manifolds import MultibodyPhaseSpace, VectorSpace
+from proxsuite_nlp.casadi_utils import CasadiFunction
 
 sns.set_style("whitegrid")
 
@@ -155,7 +155,7 @@ def equality_constraints(q, fs):
 def inequality_constraints(q, which_solver):
     ineq = []
     ineq.append(-com(q)[2] + (sum([f(q)[2] for f in feet.values()])) / len(feet))
-    if which_solver == "proxnlp":
+    if which_solver == "proxsuite_nlp":
         ineq.append(-com(q)[2] + (sum([f(q)[2] for f in feet.values()])) / len(feet))
     return casadi.vertcat(*ineq)
 
@@ -213,7 +213,7 @@ if viz is not None:
     viz.display(qopt_ipopt)
 
 
-# Problem PROXNLP
+# Problem proxsuite_nlp
 
 xspace = MultibodyPhaseSpace(model)
 pb_space = VectorSpace(4 * 3 + (xspace.ndx))
@@ -240,40 +240,40 @@ eq_fun = CasadiFunction(
 ineq_fun = CasadiFunction(
     pb_space.nx,
     pb_space.ndx,
-    inequality_constraints(q, "proxnlp"),
+    inequality_constraints(q, "proxsuite_nlp"),
     XF_s,
     use_hessian=True,
 )
 
 # Solver setup
 
-cost_fun_ = proxnlp.costs.CostFromFunction(cost_fun)
-eq_constr1_ = proxnlp.constraints.createEqualityConstraint(eq_fun)
-ineq_constr1_ = proxnlp.constraints.createInequalityConstraint(fc_fun)
-ineq_constr2_ = proxnlp.constraints.createInequalityConstraint(ineq_fun)
+cost_fun_ = proxsuite_nlp.costs.CostFromFunction(cost_fun)
+eq_constr1_ = proxsuite_nlp.constraints.createEqualityConstraint(eq_fun)
+ineq_constr1_ = proxsuite_nlp.constraints.createInequalityConstraint(fc_fun)
+ineq_constr2_ = proxsuite_nlp.constraints.createInequalityConstraint(ineq_fun)
 
 constraints = []
 constraints.append(eq_constr1_)
 constraints.append(ineq_constr1_)
 constraints.append(ineq_constr2_)
 
-problem = proxnlp.Problem(pb_space, cost_fun_, constraints)
+problem = proxsuite_nlp.Problem(pb_space, cost_fun_, constraints)
 
 print("No. of variables  :", pb_space.nx)
 print("No. of constraints:", problem.total_constraint_dim)
 
-callback = proxnlp.helpers.HistoryCallback()
+callback = proxsuite_nlp.helpers.HistoryCallback()
 rho_init = 1e-12
 mu_init = 1e-2
 
-solver = proxnlp.Solver(
+solver = proxsuite_nlp.ProxNLPSolver(
     problem,
     mu_init=mu_init,
     rho_init=rho_init,
     tol=TOLERANCE,
     dual_alpha=0.5,
     dual_beta=0.5,
-    verbose=proxnlp.VERBOSE,
+    verbose=proxsuite_nlp.VERBOSE,
 )
 solver.setup()
 solver.register_callback(callback)
@@ -296,24 +296,24 @@ dxs_opt_flat = dxus_opt[: xspace.nx]
 dqs_opt = dxs_opt_flat[: model.nv]
 dvs_opt = dxs_opt_flat[model.nv :]
 
-f_opt_proxnlp = dxus_opt[xspace.ndx :]
-f_opt_proxnlp = np.split(f_opt_proxnlp, 4)
+f_opt_proxsuite_nlp = dxus_opt[xspace.ndx :]
+f_opt_proxsuite_nlp = np.split(f_opt_proxsuite_nlp, 4)
 
-pr_proxnlp = callback.storage.prim_infeas
-du_proxnlp = callback.storage.dual_infeas
+pr_proxsuite_nlp = callback.storage.prim_infeas
+du_proxsuite_nlp = callback.storage.dual_infeas
 
-qopt_proxnlp = integrate(q0, dqs_opt).full()
+qopt_proxsuite_nlp = integrate(q0, dqs_opt).full()
 
-viz.display(qopt_proxnlp)
+viz.display(qopt_proxsuite_nlp)
 
 
 print("Difference between the solutions")
-for i, (qipopt, qproxnlp) in enumerate(zip(qopt_ipopt, qopt_proxnlp)):
-    print("q_" + str(i) + " difference:\t", qipopt - qproxnlp)
+for i, (qipopt, qproxsuite_nlp) in enumerate(zip(qopt_ipopt, qopt_proxsuite_nlp)):
+    print("q_" + str(i) + " difference:\t", qipopt - qproxsuite_nlp)
 
 print("\nDifference between the solutions")
-for i, (fipopt, fproxnlp) in enumerate(zip(f_opt_ipopt, f_opt_proxnlp)):
-    print("F_" + str(i) + " difference:\t", fipopt - fproxnlp)
+for i, (fipopt, fproxsuite_nlp) in enumerate(zip(f_opt_ipopt, f_opt_proxsuite_nlp)):
+    print("F_" + str(i) + " difference:\t", fipopt - fproxsuite_nlp)
 
 fig, axes = plt.subplots(1, 2, sharey=True, figsize=(12, 6), dpi=90)
 plt.sca(axes[0])
@@ -324,9 +324,9 @@ ylims = plt.ylim()
 plt.legend(["dual", "primal"])
 
 plt.sca(axes[1])
-plt.title("proxnlp Residuals")
-plt.semilogy(du_proxnlp, marker=".")
-plt.semilogy(pr_proxnlp, marker=".")
+plt.title("proxsuite_nlp Residuals")
+plt.semilogy(du_proxsuite_nlp, marker=".")
+plt.semilogy(pr_proxsuite_nlp, marker=".")
 ylims = (min(ylims[0], plt.ylim()[0]), max(ylims[1], plt.ylim()[1]))
 plt.ylim(*ylims)
 plt.legend(["dual", "primal"])
