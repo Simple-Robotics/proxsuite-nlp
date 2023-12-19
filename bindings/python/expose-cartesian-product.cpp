@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/python/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 using context::Manifold;
@@ -95,4 +96,5 @@ void exposeCartesianProduct() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

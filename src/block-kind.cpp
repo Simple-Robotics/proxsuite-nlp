@@ -6,7 +6,8 @@
 
 #include <iostream>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 /// BlockKind of the transpose of a matrix.
@@ -277,4 +278,5 @@ void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept {
 }
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

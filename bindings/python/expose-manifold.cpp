@@ -10,7 +10,8 @@
 #include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 #include "proxsuite-nlp/modelling/spaces/tangent-bundle.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 using context::ConstVectorRef;
 using context::Manifold;
@@ -228,4 +229,5 @@ void exposeManifolds() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

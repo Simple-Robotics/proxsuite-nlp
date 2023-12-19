@@ -12,11 +12,16 @@
 
 #include "proxsuite-nlp/math.hpp"
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
+
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
+
 using linalg::ProxSuiteLDLTWrapper;
+
+#endif
 
 namespace {
 constexpr auto unit = benchmark::kMicrosecond;
@@ -74,12 +79,16 @@ LDLT construct(isize matrix_size, const SymbolicBlockMatrix & /* sym_mat */) {
   return LDLT(matrix_size);
 }
 
+#ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
+
 template <>
 ProxSuiteLDLTWrapper<Scalar>
 construct<ProxSuiteLDLTWrapper<Scalar>>(isize matrix_size,
                                         const SymbolicBlockMatrix &) {
   return ProxSuiteLDLTWrapper<Scalar>(matrix_size, matrix_size);
 }
+
+#endif
 
 /// BlockLDLT need SymbolicBlockMatrix as argument
 template <>

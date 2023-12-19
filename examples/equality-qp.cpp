@@ -22,7 +22,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N) {
   return Q.template topLeftCorner<-1, -1>(M, N);
 }
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraint<double>;
 using Constraint = ConstraintObjectTpl<double>;

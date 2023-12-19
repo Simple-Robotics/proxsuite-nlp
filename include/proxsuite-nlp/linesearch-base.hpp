@@ -8,7 +8,8 @@
 #include <fmt/core.h>
 #include <ostream>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 enum class LinesearchStrategy { ARMIJO, WOLFE };
 enum class LSInterpolation { BISECTION, QUADRATIC, CUBIC };
 
@@ -68,7 +69,8 @@ Linesearch<T>::Linesearch(const Linesearch::Options &options)
 
 template <typename T> Linesearch<T>::~Linesearch() = default;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/linesearch-armijo.hpp"
 

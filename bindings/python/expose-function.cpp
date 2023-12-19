@@ -2,7 +2,8 @@
 #include "proxsuite-nlp/function-ops.hpp"
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 using context::C1Function;
 using context::C2Function;
@@ -54,7 +55,7 @@ void exposeFunctionTypes() {
           "__matmul__",
           +[](shared_ptr<C2Function> const &left,
               shared_ptr<C2Function> const &right) {
-            return ::proxnlp::compose<Scalar>(left, right);
+            return ::proxsuite::nlp::compose<Scalar>(left, right);
           },
           "Composition operator. This composes the first argument over the "
           "second one.");
@@ -81,9 +82,10 @@ void exposeFunctionOps() {
                                       bp::return_internal_reference<>()),
                     "The right-hand side of the composition.");
 
-  bp::def("compose", &::proxnlp::compose<context::Scalar>, bp::args("f", "g"),
-          compose_doc);
+  bp::def("compose", &::proxsuite::nlp::compose<context::Scalar>,
+          bp::args("f", "g"), compose_doc);
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

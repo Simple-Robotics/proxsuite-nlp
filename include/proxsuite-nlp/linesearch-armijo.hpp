@@ -8,7 +8,8 @@
 
 #include <Eigen/QR>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// @brief Polynomials represented by their coefficients in decreasing order of
 /// degree.
@@ -226,4 +227,5 @@ protected:
   DecompType decomp;
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

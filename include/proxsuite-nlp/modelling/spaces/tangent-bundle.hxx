@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/modelling/spaces/tangent-bundle.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <class Base>
 typename TangentBundleTpl<Base>::PointType
@@ -71,4 +72,5 @@ void TangentBundleTpl<Base>::Jdifference_impl(const ConstVectorRef &x0,
   }
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

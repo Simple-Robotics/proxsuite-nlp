@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/constraint-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief   Equality constraints \f$c(x) = 0\f$.
@@ -47,6 +48,7 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/modelling/constraints.hpp"

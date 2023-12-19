@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/function-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace autodiff {
 
 enum FDLevel {
@@ -160,4 +161,5 @@ struct finite_difference_wrapper<_Scalar, TOC2>
 };
 
 } // namespace autodiff
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

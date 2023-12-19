@@ -8,7 +8,8 @@
 #include <fmt/ostream.h>
 #include <fmt/color.h>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 template <typename Scalar>
 ProxNLPSolverTpl<Scalar>::ProxNLPSolverTpl(
     shared_ptr<Problem> prob, const Scalar tol, const Scalar mu_init,
@@ -574,4 +575,5 @@ void ProxNLPSolverTpl<Scalar>::tryStep(Workspace &workspace,
       results.data_lams_opt + alpha * workspace.dual_step;
   PROXSUITE_NLP_NOMALLOC_END;
 }
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

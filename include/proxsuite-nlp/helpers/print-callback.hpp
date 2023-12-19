@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/helpers-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace helpers {
 
 template <typename Scalar> struct print_callback : base_callback<Scalar> {
@@ -13,4 +14,5 @@ template <typename Scalar> struct print_callback : base_callback<Scalar> {
 };
 
 } // namespace helpers
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

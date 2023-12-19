@@ -6,7 +6,8 @@
 #include "proxsuite-nlp/math.hpp"
 #include "proxsuite-nlp/linalg/gemmt.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 namespace backend {
 
@@ -141,4 +142,5 @@ template <int Mode, bool IsLower> struct block_triangular_subsolve_impl {
 } // namespace backend
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

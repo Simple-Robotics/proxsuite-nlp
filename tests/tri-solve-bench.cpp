@@ -8,7 +8,7 @@
 
 #include <benchmark/benchmark.h>
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::TriangularBlockMatrix;
 

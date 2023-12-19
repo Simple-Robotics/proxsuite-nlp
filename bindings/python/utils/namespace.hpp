@@ -2,7 +2,8 @@
 
 #include <boost/python.hpp>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 namespace bp = boost::python;
 
@@ -26,4 +27,5 @@ inline bp::object get_namespace(const std::string &name) {
 
 } // namespace python
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

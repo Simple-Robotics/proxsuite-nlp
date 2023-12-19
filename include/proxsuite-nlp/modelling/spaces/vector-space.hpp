@@ -4,7 +4,8 @@
 
 #include <type_traits>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// @brief    Standard Euclidean vector space.
 template <typename _Scalar, int _Dim, int _Options>
@@ -75,4 +76,5 @@ struct VectorSpaceTpl : public ManifoldAbstractTpl<_Scalar, _Options> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

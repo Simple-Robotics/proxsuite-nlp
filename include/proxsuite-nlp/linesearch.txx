@@ -3,10 +3,12 @@
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/linesearch-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 extern template class Linesearch<context::Scalar>;
 extern template struct PolynomialTpl<context::Scalar>;
 extern template class ArmijoLinesearch<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

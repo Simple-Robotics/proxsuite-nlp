@@ -5,7 +5,8 @@
 
 #include "boost/python/operators.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 using context::ConstMatrixRef;
@@ -111,4 +112,5 @@ void exposeCost() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

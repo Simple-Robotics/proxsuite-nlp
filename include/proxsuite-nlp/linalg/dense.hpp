@@ -7,7 +7,8 @@
 
 #include "proxsuite-nlp/linalg/ldlt-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 using Eigen::internal::LDLT_Traits;
@@ -208,4 +209,5 @@ protected:
 };
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

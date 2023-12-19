@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 auto CartesianProductTpl<Scalar>::neutral() const -> PointType {
@@ -197,4 +198,5 @@ void CartesianProductTpl<Scalar>::Jdifference_impl(const ConstVectorRef &x0,
   }
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

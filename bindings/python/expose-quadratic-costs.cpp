@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
 #include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 using context::ConstMatrixRef;
@@ -53,4 +54,5 @@ void exposeQuadraticCosts() {
                     &QuadraticDistanceCost::updateTarget);
 }
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

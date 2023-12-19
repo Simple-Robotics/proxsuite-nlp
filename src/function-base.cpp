@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/cost-function.hpp"
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct BaseFunctionTpl<context::Scalar>;
 
@@ -13,4 +14,5 @@ template struct C2FunctionTpl<context::Scalar>;
 
 template struct ComposeFunctionTpl<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

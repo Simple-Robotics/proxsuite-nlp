@@ -7,7 +7,8 @@
 #include "proxsuite-nlp/function-base.hpp"
 #include "proxsuite-nlp/manifold-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * Constraint function to be equal to a given element of a space.
@@ -47,4 +48,5 @@ public:
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

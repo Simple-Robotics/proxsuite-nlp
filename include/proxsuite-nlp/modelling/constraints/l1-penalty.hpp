@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/constraint-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief   Composite \f$\ell_1\f$-penalty function \f$ \|c(x)\|_1 \f$.
@@ -45,4 +46,5 @@ struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

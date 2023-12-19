@@ -1,6 +1,7 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 /// Expose a differentiable residual (subclass of C2FunctionTpl).
@@ -10,4 +11,5 @@ auto expose_function(const char *name, const char *docstring, Init init) {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

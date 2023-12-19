@@ -3,8 +3,10 @@
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/problem-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 extern template struct ProblemTpl<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

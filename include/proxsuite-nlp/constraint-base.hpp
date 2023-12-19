@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/function-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 ///
 /// @brief   Base constraint set type.
@@ -137,6 +138,7 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/constraint-base.hxx"

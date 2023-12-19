@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/modelling/residuals/rigid-transform-point.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 using context::Scalar;
@@ -24,5 +25,6 @@ void exposePinocchioResiduals() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 #endif

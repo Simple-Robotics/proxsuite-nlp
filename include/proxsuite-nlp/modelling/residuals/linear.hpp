@@ -4,7 +4,8 @@
 #include "proxsuite-nlp/function-ops.hpp"
 #include "proxsuite-nlp/modelling/residuals/state-residual.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief Linear residuals \f$r(x) = Ax + b\f$.
@@ -54,4 +55,5 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

@@ -8,5 +8,5 @@ foreach(pyfile ${PYTHON_TESTS})
   string(REGEX REPLACE "_" "-" test_name ${test_name})
   # We must add tests/python because in the future we might create extension modules
   # specifically for some tests
-  add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "python")
+  add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "bindings/python")
 endforeach()

@@ -3,7 +3,8 @@
 
 #include "proxsuite-nlp/workspace.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 void exposeWorkspace() {
   using context::Scalar;
@@ -63,4 +64,5 @@ void exposeWorkspace() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

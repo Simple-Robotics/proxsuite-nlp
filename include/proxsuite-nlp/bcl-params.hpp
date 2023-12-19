@@ -2,7 +2,8 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 template <typename Scalar> struct BCLParamsTpl {
 
   /// Log-factor \f$\alpha_\eta\f$ for primal tolerance (failure)
@@ -19,4 +20,5 @@ template <typename Scalar> struct BCLParamsTpl {
   Scalar rho_update_factor = 1.0;
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

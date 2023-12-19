@@ -4,7 +4,8 @@
 
 #include <type_traits>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace {
 /// Typedef in anon namespace for use in rest of file.
 template <typename T> using ManifoldPtr = shared_ptr<ManifoldAbstractTpl<T>>;
@@ -159,7 +160,8 @@ CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
   return right * left;
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 // implementation details
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hxx"

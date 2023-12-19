@@ -2,7 +2,8 @@
 #include "proxsuite-nlp/helpers-base.hpp"
 #include "proxsuite-nlp/helpers/history-callback.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 struct CallbackWrapper : helpers::base_callback<context::Scalar>,
@@ -51,4 +52,5 @@ void exposeCallbacks() {
   }
 }
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

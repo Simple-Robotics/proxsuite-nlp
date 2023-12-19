@@ -9,10 +9,10 @@
 /// types.
 template <typename MatrixType>
 struct fmt::formatter<MatrixType,
-                      proxnlp::enable_if_eigen_dense<MatrixType, char>>
+                      proxsuite::nlp::enable_if_eigen_dense<MatrixType, char>>
     : fmt::ostream_formatter {};
 
 template <typename MatrixType>
 struct fmt::is_range<MatrixType,
-                     proxnlp::enable_if_eigen_dense<MatrixType, char>>
+                     proxsuite::nlp::enable_if_eigen_dense<MatrixType, char>>
     : std::false_type {};

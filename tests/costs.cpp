@@ -10,7 +10,7 @@
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #endif
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 namespace utf = boost::unit_test;
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 namespace pin = pinocchio;

@@ -5,9 +5,9 @@
 #include <EigenRand/EigenRand>
 
 namespace {
-using proxnlp::linalg::BlockKind;
-using proxnlp::linalg::isize;
-using proxnlp::linalg::SymbolicBlockMatrix;
+using proxsuite::nlp::linalg::BlockKind;
+using proxsuite::nlp::linalg::isize;
+using proxsuite::nlp::linalg::SymbolicBlockMatrix;
 using Scalar = double;
 PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 } // namespace

@@ -1,7 +1,8 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/prox-solver.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 void exposeSolver() {
@@ -185,4 +186,5 @@ void exposeSolver() {
                      "Proximal penalty update factor.");
 }
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

@@ -17,7 +17,8 @@
 
 #include "proxsuite-nlp/linesearch-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 enum class MultiplierUpdateMode { NEWTON, PRIMAL, PRIMAL_DUAL };
 
@@ -265,7 +266,8 @@ public:
 inline InertiaFlag checkInertia(const int ndx, const int nc,
                                 const Eigen::VectorXi &signature);
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/prox-solver.hxx"
 

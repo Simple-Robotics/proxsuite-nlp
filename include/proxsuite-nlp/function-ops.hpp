@@ -6,7 +6,8 @@
 
 #include <utility>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /** @brief Composition of two functions \f$f \circ g\f$.
  */
@@ -57,7 +58,8 @@ auto compose(const shared_ptr<C2FunctionTpl<Scalar>> &left,
   return std::make_shared<ComposeFunctionTpl<Scalar>>(left, right);
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/function-ops.txx"

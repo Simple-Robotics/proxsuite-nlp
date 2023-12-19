@@ -12,7 +12,8 @@
 #include <boost/variant.hpp>
 #include <array>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 namespace {
 using linalg::isize;
@@ -218,4 +219,5 @@ computeInertiaTuple(const Eigen::Ref<Eigen::VectorXi const> &signature) {
   return {np, nn, n0};
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

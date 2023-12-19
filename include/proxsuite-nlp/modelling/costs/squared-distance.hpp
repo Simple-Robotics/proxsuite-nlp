@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/modelling/costs/quadratic-residual.hpp"
 #include "proxsuite-nlp/modelling/residuals/state-residual.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /** @brief    Weighted quadratic distance \f$\frac{1}{2}\|x\ominus
  * \bar{x}\|^2_W\f$ on a space.
@@ -45,7 +46,8 @@ struct QuadraticDistanceCostTpl : QuadraticResidualCostTpl<_Scalar> {
   }
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/modelling/costs/squared-distance.txx"

@@ -3,7 +3,8 @@
 #include "proxsuite-nlp/cost-function.hpp"
 #include "proxsuite-nlp/function-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /**
  * @brief Quadratic function \f$\frac{1}{2} r^\top Qr + b^\top r + c\f$ of a
@@ -70,7 +71,8 @@ protected:
   mutable MatrixXs H;
 };
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
 
 #include "proxsuite-nlp/modelling/costs/quadratic-residual.hxx"
 

@@ -3,9 +3,11 @@
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 extern template struct MultibodyConfiguration<context::Scalar>;
 extern template struct MultibodyPhaseSpace<context::Scalar>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

@@ -5,7 +5,8 @@
 #include <pinocchio/multibody/liegroup/liegroup-base.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 namespace pin = pinocchio;
 
@@ -98,4 +99,5 @@ template <int D, typename Scalar>
 using SOTpl =
     PinocchioLieGroup<pinocchio::SpecialOrthogonalOperationTpl<D, Scalar>>;
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

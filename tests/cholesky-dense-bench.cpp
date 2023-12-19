@@ -89,7 +89,7 @@ BENCHMARK(BM_pos_sem_def<Eigen::BunchKaufman<Eigen::MatrixXd>>)
 BENCHMARK(BM_indefinite<Eigen::LDLT<Eigen::MatrixXd>>)->Apply(custom_args);
 BENCHMARK(BM_indefinite<Eigen::BunchKaufman<Eigen::MatrixXd>>)
     ->Apply(custom_args);
-BENCHMARK(BM_indefinite<proxnlp::linalg::DenseLDLT<double>>)
+BENCHMARK(BM_indefinite<proxsuite::nlp::linalg::DenseLDLT<double>>)
     ->Apply(custom_args);
 
 BENCHMARK_MAIN();

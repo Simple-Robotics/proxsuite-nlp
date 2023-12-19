@@ -1,7 +1,9 @@
 #include "proxsuite-nlp/prox-solver.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template class ProxNLPSolverTpl<context::Scalar>;
 
-} // namespace proxnlp
+}
+} // namespace proxsuite

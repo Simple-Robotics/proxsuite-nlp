@@ -1,7 +1,9 @@
 #include "proxsuite-nlp/workspace.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template struct WorkspaceTpl<context::Scalar>;
 
-}
+} // namespace nlp
+} // namespace proxsuite

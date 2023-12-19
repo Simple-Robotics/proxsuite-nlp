@@ -9,7 +9,8 @@
 #include <numeric>
 #include <vector>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace linalg {
 
 using isize = Eigen::Index;
@@ -137,4 +138,5 @@ void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
                         isize const *perm = nullptr) noexcept;
 
 } // namespace linalg
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

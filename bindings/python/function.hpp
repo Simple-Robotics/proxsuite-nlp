@@ -2,7 +2,8 @@
 
 #include "proxsuite-nlp/function-base.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 struct FunctionWrap : context::Function, bp::wrapper<context::Function> {
@@ -72,4 +73,5 @@ struct C2FunctionWrap : context::C2Function, bp::wrapper<context::C2Function> {
 };
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

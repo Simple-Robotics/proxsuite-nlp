@@ -4,7 +4,8 @@
 
 #include "proxsuite-nlp/cost-sum.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 auto operator+(const shared_ptr<CostFunctionBaseTpl<Scalar>> &left,
@@ -34,4 +35,5 @@ auto operator*(Scalar left,
   out->addComponent(right, left);
   return out;
 }
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

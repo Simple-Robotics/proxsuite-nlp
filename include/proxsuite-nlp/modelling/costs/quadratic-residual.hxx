@@ -2,7 +2,8 @@
 
 #include "./quadratic-residual.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 template <typename Scalar>
 QuadraticResidualCostTpl<Scalar>::QuadraticResidualCostTpl(
@@ -62,4 +63,5 @@ void QuadraticResidualCostTpl<Scalar>::computeHessian(const ConstVectorRef &x,
   out.noalias() += JtW * Jres;
 }
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

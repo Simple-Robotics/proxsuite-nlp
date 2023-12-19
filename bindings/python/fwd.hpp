@@ -7,7 +7,8 @@
 #endif
 #include "proxsuite-nlp/context.hpp"
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 
 /// @brief Python bindings.
 namespace python {
@@ -38,4 +39,5 @@ void exposeAutodiff();
 
 } // namespace python
 
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite

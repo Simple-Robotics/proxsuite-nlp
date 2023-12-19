@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 
 namespace utf = boost::unit_test;
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 
 using linalg::BlockLDLT;
 using linalg::DenseLDLT;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(block_structure_allocator) {
 
   BOOST_TEST_MESSAGE("Default structure:");
   linalg::SymbolicBlockMatrix default_structure =
-      proxnlp::create_default_block_structure(nprims, nduals);
+      proxsuite::nlp::create_default_block_structure(nprims, nduals);
   linalg::print_sparsity_pattern(default_structure);
 
   BOOST_TEST_MESSAGE("Modified structure:");

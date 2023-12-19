@@ -11,7 +11,7 @@
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 
-using namespace proxnlp;
+using namespace proxsuite::nlp;
 using Manifold = PinocchioLieGroup<SO2>;
 using Problem = ProblemTpl<double>;
 

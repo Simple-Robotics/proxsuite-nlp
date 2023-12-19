@@ -8,7 +8,8 @@
 
 #include <eigenpy/std-vector.hpp>
 
-namespace proxnlp {
+namespace proxsuite {
+namespace nlp {
 namespace python {
 
 using context::C2Function;
@@ -131,4 +132,5 @@ static void exposeConstraintTypes() {
 }
 
 } // namespace python
-} // namespace proxnlp
+} // namespace nlp
+} // namespace proxsuite
