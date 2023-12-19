@@ -22,8 +22,7 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - clang  # [win]
-    - ninja  # [win]
-    - make   # [not win]
+    - ninja
   host:
     - eigen
     - eigenpy
