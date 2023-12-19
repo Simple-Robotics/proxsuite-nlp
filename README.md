@@ -4,9 +4,19 @@
 
 # proxsuite-nlp: a package for nonlinear optimization on manifolds
 
-`proxsuite-nlp` is a C++14 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds, as well as some modelling tools.
+**proxsuite-nlp** is a C++14 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds, as well as some modelling tools.
 
-## Building from source
+## Installation
+
+### From Conda
+
+From [our channel](https://anaconda.org/simple-robotics/proxsuite-nlp)
+
+```bash
+conda install -c simple-robotics proxsuite-nlp
+```
+
+### From source
 
 Clone this repo using
 
@@ -22,17 +32,14 @@ cmake -S . -B build
 cmake --build build/ --config Release --target install
 ```
 
-### Dependencies
+**Dependencies**
 
 * CMake (with the [JRL CMake modules](https://github.com/jrl-umi3218/jrl-cmakemodules))
 * [eigenpy](https://github.com/stack-of-tasks/eigenpy)>=3.1.0 | [conda](https://anaconda.org/conda-forge/eigenpy)
-* [pinocchio](https://github.com/stack-of-tasks/eigenpy)>=2.9.1 | [conda](https://anaconda.org/conda-forge/pinocchio)
+* [pinocchio](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/pinocchio)
 * Eigen>=3.3.7
 * [fmtlib](https://github.com/fmtlib/fmt)>=9.1.0, <11
 * [Boost](https://www.boost.org/)>=1.71
-* [Benchmark](https://github.com/google/benchmark)==1.5
-
-For easy dependency management, I suggest using the [conda](https://github.com/conda/conda) package manager.
 
 **Python dependencies:**
 
@@ -44,7 +51,7 @@ For easy dependency management, I suggest using the [conda](https://github.com/c
 
 ### Notes
 
-* If you want to use Python and develop, I really advise managing your dependencies and environment using [conda](https://github.com/conda/conda). To build against a Conda environment, activate the environment and add `export CMAKE_PREFIX_PATH=$CONDA_PREFIX` before running CMake.
+* To build against a Conda environment, activate the environment and add `export CMAKE_PREFIX_PATH=$CONDA_PREFIX` before running CMake.
 * To build the documentation:
 
     ```bash
