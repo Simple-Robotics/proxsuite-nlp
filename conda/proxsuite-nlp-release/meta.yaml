@@ -32,7 +32,6 @@ requirements:
     - fmt
     - pinocchio
     - python
-    - benchmark
     - example-robot-data
   run:
     - eigen
