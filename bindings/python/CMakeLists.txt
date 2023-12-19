@@ -10,19 +10,14 @@ include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
 
 # identify bindings C++ source files
-file(GLOB_RECURSE ${PYLIB_NAME}_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
-file(GLOB_RECURSE ${PYLIB_NAME}_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
-
-set(PY_HEADERS ${${PYLIB_NAME}_HEADERS})
-set(PY_SOURCES ${${PYLIB_NAME}_SOURCES})
+file(GLOB_RECURSE PY_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE PY_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
 add_header_group(PY_HEADERS)
 
 function(MAKE_BINDINGS)
   add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
 
-  target_include_directories(${PYLIB_NAME} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
   set_target_properties(
     ${PYLIB_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
@@ -36,6 +31,9 @@ function(MAKE_BINDINGS)
 
   target_compile_options(${PYLIB_NAME} PRIVATE -Wno-conversion -Wno-comment)
   target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
+  target_include_directories(
+    ${PYLIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
   # link solver, eigenpy, Boost.Python
   target_link_libraries(${PYLIB_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
@@ -47,21 +45,11 @@ endfunction()
 
 make_bindings()
 
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python
-     ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python/utils)
-
-# copy headers to build/include/ directory
-# TODO: fix include path
-foreach(pyheader ${PY_HEADERS})
-  string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" pyheader ${pyheader})
-  get_filename_component(headerPath ${pyheader} PATH)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${pyheader}
-                          ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/python/${pyheader})
-  install(
-    FILES ${pyheader}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/proxsuite-nlp/python/${headerPath}
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
-endforeach(pyheader)
+install(
+  DIRECTORY include/${PROJECT_NAME}
+  DESTINATION "include"
+  FILES_MATCHING
+  PATTERN "*.hpp")
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py)
