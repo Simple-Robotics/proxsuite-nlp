@@ -52,7 +52,9 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DPYTHON_EXECUTABLE=$(which python3) \
-          -DBUILD_WITH_OPENMP_SUPPORT=ON
+          -DBUILD_PYTHON_INTERFACE=ON \
+          -DGENERATE_PYTHON_STUBS=ON \
+          -DBUILD_BENCHMARK=ON
         cmake --build .
         ctest --output-on-failure
         cmake --install
