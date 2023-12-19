@@ -9,20 +9,20 @@
 namespace {
 
 namespace veg = proxsuite::linalg::veg;
-namespace psdense = proxsuite::linalg::dense;
+namespace dense_linalg = proxsuite::linalg::dense;
 using byte = proxsuite::linalg::veg::mem::byte;
 using StackType = proxsuite::linalg::veg::Vec<byte>;
 using StackReq = proxsuite::linalg::veg::dynstack::StackReq;
 
 template <typename Mat, typename Rhs> void solve_impl(Mat &&ld_, Rhs &&rhs_) {
-  auto ld = psdense::util::to_view(ld_);
-  auto rhs = psdense::util::to_view_dyn_rows(rhs_);
+  auto ld = dense_linalg::util::to_view(ld_);
+  auto rhs = dense_linalg::util::to_view_dyn_rows(rhs_);
   using Scalar = typename Mat::Scalar;
 
   auto l = ld.template triangularView<Eigen::UnitLower>();
   auto lt =
-      psdense::util::trans(ld).template triangularView<Eigen::UnitUpper>();
-  auto d = psdense::util::diagonal(ld);
+      dense_linalg::util::trans(ld).template triangularView<Eigen::UnitUpper>();
+  auto d = dense_linalg::util::diagonal(ld);
   l.solveInPlace(rhs);
   constexpr Scalar eps = std::numeric_limits<Scalar>::min();
 
@@ -47,7 +47,7 @@ namespace linalg {
 template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
-  using psldlt_t = psdense::Ldlt<Scalar>;
+  using psldlt_t = dense_linalg::Ldlt<Scalar>;
   using DView = typename Base::DView;
 
   psldlt_t m_ldlt;
@@ -98,7 +98,7 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
   }
 
   inline DView vectorD() const {
-    return psdense::util::diagonal(m_ldlt.ld_col());
+    return dense_linalg::util::diagonal(m_ldlt.ld_col());
   }
 
   MatrixXs reconstructedMatrix() const {
