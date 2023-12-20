@@ -3,6 +3,8 @@
 /// @author Wilson Jallet
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 
+#include <cstdint>
+
 #include "proxsuite-nlp/linalg/bunchkaufman.hpp"
 #include "proxsuite-nlp/linalg/dense.hpp"
 #include "util.hpp"
@@ -62,9 +64,9 @@ void BM_indefinite(benchmark::State &state) {
 }
 
 /// TODO 1000, 2000 and 3000 take really long time
-const std::vector<long> dimArgs = {55, 64, 77, 115, 128, 256, 432,
-                                   /*1000, 2000, 4832*/};
-const std::vector<long> nonDefArgs = {1, 2, 4, 8, 16, 32};
+const std::vector<int64_t> dimArgs = {55, 64, 77, 115, 128, 256, 432,
+                                      /*1000, 2000, 4832*/};
+const std::vector<int64_t> nonDefArgs = {1, 2, 4, 8, 16, 32};
 static void custom_args(benchmark::internal::Benchmark *b) {
   b->ArgName("dim");
   for (auto d : dimArgs)
