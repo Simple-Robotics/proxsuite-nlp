@@ -7,7 +7,10 @@ jobs:
     name: ${{ matrix.os }} - Python ${{ matrix.python-version }} ${{ matrix.build_type }} ${{ matrix.cxx_options }}
     runs-on: ${{ matrix.os }}
     env:
-      CCACHE_DIR: ~/.ccache
+      CCACHE_BASEDIR: "${GITHUB_WORKSPACE}"
+      CCACHE_DIR: "${GITHUB_WORKSPACE}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
 
     strategy:
       fail-fast: false
@@ -23,7 +26,7 @@ jobs:
 
     - uses: actions/cache@v3
       with:
-        path: ${{ env.CCACHE_DIR }}
+        path: .ccache
         key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
 
     - uses: conda-incubator/setup-miniconda@v3
