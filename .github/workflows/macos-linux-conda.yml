@@ -4,7 +4,7 @@ on: [push,pull_request]
 
 jobs:
   proxsuite-nlp-conda:
-    name: proxsuite-nlp on ${{ matrix.os }} in ${{ matrix.build_type }} mode with Conda
+    name: ${{ matrix.os }} - Python ${{ matrix.python-version }} ${{ matrix.build_type }} ${{ matrix.cxx_options }}
     runs-on: ${{ matrix.os }}
     env:
       CCACHE_DIR: ~/.ccache
