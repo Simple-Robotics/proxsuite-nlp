@@ -63,10 +63,12 @@ cmake --build build/ --config Release --target install
 
 The following people have been involved in the development of **proxsuite-nlp** and are warmly thanked for their contributions:
 
--   [Wilson Jallet](https://github.com/ManifoldFR) (LAAS-CNRS/Inria): main developer and manager of the project
--   [Sarah El Kazdadi](https://github.com/sarah-ek) (Inria): linear algebra modules developer
--   [Fabian Schramm](https://github.com/fabinsch) (Inria): core developper
--   [Joris Vaillant](https://github.com/jorisv) (Inria): core developer
+* [Wilson Jallet](https://github.com/ManifoldFR) (LAAS-CNRS/Inria): main developer and manager of the project
+* [Sarah El Kazdadi](https://github.com/sarah-ek) (Inria): linear algebra modules developer
+* [Fabian Schramm](https://github.com/fabinsch) (Inria): core developper
+* [Joris Vaillant](https://github.com/jorisv) (Inria): core developer
+* [Justin Carpentier](https://github.com/jcarpent) (Inria): project coordinator
+* [Nicolas Mansard](https://github.com/nmansard) (LAAS-CNRS): project coordinator
 
 ## Acknowledgments
 
