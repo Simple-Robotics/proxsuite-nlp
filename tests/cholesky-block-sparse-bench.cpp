@@ -37,25 +37,25 @@ auto create_problem_structure(isize matrix_structure_type, isize pb_size)
   case 0:
     nb_blocks = 3;
     // clang-format off
-    data = new BlockKind[static_cast<ulong>(nb_blocks * nb_blocks)]{
+    data = new BlockKind[static_cast<unsigned long>(nb_blocks * nb_blocks)]{
       BlockKind::Diag,  BlockKind::Dense, BlockKind::Dense,
       BlockKind::Dense, BlockKind::Dense, BlockKind::Diag,
       BlockKind::Dense, BlockKind::Diag, BlockKind::Diag
     };
     // clang-format on
-    row_segments = new isize[static_cast<ulong>(nb_blocks)]{
+    row_segments = new isize[static_cast<unsigned long>(nb_blocks)]{
         pb_size, pb_size * 2, pb_size * 2};
     break;
   case 1:
     nb_blocks = 3;
     // clang-format off
-    data = new BlockKind[static_cast<ulong>(nb_blocks * nb_blocks)]{
+    data = new BlockKind[static_cast<unsigned long>(nb_blocks * nb_blocks)]{
       BlockKind::Diag,  BlockKind::Zero, BlockKind::Dense,
       BlockKind::Dense, BlockKind::Diag, BlockKind::Zero,
       BlockKind::Zero, BlockKind::Dense, BlockKind::Diag
     };
     // clang-format on
-    row_segments = new isize[static_cast<ulong>(nb_blocks)]{
+    row_segments = new isize[static_cast<unsigned long>(nb_blocks)]{
         pb_size, pb_size * 2, pb_size * 2};
     break;
   default:
