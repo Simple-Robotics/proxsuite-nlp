@@ -7,8 +7,7 @@ jobs:
     name: proxsuite-nlp on ${{ matrix.os }} in ${{ matrix.build_type }} mode with Conda
     runs-on: ${{ matrix.os }}
     env:
-      CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
-      BUILD_ADVANCED_TESTING: ${{ matrix.BUILD_ADVANCED_TESTING }}
+      CCACHE_DIR: ~/.ccache
 
     strategy:
       fail-fast: false
@@ -16,9 +15,6 @@ jobs:
         os: ["ubuntu-latest", "macos-latest"]
         build_type: [Release, Debug]
         python-version: ["3.8", "3.12"]
-
-        include:
-          CCACHE_DIR: /home/runner/.ccache
 
     steps:
     - uses: actions/checkout@v4
