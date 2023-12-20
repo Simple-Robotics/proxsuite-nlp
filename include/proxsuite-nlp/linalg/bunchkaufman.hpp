@@ -1,6 +1,8 @@
 /// @file
 /// @author Sarah El-Kazdadi
 /// @copyright Copyright (C) 2023
+#pragma once
+
 #include "Eigen/Core"
 
 namespace Eigen {
