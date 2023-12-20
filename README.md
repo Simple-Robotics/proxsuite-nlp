@@ -4,7 +4,7 @@
 
 # proxsuite-nlp: a package for nonlinear optimization on manifolds
 
-**proxsuite-nlp** is a C++14 library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds, as well as some modelling tools.
+**proxsuite-nlp** is a C++ library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds, as well as some modelling tools.
 
 ## Installation
 
@@ -40,6 +40,7 @@ cmake --build build/ --config Release --target install
 * Eigen>=3.3.7
 * [fmtlib](https://github.com/fmtlib/fmt)>=9.1.0, <11
 * [Boost](https://www.boost.org/)>=1.71
+* a C++-14 compliant compiler
 
 **Python dependencies:**
 
