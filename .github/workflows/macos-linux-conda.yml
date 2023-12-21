@@ -4,11 +4,13 @@ on: [push,pull_request]
 
 jobs:
   proxsuite-nlp-conda:
-    name: proxsuite-nlp on ${{ matrix.os }} in ${{ matrix.build_type }} mode with Conda
+    name: ${{ matrix.os }} - Python ${{ matrix.python-version }} ${{ matrix.build_type }} ${{ matrix.cxx_options }}
     runs-on: ${{ matrix.os }}
     env:
-      CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
-      BUILD_ADVANCED_TESTING: ${{ matrix.BUILD_ADVANCED_TESTING }}
+      CCACHE_BASEDIR: "${GITHUB_WORKSPACE}"
+      CCACHE_DIR: "${GITHUB_WORKSPACE}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
 
     strategy:
       fail-fast: false
@@ -17,9 +19,6 @@ jobs:
         build_type: [Release, Debug]
         python-version: ["3.8", "3.12"]
 
-        include:
-          CCACHE_DIR: /home/runner/.ccache
-
     steps:
     - uses: actions/checkout@v4
       with:
@@ -27,7 +26,7 @@ jobs:
 
     - uses: actions/cache@v3
       with:
-        path: ${{ env.CCACHE_DIR }}
+        path: .ccache
         key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
 
     - uses: conda-incubator/setup-miniconda@v3
@@ -57,7 +56,7 @@ jobs:
           -DBUILD_BENCHMARK=ON
         cmake --build .
         ctest --output-on-failure
-        cmake --install
+        cmake --install .
 
     - name: Uninstall proxsuite-nlp
       shell: bash -l {0}
@@ -65,3 +64,18 @@ jobs:
         conda activate proxsuite-nlp
         cd build
         cmake --build . --target uninstall
+
+  check:
+    if: always()
+    name: check-macos-linux-conda
+
+    needs:
+    - proxsuite-nlp-conda
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}

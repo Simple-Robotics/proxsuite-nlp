@@ -5,12 +5,9 @@ package:
   name: {{ name }}
   version: {{ version }}
 
-# source:
-#   git_url: https://github.com/Simple-Robotics/proxsuite-nlp
-#   git_rev: v{{ version }}
-
 source:
-  path: ../../
+  git_url: https://github.com/Simple-Robotics/proxsuite-nlp
+  git_rev: v{{ version }}
 
 build:
   number: 0
