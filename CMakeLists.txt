@@ -75,17 +75,17 @@ set(CFLAGS_DEPENDENCIES)
 
 if(INITIALIZE_WITH_NAN)
   message(STATUS "Initialize with NaN all the Eigen entries.")
-  add_definitions(-DEIGEN_INITIALIZE_MATRICES_BY_NAN)
+  add_compile_definitions(EIGEN_INITIALIZE_MATRICES_BY_NAN)
 endif(INITIALIZE_WITH_NAN)
 
 if(CHECK_RUNTIME_MALLOC)
   message(STATUS "Check if some memory allocations are performed at runtime.")
   add_compile_definitions(PROXSUITE_NLP_EIGEN_CHECK_MALLOC)
-  add_definitions(-DEIGEN_RUNTIME_NO_MALLOC)
+  add_compile_definitions(EIGEN_RUNTIME_NO_MALLOC)
 endif(CHECK_RUNTIME_MALLOC)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
-  add_definitions(-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION)
+  add_compile_definitions(PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION")
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
@@ -101,7 +101,7 @@ add_project_dependency(fmt "9.1.0...<11" REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.
 
 if(BUILD_WITH_PROXSUITE)
   add_project_dependency(proxsuite REQUIRED)
-  add_definitions(-DPROXSUITE_NLP_USE_PROXSUITE_LDLT)
+  add_compile_definitions(PROXSUITE_NLP_USE_PROXSUITE_LDLT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_USE_PROXSUITE_LDLT")
 endif()
 
@@ -126,6 +126,7 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
   add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
   add_compile_definitions(PROXSUITE_NLP_WITH_PINOCCHIO)
+  list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_WITH_PINOCCHIO")
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
 
 # --- MAIN LIBRARY ----------------------------------------
