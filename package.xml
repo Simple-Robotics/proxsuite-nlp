@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>proxsuite-nlp</name>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <maintainer email="wilson.jallet@laas.fr">Wilson Jallet</maintainer>
   <description> A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.</description>
   <license>tbd</license>
