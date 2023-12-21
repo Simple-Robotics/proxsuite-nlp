@@ -69,6 +69,10 @@ cmake_dependent_option(
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
 
+# Variable containing all the cflags definition relative to optional dependencies
+# and options
+set(CFLAGS_DEPENDENCIES)
+
 if(INITIALIZE_WITH_NAN)
   message(STATUS "Initialize with NaN all the Eigen entries.")
   add_definitions(-DEIGEN_INITIALIZE_MATRICES_BY_NAN)
@@ -100,9 +104,6 @@ if(BUILD_WITH_PROXSUITE)
   add_definitions(-DPROXSUITE_NLP_USE_PROXSUITE_LDLT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_USE_PROXSUITE_LDLT")
 endif()
-
-# Variable containing all the cflags definition relative to optional dependencies
-set(CFLAGS_DEPENDENCIES)
 
 set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
 

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Fixed a missing `#pragma once` in `linalg/bunchkaufman.hpp`
 * Fix benchmarks build with MacOS
+* Fix pkg-config definitions
 
 ## [0.3.0] - 2023-12-19
 
