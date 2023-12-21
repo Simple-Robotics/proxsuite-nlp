@@ -7,19 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-* BibTeX file `CITATIONS.bib` for related papers
-
-### Changed
-
-* Dependencies and some language in README
-
 ### Fixed
 
 * Fixed a missing `#pragma once` in `linalg/bunchkaufman.hpp`
-* Reference to `proxnlp` in `CITATIONS.cff`
-* License file (tentative)
 * Fix benchmarks build with MacOS
 
 ## [0.3.0] - 2023-12-19
