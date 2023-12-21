@@ -1,0 +1,49 @@
+[project]
+name = "proxsuite-nlp"
+description = "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds."
+authors = ["Wilson Jallet <wilson.jallet@polytechnique.org>"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64"]
+license = "BSD-2-Clause"
+license-file = "LICENSE"
+readme = "README.md"
+homepage = "https://github.com/Simple-Robotics/proxsuite-nlp"
+repository = "https://github.com/Simple-Robotics/proxsuite-nlp"
+
+[tasks]
+# Configures CMake
+configure = { cmd = [
+    "cmake",
+    # Use the cross-platform Ninja generator
+    "-G",
+    "Ninja",
+    # The source is in the root directory
+    "-S",
+    ".",
+    # We wanna build in the .build directory
+    "-B",
+    "build",
+    # Use ccache
+    "-D",
+    "CMAKE_CXX_COMPILER_LAUNCHER=ccache",
+    # export compile commands
+    "-D",
+    "CMAKE_EXPORT_COMPILE_COMMANDS=ON",
+] }
+
+# Build the executable but make sure CMake is configured first.
+build = { cmd = ["ninja", "-C", "build"], depends_on = ["configure"] }
+
+[dependencies]
+python = ">=3.8,<3.13"
+cmake = ">=3.20,<4"
+ninja = "~=1.10"
+cxx-compiler = "~=1.7"
+ccache = "~=4.8"
+eigenpy = "~=3.1"
+pinocchio = "~=2.6"
+eigen = "~=3.4"
+fmt = "~=10.1"
+example-robot-data = "~=4.0"
+pytest = "~=7.4"
+casadi = "~=3.6"
