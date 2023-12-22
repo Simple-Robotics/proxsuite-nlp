@@ -74,7 +74,3 @@ The following people have been involved in the development of **proxsuite-nlp** 
 ## Acknowledgments
 
 The development of **proxsuite-nlp** is actively supported by the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](http://www.inria.fr) and the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr).
-
-The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies,
-either expressed or implied, of the proxsuite-nlp project.
