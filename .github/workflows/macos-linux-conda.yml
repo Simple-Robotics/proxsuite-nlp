@@ -27,7 +27,8 @@ jobs:
     - uses: actions/cache@v3
       with:
         path: .ccache
-        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
+        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ github.sha }}
+        restore-keys: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-
 
     - uses: prefix-dev/setup-pixi@v0.4.1
       with:
