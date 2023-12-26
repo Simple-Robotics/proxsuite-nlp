@@ -16,7 +16,24 @@ From [our channel](https://anaconda.org/simple-robotics/proxsuite-nlp)
 conda install -c simple-robotics proxsuite-nlp
 ```
 
-### From source
+### From source (pixi)
+
+Clone this repo using
+
+```bash
+git clone [url-to-repo] --recursive
+```
+
+Install [pixi](https://pixi.sh/) and run:
+
+```bash
+cd your/checkout/folder/
+pixi run build
+```
+
+The project is then builded in the `your/checkout/folder/build` directory.
+
+### From source (manual)
 
 Clone this repo using
 
