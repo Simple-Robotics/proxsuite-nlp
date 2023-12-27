@@ -556,6 +556,8 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
   template <typename InputType>
   BunchKaufman &compute(const EigenBase<InputType> &matrix);
 
+  ComputationInfo info() const { return m_info; }
+
 #ifdef EIGEN_PARSED_BY_DOXYGEN
   template <typename Rhs>
   inline const Solve<LDLT, Rhs> solve(const MatrixBase<Rhs> &b) const;
