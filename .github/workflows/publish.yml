@@ -56,7 +56,7 @@ jobs:
           --error-overlinking \
           --py ${{ matrix.python-version }} \
           --numpy ${{ matrix.numpy-version }} \
-          conda/proxsuite-nlp-release
+          packaging/conda/proxsuite-nlp-release
 
     - name: upload on conda
       if: github.event_name == 'release' || inputs.publish
