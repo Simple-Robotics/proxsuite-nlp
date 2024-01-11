@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* Changed the minimum version of eigenpy to 3.2.0
+
 ## [0.3.1] - 2023-12-21
 
 ### Fixed

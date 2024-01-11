@@ -7,7 +7,7 @@ dependencies:
   - ninja
   - cxx-compiler
   - ccache
-  - eigenpy
+  - eigenpy>=3.2
   - pinocchio
   - eigen
   - fmt
