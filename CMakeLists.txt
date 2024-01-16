@@ -187,7 +187,8 @@ function(create_library)
   add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
   add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
-  target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS})
+  target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS}
+                                                    $<$<PLATFORM_ID:Windows>:NOMINMAX>)
 
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX VERSION ${PROJECT_VERSION})
   if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
@@ -206,9 +207,8 @@ function(create_library)
   endif(BUILD_WITH_PROXSUITE)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
-  if(MSVC)
-    target_compile_options(${PROJECT_NAME} PUBLIC "/bigobj")
-  endif(MSVC)
+  set(MSVC_CMD_OPTIONS /bigobj)
+  target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANG_AND_ID:MSVC>:${MSVC_CMD_OPTIONS}>)
 
   foreach(headerFile ${LIB_HEADERS})
     string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/" "" headerFileRelative ${headerFile})
