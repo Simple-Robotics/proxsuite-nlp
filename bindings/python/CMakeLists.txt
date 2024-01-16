@@ -30,7 +30,10 @@ function(MAKE_BINDINGS)
     set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}")
   endif()
 
-  target_compile_options(${PYLIB_NAME} PRIVATE -Wno-conversion -Wno-comment)
+  set(GCC_CMD_OPTIONS -Wno-conversion -Wno-comment)
+  set(GCC_CMD_ID CXX,AppleClang,Clang,GNU)
+  target_compile_options(${PYLIB_NAME}
+                         PRIVATE $<$<COMPILE_LANG_AND_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>)
   target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
   target_include_directories(
     ${PYLIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
