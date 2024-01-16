@@ -23,27 +23,13 @@ enum FDType {
 
 namespace internal {
 
-// fwd declare the implementation of finite difference algorithms.
-template <typename Scalar, FDLevel n, FDType = CENTRAL>
-struct finite_difference_impl;
-
-template <typename Scalar>
-struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
+template <typename Scalar> struct finite_difference_impl {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
-  using FuncType = BaseFunctionTpl<Scalar>;
-  using Base = C1FunctionTpl<Scalar>;
-  using Base::computeJacobian;
 
-  const ManifoldAbstractTpl<Scalar> &space;
-  const FuncType &func;
-  Scalar fd_eps;
-
-  finite_difference_impl(const ManifoldAbstractTpl<Scalar> &space,
-                         const FuncType &func, const Scalar fd_eps)
-      : C1FunctionTpl<Scalar>(func.nx(), func.ndx(), func.nr()), space(space),
-        func(func), fd_eps(fd_eps) {}
-
-  void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const override {
+  static void computeJacobian(const ManifoldAbstractTpl<Scalar> &space,
+                              const BaseFunctionTpl<Scalar> &func,
+                              const Scalar fd_eps, const ConstVectorRef &x,
+                              MatrixRef Jout) {
     VectorXs ei(func.ndx());
     VectorXs xplus = space.neutral();
     VectorXs xminus = space.neutral();
@@ -56,26 +42,11 @@ struct finite_difference_impl<Scalar, TOC1> : virtual C1FunctionTpl<Scalar> {
       ei(i) = 0.;
     }
   }
-};
 
-template <typename Scalar>
-struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar> {
-  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
-  using FuncType = C1FunctionTpl<Scalar>;
-  using Base = C2FunctionTpl<Scalar>;
-  using Base::vectorHessianProduct;
-
-  const ManifoldAbstractTpl<Scalar> &space;
-  const FuncType &func;
-  Scalar fd_eps;
-
-  finite_difference_impl(const ManifoldAbstractTpl<Scalar> &space,
-                         const FuncType &func, const Scalar fd_eps)
-      : Base(func.nx(), func.ndx(), func.nr()), space(space), func(func),
-        fd_eps(fd_eps) {}
-
-  void vectorHessianProduct(const ConstVectorRef &x, const ConstVectorRef &v,
-                            MatrixRef Hout) const override {
+  static void vectorHessianProduct(const ManifoldAbstractTpl<Scalar> &space,
+                                   const C1FunctionTpl<Scalar> &func,
+                                   const Scalar fd_eps, const ConstVectorRef &x,
+                                   const ConstVectorRef &v, MatrixRef Hout) {
     VectorXs ei(func.ndx());
     VectorXs xplus = space.neutral();
     VectorXs xminus = space.neutral();
@@ -101,27 +72,35 @@ struct finite_difference_impl<Scalar, TOC2> : virtual C2FunctionTpl<Scalar> {
 
 template <typename Scalar, FDLevel n = TOC1> struct finite_difference_wrapper;
 
-/** @brief    Approximate the derivatives of a given function
- *            using finite differences, to downcast the function to a
- * C1FunctionTpl.
+/** @brief    Approximate the derivatives of a given function using finite
+ * differences, to downcast the function to a C1FunctionTpl.
  */
 template <typename _Scalar>
-struct finite_difference_wrapper<_Scalar, TOC1>
-    : internal::finite_difference_impl<_Scalar, TOC1> {
+struct finite_difference_wrapper<_Scalar, TOC1> : C1FunctionTpl<_Scalar> {
   using Scalar = _Scalar;
-
-  using InputType = BaseFunctionTpl<Scalar>;
-  using OutType = C1FunctionTpl<Scalar>;
-  using Base = internal::finite_difference_impl<Scalar, TOC1>;
-  using Base::computeJacobian;
-
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
-  finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
-                            const InputType &func, const Scalar fd_eps)
-      : OutType(func.nx(), func.ndx(), func.nr()), Base(space, func, fd_eps) {}
+  using Base = C1FunctionTpl<_Scalar>;
+  using FuncType = BaseFunctionTpl<Scalar>;
 
-  VectorXs operator()(const ConstVectorRef &x) const { return this->func(x); }
+  const ManifoldAbstractTpl<Scalar> &space;
+  const FuncType &func;
+  Scalar fd_eps;
+
+  using Base::computeJacobian;
+
+  finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
+                            const FuncType &func, const Scalar fd_eps)
+      : Base(space, func.nr()), space(space), func(func), fd_eps(fd_eps) {}
+
+  VectorXs operator()(const ConstVectorRef &x) const override {
+    return func(x);
+  }
+
+  void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const override {
+    return internal::finite_difference_impl<Scalar>::computeJacobian(
+        space, func, fd_eps, x, Jout);
+  }
 };
 
 /** @brief    Approximate the second derivatives of a given function using
@@ -131,32 +110,33 @@ struct finite_difference_wrapper<_Scalar, TOC1>
  * TOC1>, and the C2 implementation.
  */
 template <typename _Scalar>
-struct finite_difference_wrapper<_Scalar, TOC2>
-    : internal::finite_difference_impl<_Scalar, TOC1>,
-      internal::finite_difference_impl<_Scalar, TOC2> {
+struct finite_difference_wrapper<_Scalar, TOC2> : C2FunctionTpl<_Scalar> {
   using Scalar = _Scalar;
-
-  using InputType = C1FunctionTpl<Scalar>;
-  using OutType = C2FunctionTpl<Scalar>;
-
-  using Base1 = internal::finite_difference_impl<Scalar, TOC1>;
-  using Base2 = internal::finite_difference_impl<Scalar, TOC2>;
-  using Base1::computeJacobian;
-  using Base2::vectorHessianProduct;
-
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
-  finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
-                            const InputType &func, const Scalar fd_eps)
-      : C1FunctionTpl<Scalar>(func.nx(), func.ndx(), func.nr()),
-        OutType(func.nx(), func.ndx(), func.nr()), Base1(space, func, fd_eps),
-        Base2(space, func, fd_eps) {}
+  using Base = C2FunctionTpl<_Scalar>;
+  using FuncType = C1FunctionTpl<Scalar>;
 
-  VectorXs operator()(const ConstVectorRef &x) const override {
-    return static_cast<const Base1 &>(*this).func(x);
-  }
+  const ManifoldAbstractTpl<Scalar> &space;
+  const FuncType &func;
+  Scalar fd_eps;
+
+  using Base::computeJacobian;
+
+  finite_difference_wrapper(const ManifoldAbstractTpl<Scalar> &space,
+                            const FuncType &func, const Scalar fd_eps)
+      : Base(space, func.nr()), space(space), func(func), fd_eps(fd_eps) {}
+
+  VectorXs operator()(const ConstVectorRef &x) const override { func(x); }
+
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const override {
-    Base1::computeJacobian(x, Jout);
+    func.computeJacobian(x, Jout);
+  }
+
+  void vectorHessianProduct(const ConstVectorRef &x, const ConstVectorRef &v,
+                            MatrixRef Hout) const override {
+    internal::finite_difference_impl<Scalar>::vectorHessianProduct(
+        space, func, fd_eps, x, v, Hout);
   }
 };
 
