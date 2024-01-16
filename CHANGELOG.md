@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* Don't use virtual inheritance to implement `finite_difference_wrapper`
+
 ## [0.3.2] - 2024-01-12
 
 ### Changed
