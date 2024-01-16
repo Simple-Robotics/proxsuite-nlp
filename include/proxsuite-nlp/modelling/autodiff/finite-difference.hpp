@@ -127,7 +127,9 @@ struct finite_difference_wrapper<_Scalar, TOC2> : C2FunctionTpl<_Scalar> {
                             const FuncType &func, const Scalar fd_eps)
       : Base(space, func.nr()), space(space), func(func), fd_eps(fd_eps) {}
 
-  VectorXs operator()(const ConstVectorRef &x) const override { func(x); }
+  VectorXs operator()(const ConstVectorRef &x) const override {
+    return func(x);
+  }
 
   void computeJacobian(const ConstVectorRef &x, MatrixRef Jout) const override {
     func.computeJacobian(x, Jout);
