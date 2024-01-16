@@ -208,7 +208,7 @@ function(create_library)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   set(MSVC_CMD_OPTIONS /bigobj)
-  target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANG_AND_ID:MSVC>:${MSVC_CMD_OPTIONS}>)
+  target_compile_options(${PROJECT_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:${MSVC_CMD_OPTIONS}>)
 
   foreach(headerFile ${LIB_HEADERS})
     string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/" "" headerFileRelative ${headerFile})
