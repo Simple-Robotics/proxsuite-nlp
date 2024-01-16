@@ -7,7 +7,7 @@
 namespace proxsuite {
 namespace nlp {
 
-extern template struct PROXSUITE_NLP_DLLAPI ManifoldAbstractTpl<context::Scalar>;
+PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI ManifoldAbstractTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

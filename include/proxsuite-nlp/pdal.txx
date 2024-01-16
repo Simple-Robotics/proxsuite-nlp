@@ -9,7 +9,7 @@
 namespace proxsuite {
 namespace nlp {
 
-extern template struct PROXSUITE_NLP_DLLAPI ALMeritFunctionTpl<context::Scalar>;
+PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI ALMeritFunctionTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

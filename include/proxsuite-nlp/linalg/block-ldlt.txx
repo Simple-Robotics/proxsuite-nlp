@@ -8,7 +8,7 @@ namespace proxsuite {
 namespace nlp {
 namespace linalg {
 
-extern template struct PROXSUITE_NLP_DLLAPI BlockLDLT<context::Scalar>;
+PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI BlockLDLT<context::Scalar>;
 
 } // namespace linalg
 } // namespace nlp
