@@ -1,13 +1,14 @@
 #pragma once
 
+#include "proxsuite-nlp/config.hpp"
 #include "proxsuite-nlp/context.hpp"
-#include "./block-ldlt.hpp"
+#include "proxsuite-nlp/linalg/block-ldlt.hpp"
 
 namespace proxsuite {
 namespace nlp {
 namespace linalg {
 
-extern template struct BlockLDLT<context::Scalar>;
+extern template struct PROXSUITE_NLP_DLLAPI BlockLDLT<context::Scalar>;
 
 } // namespace linalg
 } // namespace nlp

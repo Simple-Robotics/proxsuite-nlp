@@ -1,12 +1,13 @@
 #pragma once
 
+#include "proxsuite-nlp/config.hpp"
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/prox-solver.hpp"
 
 namespace proxsuite {
 namespace nlp {
 
-extern template class ProxNLPSolverTpl<context::Scalar>;
+extern template class PROXSUITE_NLP_DLLAPI ProxNLPSolverTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite
