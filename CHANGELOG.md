@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Changed the minimum version of eigenpy to 3.2.0
 
+### Fixed
+
+* Build on Windows
+
 ## [0.3.1] - 2023-12-21
 
 ### Fixed
