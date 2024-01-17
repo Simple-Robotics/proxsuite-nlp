@@ -23,8 +23,8 @@ except ImportError:
         with build_directory_manager() as dll_dir_manager:
             for p in get_dll_paths():
                 dll_dir_manager.add_dll_directory(p)
-            from .pinocchio_pywrap import *
-            from .pinocchio_pywrap import __version__, __raw_version__
+            from .pyproxsuite_nlp import *
+            from .pyproxsuite_nlp import __version__
     else:
         raise
 
