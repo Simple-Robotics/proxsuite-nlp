@@ -4,13 +4,13 @@ import contextlib
 
 
 def get_dll_paths():
-    pinocchio_paths = os.getenv('PINOCCHIO_WINDOWS_DLL_PATH')
-    if pinocchio_paths is None:
+    proxsuite_nlp_paths = os.getenv('PROXSUITE_NLP_WINDOWS_DLL_PATH')
+    if proxsuite_nlp_paths is None:
         # Standard site-packages to bin path
         RELATIVE_DLL_PATH = "..\\..\\..\\bin"
         return [os.path.join(os.path.dirname(__file__), RELATIVE_DLL_PATH)]
     else:
-        return pinocchio_paths.split(os.pathsep)
+        return proxsuite_nlp_paths.split(os.pathsep)
 
 
 class PathManager(contextlib.AbstractContextManager):
