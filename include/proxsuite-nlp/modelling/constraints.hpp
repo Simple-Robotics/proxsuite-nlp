@@ -7,6 +7,7 @@
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/context.hpp"
+#include "proxsuite-nlp/modelling/constraints.txx"
 
 namespace proxsuite {
 namespace nlp {
