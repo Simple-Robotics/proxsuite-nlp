@@ -180,12 +180,21 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
 
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
+function(set_standard_output_directory target)
+  set_target_properties(
+    ${target}
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin
+               LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+endfunction()
+
 function(create_library)
   # get the compile defs
   get_directory_property(CURRENT_COMPILE_DEFINITIONS COMPILE_DEFINITIONS)
 
   add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
   add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
+  set_standard_output_directory(${PROJECT_NAME})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
   target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS}
                                                     $<$<PLATFORM_ID:Windows>:NOMINMAX>)
