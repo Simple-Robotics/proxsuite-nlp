@@ -22,6 +22,7 @@ function(MAKE_BINDINGS)
   set_target_properties(
     ${PYLIB_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
+               RUNTIME_OUTPUT_DIRECTORY "proxsuite_nlp"
                PREFIX ""
                SUFFIX ${PYTHON_EXT_SUFFIX}
                VERSION ${PROJECT_VERSION})
