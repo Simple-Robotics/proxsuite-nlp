@@ -2,6 +2,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
+#include "proxsuite-nlp/manifold-base.hpp"
 #include "proxsuite-nlp/function-base.hpp"
 
 namespace proxsuite {
