@@ -19,7 +19,7 @@ constexpr char sci_format[] = "{: > {}.{}e}";
 constexpr char dbl_format[] = "{: > {}.{}g}";
 
 struct LogRecord {
-  unsigned long iter;
+  size_t iter;
   double step_size;
   double inner_crit;
   double prim_err;
@@ -28,7 +28,7 @@ struct LogRecord {
   double dphi0;
   double merit;
   double dM;
-  unsigned long al_iter;
+  size_t al_iter;
 };
 
 /// @brief  A logging utility.

@@ -447,7 +447,7 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
 
     invokeCallbacks(workspace, results);
 
-    LogRecord record{static_cast<unsigned long>(results.num_iters + 1),
+    LogRecord record{results.num_iters + 1,
                      workspace.alpha_opt,
                      inner_crit,
                      results.prim_infeas,
@@ -456,7 +456,7 @@ void ProxNLPSolverTpl<Scalar>::innerLoop(Workspace &workspace,
                      dphi0,
                      results.merit,
                      phi_new - phi0,
-                     static_cast<unsigned long>(results.al_iters + 1)};
+                     results.al_iters + 1};
 
     logger.log(record);
 
