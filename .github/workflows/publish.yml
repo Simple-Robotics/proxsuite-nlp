@@ -41,10 +41,17 @@ jobs:
         python-version: "3.10"
 
     - name: Install conda-build and anaconda-client
+      if: contains(matrix.os, 'macos') || contains(matrix.os, 'ubuntu')
       shell: bash -el {0}
       run: conda install conda-build anaconda-client
 
+    - name: Install conda-build, anaconda-client and bash
+      if: contains(matrix.os, 'windows')
+      shell: bash -el {0}
+      run: conda install conda-build anaconda-client git
+
     - name: Set version
+      shell: bash -el {0}
       run: |
         VER=$(grep "<version>" package.xml | sed 's/  <version>//g' | sed 's/<\/version>//g')
         echo "VERSION=$VER" >> $GITHUB_ENV
