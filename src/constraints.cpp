@@ -1,4 +1,5 @@
 #include "proxsuite-nlp/modelling/constraints.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 namespace proxsuite {
 namespace nlp {

@@ -1,5 +1,5 @@
 #include "proxsuite-nlp/modelling/residuals/rigid-transform-point.hpp"
-#include "proxsuite-nlp/context.hpp"
+#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 namespace proxsuite {
 namespace nlp {
