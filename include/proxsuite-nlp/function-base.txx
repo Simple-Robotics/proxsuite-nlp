@@ -7,11 +7,11 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI BaseFunctionTpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI BaseFunctionTpl<context::Scalar>;
 
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI C1FunctionTpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI C1FunctionTpl<context::Scalar>;
 
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI C2FunctionTpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI C2FunctionTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

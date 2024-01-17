@@ -7,12 +7,12 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI ConstraintSetBase<context::Scalar>;
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI ConstraintObjectTpl<context::Scalar>;
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI EqualityConstraint<context::Scalar>;
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI NegativeOrthant<context::Scalar>;
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI BoxConstraintTpl<context::Scalar>;
-PROXSUITE_NLP_EXTERN template struct PROXSUITE_NLP_DLLAPI NonsmoothPenaltyL1Tpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI ConstraintSetBase<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI ConstraintObjectTpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI EqualityConstraint<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI NegativeOrthant<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI BoxConstraintTpl<context::Scalar>;
+PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI NonsmoothPenaltyL1Tpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite
