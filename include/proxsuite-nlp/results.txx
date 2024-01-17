@@ -7,7 +7,8 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI ResultsTpl<context::Scalar>;
+PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI
+    ResultsTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

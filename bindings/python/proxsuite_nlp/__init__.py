@@ -17,6 +17,7 @@ try:
     from .pyproxsuite_nlp import __version__
 except ImportError:
     import platform
+
     if platform.system() == "Windows":
         from .windows_dll_manager import get_dll_paths, build_directory_manager
 

@@ -4,15 +4,17 @@ import contextlib
 
 
 def get_dll_paths():
-    proxsuite_nlp_paths = os.getenv('PROXSUITE_NLP_WINDOWS_DLL_PATH')
+    proxsuite_nlp_paths = os.getenv("PROXSUITE_NLP_WINDOWS_DLL_PATH")
     if proxsuite_nlp_paths is None:
         # From https://peps.python.org/pep-0250/#implementation
         # lib/python-version/site-packages
         RELATIVE_DLL_PATH1 = "..\\..\\..\\bin"
         # lib/site-packages
         RELATIVE_DLL_PATH2 = "..\\..\\bin"
-        return [os.path.join(os.path.dirname(__file__), RELATIVE_DLL_PATH1),
-                os.path.join(os.path.dirname(__file__), RELATIVE_DLL_PATH2)]
+        return [
+            os.path.join(os.path.dirname(__file__), RELATIVE_DLL_PATH1),
+            os.path.join(os.path.dirname(__file__), RELATIVE_DLL_PATH2),
+        ]
     else:
         return proxsuite_nlp_paths.split(os.pathsep)
 
