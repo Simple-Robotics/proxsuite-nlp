@@ -7,7 +7,7 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXP_INST_DECL struct PROXSUITE_NLP_DLLAPI CartesianProductTpl<context::Scalar>;
+PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI CartesianProductTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite
