@@ -66,5 +66,6 @@ endforeach()
 # Generate stubs
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME})
+  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME}
+                 ${PROJECT_NAME})
 endif(GENERATE_PYTHON_STUBS)
