@@ -4,7 +4,8 @@
 namespace proxsuite {
 namespace nlp {
 
-template struct QuadraticDistanceCostTpl<context::Scalar>;
+template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    QuadraticDistanceCostTpl<context::Scalar>;
 
 }
 } // namespace proxsuite

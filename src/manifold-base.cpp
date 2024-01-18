@@ -4,7 +4,8 @@
 namespace proxsuite {
 namespace nlp {
 
-template struct ManifoldAbstractTpl<context::Scalar>;
+template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ManifoldAbstractTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

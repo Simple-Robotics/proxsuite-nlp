@@ -5,7 +5,8 @@
 namespace proxsuite {
 namespace nlp {
 
-template struct ResultsTpl<context::Scalar>;
+template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ResultsTpl<context::Scalar>;
 
 }
 } // namespace proxsuite

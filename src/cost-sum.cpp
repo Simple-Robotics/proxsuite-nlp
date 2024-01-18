@@ -4,7 +4,8 @@
 namespace proxsuite {
 namespace nlp {
 
-template struct CostSumTpl<context::Scalar>;
+template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    CostSumTpl<context::Scalar>;
 
 }
 } // namespace proxsuite
