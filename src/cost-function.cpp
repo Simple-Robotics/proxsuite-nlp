@@ -7,7 +7,8 @@ namespace nlp {
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     CostFunctionBaseTpl<context::Scalar>;
 
-template auto downcast_function_to_cost<context::Scalar>(
+template PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI auto
+downcast_function_to_cost<context::Scalar>(
     const shared_ptr<context::C2Function> &) -> shared_ptr<context::Cost>;
 
 } // namespace nlp
