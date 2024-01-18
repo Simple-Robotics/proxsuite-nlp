@@ -130,6 +130,12 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   const FunctionType &func() const { return *func_; }
   int nr() const { return func_->nr(); }
 
+  // Must be defined because of MSVC explicit template instantiation
+  ConstraintObjectTpl(ConstraintObjectTpl &&) = default;
+  ConstraintObjectTpl &operator=(ConstraintObjectTpl &&) = default;
+  ConstraintObjectTpl(const ConstraintObjectTpl &) = default;
+  ConstraintObjectTpl &operator=(const ConstraintObjectTpl &) = default;
+
   ConstraintObjectTpl(shared_ptr<FunctionType> func,
                       shared_ptr<ConstraintSet> set)
       : func_(func), set_(set) {}

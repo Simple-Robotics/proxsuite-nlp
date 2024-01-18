@@ -46,8 +46,14 @@ struct C1FunctionTpl : public BaseFunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = BaseFunctionTpl<_Scalar>;
-  using Base::Base;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
+
+  // We can't use using Base::Base because of MSVC explicit template
+  // instantiation
+  C1FunctionTpl(const int nx, const int ndx, const int nr)
+      : Base(nx, ndx, nr) {}
+  C1FunctionTpl(const ManifoldAbstractTpl<Scalar> &manifold, const int nr)
+      : C1FunctionTpl(manifold.nx(), manifold.ndx(), nr) {}
 
   /// @brief      Jacobian matrix of the constraint function.
   virtual void computeJacobian(const ConstVectorRef &x,
@@ -72,8 +78,14 @@ struct C2FunctionTpl : public C1FunctionTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   using Base = C1FunctionTpl<_Scalar>;
-  using Base::Base;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
+
+  // We can't use using Base::Base because of MSVC explicit template
+  // instantiation
+  C2FunctionTpl(const int nx, const int ndx, const int nr)
+      : Base(nx, ndx, nr) {}
+  C2FunctionTpl(const ManifoldAbstractTpl<Scalar> &manifold, const int nr)
+      : C2FunctionTpl(manifold.nx(), manifold.ndx(), nr) {}
 
   /// @brief      Vector-hessian product.
   virtual void vectorHessianProduct(const ConstVectorRef &,
