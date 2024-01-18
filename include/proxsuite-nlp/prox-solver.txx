@@ -7,7 +7,7 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION class PROXSUITE_NLP_DLLAPI
+extern template class PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     ProxNLPSolverTpl<context::Scalar>;
 
 } // namespace nlp

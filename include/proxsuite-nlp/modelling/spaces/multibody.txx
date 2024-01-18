@@ -7,9 +7,9 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     MultibodyConfiguration<context::Scalar>;
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     MultibodyPhaseSpace<context::Scalar>;
 
 } // namespace nlp

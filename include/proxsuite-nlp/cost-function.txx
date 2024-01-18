@@ -6,10 +6,10 @@
 namespace proxsuite {
 namespace nlp {
 
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION struct PROXSUITE_NLP_DLLAPI
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     CostFunctionBaseTpl<context::Scalar>;
 
-PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION PROXSUITE_NLP_DLLAPI auto
+extern template PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI auto
 downcast_function_to_cost<context::Scalar>(
     const shared_ptr<context::C2Function> &) -> shared_ptr<context::Cost>;
 
