@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Don't use virtual inheritance to implement `finite_difference_wrapper`
 * Build on Windows
+* Fix Armijo lineseach exit condition
 
 ### Changed
 
