@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2024-01-19
+
 ### Fixed
 
 * Missing installation of template declaration header `modelling/constraints.txx`
@@ -39,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * This is the first release of `proxsuite-nlp`. This library is a joint effort between LAAS-CNRS and INRIA, and will be maintained and expanded in the future. Please provide constructive feedback and contribute!
 
-[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.0...v0.3.1
