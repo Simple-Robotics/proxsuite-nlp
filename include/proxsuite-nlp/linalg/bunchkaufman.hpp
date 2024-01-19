@@ -142,11 +142,15 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType &a,
       }
     }
 
+    // pivots matrix store int by default
+    // Like Eigen, we assume that we will never
+    // have a matrix that will have more rows/columns
+    // than int can old
     if (k_step == 1) {
-      pivots[k] = kp;
+      pivots[k] = static_cast<int>(kp);
     } else {
-      pivots[k] = -1 - kp;
-      pivots[k + 1] = -1 - kp;
+      pivots[k] = static_cast<int>(-1 - kp);
+      pivots[k + 1] = static_cast<int>(-1 - kp);
     }
 
     k += k_step;
@@ -287,11 +291,15 @@ bunch_kaufman_in_place_one_block(MatrixType &a, WType &w, IndicesType &pivots,
       }
     }
 
+    // pivots matrix store int by default
+    // Like Eigen, we assume that we will never
+    // have a matrix that will have more rows/columns
+    // than int can old
     if (k_step == 1) {
-      pivots[k] = kp;
+      pivots[k] = static_cast<int>(kp);
     } else {
-      pivots[k] = -1 - kp;
-      pivots[k + 1] = -1 - kp;
+      pivots[k] = static_cast<int>(-1 - kp);
+      pivots[k + 1] = static_cast<int>(-1 - kp);
     }
 
     k += k_step;
@@ -360,10 +368,14 @@ ComputationInfo bunch_kaufman_in_place(MatrixType &a, VecType &subdiag,
 
     for (Index j = k; j < k + kb; ++j) {
       auto &p = pivots.coeffRef(j);
+      // pivots matrix store int by default
+      // Like Eigen, we assume that we will never
+      // have a matrix that will have more rows/columns
+      // than int can old
       if (p >= 0) {
-        p += k;
+        p += static_cast<int>(k);
       } else {
-        p -= k;
+        p -= static_cast<int>(k);
       }
     }
 

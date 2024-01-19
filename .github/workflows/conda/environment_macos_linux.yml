@@ -6,6 +6,7 @@ dependencies:
   - cmake
   - ninja
   - cxx-compiler
+  - pkg-config
   - ccache
   - eigenpy>=3.2
   - pinocchio

@@ -11,6 +11,7 @@ function(add_proxsuite_nlp_example exfile)
   message(STATUS "Adding executable ${example_name} (file ${exfile})")
 
   add_unit_test(${example_name} ${exfile})
+  set_standard_output_directory(${example_name})
   set_target_properties(${example_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${example_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

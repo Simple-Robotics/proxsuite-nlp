@@ -5,6 +5,8 @@
 /// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
 #pragma once
 
+#include "proxsuite-nlp/config.hpp"
+
 #include <Eigen/Core>
 #include <numeric>
 #include <vector>
@@ -31,19 +33,19 @@ enum BlockKind {
 };
 
 /// BlockKind of the transpose of a matrix.
-BlockKind trans(BlockKind a) noexcept;
+PROXSUITE_NLP_DLLAPI BlockKind trans(BlockKind a) noexcept;
 
 /// BlockKind of the addition of two matrices - given by their BlockKind.
-BlockKind add(BlockKind a, BlockKind b) noexcept;
+PROXSUITE_NLP_DLLAPI BlockKind add(BlockKind a, BlockKind b) noexcept;
 
 /// BlockKind of the product of two matrices.
-BlockKind mul(BlockKind a, BlockKind b) noexcept;
+PROXSUITE_NLP_DLLAPI BlockKind mul(BlockKind a, BlockKind b) noexcept;
 
 /// @brief    Symbolic representation of the sparsity structure of a (square)
 /// block matrix.
 /// @details  This struct describes the block-wise layout of a matrix, in
 /// row-major format.
-struct SymbolicBlockMatrix {
+struct PROXSUITE_NLP_DLLAPI SymbolicBlockMatrix {
   BlockKind *m_data;
   isize *segment_lens;
   isize segments_count;
@@ -131,11 +133,13 @@ public:
   }
 };
 
-void print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
+PROXSUITE_NLP_DLLAPI void
+print_sparsity_pattern(const SymbolicBlockMatrix &smat) noexcept;
 
 /// Deep copy of a SymbolicBlockMatrix, possibily with a permutation.
-void symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
-                        isize const *perm = nullptr) noexcept;
+PROXSUITE_NLP_DLLAPI void
+symbolic_deep_copy(const SymbolicBlockMatrix &in, SymbolicBlockMatrix &out,
+                   isize const *perm = nullptr) noexcept;
 
 } // namespace linalg
 } // namespace nlp

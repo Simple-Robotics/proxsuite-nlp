@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * Don't use virtual inheritance to implement `finite_difference_wrapper`
+* Build on Windows
+* Fix Armijo lineseach exit condition
 
 ## [0.3.2] - 2024-01-12
 

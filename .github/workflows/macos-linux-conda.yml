@@ -45,20 +45,21 @@ jobs:
     - uses: actions/cache@v3
       with:
         path: .ccache
-        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ github.sha }}
-        restore-keys: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-
+        key: ccache-macos-linux-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-${{ github.sha }}
+        restore-keys: ccache-macos-linux-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-
 
     - uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: proxsuite-nlp
         auto-update-conda: true
-        environment-file: .github/workflows/conda/conda-env.yml
+        environment-file: .github/workflows/conda/environment_macos_linux.yml
         python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
 
     - name: Build proxsuite-nlp
-      shell: bash -l {0}
+      shell: bash -el {0}
       run: |
-        conda activate proxsuite-nlp
+        conda list
         echo $CONDA_PREFIX
 
         mkdir build
@@ -78,9 +79,8 @@ jobs:
         cmake --install .
 
     - name: Uninstall proxsuite-nlp
-      shell: bash -l {0}
+      shell: bash -el {0}
       run: |
-        conda activate proxsuite-nlp
         cd build
         cmake --build . --target uninstall
 

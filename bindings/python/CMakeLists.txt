@@ -22,6 +22,7 @@ function(MAKE_BINDINGS)
   set_target_properties(
     ${PYLIB_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
+               RUNTIME_OUTPUT_DIRECTORY "proxsuite_nlp"
                PREFIX ""
                SUFFIX ${PYTHON_EXT_SUFFIX}
                VERSION ${PROJECT_VERSION})
@@ -30,7 +31,10 @@ function(MAKE_BINDINGS)
     set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}")
   endif()
 
-  target_compile_options(${PYLIB_NAME} PRIVATE -Wno-conversion -Wno-comment)
+  set(GCC_CMD_OPTIONS -Wno-conversion -Wno-comment)
+  set(GCC_CMD_ID AppleClang,Clang,GNU)
+  target_compile_options(${PYLIB_NAME}
+                         PRIVATE $<$<CXX_COMPILER_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>)
   target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
   target_include_directories(
     ${PYLIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
@@ -53,7 +57,7 @@ install(
   PATTERN "*.hpp")
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
-set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py)
+set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py windows_dll_manager.py)
 
 foreach(pyfile ${${PYLIB_NAME}_PYFILES})
   python_install_on_site(proxsuite_nlp ${pyfile})
@@ -62,5 +66,6 @@ endforeach()
 # Generate stubs
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME})
+  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME}
+                 ${PROJECT_NAME})
 endif(GENERATE_PYTHON_STUBS)

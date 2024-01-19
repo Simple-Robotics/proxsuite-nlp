@@ -51,6 +51,7 @@ add_library(cnpy STATIC cnpy.cpp)
 target_link_libraries(cnpy PUBLIC Eigen3::Eigen)
 target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
 set_target_properties(cnpy PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp)
+set_standard_output_directory(cnpy)
 
 install(
   TARGETS cnpy
@@ -83,6 +84,7 @@ function(add_proxsuite_nlp_test name)
   set(test_file ${name}.cpp)
 
   add_unit_test(${test_name} ${test_file})
+  set_standard_output_directory(${test_name})
   set_target_properties(${test_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${test_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -114,6 +116,7 @@ function(add_proxsuite_nlp_bench name)
     set(bench_file ${name}.cpp)
 
     add_executable(${bench_name} ${bench_file})
+    set_standard_output_directory(${bench_name})
     set_target_properties(${bench_name} PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(${bench_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

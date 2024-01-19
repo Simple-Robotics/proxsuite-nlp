@@ -76,7 +76,7 @@ public:
     }
 
     if (std::abs(dphi0) < options().dphi_thresh) {
-      latest.phi;
+      return latest.phi;
     }
 
     for (std::size_t i = 0; i < options().max_num_steps; i++) {
