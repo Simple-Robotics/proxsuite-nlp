@@ -155,6 +155,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/pdal.cpp)
   set(LIB_TEMPLATE_DECLARATIONS
       ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
+      ${LIB_HEADER_DIR}/modelling/constraints.txx
       ${LIB_HEADER_DIR}/manifold-base.txx
       ${LIB_HEADER_DIR}/function-base.txx
       ${LIB_HEADER_DIR}/cost-function.txx
