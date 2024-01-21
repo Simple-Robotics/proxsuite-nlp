@@ -35,11 +35,11 @@ cmake --build build/ --config Release --target install
 **Dependencies**
 
 * CMake (with the [JRL CMake modules](https://github.com/jrl-umi3218/jrl-cmakemodules))
-* [eigenpy](https://github.com/stack-of-tasks/eigenpy)>=3.2.0 | [conda](https://anaconda.org/conda-forge/eigenpy)
-* [pinocchio](https://github.com/stack-of-tasks/eigenpy) | [conda](https://anaconda.org/conda-forge/pinocchio)
 * Eigen>=3.3.7
 * [fmtlib](https://github.com/fmtlib/fmt)>=9.1.0, <11
 * [Boost](https://www.boost.org/)>=1.71
+* (optional) [eigenpy](https://github.com/stack-of-tasks/eigenpy)>=3.2.0 | [conda](https://anaconda.org/conda-forge/eigenpy) (Python bindings)
+* (optional) [pinocchio](https://github.com/stack-of-tasks/pinocchio) | [conda](https://anaconda.org/conda-forge/pinocchio)
 * a C++-14 compliant compiler
 
 **Python dependencies:**
