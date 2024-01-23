@@ -194,7 +194,8 @@ template <typename Scalar> struct block_impl {
 /// over the lifetime of this object when calling compute(). A change
 /// of structure should lead to recalculating the expected sparsity pattern of
 /// the factorization, and even recomputing the sparsity-optimal permutation.
-template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
+template <typename _Scalar> struct BlockLDLT : ldlt_base<_Scalar> {
+  using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;

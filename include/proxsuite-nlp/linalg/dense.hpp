@@ -161,7 +161,8 @@ dense_ldlt_reconstruct(typename math_types<Scalar>::ConstMatrixRef const &mat,
 } // namespace backend
 
 /// @brief  A fast, recursive divide-and-conquer LDLT algorithm.
-template <typename Scalar> struct DenseLDLT : ldlt_base<Scalar> {
+template <typename _Scalar> struct DenseLDLT : ldlt_base<_Scalar> {
+  using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;
