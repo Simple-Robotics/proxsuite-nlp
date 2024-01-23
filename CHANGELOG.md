@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 * Add missing dependencies in `package.xml`: pinocchio, eigen.
-* Fix for eigenpy 3.3
+* Fix `ConstraintObjectTpl::operator==` constness (mandatory for eigenpy 3.3)
 
 ## [0.3.4] - 2024-01-19
 
