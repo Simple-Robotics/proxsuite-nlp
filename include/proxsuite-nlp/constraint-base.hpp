@@ -140,7 +140,7 @@ template <typename _Scalar> struct ConstraintObjectTpl {
                       shared_ptr<ConstraintSet> set)
       : func_(func), set_(set) {}
 
-  bool operator==(const ConstraintObjectTpl &other) {
+  bool operator==(const ConstraintObjectTpl &other) const {
     return (func_ == other.func_) && (set_ && other.set_);
   }
 };
