@@ -23,14 +23,21 @@ ComputationInfo bunch_kaufman_in_place_unblocked(MatrixType &a,
                                                  Index &pivot_count) {
   using Scalar = typename MatrixType::Scalar;
   using Real = typename Eigen::NumTraits<Scalar>::Real;
-  Real alpha = (Real(1) + numext::sqrt(Real(17))) / Real(8);
+  const Real alpha = (Real(1) + numext::sqrt(Real(17))) / Real(8);
   using std::swap;
 
   pivot_count = 0;
 
-  Index n = a.rows();
+  const Index n = a.rows();
   if (n == 0) {
     return Success;
+  } else if (n == 1) {
+    if (numext::abs(numext::real(a(0, 0))) == Real(0)) {
+      return NumericalIssue;
+    } else {
+      a(0, 0) = Real(1) / numext::real(a(0, 0));
+      return Success;
+    }
   }
 
   Index k = 0;
