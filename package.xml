@@ -13,7 +13,9 @@
   <depend>python3</depend>
   <depend>python3-numpy</depend>
   <depend>boost</depend>
+  <depend>eigen</depend>
   <depend>eigenpy</depend>
+  <depend>pinocchio</depend>
   <depend>fmtlib</depend>
 
   <buildtool_depend>cmake</buildtool_depend>
