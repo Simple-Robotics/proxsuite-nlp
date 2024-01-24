@@ -194,6 +194,13 @@ template <typename _Scalar> struct DenseLDLT : ldlt_base<_Scalar> {
     return backend::dense_ldlt_solve_in_place(m_matrix, b);
   }
 
+  template <typename Rhs>
+  typename Rhs::PlainObject solve(const Eigen::MatrixBase<Rhs> &rhs) const {
+    typename Rhs::PlainObject out = rhs;
+    solveInPlace(out);
+    return out;
+  }
+
   MatrixXs reconstructedMatrix() const {
     MatrixXs res(m_matrix.rows(), m_matrix.cols());
     res.setIdentity();

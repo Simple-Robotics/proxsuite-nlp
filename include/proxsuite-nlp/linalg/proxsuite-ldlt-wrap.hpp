@@ -98,6 +98,13 @@ template <typename _Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<_Scalar> {
     return true;
   }
 
+  template <typename Rhs>
+  typename Rhs::PlainObject solve(const Eigen::MatrixBase<Rhs> &rhs) const {
+    typename Rhs::PlainObject out = rhs;
+    solveInPlace(out);
+    return out;
+  }
+
   inline DView vectorD() const {
     return dense_linalg::util::diagonal(m_ldlt.ld_col());
   }

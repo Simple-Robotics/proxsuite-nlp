@@ -23,19 +23,17 @@ struct LDLTVisitor : bp::def_visitor<LDLTVisitor<LDLTtype>> {
     return fac.solveInPlace(rhsAndX);
   }
 
-  template <typename PlainObject>
-  static PlainObject solve(const LDLTtype &fac, Eigen::Ref<PlainObject> rhs) {
-    PlainObject a = rhs;
-    fac.solveInPlace(a);
-    return a;
+  template <typename RhsType>
+  static auto solve(const LDLTtype &fac, RhsType &rhs) {
+    return fac.solve(rhs);
   }
 
   template <typename... Args> void visit(bp::class_<Args...> &cl) const {
     cl.def("compute", compute_proxy, policies::return_internal_reference,
            ("self"_a, "mat"))
         .def("solveInPlace", solveInPlace_proxy, ("self"_a, "rhsAndX"))
-        .def("solve", solve<VectorXs>, ("self"_a, "rhs"))
-        .def("solve", solve<MatrixXs>, ("self"_a, "rhs"))
+        .def("solve", solve<Eigen::Ref<const VectorXs>>, ("self"_a, "rhs"))
+        .def("solve", solve<Eigen::Ref<const MatrixXs>>, ("self"_a, "rhs"))
         .def("matrixLDLT", &LDLTtype::matrixLDLT, policies::return_by_value,
              "self"_a,
              "Get the current value of the decomposition matrix. This makes a "

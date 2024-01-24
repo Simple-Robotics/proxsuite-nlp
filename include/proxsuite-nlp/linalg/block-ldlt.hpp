@@ -300,6 +300,13 @@ public:
   template <typename Derived>
   bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
 
+  template <typename Rhs>
+  typename Rhs::PlainObject solve(const Eigen::MatrixBase<Rhs> &rhs) const {
+    typename Rhs::PlainObject out = rhs;
+    solveInPlace(out);
+    return out;
+  }
+
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 
   inline void compute() {
