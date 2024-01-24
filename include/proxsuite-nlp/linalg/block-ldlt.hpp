@@ -194,7 +194,8 @@ template <typename Scalar> struct block_impl {
 /// over the lifetime of this object when calling compute(). A change
 /// of structure should lead to recalculating the expected sparsity pattern of
 /// the factorization, and even recomputing the sparsity-optimal permutation.
-template <typename Scalar> struct BlockLDLT : ldlt_base<Scalar> {
+template <typename _Scalar> struct BlockLDLT : ldlt_base<_Scalar> {
+  using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using DView = typename Base::DView;
@@ -298,6 +299,13 @@ public:
   /// Solve for the right-hand side in-place.
   template <typename Derived>
   bool solveInPlace(Eigen::MatrixBase<Derived> &b) const;
+
+  template <typename Rhs>
+  typename Rhs::PlainObject solve(const Eigen::MatrixBase<Rhs> &rhs) const {
+    typename Rhs::PlainObject out = rhs;
+    solveInPlace(out);
+    return out;
+  }
 
   const MatrixXs &matrixLDLT() const override { return m_matrix; }
 

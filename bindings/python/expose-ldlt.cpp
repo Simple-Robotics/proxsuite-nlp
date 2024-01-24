@@ -9,6 +9,9 @@ namespace python {
 
 template <class LDLTtype>
 struct LDLTVisitor : bp::def_visitor<LDLTVisitor<LDLTtype>> {
+  using Scalar = typename LDLTtype::Scalar;
+  using VectorXs = Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor>;
+  using MatrixXs = Eigen::Matrix<Scalar, -1, -1, Eigen::ColMajor>;
 
   static LDLTtype &compute_proxy(LDLTtype &fac,
                                  const context::ConstMatrixRef &mat) {
@@ -20,10 +23,17 @@ struct LDLTVisitor : bp::def_visitor<LDLTVisitor<LDLTtype>> {
     return fac.solveInPlace(rhsAndX);
   }
 
+  template <typename RhsType>
+  static auto solve(const LDLTtype &fac, RhsType &rhs) {
+    return fac.solve(rhs);
+  }
+
   template <typename... Args> void visit(bp::class_<Args...> &cl) const {
     cl.def("compute", compute_proxy, policies::return_internal_reference,
            ("self"_a, "mat"))
         .def("solveInPlace", solveInPlace_proxy, ("self"_a, "rhsAndX"))
+        .def("solve", solve<Eigen::Ref<const VectorXs>>, ("self"_a, "rhs"))
+        .def("solve", solve<Eigen::Ref<const MatrixXs>>, ("self"_a, "rhs"))
         .def("matrixLDLT", &LDLTtype::matrixLDLT, policies::return_by_value,
              "self"_a,
              "Get the current value of the decomposition matrix. This makes a "

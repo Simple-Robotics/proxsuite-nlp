@@ -44,7 +44,8 @@ namespace nlp {
 namespace linalg {
 
 /// @brief Use the LDLT from proxsuite.
-template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
+template <typename _Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<_Scalar> {
+  using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Base = ldlt_base<Scalar>;
   using psldlt_t = dense_linalg::Ldlt<Scalar>;
@@ -95,6 +96,13 @@ template <typename Scalar> struct ProxSuiteLDLTWrapper : ldlt_base<Scalar> {
     rhs = perm * work;
 
     return true;
+  }
+
+  template <typename Rhs>
+  typename Rhs::PlainObject solve(const Eigen::MatrixBase<Rhs> &rhs) const {
+    typename Rhs::PlainObject out = rhs;
+    solveInPlace(out);
+    return out;
   }
 
   inline DView vectorD() const {
