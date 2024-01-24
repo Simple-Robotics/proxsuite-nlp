@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Typedef for `Scalar` in the matrix decomposition classes
-* `.solve(rhs)` (allocating version of `.solveInPlace()`) to their Python bindings
+* `.solve(rhs)` (allocating version of `.solveInPlace()`) to their C++ class and Python bindings
 
 ## [0.3.4] - 2024-01-19
 
