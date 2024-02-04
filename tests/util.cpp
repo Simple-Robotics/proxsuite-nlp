@@ -1,6 +1,6 @@
 #include "./util.hpp"
 
-MatrixXs sampleGaussianOrhogonalEnsemble(Eigen::Index n) {
+MatrixXs sampleGaussianOrthogonalEnsemble(Eigen::Index n) {
   Eigen::Rand::P8_mt19937_64 urng{42};
   MatrixXs A = Eigen::Rand::normal<MatrixXs>(n, n, urng);
   double Z = std::sqrt(2.0 * int(n));
