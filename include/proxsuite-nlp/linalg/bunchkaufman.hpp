@@ -341,18 +341,14 @@ bunch_kaufman_in_place_one_block(MatrixType &a, WType &w, IndicesType &pivots,
   }
 }
 
-template <typename MatrixType, typename VecType, typename IndicesType>
+template <typename MatrixType, typename VecType, typename IndicesType,
+          typename WorkspaceType>
 ComputationInfo bunch_kaufman_in_place(MatrixType &a, VecType &subdiag,
-                                       IndicesType &pivots,
+                                       IndicesType &pivots, WorkspaceType &w,
                                        Index &pivot_count) {
-  Index blocksize = 32;
   Index n = a.rows();
 
-  if (n <= blocksize) {
-    blocksize = 0;
-  }
-
-  typename MatrixType::PlainObject w(n, blocksize);
+  const Index blocksize = w.cols();
 
   Index k = 0;
   while (k < n) {
@@ -528,7 +524,9 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
     UpLo = UpLo_
   };
   using MatrixType = MatrixType_;
+  using PlainObject = typename MatrixType::PlainObject;
   using Base = SolverBase<BunchKaufman>;
+  static constexpr Index BlockSize = 32;
   EIGEN_GENERIC_PUBLIC_INTERFACE(BunchKaufman)
   using VecType = Matrix<Scalar, RowsAtCompileTime, 1, Eigen::DontAlign,
                          MaxRowsAtCompileTime>;
@@ -542,16 +540,21 @@ struct BunchKaufman : SolverBase<BunchKaufman<MatrixType_, UpLo_>> {
 
   BunchKaufman()
       : m_matrix(), m_subdiag(), m_pivot_count(0), m_pivots(),
-        m_isInitialized(false), m_info(ComputationInfo::InvalidInput) {}
+        m_isInitialized(false), m_info(ComputationInfo::InvalidInput),
+        m_blocksize(), m_workspace() {}
   explicit BunchKaufman(Index size)
       : m_matrix(size, size), m_subdiag(size), m_pivot_count(0), m_pivots(size),
-        m_isInitialized(false), m_info(ComputationInfo::InvalidInput) {}
+        m_isInitialized(false), m_info(ComputationInfo::InvalidInput),
+        m_blocksize(size <= BlockSize ? 0 : BlockSize),
+        m_workspace(size, m_blocksize) {}
 
   template <typename InputType>
   explicit BunchKaufman(const EigenBase<InputType> &matrix)
       : m_matrix(matrix.rows(), matrix.cols()), m_subdiag(matrix.rows()),
         m_pivot_count(0), m_pivots(matrix.rows()), m_isInitialized(false),
-        m_info(ComputationInfo::InvalidInput) {
+        m_info(ComputationInfo::InvalidInput),
+        m_blocksize(matrix.rows() <= BlockSize ? 0 : BlockSize),
+        m_workspace(matrix.rows(), m_blocksize) {
     this->compute(matrix.derived());
   }
 
@@ -600,6 +603,8 @@ private:
   IndicesType m_pivots;
   bool m_isInitialized;
   ComputationInfo m_info;
+  Index m_blocksize;
+  PlainObject m_workspace;
 };
 
 #ifndef EIGEN_PARSED_BY_DOXYGEN
@@ -644,11 +649,14 @@ BunchKaufman<MatrixType_, UpLo_>::compute(const EigenBase<InputType> &a) {
   this->m_matrix.setZero();
   this->m_subdiag.setZero();
   this->m_pivots.setZero();
+  this->m_blocksize = n <= BlockSize ? 0 : BlockSize;
+  this->m_workspace.setZero(n, this->m_blocksize);
 
   this->m_matrix.template triangularView<Lower>() =
       a.derived().template triangularView<UpLo_>();
   this->m_info = internal::bunch_kaufman_in_place(
-      this->m_matrix, this->m_subdiag, this->m_pivots, this->m_pivot_count);
+      this->m_matrix, this->m_subdiag, this->m_pivots, this->m_workspace,
+      this->m_pivot_count);
   this->m_isInitialized = true;
   return *this;
 }
