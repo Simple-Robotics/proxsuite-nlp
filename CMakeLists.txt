@@ -37,12 +37,6 @@ include(CMakeDependentOption)
 
 apply_default_apple_configuration()
 
-if(WIN32)
-  set(LINK copy_if_different)
-else(WIN32)
-  set(LINK create_symlink)
-endif(WIN32)
-
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
