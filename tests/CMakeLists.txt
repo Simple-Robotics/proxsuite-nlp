@@ -138,6 +138,12 @@ function(add_proxsuite_nlp_bench name)
   endif()
 endfunction()
 
+if(WIN32)
+  set(LINK copy_if_different)
+else(WIN32)
+  set(LINK create_symlink)
+endif(WIN32)
+
 # symlink test data file
 function(symlink_data_file filename)
   # filename should be relative
