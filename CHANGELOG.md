@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* Enhance CMake packaging ([165](https://github.com/Simple-Robotics/proxsuite-nlp/pull/65))
+
 ## [0.4.0] - 2024-01-31
 
 ### Fixed
