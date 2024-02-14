@@ -240,6 +240,7 @@ endfunction()
 create_library()
 
 add_header_group(LIB_HEADERS)
+add_source_group(LIB_SOURCES)
 
 install(
   TARGETS ${PROJECT_NAME}
