@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add missing dependencies in `package.xml`: pinocchio, eigen.
 * Fix `ConstraintObjectTpl::operator==` constness (mandatory for eigenpy 3.3)
 * Corner case in `BunchKaufman<>` decomposition class when number of lhs rows is 1
+* Memory allocation in `BunchKaufman<>` ([#66](https://github.com/Simple-Robotics/proxsuite-nlp/pull/66))
 
 ### Added
 
