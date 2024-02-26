@@ -13,7 +13,7 @@ PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 } // namespace
 
 /// Sample for the GOE (Gaussian Orthogonal Ensemble)
-MatrixXs sampleGaussianOrhogonalEnsemble(Eigen::Index n);
+MatrixXs sampleGaussianOrthogonalEnsemble(Eigen::Index n);
 
 /// Get a random, symmetric block-sparse matrix
 MatrixXs getRandomSymmetricBlockMatrix(SymbolicBlockMatrix const &sym);

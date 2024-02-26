@@ -53,7 +53,7 @@ void BM_indefinite(benchmark::State &state) {
   for (auto _ : state) {
     long n = state.range(0);
     state.PauseTiming();
-    MatrixType a = sampleGaussianOrhogonalEnsemble(n);
+    MatrixType a = sampleGaussianOrthogonalEnsemble(n);
     MatrixType b = Eigen::Rand::normal<MatrixType>(n, 4, rng);
     state.ResumeTiming();
 
