@@ -126,7 +126,7 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   default:
     PROXSUITE_NLP_RUNTIME_ERROR(
         "ProxSuite support is not enabled. You should recompile ProxNLP with "
-        "the BUILD_WITH_PROXSUITE flag.");
+        "the BUILD_WITH_PROXSUITE_SUPPORT flag.");
 #endif
   }
 }

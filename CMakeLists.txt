@@ -36,12 +36,6 @@ include(CMakeDependentOption)
 
 apply_default_apple_configuration()
 
-if(WIN32)
-  set(LINK copy_if_different)
-else(WIN32)
-  set(LINK create_symlink)
-endif(WIN32)
-
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
@@ -61,7 +55,7 @@ option(BUILD_BENCHMARK "Build the benchmarks" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
 option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
-option(BUILD_WITH_PROXSUITE "Build the library with ProxSuite's LDLT" OFF)
+option(BUILD_WITH_PROXSUITE_SUPPORT "Build the library with ProxSuite's LDLT decomposition" OFF)
 cmake_dependent_option(
   GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF
   BUILD_PYTHON_INTERFACE OFF)
@@ -99,7 +93,7 @@ endmacro(TAG_LIBRARY_VERSION)
 add_project_dependency(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
 add_project_dependency(fmt "9.1.0...<11" REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.1.0")
 
-if(BUILD_WITH_PROXSUITE)
+if(BUILD_WITH_PROXSUITE_SUPPORT)
   add_project_dependency(proxsuite REQUIRED)
   add_compile_definitions(PROXSUITE_NLP_USE_PROXSUITE_LDLT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_USE_PROXSUITE_LDLT")
@@ -212,9 +206,9 @@ function(create_library)
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
-  if(BUILD_WITH_PROXSUITE)
+  if(BUILD_WITH_PROXSUITE_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
-  endif(BUILD_WITH_PROXSUITE)
+  endif(BUILD_WITH_PROXSUITE_SUPPORT)
   target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 
   set(MSVC_CMD_OPTIONS /bigobj)
@@ -234,6 +228,7 @@ endfunction()
 create_library()
 
 add_header_group(LIB_HEADERS)
+add_source_group(LIB_SOURCES)
 
 install(
   TARGETS ${PROJECT_NAME}
@@ -272,7 +267,7 @@ endif()
 if(BUILD_PYTHON_INTERFACE)
   export_variable(PROXSUITE_NLP_WITH_PYTHON_INTERFACE ON)
 endif()
-if(BUILD_WITH_PROXSUITE)
+if(BUILD_WITH_PROXSUITE_SUPPORT)
   export_variable(PROXSUITE_NLP_WITH_PROXSUITE ON)
 endif()
 
