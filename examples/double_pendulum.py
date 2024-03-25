@@ -4,6 +4,7 @@ Copyright (C) 2022 LAAS-CNRS, INRIA
 Author:
     Wilson Jallet
 """
+
 import proxsuite_nlp
 
 import pinocchio as pin

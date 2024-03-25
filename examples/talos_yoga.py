@@ -23,6 +23,7 @@ Author:
     Alessandro Assirelli
 
 """
+
 import pinocchio as pin
 import pinocchio.casadi as cpin
 import casadi

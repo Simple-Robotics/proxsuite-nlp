@@ -97,8 +97,8 @@ public:
     return ostr;
   }
 
-  friend auto operator*(CostSumTpl const &self, Scalar a)
-      -> shared_ptr<CostSumTpl> {
+  friend auto operator*(CostSumTpl const &self,
+                        Scalar a) -> shared_ptr<CostSumTpl> {
     auto out = self.clone();
     (*out) *= a;
     return out;
