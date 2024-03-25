@@ -26,8 +26,8 @@ using linalg::ProxSuiteLDLTWrapper;
 namespace {
 constexpr auto unit = benchmark::kMicrosecond;
 
-auto create_problem_structure(isize matrix_structure_type, isize pb_size)
-    -> linalg::SymbolicBlockMatrix {
+auto create_problem_structure(isize matrix_structure_type,
+                              isize pb_size) -> linalg::SymbolicBlockMatrix {
 
   BlockKind *data = nullptr;
   isize *row_segments = nullptr;

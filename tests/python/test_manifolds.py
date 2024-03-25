@@ -1,6 +1,7 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
+
 import pytest
 import numpy as np
 

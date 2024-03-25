@@ -1,6 +1,7 @@
 """
 Copyright (C) 2022 LAAS-CNRS, INRIA
 """
+
 import casadi
 import proxsuite_nlp
 import numpy as np

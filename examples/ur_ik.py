@@ -1,6 +1,7 @@
 """
 Inverse kinematics with box constraints.
 """
+
 import proxsuite_nlp
 from proxsuite_nlp import manifolds, costs, constraints
 from proxsuite_nlp import C2Function

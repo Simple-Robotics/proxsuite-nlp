@@ -104,12 +104,12 @@ void npy_vsave(char const *fname, void const *vdata, usize sizeof_T,
                char const *mode);
 
 auto npy_vload_vec(std::string const &fname, usize sizeof_T, void *vec,
-                   void *(*ptr)(void *), void (*resize)(void *, usize rows))
-    -> LoadVecResult;
+                   void *(*ptr)(void *),
+                   void (*resize)(void *, usize rows)) -> LoadVecResult;
 auto npy_vload_mat(std::string const &fname, usize sizeof_T, void *vec,
                    void *(*ptr)(void *),
-                   void (*resize)(void *, usize rows, usize cols))
-    -> LoadMatResult;
+                   void (*resize)(void *, usize rows,
+                                  usize cols)) -> LoadMatResult;
 } // namespace detail
 
 template <typename D>
