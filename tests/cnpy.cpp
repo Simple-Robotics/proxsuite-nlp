@@ -217,8 +217,8 @@ void parse_npy_header(std::FILE *fp, usize &word_size,
 }
 
 auto load_npy_vec(std::FILE *fp, usize sizeof_T, void *vec,
-                  void *(*ptr)(void *), void (*resize)(void *, usize rows))
-    -> LoadVecResult {
+                  void *(*ptr)(void *),
+                  void (*resize)(void *, usize rows)) -> LoadVecResult {
   std::vector<usize> shape;
 
   usize word_size{};
@@ -242,8 +242,8 @@ auto load_npy_vec(std::FILE *fp, usize sizeof_T, void *vec,
 
 auto load_npy_mat(std::FILE *fp, usize sizeof_T, void *vec,
                   void *(*ptr)(void *),
-                  void (*resize)(void *, usize rows, usize cols))
-    -> LoadMatResult {
+                  void (*resize)(void *, usize rows,
+                                 usize cols)) -> LoadMatResult {
   std::vector<usize> shape;
 
   usize word_size{};
@@ -270,8 +270,8 @@ auto load_npy_mat(std::FILE *fp, usize sizeof_T, void *vec,
 }
 
 auto npy_vload_vec(std::string const &fname, usize sizeof_T, void *vec,
-                   void *(*ptr)(void *), void (*resize)(void *, usize rows))
-    -> LoadVecResult {
+                   void *(*ptr)(void *),
+                   void (*resize)(void *, usize rows)) -> LoadVecResult {
   File fp{fname.c_str(), "rb"}; // NOLINT
 
   CNPY_ASSERT(fp.ptr != nullptr);
@@ -280,8 +280,8 @@ auto npy_vload_vec(std::string const &fname, usize sizeof_T, void *vec,
 
 auto npy_vload_mat(std::string const &fname, usize sizeof_T, void *vec,
                    void *(*ptr)(void *),
-                   void (*resize)(void *, usize rows, usize cols))
-    -> LoadMatResult {
+                   void (*resize)(void *, usize rows,
+                                  usize cols)) -> LoadMatResult {
   File fp{fname.c_str(), "rb"}; // NOLINT
 
   CNPY_ASSERT(fp.ptr != nullptr);
