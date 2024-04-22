@@ -40,8 +40,8 @@ repos:
     hooks:
     - id: cmake-format
       additional_dependencies: [pyyaml>=5.1]
-    #- id: cmake-lint
-    #  additional_dependencies: [pyyaml>=5.1]
+    - id: cmake-lint
+      additional_dependencies: [pyyaml>=5.1]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
