@@ -6,7 +6,8 @@ cmake_minimum_required(VERSION 3.12)
 
 set(PROJECT_NAME proxsuite-nlp)
 set(PROJECT_DESCRIPTION
-    "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds.")
+    "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds."
+)
 set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
 set(PROJECT_CUSTOM_HEADER_DIR "proxsuite-nlp")
@@ -46,10 +47,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
       Release
-      CACHE STRING "Choose the type of build." FORCE)
+      CACHE STRING "Choose the type of build." FORCE
+  )
   # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel"
-                                               "RelWithDebInfo")
+  set_property(
+    CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+  )
 endif()
 
 # --- OPTIONS ----------------------------------------
@@ -64,7 +67,8 @@ option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchi
 option(BUILD_WITH_PROXSUITE "Build the library with ProxSuite's LDLT" OFF)
 cmake_dependent_option(
   GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF
-  BUILD_PYTHON_INTERFACE OFF)
+  BUILD_PYTHON_INTERFACE OFF
+)
 
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
@@ -118,7 +122,8 @@ if(BUILD_PYTHON_INTERFACE)
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+  )
   message(STATUS "Python compiler: ${_python_implementation_value}")
 endif(BUILD_PYTHON_INTERFACE)
 
@@ -152,7 +157,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp
-      ${PROJECT_SOURCE_DIR}/src/pdal.cpp)
+      ${PROJECT_SOURCE_DIR}/src/pdal.cpp
+  )
   set(LIB_TEMPLATE_DECLARATIONS
       ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
       ${LIB_HEADER_DIR}/modelling/constraints.txx
@@ -168,13 +174,16 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${LIB_HEADER_DIR}/linesearch.txx
       ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
       ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
-      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx)
+      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx
+  )
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
     list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/multibody/rigid-transform-point.cpp
-         ${PROJECT_SOURCE_DIR}/src/multibody/spaces.cpp)
+         ${PROJECT_SOURCE_DIR}/src/multibody/spaces.cpp
+    )
     list(APPEND LIB_TEMPLATE_DECLARATIONS
          ${LIB_HEADER_DIR}/modelling/residuals/rigid-transform-point.txx
-         ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx)
+         ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx
+    )
   endif(BUILD_WITH_PINOCCHIO_SUPPORT)
   list(APPEND LIB_HEADERS ${LIB_TEMPLATE_DECLARATIONS})
   list(APPEND LIB_SOURCES ${LIB_TEMPLATE_SOURCES})
@@ -186,7 +195,8 @@ function(set_standard_output_directory target)
     ${target}
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin
                LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
-               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+  )
 endfunction()
 
 function(create_library)
@@ -197,8 +207,9 @@ function(create_library)
   add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
   set_standard_output_directory(${PROJECT_NAME})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
-  target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS}
-                                                    $<$<PLATFORM_ID:Windows>:NOMINMAX>)
+  target_compile_definitions(
+    ${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS} $<$<PLATFORM_ID:Windows>:NOMINMAX>
+  )
 
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX VERSION ${PROJECT_VERSION})
   if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
@@ -226,7 +237,8 @@ function(create_library)
     install(
       FILES ${headerFileRelative}
       DESTINATION ${CMAKE_INSTALL_PREFIX}/${headerPath}
-      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
   endforeach(headerFile ${LIB_HEADERS})
 
 endfunction()
@@ -242,7 +254,8 @@ install(
   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+  RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)
 
 add_subdirectory(bindings)
 
@@ -259,7 +272,8 @@ macro(EXPORT_VARIABLE var_name var_value)
   if(has_parent)
     set(${var_name}
         ${var_value}
-        PARENT_SCOPE)
+        PARENT_SCOPE
+    )
   else()
     set(${var_name} ${var_value})
   endif()

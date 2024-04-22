@@ -34,8 +34,10 @@ if(BUILD_PYTHON_INTERFACE)
 
   foreach(pyfile ${EXAMPLES_PY})
     get_filename_component(pyfile_name ${pyfile} NAME)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${pyfile}
-                            ${CMAKE_CURRENT_BINARY_DIR}/${pyfile_name})
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E create_symlink ${pyfile}
+              ${CMAKE_CURRENT_BINARY_DIR}/${pyfile_name}
+    )
   endforeach()
 
 endif(BUILD_PYTHON_INTERFACE)

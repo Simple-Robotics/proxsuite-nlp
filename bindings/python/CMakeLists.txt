@@ -25,7 +25,8 @@ function(MAKE_BINDINGS)
                RUNTIME_OUTPUT_DIRECTORY "proxsuite_nlp"
                PREFIX ""
                SUFFIX ${PYTHON_EXT_SUFFIX}
-               VERSION ${PROJECT_VERSION})
+               VERSION ${PROJECT_VERSION}
+  )
   if(UNIX AND NOT APPLE)
     get_relative_rpath(${${PYLIB_NAME}_INSTALL_DIR} PYLIB_INSTALL_RPATH)
     set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}")
@@ -33,19 +34,22 @@ function(MAKE_BINDINGS)
 
   set(GCC_CMD_OPTIONS -Wno-conversion -Wno-comment)
   set(GCC_CMD_ID AppleClang,Clang,GNU)
-  target_compile_options(${PYLIB_NAME}
-                         PRIVATE $<$<CXX_COMPILER_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>)
+  target_compile_options(
+    ${PYLIB_NAME} PRIVATE $<$<CXX_COMPILER_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>
+  )
   target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
   target_include_directories(
     ${PYLIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
-                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  )
 
   # link solver, eigenpy, Boost.Python
   target_link_libraries(${PYLIB_NAME} PUBLIC ${PROJECT_NAME} eigenpy::eigenpy)
   install(
     TARGETS ${PYLIB_NAME}
     EXPORT ${TARGETS_EXPORT_NAME}
-    DESTINATION ${${PYLIB_NAME}_INSTALL_DIR})
+    DESTINATION ${${PYLIB_NAME}_INSTALL_DIR}
+  )
 endfunction()
 
 make_bindings()
@@ -54,7 +58,8 @@ install(
   DIRECTORY include/${PROJECT_NAME}
   DESTINATION "include"
   FILES_MATCHING
-  PATTERN "*.hpp")
+  PATTERN "*.hpp"
+)
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
 set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py windows_dll_manager.py)
@@ -66,6 +71,7 @@ endforeach()
 # Generate stubs
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME}
-                 ${PROJECT_NAME})
+  generate_stubs(
+    ${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME} ${PROJECT_NAME}
+  )
 endif(GENERATE_PYTHON_STUBS)

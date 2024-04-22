@@ -13,15 +13,18 @@ FetchContent_Declare(
   eigenrand
   GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
   GIT_TAG 23d287e
-  GIT_PROGRESS TRUE)
+  GIT_PROGRESS TRUE
+)
 FetchContent_GetProperties(eigenrand)
 if(NOT eigenrand_POPULATED)
   set(EIGENRAND_BUILD_TEST
       OFF
-      CACHE INTERNAL "Enable EigenRand test")
+      CACHE INTERNAL "Enable EigenRand test"
+  )
   set(EIGENRAND_BUILD_BENCHMARK
       OFF
-      CACHE INTERNAL "Enable EigenRand benchmark")
+      CACHE INTERNAL "Enable EigenRand benchmark"
+  )
   FetchContent_Populate(eigenrand)
   add_subdirectory(${eigenrand_SOURCE_DIR} ${eigenrand_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
@@ -32,15 +35,18 @@ if(BUILD_BENCHMARK)
     benchmark
     GIT_REPOSITORY https://github.com/google/benchmark.git
     GIT_TAG v1.8.3
-    GIT_PROGRESS TRUE)
+    GIT_PROGRESS TRUE
+  )
   FetchContent_GetProperties(benchmark)
   if(NOT benchmark_POPULATED)
     set(BENCHMARK_ENABLE_WERROR
         OFF
-        CACHE INTERNAL "Disable -Werror flag in benchmark")
+        CACHE INTERNAL "Disable -Werror flag in benchmark"
+    )
     set(BENCHMARK_ENABLE_TESTING
         OFF
-        CACHE INTERNAL "Disable testing of the benchmark library")
+        CACHE INTERNAL "Disable testing of the benchmark library"
+    )
     FetchContent_Populate(benchmark)
     add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR} EXCLUDE_FROM_ALL)
   endif()
@@ -57,7 +63,8 @@ install(
   TARGETS cnpy
   EXPORT ${TARGETS_EXPORT_NAME}
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests)
+  PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests
+)
 
 set(TEST_UTIL_LIB ${PROJECT_NAME}_test_util)
 add_library(${TEST_UTIL_LIB} STATIC util.cpp)
@@ -69,14 +76,16 @@ macro(ADD_TEST_CFLAGS test_name flag)
   set_property(
     TARGET ${test_name}
     APPEND_STRING
-    PROPERTY COMPILE_FLAGS " ${flag}")
+    PROPERTY COMPILE_FLAGS " ${flag}"
+  )
 endmacro()
 
 function(get_cpp_test_name name dir out_var)
   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "test-cpp" prefix ${dir})
   set(${out_var}
       "${prefix}-${name}"
-      PARENT_SCOPE)
+      PARENT_SCOPE
+  )
 endfunction()
 
 function(add_proxsuite_nlp_test name)
@@ -107,7 +116,8 @@ function(get_cpp_bench_name name dir out_var)
   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "bench-cpp" prefix ${dir})
   set(${out_var}
       "${prefix}-${name}"
-      PARENT_SCOPE)
+      PARENT_SCOPE
+  )
 endfunction()
 
 function(add_proxsuite_nlp_bench name)
@@ -129,8 +139,10 @@ endfunction()
 # symlink test data file
 function(symlink_data_file filename)
   # filename should be relative
-  execute_process(COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-                          ${CMAKE_CURRENT_BINARY_DIR}/${filename})
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+            ${CMAKE_CURRENT_BINARY_DIR}/${filename}
+  )
 endfunction()
 
 add_proxsuite_nlp_bench(cholesky-block-sparse-bench)
