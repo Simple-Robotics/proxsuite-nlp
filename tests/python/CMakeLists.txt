@@ -2,16 +2,19 @@ function(CHECK_FOR_PYTHON_PACKAGE package_name)
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import ${package_name}"
     RESULT_VARIABLE _pypkg_found
-    OUTPUT_QUIET ERROR_QUIET)
+    OUTPUT_QUIET ERROR_QUIET
+  )
   if(_pypkg_found EQUAL 0)
     set(${package_name}_FOUND
         TRUE
-        PARENT_SCOPE)
+        PARENT_SCOPE
+    )
     message(STATUS "Found Python package ${package_name}.")
   else()
     set(${package_name}_FOUND
         FALSE
-        PARENT_SCOPE)
+        PARENT_SCOPE
+    )
     message(STATUS "Python package ${package_name} not found.")
   endif()
 endfunction()

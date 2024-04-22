@@ -14,7 +14,8 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
   GIT_TAG 23d287e
   GIT_PROGRESS TRUE
-  EXCLUDE_FROM_ALL SYSTEM)
+  EXCLUDE_FROM_ALL SYSTEM
+)
 FetchContent_GetProperties(eigenrand)
 if(NOT eigenrand_POPULATED)
   set(EIGENRAND_BUILD_TEST
@@ -27,8 +28,9 @@ if(NOT eigenrand_POPULATED)
   )
   FetchContent_Populate(eigenrand)
   add_library(EigenRand::EigenRand IMPORTED INTERFACE)
-  set_target_properties(EigenRand::EigenRand PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                                        ${eigenrand_SOURCE_DIR})
+  set_target_properties(
+    EigenRand::EigenRand PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${eigenrand_SOURCE_DIR}
+  )
 endif(NOT eigenrand_POPULATED)
 
 # Add benchmark dependency
