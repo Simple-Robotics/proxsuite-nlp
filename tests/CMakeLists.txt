@@ -14,7 +14,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
   GIT_TAG 23d287e
   GIT_PROGRESS TRUE
-)
+  EXCLUDE_FROM_ALL SYSTEM)
 FetchContent_GetProperties(eigenrand)
 if(NOT eigenrand_POPULATED)
   set(EIGENRAND_BUILD_TEST
@@ -26,8 +26,10 @@ if(NOT eigenrand_POPULATED)
       CACHE INTERNAL "Enable EigenRand benchmark"
   )
   FetchContent_Populate(eigenrand)
-  add_subdirectory(${eigenrand_SOURCE_DIR} ${eigenrand_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+  add_library(EigenRand::EigenRand IMPORTED INTERFACE)
+  set_target_properties(EigenRand::EigenRand PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                        ${eigenrand_SOURCE_DIR})
+endif(NOT eigenrand_POPULATED)
 
 # Add benchmark dependency
 if(BUILD_BENCHMARK)
@@ -68,8 +70,8 @@ install(
 
 set(TEST_UTIL_LIB ${PROJECT_NAME}_test_util)
 add_library(${TEST_UTIL_LIB} STATIC util.cpp)
-target_link_libraries(${TEST_UTIL_LIB} PUBLIC ${PROJECT_NAME} EigenRand::EigenRand)
-target_include_directories(${TEST_UTIL_LIB} PRIVATE ./)
+target_link_libraries(${TEST_UTIL_LIB} PUBLIC ${PROJECT_NAME})
+target_link_libraries(${TEST_UTIL_LIB} PUBLIC EigenRand::EigenRand)
 set_target_properties(${TEST_UTIL_LIB} PROPERTIES LINKER_LANGUAGE CXX)
 
 macro(ADD_TEST_CFLAGS test_name flag)
@@ -135,6 +137,12 @@ function(add_proxsuite_nlp_bench name)
     target_link_libraries(${bench_name} PRIVATE ${TEST_UTIL_LIB})
   endif()
 endfunction()
+
+if(WIN32)
+  set(LINK copy_if_different)
+else(WIN32)
+  set(LINK create_symlink)
+endif(WIN32)
 
 # symlink test data file
 function(symlink_data_file filename)
