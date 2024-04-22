@@ -48,8 +48,7 @@ auto main() -> int {
         Mat x = dec.solve(b);
         std::cout << "    llt error: " << (a * x - b).cwiseAbs().maxCoeff()
                   << "\n";
-        std::cout << "    time elapsed: " << elapsed << "s"
-                  << "\n\n";
+        std::cout << "    time elapsed: " << elapsed << "s" << "\n\n";
       }
       {
         Eigen::LDLT<Mat> dec(n);
@@ -57,8 +56,7 @@ auto main() -> int {
         Mat x = dec.solve(b);
         std::cout << "    ldlt error: " << (a * x - b).cwiseAbs().maxCoeff()
                   << "\n";
-        std::cout << "    time elapsed: " << elapsed << "s"
-                  << "\n\n";
+        std::cout << "    time elapsed: " << elapsed << "s" << "\n\n";
       }
       {
         Eigen::BunchKaufman<Mat> dec(n);
@@ -66,8 +64,7 @@ auto main() -> int {
         Mat x = dec.solve(b);
         std::cout << "    bunch-kaufman error: "
                   << (a * x - b).cwiseAbs().maxCoeff() << "\n";
-        std::cout << "    time elapsed: " << elapsed << "s"
-                  << "\n\n";
+        std::cout << "    time elapsed: " << elapsed << "s" << "\n\n";
       }
       std::cout << '\n';
 
@@ -82,8 +79,7 @@ auto main() -> int {
         Mat x = dec.solve(b);
         std::cout << "    ldlt error: " << (a * x - b).cwiseAbs().maxCoeff()
                   << "\n";
-        std::cout << "    time elapsed: " << elapsed << "s"
-                  << "\n\n";
+        std::cout << "    time elapsed: " << elapsed << "s" << "\n\n";
       }
       {
         Eigen::BunchKaufman<Mat> dec(n);
@@ -91,8 +87,7 @@ auto main() -> int {
         Mat x = dec.solve(b);
         std::cout << "    bunch-kaufman error: "
                   << (a * x - b).cwiseAbs().maxCoeff() << "\n";
-        std::cout << "    time elapsed: " << elapsed << "s"
-                  << "\n\n";
+        std::cout << "    time elapsed: " << elapsed << "s" << "\n\n";
       }
     };
     std::cout << "dim: " << n << "\n\n";
