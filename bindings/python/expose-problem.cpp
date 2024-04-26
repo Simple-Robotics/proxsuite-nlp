@@ -10,8 +10,7 @@ void exposeProblem() {
   using context::Manifold;
   using context::Problem;
 
-  bp::class_<Problem, shared_ptr<Problem>>(
-      "Problem", "Problem definition class.", bp::no_init)
+  bp::class_<Problem>("Problem", "Problem definition class.", bp::no_init)
       .def(bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>,
                     const std::vector<Constraint> &>(
           (bp::arg("self"), bp::arg("space"), bp::arg("cost"),

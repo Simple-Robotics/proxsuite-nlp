@@ -49,8 +49,11 @@ public:
   using ConstraintSet = ConstraintSetBase<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
-  /// Manifold on which to optimize.
-  shared_ptr<Problem> problem_;
+protected:
+  /// General nonlinear program to solve.
+  Problem *problem_;
+
+public:
   /// Merit function.
   ALMeritFunctionTpl<Scalar> merit_fun;
   /// Proximal regularization penalty.
@@ -121,7 +124,7 @@ public:
   unique_ptr<Workspace> workspace_;
   unique_ptr<Results> results_;
 
-  ProxNLPSolverTpl(shared_ptr<Problem> prob, const Scalar tol = 1e-6,
+  ProxNLPSolverTpl(Problem &prob, const Scalar tol = 1e-6,
                    const Scalar mu_eq_init = 1e-2, const Scalar rho_init = 0.,
                    const VerboseLevel verbose = QUIET,
                    const Scalar mu_lower = 1e-9, const Scalar prim_alpha = 0.1,
@@ -129,6 +132,8 @@ public:
                    const Scalar dual_beta = 1.,
                    LDLTChoice ldlt_blocked = LDLTChoice::BUNCHKAUFMAN,
                    const LinesearchOptions ls_options = LinesearchOptions());
+
+  const Problem &problem() const { return *problem_; }
 
   const Manifold &manifold() const { return *problem_->manifold_; }
 

@@ -56,9 +56,8 @@ void exposeSolver() {
       .export_values();
 
   using LinesearchOptions = Linesearch<Scalar>::Options;
-  bp::class_<LinesearchOptions>(
-      "LinesearchOptions", "Linesearch options.",
-      bp::init<>(bp::args("self"), "Default constructor."))
+  bp::class_<LinesearchOptions>("LinesearchOptions", "Linesearch options.",
+                                bp::init<>(("self"_a), "Default constructor."))
       .def_readwrite("armijo_c1", &LinesearchOptions::armijo_c1)
       .def_readwrite("wolfe_c2", &LinesearchOptions::wolfe_c2)
       .def_readwrite(
@@ -91,14 +90,17 @@ void exposeSolver() {
       "Semi-smooth Newton-based solver for nonlinear optimization using a "
       "primal-dual method of multipliers. This solver works by approximately "
       "solving the proximal subproblems in the method of multipliers.",
-      bp::init<shared_ptr<Problem>, Scalar, Scalar, Scalar, VerboseLevel,
-               Scalar, Scalar, Scalar, Scalar, Scalar, LDLTChoice>(
-          (bp::arg("self"), bp::arg("problem"), bp::arg("tol") = 1e-6,
-           bp::arg("mu_init") = 1e-2, bp::arg("rho_init") = 0.,
-           bp::arg("verbose") = VerboseLevel::QUIET, bp::arg("mu_min") = 1e-9,
-           bp::arg("prim_alpha") = 0.1, bp::arg("prim_beta") = 0.9,
-           bp::arg("dual_alpha") = 1., bp::arg("dual_beta") = 1.,
-           bp::arg("ldlt_choice") = LDLTChoice::DENSE)))
+      bp::init<Problem &, Scalar, Scalar, Scalar, VerboseLevel, Scalar, Scalar,
+               Scalar, Scalar, Scalar, LDLTChoice>(
+          ("self"_a, "problem", "tol"_a = 1e-6, "mu_init"_a = 1e-2,
+           "rho_init"_a = 0., "verbose"_a = VerboseLevel::QUIET,
+           "mu_min"_a = 1e-9, "prim_alpha"_a = 0.1, "prim_beta"_a = 0.9,
+           "dual_alpha"_a = 1., "dual_beta"_a = 1.,
+           "ldlt_choice"_a = LDLTChoice::DENSE)))
+      .add_property("problem",
+                    bp::make_function(&ProxNLPSolver::problem,
+                                      bp::return_internal_reference<>()),
+                    "The general nonlinear program to solve.")
       .add_property("manifold",
                     bp::make_function(&ProxNLPSolver::manifold,
                                       bp::return_internal_reference<>()),
@@ -106,14 +108,14 @@ void exposeSolver() {
       .def_readwrite("hess_approx", &ProxNLPSolver::hess_approx)
       .def_readwrite("ls_strat", &ProxNLPSolver::ls_strat)
       .def("register_callback", &ProxNLPSolver::registerCallback,
-           bp::args("self", "cb"), "Add a callback to the solver.")
+           ("self"_a, "cb"), "Add a callback to the solver.")
       .def("clear_callbacks", &ProxNLPSolver::clearCallbacks,
-           "Clear callbacks.", bp::args("self"))
+           "Clear callbacks.", ("self"_a))
       .def_readwrite("verbose", &ProxNLPSolver::verbose,
                      "Solver verbose setting.")
       .def_readwrite("ldlt_choice", &ProxNLPSolver::ldlt_choice_,
                      "Use the BlockLDLT solver.")
-      .def("setup", &ProxNLPSolver::setup, bp::args("self"),
+      .def("setup", &ProxNLPSolver::setup, ("self"_a),
            "Initialize the solver workspace and results.")
       .def("getResults", &ProxNLPSolver::getResults, ("self"_a),
            deprecation_warning_policy<DeprecationType::DEPRECATION,
@@ -128,21 +130,19 @@ void exposeSolver() {
       .add_property("results", bp::make_getter(&ProxNLPSolver::results_,
                                                ReturnInternalStdUniquePtr{}))
       .def<solve_std_vec_ins_t>(
-          "solve", &ProxNLPSolver::solve, bp::args("self", "x0", "lams0"),
+          "solve", &ProxNLPSolver::solve, ("self"_a, "x0", "lams0"),
           "Run the solver (multiplier guesses given as a list).")
-      .def<solve_eig_vec_ins_t>("solve", &ProxNLPSolver::solve,
-                                (bp::arg("self"), bp::arg("x0"),
-                                 bp::arg("lams0") = context::VectorXs(0)),
-                                "Run the solver.")
-      .def("setPenalty", &ProxNLPSolver::setPenalty, bp::args("self", "mu"),
+      .def<solve_eig_vec_ins_t>(
+          "solve", &ProxNLPSolver::solve,
+          ("self"_a, "x0", "lams0"_a = context::VectorXs(0)), "Run the solver.")
+      .def("setPenalty", &ProxNLPSolver::setPenalty, ("self"_a, "mu"),
            "Set the augmented Lagrangian penalty parameter.")
       .def("setDualPenalty", &ProxNLPSolver::setDualPenalty,
-           bp::args("self", "gamma"),
+           ("self"_a, "gamma"),
            "Set the dual variable penalty for the linesearch merit "
            "function.")
       .def("setProxParameter", &ProxNLPSolver::setProxParameter,
-           bp::args("self", "rho"),
-           "Set the primal proximal penalty parameter.")
+           ("self"_a, "rho"), "Set the primal proximal penalty parameter.")
       .def_readwrite("mu_init", &ProxNLPSolver::mu_init_,
                      "Initial AL parameter value.")
       .def_readwrite("rho_init", &ProxNLPSolver::rho_init_,
@@ -188,7 +188,7 @@ void exposeSolver() {
   bp::class_<BCLParams>("BCLParams",
                         "Parameters for the bound-constrained Lagrangian (BCL) "
                         "penalty update strategy.",
-                        bp::init<>(bp::args("self")))
+                        bp::init<>(("self"_a)))
       .def_readwrite("prim_alpha", &BCLParams::prim_alpha)
       .def_readwrite("prim_beta", &BCLParams::prim_beta)
       .def_readwrite("dual_alpha", &BCLParams::dual_alpha)
