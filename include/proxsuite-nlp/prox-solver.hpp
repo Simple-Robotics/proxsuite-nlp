@@ -105,18 +105,16 @@ public:
 
   //// Parameters for the inertia-correcting strategy.
 
-  const Scalar del_inc_k = 8.;
-  const Scalar del_inc_big = 100.;
-  const Scalar del_dec_k = 1. / 3.;
-
-  const Scalar DELTA_MIN = 1e-14; // Minimum nonzero regularization strength.
-  const Scalar DELTA_MAX = 1e6;   // Maximum regularization strength.
-  const Scalar DELTA_NONZERO_INIT = 1e-4;
+  Scalar del_inc_k = 8.;      //< Inertia corrector increase factor
+  Scalar del_inc_big = 100.;  //< Inertia corrector increase factor (big)
+  Scalar del_dec_k = 1. / 3.; //< Inertia corrector decrease factor
+  Scalar DELTA_MIN = 1e-14;   //< Minimum nonzero regularization strength.
+  Scalar DELTA_MAX = 1e6;     //< Maximum regularization strength.
+  Scalar DELTA_NONZERO_INIT = 1e-4;
   Scalar DELTA_INIT = 0.;
 
-  /// Solver maximum number of iterations.
-  std::size_t max_iters = 100;
-  std::size_t max_al_iters = 1000;
+  std::size_t max_iters = 100;     //< Solver maximum number of iterations.
+  std::size_t max_al_iters = 1000; //< Maximum outer (AL) iterations.
 
   /// Callbacks
   std::vector<CallbackPtr> callbacks_;
