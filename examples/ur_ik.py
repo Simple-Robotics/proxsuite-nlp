@@ -8,6 +8,7 @@ from proxsuite_nlp import C2Function
 
 import numpy as np
 import pinocchio as pin
+import pinocchio.visualize
 import example_robot_data as erd
 
 
