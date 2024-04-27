@@ -48,6 +48,10 @@ public:
   }
 };
 
+template <typename Scalar>
+using EqualityConstraint PROXSUITE_NLP_DEPRECATED_MESSAGE(
+    "Use EqualityConstraintTpl<T> instead") = EqualityConstraintTpl<Scalar>;
+
 } // namespace nlp
 } // namespace proxsuite
 
