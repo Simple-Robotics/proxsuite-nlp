@@ -4,6 +4,7 @@
 #include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
 #include "proxsuite-nlp/modelling/constraints/box-constraint.hpp"
 #include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
+#include "proxsuite-nlp/modelling/constraints/constraint-set-product.hpp"
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/modelling/constraints.txx"
