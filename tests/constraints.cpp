@@ -1,8 +1,5 @@
 #include "proxsuite-nlp/constraint-base.hpp"
-#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
-#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
-// #include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
-
+#include "proxsuite-nlp/modelling/constraints.hpp"
 #include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
 #include <fmt/core.h>
@@ -31,6 +28,26 @@ BOOST_AUTO_TEST_CASE(test_equality) {
   double m = eq_set.computeMoreauEnvelope(x1, zout);
   BOOST_TEST_CHECK(zout.isApprox(x1));
   BOOST_TEST_CHECK(m == (0.5 / mu * zout.squaredNorm()));
+}
+
+BOOST_AUTO_TEST_CASE(constraint_product_op) {
+  EqualityConstraintTpl<double> eq_op;
+  NegativeOrthantTpl<double> neg_op;
+  long n1 = 2, n2 = 3;
+  ConstraintSetProductTpl<double> op({&eq_op, &neg_op}, {n1, n2});
+
+  VectorXs z(n1 + n2);
+  z.setRandom();
+  z[4] = -0.14;
+  VectorXs zCopy = z;
+
+  fmt::print("z = {}\n", z.transpose());
+  op.normalConeProjection(zCopy, z);
+  fmt::print("zproj = {}\n", z.transpose());
+
+  neg_op.normalConeProjection(zCopy.tail(n2), zCopy.tail(n2));
+
+  BOOST_CHECK(z.isApprox(zCopy));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
