@@ -38,6 +38,15 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
+  ConstraintSetProductTpl(const std::vector<Base *> components,
+                          const std::vector<Eigen::Index> &blockSizes)
+      : m_components(components), m_blockSizes(blockSizes) {
+    if (components.size() != blockSizes.size()) {
+      PROXSUITE_NLP_RUNTIME_ERROR("Number of components and corresponding "
+                                  "block sizes should be the same.");
+    }
+  }
+
   Scalar evaluate(const ConstVectorRef &zproj) const override {
     Scalar res = 0.;
     for (std::size_t i = 0; i < m_components.size(); i++) {
