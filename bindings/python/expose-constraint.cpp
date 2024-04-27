@@ -124,6 +124,8 @@ static void exposeConstraintTypes() {
 
   exposeSpecificConstraintSet<ConstraintSetProduct>(
       "ConstraintSetProduct", "Cartesian product of constraint sets.")
+      .def(bp::init<std::vector<ConstraintSet *>, std::vector<Eigen::Index>>(
+          ("self"_a, "components", "blockSizes")))
       .add_property("blockSizes",
                     bp::make_function(&ConstraintSetProduct::blockSizes,
                                       bp::return_internal_reference<>()),
