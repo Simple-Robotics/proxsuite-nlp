@@ -100,6 +100,7 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
     }
   }
 
+  const std::vector<Base *> &components() const { return m_components; }
   const std::vector<Eigen::Index> &blockSizes() const { return m_blockSizes; }
 
 private:
