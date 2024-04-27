@@ -38,6 +38,10 @@ struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
   }
 };
 
+template <typename Scalar>
+using NegativeOrthant PROXSUITE_NLP_DEPRECATED_MESSAGE(
+    "Use NegativeOrthantTpl<T> instead") = NegativeOrthantTpl<Scalar>;
+
 } // namespace nlp
 } // namespace proxsuite
 
