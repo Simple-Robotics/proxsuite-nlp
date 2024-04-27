@@ -9,9 +9,9 @@ template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     ConstraintObjectTpl<context::Scalar>;
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    EqualityConstraint<context::Scalar>;
+    EqualityConstraintTpl<context::Scalar>;
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    NegativeOrthant<context::Scalar>;
+    NegativeOrthantTpl<context::Scalar>;
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     BoxConstraintTpl<context::Scalar>;
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI

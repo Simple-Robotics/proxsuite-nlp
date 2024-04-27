@@ -70,7 +70,7 @@ int main() {
   auto residualCirclePtr = std::make_shared<QuadraticResidualCostTpl<double>>(
       resptr, w2, -radius_sq);
 
-  using Ineq_t = NegativeOrthant<double>;
+  using Ineq_t = NegativeOrthantTpl<double>;
   using CstrType = Problem::ConstraintObject;
   CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
   std::vector<CstrType> cstrs{cstr1};
