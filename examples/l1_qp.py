@@ -26,6 +26,9 @@ lin_fun = proxsuite_nlp.residuals.LinearFunction(A)
 assert np.allclose(A @ target, lin_fun(target))
 penalty = constraints.ConstraintObject(lin_fun, constraints.NonsmoothPenaltyL1())
 
+TOL = 1e-6
+MAX_ITER = 50
+
 
 def soft_thresh(x):
     print("CVXPY SOLVE")
@@ -33,8 +36,18 @@ def soft_thresh(x):
     e = x - target
     c = 0.5 * cvxpy.quad_form(e, w_x) + cvxpy.norm1(A @ x)
     p = cvxpy.Problem(cvxpy.Minimize(c))
-    p.solve()
+    p.solve(
+        solver="OSQP",
+        eps_abs=TOL,
+        eps_rel=TOL,
+        eps_prim_inf=TOL,
+        eps_dual_inf=TOL,
+        max_iter=MAX_ITER,
+        verbose=True,
+    )
     print(p.solver_stats)
+    extra = p.solver_stats.extra_stats
+    print(extra)
     return p.solution.primal_vars[1].copy()
 
 
@@ -47,10 +60,10 @@ print("x0:", x0)
 
 problem = proxsuite_nlp.Problem(space, rcost, [penalty])
 
-tol = 1e-6
-mu_init = 0.1
-rho_init = 1e-6
-solver = proxsuite_nlp.ProxNLPSolver(problem, tol, mu_init, rho_init)
+mu_init = 0.01
+rho_init = 1e-12
+solver = proxsuite_nlp.ProxNLPSolver(problem, TOL, mu_init, rho_init)
+solver.max_iters = MAX_ITER
 solver.verbose = proxsuite_nlp.VERBOSE
 print("Params:", (solver.kkt_system, solver.mul_update_mode))
 
@@ -71,7 +84,7 @@ print("cerrs:", rs.constraint_errs.tolist())
 print("cstr_val:")
 pprint.pp(ws.cstr_values.tolist(), indent=2)
 print("Soft thresh of target:", sol)
-print("CORRECT SOLUTION? {}".format(np.allclose(rs.xopt, sol, rtol=tol, atol=tol)))
+print("CORRECT SOLUTION? {}".format(np.allclose(rs.xopt, sol, rtol=TOL, atol=TOL)))
 
 cbstore: HistoryCallback.history_storage = cb.storage
 prim_infeas = cbstore.prim_infeas
