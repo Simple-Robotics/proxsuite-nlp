@@ -13,7 +13,7 @@ namespace nlp {
  * function.
  */
 template <typename _Scalar>
-struct EqualityConstraint : ConstraintSetBase<_Scalar> {
+struct EqualityConstraintTpl : ConstraintSetBase<_Scalar> {
 public:
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);

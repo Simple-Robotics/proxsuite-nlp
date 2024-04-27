@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(test_equality) {
   VectorXs zout(N);
   zout.setZero();
 
-  EqualityConstraint<double> eq_set;
+  EqualityConstraintTpl<double> eq_set;
   double mu = 0.1;
 
   eq_set.setProxParameter(mu);

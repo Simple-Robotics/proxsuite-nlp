@@ -12,9 +12,9 @@ extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
 extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     ConstraintObjectTpl<context::Scalar>;
 extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    EqualityConstraint<context::Scalar>;
+    EqualityConstraintTpl<context::Scalar>;
 extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    NegativeOrthant<context::Scalar>;
+    NegativeOrthantTpl<context::Scalar>;
 extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     BoxConstraintTpl<context::Scalar>;
 extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI

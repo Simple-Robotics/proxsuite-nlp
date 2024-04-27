@@ -16,7 +16,7 @@ namespace nlp {
  * where \f$h : \mathcal{X} \to \RR^p\f$ is a given residual.
  */
 template <typename _Scalar>
-struct NegativeOrthant : ConstraintSetBase<_Scalar> {
+struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 

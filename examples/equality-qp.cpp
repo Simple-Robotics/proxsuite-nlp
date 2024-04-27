@@ -24,7 +24,7 @@ Eigen::Matrix<Scalar, -1, -1> randomOrthogonal(int M, int N) {
 
 using namespace proxsuite::nlp;
 using Problem = ProblemTpl<double>;
-using EqualityType = EqualityConstraint<double>;
+using EqualityType = EqualityConstraintTpl<double>;
 using Constraint = ConstraintObjectTpl<double>;
 
 template <int N, int M = 1> int submain() {

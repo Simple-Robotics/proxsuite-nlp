@@ -1,10 +1,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #include "proxsuite-nlp/python/fwd.hpp"
 
-#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
-#include "proxsuite-nlp/modelling/constraints/negative-orthant.hpp"
-#include "proxsuite-nlp/modelling/constraints/box-constraint.hpp"
-#include "proxsuite-nlp/modelling/constraints/l1-penalty.hpp"
+#include "proxsuite-nlp/modelling/constraints.hpp"
 
 #include <eigenpy/std-vector.hpp>
 
@@ -18,6 +15,8 @@ using context::ConstraintSet;
 using context::ConstVectorRef;
 using context::Scalar;
 using eigenpy::StdVectorPythonVisitor;
+using L1Penalty = NonsmoothPenaltyL1Tpl<Scalar>;
+using BoxConstraint = BoxConstraintTpl<Scalar>;
 
 template <typename T, typename Init>
 auto exposeSpecificConstraintSet(const char *name, const char *docstring,
@@ -102,30 +101,32 @@ void exposeConstraints() {
 }
 
 static void exposeConstraintTypes() {
-  exposeSpecificConstraintSet<EqualityConstraint<Scalar>>(
+  exposeSpecificConstraintSet<EqualityConstraintTpl<Scalar>>(
       "EqualityConstraintSet", "Cast a function into an equality constraint");
 
-  exposeSpecificConstraintSet<NegativeOrthant<Scalar>>(
+  exposeSpecificConstraintSet<NegativeOrthantTpl<Scalar>>(
       "NegativeOrthant",
       "Cast a function into a negative inequality constraint h(x) \\leq 0");
 
-  exposeSpecificConstraintSet<BoxConstraintTpl<Scalar>>(
+  exposeSpecificConstraintSet<BoxConstraint>(
       "BoxConstraint",
       "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.",
       bp::init<context::ConstVectorRef, context::ConstVectorRef>(
           bp::args("self", "lower_limit", "upper_limit")))
-      .def_readwrite("upper_limit", &BoxConstraintTpl<Scalar>::upper_limit)
-      .def_readwrite("lower_limit", &BoxConstraintTpl<Scalar>::lower_limit);
+      .def_readwrite("upper_limit", &BoxConstraint::upper_limit)
+      .def_readwrite("lower_limit", &BoxConstraint::lower_limit);
 
   bp::def("createEqualityConstraint",
-          &make_constraint<EqualityConstraint<Scalar>>,
+          &make_constraint<EqualityConstraintTpl<Scalar>>,
           "Convenience function to create an equality constraint from a "
           "C2Function.");
   bp::def("createInequalityConstraint",
-          &make_constraint<NegativeOrthant<Scalar>>,
+          &make_constraint<NegativeOrthantTpl<Scalar>>,
           "Convenience function to create an inequality constraint from a "
           "C2Function.");
 
+  exposeSpecificConstraintSet<L1Penalty>("NonsmoothPenaltyL1",
+                                         "1-norm penalty function.");
   using L1Penalty_t = NonsmoothPenaltyL1Tpl<Scalar>;
   exposeSpecificConstraintSet<L1Penalty_t>("NonsmoothPenaltyL1",
                                            "1-norm penalty function.");
