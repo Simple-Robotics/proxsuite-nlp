@@ -16,6 +16,8 @@ template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     BoxConstraintTpl<context::Scalar>;
 template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     NonsmoothPenaltyL1Tpl<context::Scalar>;
+template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ConstraintSetProductTpl<context::Scalar>;
 
 } // namespace nlp
 } // namespace proxsuite

@@ -16,21 +16,13 @@ using context::ConstVectorRef;
 using context::Scalar;
 using eigenpy::StdVectorPythonVisitor;
 using L1Penalty = NonsmoothPenaltyL1Tpl<Scalar>;
+using ConstraintSetProduct = ConstraintSetProductTpl<Scalar>;
 using BoxConstraint = BoxConstraintTpl<Scalar>;
-
-template <typename T, typename Init>
-auto exposeSpecificConstraintSet(const char *name, const char *docstring,
-                                 Init &&init) {
-  return bp::class_<T, bp::bases<context::ConstraintSet>>(name, docstring,
-                                                          init);
-}
 
 template <typename T>
 auto exposeSpecificConstraintSet(const char *name, const char *docstring) {
-  // bp::class_<T, bp::bases<context::ConstraintSet>>(
-  //     name, docstring, bp::init<>(bp::args("self")));
-  return exposeSpecificConstraintSet<T>(name, docstring,
-                                        bp::init<>(bp::args("self")));
+  return bp::class_<T, bp::bases<context::ConstraintSet>>(name, docstring,
+                                                          bp::no_init);
 }
 
 template <typename T>
@@ -102,17 +94,19 @@ void exposeConstraints() {
 
 static void exposeConstraintTypes() {
   exposeSpecificConstraintSet<EqualityConstraintTpl<Scalar>>(
-      "EqualityConstraintSet", "Cast a function into an equality constraint");
+      "EqualityConstraintSet", "Cast a function into an equality constraint")
+      .def(bp::init<>("self"_a));
 
   exposeSpecificConstraintSet<NegativeOrthantTpl<Scalar>>(
       "NegativeOrthant",
-      "Cast a function into a negative inequality constraint h(x) \\leq 0");
+      "Cast a function into a negative inequality constraint h(x) \\leq 0")
+      .def(bp::init<>("self"_a));
 
   exposeSpecificConstraintSet<BoxConstraint>(
       "BoxConstraint",
-      "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.",
-      bp::init<context::ConstVectorRef, context::ConstVectorRef>(
-          bp::args("self", "lower_limit", "upper_limit")))
+      "Box constraint of the form :math:`z \\in [z_\\min, z_\\max]`.")
+      .def(bp::init<context::ConstVectorRef, context::ConstVectorRef>(
+          ("self"_a, "lower_limit", "upper_limit")))
       .def_readwrite("upper_limit", &BoxConstraint::upper_limit)
       .def_readwrite("lower_limit", &BoxConstraint::lower_limit);
 
@@ -127,9 +121,13 @@ static void exposeConstraintTypes() {
 
   exposeSpecificConstraintSet<L1Penalty>("NonsmoothPenaltyL1",
                                          "1-norm penalty function.");
-  using L1Penalty_t = NonsmoothPenaltyL1Tpl<Scalar>;
-  exposeSpecificConstraintSet<L1Penalty_t>("NonsmoothPenaltyL1",
-                                           "1-norm penalty function.");
+
+  exposeSpecificConstraintSet<ConstraintSetProduct>(
+      "ConstraintSetProduct", "Cartesian product of constraint sets.")
+      .add_property("blockSizes",
+                    bp::make_function(&ConstraintSetProduct::blockSizes,
+                                      bp::return_internal_reference<>()),
+                    "Dimensions of each component of the cartesian product.");
 }
 
 } // namespace python
