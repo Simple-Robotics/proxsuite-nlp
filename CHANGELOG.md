@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* Added `ConstraintSetProduct` ([#74](https://github.com/Simple-Robotics/proxsuite-nlp/pull/74))
+
 ### Changed
 
 * `EqualityConstraint`/`NegativeOrthant` template classes changed to `EqualityConstraintTpl`/`NegativeOrthantTpl`
