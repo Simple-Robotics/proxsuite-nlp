@@ -21,7 +21,7 @@ public:
   PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   /// Constructor using base space instance.
-  TangentBundleTpl(Base base) : base_(base){};
+  TangentBundleTpl(Base base) : base_(base) {};
   /// Constructor using base space constructor.
   template <typename... BaseCtorArgs>
   TangentBundleTpl(BaseCtorArgs... args) : base_(Base(args...)) {}

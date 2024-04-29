@@ -24,7 +24,7 @@ public:
   using Base = ManifoldAbstractTpl<Scalar, Options>;
   PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
-  MultibodyConfiguration(const ModelType &model) : model_(model){};
+  MultibodyConfiguration(const ModelType &model) : model_(model) {};
 
   const ModelType &getModel() const { return model_; }
 
