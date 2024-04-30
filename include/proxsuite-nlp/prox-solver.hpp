@@ -148,7 +148,9 @@ public:
   ConvergenceFlag solve(const ConstVectorRef &x0,
                         const std::vector<VectorRef> &lams0);
 
+  PROXSUITE_NLP_DEPRECATED
   const Workspace &getWorkspace() const { return *workspace_; }
+  PROXSUITE_NLP_DEPRECATED
   const Results &getResults() const { return *results_; }
 
   /**
