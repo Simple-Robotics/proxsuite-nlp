@@ -24,6 +24,8 @@ option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
+set(DOXYGEN_HTML_HEADER "${CMAKE_SOURCE_DIR}/doc/header.html")
+set(DOXYGEN_HTML_STYLESHEET "")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/base.cmake)
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)

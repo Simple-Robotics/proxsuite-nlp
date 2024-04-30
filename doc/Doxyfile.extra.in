@@ -1,7 +1,7 @@
 INPUT                   = @CMAKE_SOURCE_DIR@/doc \
                           @CMAKE_SOURCE_DIR@/include \
                           @CMAKE_SOURCE_DIR@/bindings/python \
-                          @CMAKE_SOURCE_DIR@/README.md
+                          @CMAKE_SOURCE_DIR@/README.md \
 
 RECURSIVE               = YES
 
@@ -37,15 +37,13 @@ EXTRA_PACKAGES          = {bm,stmaryrd}
 FORMULA_MACROFILE       = @PROJECT_SOURCE_DIR@/doc/macros.inc
 
 GENERATE_TREEVIEW       = YES
-GENERATE_LATEX          = NO
 
 VERBATIM_HEADERS        = YES
 
 
-HTML_HEADER             = @PROJECT_SOURCE_DIR@/doc/header.html
 HTML_EXTRA_STYLESHEET   = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome.css
 HTML_EXTRA_FILES        = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome-darkmode-toggle.js
-
+HTML_COLORSTYLE         = LIGHT
 
 TAGFILES                =
 

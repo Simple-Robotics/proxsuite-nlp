@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./doc/images/proxsuite-logo.png" width="700" alt="Proxsuite Logo" align="center"/>
+  <img src="https://raw.githubusercontent.com/Simple-Robotics/proxsuite-nlp/main/doc/images/proxsuite-logo.png" width="700" alt="Proxsuite Logo" align="center"/>
 </p>
 
 # proxsuite-nlp: a package for nonlinear optimization on manifolds
