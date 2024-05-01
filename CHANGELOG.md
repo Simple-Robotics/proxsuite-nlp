@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * `EqualityConstraint`/`NegativeOrthant` template classes changed to `EqualityConstraintTpl`/`NegativeOrthantTpl`
+* Deprecate getters `getWorkspace()` and `getResults()` in both C++ and Python ([#76](https://github.com/Simple-Robotics/proxsuite-nlp/pull/76))
+* Bump minimum version of eigenpy to 3.4.0 ([#76](https://github.com/Simple-Robotics/proxsuite-nlp/pull/76))
 
 ## [0.5.0] - 2024-04-23
 

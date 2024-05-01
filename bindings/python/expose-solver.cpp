@@ -1,5 +1,7 @@
 #include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/deprecation-policy.hpp"
 #include "proxsuite-nlp/prox-solver.hpp"
+#include <eigenpy/std-unique-ptr.hpp>
 
 namespace proxsuite {
 namespace nlp {
@@ -13,6 +15,7 @@ void exposeSolver() {
   using context::ConstVectorRef;
   using context::Problem;
   using context::VectorRef;
+  using eigenpy::ReturnInternalStdUniquePtr;
 
   bp::enum_<VerboseLevel>("VerboseLevel", "Verbose level for the solver.")
       .value("QUIET", QUIET)
@@ -81,6 +84,9 @@ void exposeSolver() {
   using solve_eig_vec_ins_t = ConvergenceFlag (ProxNLPSolver::*)(
       const ConstVectorRef &, const ConstVectorRef &);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::class_<ProxNLPSolver, boost::noncopyable>(
       "ProxNLPSolver",
       "Semi-smooth Newton-based solver for nonlinear optimization using a "
@@ -110,12 +116,18 @@ void exposeSolver() {
                      "Use the BlockLDLT solver.")
       .def("setup", &ProxNLPSolver::setup, bp::args("self"),
            "Initialize the solver workspace and results.")
-      .def("getResults", &ProxNLPSolver::getResults, bp::args("self"),
-           bp::return_internal_reference<>(),
+      .def("getResults", &ProxNLPSolver::getResults, ("self"_a),
+           deprecation_warning_policy<DeprecationType::DEPRECATION,
+                                      bp::return_internal_reference<>>(),
            "Get a reference to the results object.")
-      .def("getWorkspace", &ProxNLPSolver::getWorkspace, bp::args("self"),
-           bp::return_internal_reference<>(),
+      .def("getWorkspace", &ProxNLPSolver::getWorkspace, ("self"_a),
+           deprecation_warning_policy<DeprecationType::DEPRECATION,
+                                      bp::return_internal_reference<>>(),
            "Get a reference to the workspace object.")
+      .add_property("workspace", bp::make_getter(&ProxNLPSolver::workspace_,
+                                                 ReturnInternalStdUniquePtr{}))
+      .add_property("results", bp::make_getter(&ProxNLPSolver::results_,
+                                               ReturnInternalStdUniquePtr{}))
       .def<solve_std_vec_ins_t>(
           "solve", &ProxNLPSolver::solve, bp::args("self", "x0", "lams0"),
           "Run the solver (multiplier guesses given as a list).")
@@ -167,6 +179,8 @@ void exposeSolver() {
                      "Max augmented Lagrangian iterations.")
       .def_readwrite("reg_init", &ProxNLPSolver::DELTA_INIT,
                      "Initial regularization.");
+#pragma GCC diagnostic pop
+
   bp::enum_<KktSystem>("KktSystem")
       .value("KKT_CLASSIC", KKT_CLASSIC)
       .value("KKT_PRIMAL_DUAL", KKT_PRIMAL_DUAL)

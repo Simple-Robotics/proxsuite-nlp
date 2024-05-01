@@ -113,7 +113,7 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
-  add_project_dependency(eigenpy 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.2.0")
+  add_project_dependency(eigenpy 3.4.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.4.0")
 
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"

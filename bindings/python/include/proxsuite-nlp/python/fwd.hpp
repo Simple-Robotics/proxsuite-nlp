@@ -2,9 +2,6 @@
 
 #include <eigenpy/eigenpy.hpp>
 
-#ifdef byte
-#undef byte
-#endif
 #include "proxsuite-nlp/context.hpp"
 
 namespace proxsuite {
