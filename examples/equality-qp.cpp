@@ -65,7 +65,7 @@ template <int N, int M = 1> int submain() {
   solver.setup();
   solver.solve(p1);
 
-  fmt::print("{}\n", solver.getResults());
+  fmt::print("{}\n", *solver.results_);
 
   return 0;
 }

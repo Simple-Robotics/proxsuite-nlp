@@ -103,7 +103,7 @@ int main() {
   solver.ldlt_choice_ = LDLTChoice::DENSE;
   solver.setup();
   solver.solve(p1, lams0);
-  auto &results = solver.getResults();
+  auto &results = *solver.results_;
   fmt::print("Results: {}\n", results);
   fmt::print("Output point: {}\n", results.x_opt.transpose());
   fmt::print("Target point was {}\n", p0.transpose());

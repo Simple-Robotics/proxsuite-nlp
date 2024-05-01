@@ -110,8 +110,8 @@ int main() {
   solver.setup();
   solver.solve(q0);
 
-  ResultsTpl<Scalar> const &results = solver.getResults();
-  WorkspaceTpl<Scalar> const &ws = solver.getWorkspace();
+  ResultsTpl<Scalar> const &results = *solver.results_;
+  WorkspaceTpl<Scalar> const &ws = *solver.workspace_;
   std::cout << results << std::endl;
 
   fmt::print("Optimal cost: {}\n", ws.objective_value);

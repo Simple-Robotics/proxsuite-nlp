@@ -78,7 +78,7 @@ int main() {
   solver.setup();
   solver.solve(space.rand());
 
-  auto &rs = solver.getResults();
+  auto &rs = *solver.results_;
   fmt::print("Results: {}\n", rs);
 
   return 0;
