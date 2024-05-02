@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* Included `<cassert>` to fix compilation issues ([#77](https://github.com/Simple-Robotics/proxsuite-nlp/pull/77))
+* Include `<cassert>` in `math.hpp` to fix possible compilation issues ([#77](https://github.com/Simple-Robotics/proxsuite-nlp/pull/77))
 
 ### Changed
 
