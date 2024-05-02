@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Added `ConstraintSetProduct` ([#74](https://github.com/Simple-Robotics/proxsuite-nlp/pull/74))
 
+### Fixed
+
+* Include `<cassert>` in `math.hpp` to fix possible compilation issues ([#77](https://github.com/Simple-Robotics/proxsuite-nlp/pull/77))
+
 ### Changed
 
 * `EqualityConstraint`/`NegativeOrthant` template classes changed to `EqualityConstraintTpl`/`NegativeOrthantTpl`
