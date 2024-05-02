@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2024-05-02
+
 ### Added
 
 * Added `ConstraintSetProduct` ([#74](https://github.com/Simple-Robotics/proxsuite-nlp/pull/74))
@@ -75,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * This is the first release of `proxsuite-nlp`. This library is a joint effort between LAAS-CNRS and INRIA, and will be maintained and expanded in the future. Please provide constructive feedback and contribute!
 
-[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.3.3...v0.3.4
