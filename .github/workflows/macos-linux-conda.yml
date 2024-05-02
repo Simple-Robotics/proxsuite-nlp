@@ -10,6 +10,7 @@ on:
       - '*.md'
       - 'CITATION.cff'
       - 'CITATIONS.bib'
+      - 'CHANGELOG.md'
   pull_request:
     paths-ignore:
       - 'doc/'
@@ -19,6 +20,7 @@ on:
       - '*.md'
       - 'CITATION.cff'
       - 'CITATIONS.bib'
+      - 'CHANGELOG.md'
 
 jobs:
   proxsuite-nlp-conda:
