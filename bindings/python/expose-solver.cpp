@@ -68,7 +68,6 @@ void exposeSolver() {
       .def_readwrite("alpha_min", &LinesearchOptions::alpha_min,
                      "Minimum step size.")
       .def_readwrite("max_num_steps", &LinesearchOptions::max_num_steps)
-      .def_readwrite("verbosity", &LinesearchOptions::verbosity)
       .def_readwrite("interp_type", &LinesearchOptions::interp_type,
                      "Interpolation type: bisection, quadratic or cubic.")
       .def_readwrite("contraction_min", &LinesearchOptions::contraction_min,
