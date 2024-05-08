@@ -1,7 +1,5 @@
 import proxsuite_nlp
 from proxsuite_nlp import manifolds, costs
-from proxsuite_nlp.casadi_utils import CasadiFunction
-import casadi as cas
 import numpy as np
 import pytest
 import itertools
@@ -21,14 +19,31 @@ linesearch_interp_type = [
 linesearch_opts = itertools.product(linesearch_strategies, linesearch_interp_type)
 
 
+class PolynomialFun(proxsuite_nlp.C2Function):
+    def __init__(self, nx, ndx, coeffs):
+        super().__init__(nx, ndx, 1)
+        self.poly = np.polynomial.Polynomial(coeffs)
+        self.Jpoly = self.poly.deriv(1)
+        self.Hpoly = self.Jpoly.deriv(1)
+        print(self.poly)
+
+    def __call__(self, x):
+        return self.poly(x)
+
+    def computeJacobian(self, x, J):
+        J[:] = self.Jpoly(x)
+
+    def vectorHessianProduct(self, x, v, H):
+        H[:, :] = self.Hpoly(x)
+
+
 @pytest.mark.parametrize(("ls_strat", "ls_interp_type"), linesearch_opts)
 def test_quad1d(ls_strat, ls_interp_type):
     print("OPTIONS:", ls_strat, ls_interp_type)
-    x_sm = cas.SX.sym("x", 1)
     a = 0.01
     b = -0.53
-    f = x_sm**2 * a + b * x_sm
-    fs = CasadiFunction(1, 1, f, x_sm, True)
+    coeff = [0.0, b, a]
+    fs = PolynomialFun(1, 1, coeff)
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxsuite_nlp.Problem(space, cost_fun)
@@ -37,7 +52,7 @@ def test_quad1d(ls_strat, ls_interp_type):
     solver.ls_options.interp_type = ls_interp_type
     solver.setup()
     flag = solver.solve(space.neutral(), [])
-    rs = solver.getResults()
+    rs = solver.results
 
     real_solution = -b / (2 * a)
 
@@ -50,12 +65,11 @@ def test_quad1d(ls_strat, ls_interp_type):
 @pytest.mark.parametrize(("ls_strat", "ls_interp_type"), linesearch_opts)
 def test_cubic1d(ls_strat, ls_interp_type):
     print("OPTIONS:", ls_strat, ls_interp_type)
-    x_sm = cas.SX.sym("x", 1)
     b = -10
     c = 10
     d = -24
-    f = x_sm**3 + b * x_sm**2 + c * x_sm + d
-    fs = CasadiFunction(1, 1, f, x_sm, True)
+    coeff = [d, c, b, 1.0]
+    fs = PolynomialFun(1, 1, coeff)
 
     cost_fun = costs.CostFromFunction(fs)
     problem = proxsuite_nlp.Problem(space, cost_fun)
@@ -65,7 +79,7 @@ def test_cubic1d(ls_strat, ls_interp_type):
     solver.ls_options.interp_type = ls_interp_type
     solver.setup()
     flag = solver.solve(x0, [])
-    rs = solver.getResults()
+    rs = solver.results
     assert flag == proxsuite_nlp.ConvergenceFlag.success
     assert rs.num_iters <= 7
     print(rs)
