@@ -5,6 +5,7 @@
 
 #include "proxsuite-nlp/linesearch-base.hpp"
 #include "proxsuite-nlp/exceptions.hpp"
+#include "proxsuite-nlp/context.hpp"
 
 #include <Eigen/QR>
 
@@ -226,6 +227,13 @@ protected:
   using DecompType = Eigen::HouseholderQR<Matrix2s>;
   DecompType decomp;
 };
+
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    PolynomialTpl<context::Scalar>;
+extern template class PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    ArmijoLinesearch<context::Scalar>;
+#endif
 
 } // namespace nlp
 } // namespace proxsuite
