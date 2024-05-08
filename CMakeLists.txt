@@ -150,7 +150,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
       ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
-      ${PROJECT_SOURCE_DIR}/src/linesearch.cpp
+      ${PROJECT_SOURCE_DIR}/src/linesearch-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/linesearch-armijo.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp

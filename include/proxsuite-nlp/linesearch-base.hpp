@@ -70,8 +70,6 @@ template <typename T> Linesearch<T>::~Linesearch() = default;
 } // namespace nlp
 } // namespace proxsuite
 
-#include "proxsuite-nlp/linesearch-armijo.hpp"
-
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
 #include "proxsuite-nlp/linesearch.txx"
 #endif

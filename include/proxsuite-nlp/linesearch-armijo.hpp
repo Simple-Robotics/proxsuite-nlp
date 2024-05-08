@@ -224,8 +224,7 @@ protected:
   Vector2s alph_rhs;
   Vector2s coeffs_cubic_interpolant;
   /// Solver for the 2x2 linear system
-  using DecompType = Eigen::HouseholderQR<Matrix2s>;
-  DecompType decomp;
+  Eigen::HouseholderQR<Matrix2s> decomp;
 };
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "proxsuite-nlp/prox-solver.hpp"
+#include "proxsuite-nlp/linesearch-armijo.hpp"
 
 #include <fmt/ostream.h>
 #include <fmt/color.h>
