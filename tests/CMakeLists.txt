@@ -166,6 +166,7 @@ add_proxsuite_nlp_test(costs)
 add_proxsuite_nlp_test(finite-diff)
 add_proxsuite_nlp_test(math)
 add_proxsuite_nlp_test(functions)
+add_proxsuite_nlp_test(linesearch)
 add_proxsuite_nlp_test(manifolds)
 add_proxsuite_nlp_test(solver)
 
