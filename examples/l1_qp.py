@@ -73,8 +73,8 @@ solver.setup()
 xinit = x0.copy()
 print("Initial guess: {}".format(xinit))
 flag = solver.solve(xinit)
-ws = solver.getWorkspace()
-rs = solver.getResults()
+ws = solver.workspace
+rs = solver.results
 print("FLAG: {}".format(flag))
 
 print(rs)

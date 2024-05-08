@@ -120,7 +120,8 @@ static void exposeConstraintTypes() {
           "C2Function.");
 
   exposeSpecificConstraintSet<L1Penalty>("NonsmoothPenaltyL1",
-                                         "1-norm penalty function.");
+                                         "1-norm penalty function.")
+      .def(bp::init<>(("self"_a)));
 
   exposeSpecificConstraintSet<ConstraintSetProduct>(
       "ConstraintSetProduct", "Cartesian product of constraint sets.")
