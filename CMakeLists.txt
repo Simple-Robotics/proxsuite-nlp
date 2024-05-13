@@ -15,7 +15,7 @@ set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
 
 set(CXX_DISABLE_WERROR True)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(PROJECT_USE_CMAKE_EXPORT True)
@@ -141,6 +141,7 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
   set(LIB_TEMPLATE_SOURCES
       ${PROJECT_SOURCE_DIR}/src/block-ldlt.cpp
       ${PROJECT_SOURCE_DIR}/src/constraints.cpp
+      ${PROJECT_SOURCE_DIR}/src/constraint-set-product.cpp
       ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
       ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
       ${PROJECT_SOURCE_DIR}/src/function-base.cpp
@@ -149,7 +150,8 @@ if(ENABLE_TEMPLATE_INSTANTIATION)
       ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
       ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
       ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
-      ${PROJECT_SOURCE_DIR}/src/linesearch.cpp
+      ${PROJECT_SOURCE_DIR}/src/linesearch-base.cpp
+      ${PROJECT_SOURCE_DIR}/src/linesearch-armijo.cpp
       ${PROJECT_SOURCE_DIR}/src/results.cpp
       ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
       ${PROJECT_SOURCE_DIR}/src/workspace.cpp

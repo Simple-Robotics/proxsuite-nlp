@@ -3,11 +3,10 @@
  *
  */
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
-#include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
+#include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
 #include "proxsuite-nlp/prox-solver.hpp"
 
 #include <pinocchio/multibody/liegroup/special-orthogonal.hpp>
-#include "example-base.hpp"
 
 using SO2 = pinocchio::SpecialOrthogonalOperationTpl<2, double>;
 

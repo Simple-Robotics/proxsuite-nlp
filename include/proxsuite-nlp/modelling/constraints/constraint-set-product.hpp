@@ -108,5 +108,9 @@ private:
   std::vector<Eigen::Index> m_blockSizes;
 };
 
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
+extern template struct ConstraintSetProductTpl<context::Scalar>;
+#endif
+
 } // namespace nlp
 } // namespace proxsuite
