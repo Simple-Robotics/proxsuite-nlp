@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* Changes to includes and tests for linesearch methods ([#81](https://github.com/Simple-Robotics/proxsuite-nlp/pull/81))
+
 ## [0.6.0] - 2024-05-02
 
 ### Added
