@@ -24,6 +24,7 @@ using Model = pin::ModelTpl<Scalar>;
 using Data = pin::DataTpl<Scalar>;
 using Space = MultibodyConfiguration<Scalar>;
 using Cost = CostFunctionBaseTpl<Scalar>;
+using Problem = ProblemTpl<Scalar>;
 const boost::filesystem::path URDF_PATH(EXAMPLE_ROBOT_DATA_MODEL_DIR);
 
 Model loadModel() {
@@ -93,7 +94,7 @@ int main() {
   cost->addComponent(cost1);
   cost->addComponent(cost2);
 
-  auto problem = std::make_shared<ProblemTpl<Scalar>>(space, cost);
+  Problem problem(space, cost);
 
   constexpr bool has_joint_lims = true;
   if (has_joint_lims) {
@@ -102,7 +103,7 @@ int main() {
     ConstraintObjectTpl<Scalar> cstrobj(
         std::make_shared<ManifoldDifferenceToPoint<Scalar>>(space, q0),
         box_cstr);
-    problem->addConstraint(cstrobj);
+    problem.addConstraint(cstrobj);
   }
 
   ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,

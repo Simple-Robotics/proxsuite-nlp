@@ -74,7 +74,7 @@ int main() {
   using CstrType = Problem::ConstraintObject;
   CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
   std::vector<CstrType> cstrs{cstr1};
-  auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
+  Problem prob(space_, cost_fun, cstrs);
 
   /// Test out merit functions
 
@@ -86,9 +86,9 @@ int main() {
   // PDAL FUNCTION
   fmt::print("  LAGR FUNC TEST\n");
 
-  Problem::VectorXs lams_data(prob->getTotalConstraintDim());
+  Problem::VectorXs lams_data(prob.getTotalConstraintDim());
   Problem::VectorOfRef lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
+  helpers::allocateMultipliersOrResiduals(prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers | 1st mul = {}\n", lams.size(),
              lams[0]);

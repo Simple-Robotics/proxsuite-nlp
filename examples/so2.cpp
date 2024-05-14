@@ -53,7 +53,7 @@ int main() {
   auto eq_set = std::make_shared<EqualityConstraintTpl<double>>();
   std::vector<Problem::ConstraintObject> cstrs;
   cstrs.emplace_back(resptr, eq_set);
-  auto prob = std::make_shared<Problem>(space_, cost_fun, cstrs);
+  Problem prob(space_, cost_fun, cstrs);
 
   /// Test out merit functions
 
@@ -67,7 +67,7 @@ int main() {
 
   Problem::VectorXs lams_data;
   Problem::VectorOfRef lams;
-  helpers::allocateMultipliersOrResiduals(*prob, lams_data, lams);
+  helpers::allocateMultipliersOrResiduals(prob, lams_data, lams);
 
   fmt::print("Allocated {:d} multipliers\n"
              "1st mul = {}\n",

@@ -26,6 +26,7 @@ using namespace proxsuite::nlp;
 using Problem = ProblemTpl<double>;
 using EqualityType = EqualityConstraintTpl<double>;
 using Constraint = ConstraintObjectTpl<double>;
+using SolverType = ProxNLPSolverTpl<double>;
 
 template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
@@ -55,11 +56,9 @@ template <int N, int M = 1> int submain() {
     constraints.emplace_back(res1, std::make_shared<EqualityType>());
   }
 
-  auto problem = std::make_shared<Problem>(space_, cost, constraints);
+  Problem problem(space_, cost, constraints);
 
-  using Solver_t = ProxNLPSolverTpl<double>;
-
-  Solver_t solver(problem);
+  SolverType solver(problem);
   solver.setPenalty(1e-4);
   solver.setProxParameter(1e-8);
   solver.setup();

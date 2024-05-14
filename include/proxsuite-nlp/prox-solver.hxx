@@ -13,13 +13,13 @@ namespace proxsuite {
 namespace nlp {
 template <typename Scalar>
 ProxNLPSolverTpl<Scalar>::ProxNLPSolverTpl(
-    shared_ptr<Problem> prob, const Scalar tol, const Scalar mu_init,
+    Problem &prob, const Scalar tol, const Scalar mu_init,
     const Scalar rho_init, const VerboseLevel verbose, const Scalar mu_lower,
     const Scalar prim_alpha, const Scalar prim_beta, const Scalar dual_alpha,
     const Scalar dual_beta, LDLTChoice ldlt_choice,
     const LinesearchOptions ls_options)
-    : problem_(prob), merit_fun(*problem_, pdal_beta_),
-      prox_penalty(prob->manifold_, manifold().neutral(),
+    : problem_(&prob), merit_fun(*problem_, pdal_beta_),
+      prox_penalty(prob.manifold_, manifold().neutral(),
                    rho_init *
                        MatrixXs::Identity(manifold().ndx(), manifold().ndx())),
       verbose(verbose), ldlt_choice_(ldlt_choice), rho_init_(rho_init),
