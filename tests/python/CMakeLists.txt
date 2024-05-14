@@ -25,12 +25,7 @@ if(NOT pytest_FOUND)
   message(FATAL_ERROR "Python pytest package missing. You can install it with: pip install pytest")
 endif()
 
-set(PYTHON_TESTS test_manifolds.py test_functions.py test_print.py)
-
-check_for_python_package(casadi)
-if(casadi_FOUND)
-  list(APPEND PYTHON_TESTS test_1d_funs.py)
-endif()
+set(PYTHON_TESTS test_manifolds.py test_functions.py test_print.py test_1d_funs.py)
 
 message(STATUS "Python tests: ${PYTHON_TESTS}")
 

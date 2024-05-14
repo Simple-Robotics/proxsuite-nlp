@@ -14,4 +14,3 @@ dependencies:
   - fmt
   - example-robot-data
   - pytest
-  - casadi
