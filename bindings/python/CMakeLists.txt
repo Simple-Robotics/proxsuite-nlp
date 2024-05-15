@@ -70,8 +70,10 @@ endforeach()
 
 # Generate stubs
 if(GENERATE_PYTHON_STUBS)
+  python_build_get_target(python_build_target_name)
   load_stubgen()
   generate_stubs(
     ${CMAKE_CURRENT_BINARY_DIR} proxsuite_nlp ${PYTHON_SITELIB} ${PYLIB_NAME} ${PROJECT_NAME}
+    ${python_build_target_name}
   )
 endif(GENERATE_PYTHON_STUBS)
