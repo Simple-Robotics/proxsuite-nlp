@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.0] - 2024-05-14
 
+### Changed
+
+* Solver: store problem instance as a raw pointer, change solver ctor ([#79](https://github.com/Simple-Robotics/proxsuite-nlp/pull/79))
+
 ## [0.6.1] - 2024-05-13
 
 ### Changed
 
 * Changes to includes and tests for linesearch methods ([#81](https://github.com/Simple-Robotics/proxsuite-nlp/pull/81))
-* Solver: store problem instance as a raw pointer, change solver ctor ([#79](https://github.com/Simple-Robotics/proxsuite-nlp/pull/79))
 
 ## [0.6.0] - 2024-05-02
 
