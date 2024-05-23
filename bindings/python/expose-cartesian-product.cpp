@@ -8,7 +8,7 @@ namespace python {
 
 using context::Manifold;
 using context::Scalar;
-using PolymorphicManifold = xyz::polymorphic<Manifold>;
+using PolymorphicManifold = polymorphic<Manifold>;
 using context::ConstVectorRef;
 using context::VectorRef;
 using context::VectorXs;
