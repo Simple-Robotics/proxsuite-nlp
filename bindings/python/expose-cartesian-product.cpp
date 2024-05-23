@@ -8,7 +8,7 @@ namespace python {
 
 using context::Manifold;
 using context::Scalar;
-using ManifoldPtr = shared_ptr<Manifold>;
+using PolymorphicManifold = xyz::polymorphic<Manifold>;
 using context::ConstVectorRef;
 using context::VectorRef;
 using context::VectorXs;
@@ -34,9 +34,10 @@ void exposeCartesianProduct() {
   bp::class_<CartesianProduct, bp::bases<Manifold>,
              shared_ptr<CartesianProduct>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
-      bp::init<const std::vector<ManifoldPtr> &>(bp::args("self", "spaces")))
-      .def(
-          bp::init<ManifoldPtr, ManifoldPtr>(bp::args("self", "left", "right")))
+      bp::init<const std::vector<PolymorphicManifold> &>(
+          bp::args("self", "spaces")))
+      .def(bp::init<PolymorphicManifold, PolymorphicManifold>(
+          bp::args("self", "left", "right")))
       .def(
           "getComponent",
           +[](CartesianProduct const &m, std::size_t i) -> const Manifold & {
@@ -50,11 +51,7 @@ void exposeCartesianProduct() {
           "Get the i-th component of the Cartesian product.")
       .def(
           "addComponent",
-          +[](CartesianProduct &m, ManifoldPtr const &p) { m.addComponent(p); },
-          bp::args("self", "c"), "Add a component to the Cartesian product.")
-      .def(
-          "addComponent",
-          +[](CartesianProduct &m, shared_ptr<CartesianProduct> const &p) {
+          +[](CartesianProduct &m, PolymorphicManifold const &p) {
             m.addComponent(p);
           },
           bp::args("self", "c"), "Add a component to the Cartesian product.")
@@ -89,10 +86,7 @@ void exposeCartesianProduct() {
       .def("merge_vector", &CartesianProduct::merge_vector,
            bp::args("self", "vs"),
            "Define a tangent vector on the manifold by merging vectors from "
-           "each component.")
-      .def(
-          "__mul__", +[](const shared_ptr<CartesianProduct> &a,
-                         const ManifoldPtr &b) { return a * b; });
+           "each component.");
 }
 
 } // namespace python

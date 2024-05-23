@@ -18,7 +18,7 @@ using context::Manifold;
 using context::MatrixRef;
 using context::Scalar;
 using context::VectorRef;
-using ManifoldPtr = shared_ptr<Manifold>;
+using ManifoldPoly = polymorphic<Manifold>;
 using CartesianProduct = CartesianProductTpl<Scalar>;
 
 void exposeManifoldBase() {
@@ -32,7 +32,7 @@ void exposeManifoldBase() {
   using JacobianFunType = void (Manifold::*)(
       const ConstVectorRef &, const ConstVectorRef &, MatrixRef, int) const;
 
-  bp::class_<Manifold, ManifoldPtr, boost::noncopyable>(
+  bp::class_<Manifold, boost::noncopyable>(
       "ManifoldAbstract", "Manifold abstract class.", bp::no_init)
       .add_property("nx", &Manifold::nx, "Manifold representation dimension.")
       .add_property("ndx", &Manifold::ndx, "Tangent space dimension.")
@@ -96,12 +96,12 @@ void exposeManifoldBase() {
            "Returns an object representing the tangent space to this manifold.")
       .def(
           "__mul__",
-          +[](const ManifoldPtr &a, const ManifoldPtr &b) { return a * b; })
+          +[](const ManifoldPoly &a, const ManifoldPoly &b) { return a * b; })
       .def(
-          "__mul__", +[](const ManifoldPtr &a,
+          "__mul__", +[](const ManifoldPoly &a,
                          const CartesianProduct &b) { return a * b; })
       .def(
-          "__rmul__", +[](const ManifoldPtr &a, const CartesianProduct &b) {
+          "__rmul__", +[](const ManifoldPoly &a, const CartesianProduct &b) {
             return a * b;
           });
 }
