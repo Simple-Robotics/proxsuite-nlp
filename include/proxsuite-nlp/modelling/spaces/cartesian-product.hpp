@@ -36,7 +36,7 @@ public:
   }
 
   inline void addComponent(const CartesianProductTpl &other) {
-    for (const auto &c : other->components) {
+    for (const auto &c : other.m_components) {
       this->addComponent(c);
     }
   }
@@ -129,27 +129,14 @@ auto operator*(const PolymorphicManifold<T> &left,
 template <typename T>
 auto operator*(const CartesianProductTpl<T> &left,
                const PolymorphicManifold<T> &right) {
-  CartesianProductTpl<T> out(left, right);
-  return out;
-}
-
-template <typename T>
-auto operator*(const PolymorphicManifold<T> &left,
-               const CartesianProductTpl<T> &right) {
-  return CartesianProductTpl<T>(left, right);
-}
-
-template <typename T>
-CartesianProductTpl<T> operator*(const CartesianProductTpl<T> &left,
-                                 const PolymorphicManifold<T> &right) {
   CartesianProductTpl<T> out(left);
   out.addComponent(right);
   return out;
 }
 
 template <typename T>
-CartesianProductTpl<T> operator*(const PolymorphicManifold<T> &left,
-                                 const CartesianProductTpl<T> &right) {
+auto operator*(const PolymorphicManifold<T> &left,
+               const CartesianProductTpl<T> &right) {
   return right * left;
 }
 
