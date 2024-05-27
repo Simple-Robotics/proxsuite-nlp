@@ -37,3 +37,14 @@ foreach(pyfile ${PYTHON_TESTS})
   # specifically for some tests
   add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "bindings/python")
 endforeach()
+
+include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
+
+function(add_test_lib filename)
+  get_filename_component(name ${filename} NAME_WE)
+  add_library(${name} SHARED ${filename})
+  target_link_libraries(${name} PRIVATE pyproxsuite_nlp)
+  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX ${PYTHON_EXT_SUFFIX})
+endfunction()
+
+add_test_lib(polymorphic_test.cpp)
