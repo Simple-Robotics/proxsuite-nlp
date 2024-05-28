@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(constraint_product_op) {
   EqualityConstraintTpl<double> eq_op;
   NegativeOrthantTpl<double> neg_op;
   long n1 = 2, n2 = 3;
-  ConstraintSetProductTpl<double> op({&eq_op, &neg_op}, {n1, n2});
+  ConstraintSetProductTpl<double> op({eq_op, neg_op}, {n1, n2});
 
   VectorXs z(n1 + n2);
   z.setRandom();
