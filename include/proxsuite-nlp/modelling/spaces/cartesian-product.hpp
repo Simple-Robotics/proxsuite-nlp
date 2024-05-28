@@ -31,8 +31,8 @@ public:
 
   inline std::size_t numComponents() const { return m_components.size(); }
 
-  inline void addComponent(const polymorphic<Base> &c) {
-    m_components.push_back(c);
+  template <class Concrete> inline void addComponent(const Concrete &c) {
+    m_components.emplace_back(c);
   }
 
   inline void addComponent(const CartesianProductTpl &other) {
