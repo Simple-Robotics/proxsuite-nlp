@@ -1,4 +1,5 @@
 #include "proxsuite-nlp/python/polymorphic.hpp"
+#include <eigenpy/std-vector.hpp>
 
 using namespace proxsuite::nlp::python;
 
@@ -22,12 +23,15 @@ struct Z final : X {
 };
 
 using PolyX = xyz::polymorphic<X>;
+using VecPolyX = std::vector<PolyX>;
 
 struct poly_use_base {
   template <class T> poly_use_base(const T &t) : x(t) {}
 
   PolyX x;
 };
+
+VecPolyX create_vec_poly() { return {Y(), Z(), Z()}; }
 
 PolyX getY() { return PolyX(Y()); }
 PolyX getZ() { return PolyX(Z()); }
@@ -39,12 +43,17 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::class_<Y, bp::bases<X>>("Y", bp::init<>());
   bp::class_<Z, bp::bases<X>>("Z", bp::init<>());
 
+  eigenpy::StdVectorPythonVisitor<VecPolyX>::expose(
+      "VecPolyX",
+      eigenpy::details::overload_base_get_item_for_std_vector<VecPolyX>());
+
   bp::def("getY", &getY);
   bp::def("getZ", &getZ);
+  bp::def("create_vec_poly", &create_vec_poly);
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
       .def(bp::init<const Z &>(bp::args("self", "t")))
-      .add_property("x",
-                    bp::make_getter(&poly_use_base::x, ReturnInternalPoly{}));
+      .add_property("x", bp::make_getter(&poly_use_base::x,
+                                         bp::return_internal_reference<>()));
 }
