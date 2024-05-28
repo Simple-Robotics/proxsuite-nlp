@@ -36,12 +36,16 @@ VecPolyX create_vec_poly() { return {Y(), Z(), Z()}; }
 PolyX getY() { return PolyX(Y()); }
 PolyX getZ() { return PolyX(Z()); }
 
+PolyX poly_passthrough(const PolyX &x) { return x; }
+
 BOOST_PYTHON_MODULE(polymorphic_test) {
   register_polymorphic_to_python<PolyX>();
 
   bp::class_<X, boost::noncopyable>("X", bp::init<>()).def("name", &X::name);
   bp::class_<Y, bp::bases<X>>("Y", bp::init<>());
+  bp::implicitly_convertible<Y, PolyX>();
   bp::class_<Z, bp::bases<X>>("Z", bp::init<>());
+  bp::implicitly_convertible<Z, PolyX>();
 
   eigenpy::StdVectorPythonVisitor<VecPolyX>::expose(
       "VecPolyX",
@@ -50,6 +54,7 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::def("getY", &getY);
   bp::def("getZ", &getZ);
   bp::def("create_vec_poly", &create_vec_poly);
+  bp::def("poly_passthrough", &poly_passthrough, "x"_a);
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
