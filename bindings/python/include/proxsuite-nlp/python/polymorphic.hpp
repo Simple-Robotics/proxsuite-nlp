@@ -58,37 +58,7 @@ struct make_polymorphic_reference_holder {
   }
 };
 
-struct PolyRefConverter {
-  template <class T> struct apply;
-
-  template <typename T, typename A> struct apply<xyz::polymorphic<T, A> &> {
-    using poly_type = xyz::polymorphic<T, A>;
-    using value_type = typename poly_type::value_type;
-    struct type {
-      PyObject *operator()(poly_type &x) const {
-        if (x.valueless_after_move()) {
-          return bp::detail::none();
-        }
-        return make_polymorphic_reference_holder::execute(x);
-      }
-#ifndef BOOST_PYTHON_NO_PY_SIGNATURES
-      PyTypeObject const *get_pytype() {
-        return bp::converter::registered_pytype<poly_type>::get_pytype();
-      }
-#endif
-    };
-  };
-};
-
 } // namespace detail
-
-struct ReturnInternalPoly : bp::return_internal_reference<> {
-  using result_converter = detail::PolyRefConverter;
-  template <class ArgumentPackage>
-  static PyObject *postcall(const ArgumentPackage &args_, PyObject *result_) {
-    return bp::return_internal_reference<>::postcall(args_, result_);
-  }
-};
 
 /// @brief Expose a polymorphic value type, e.g. xyz::polymorphic<T, A>.
 template <class Poly> void register_polymorphic_to_python() {
@@ -101,3 +71,26 @@ template <class Poly> void register_polymorphic_to_python() {
 
 } // namespace python
 } // namespace proxsuite::nlp
+
+namespace boost {
+namespace python {
+
+template <class T, class A, class MakeHolder>
+struct to_python_indirect<xyz::polymorphic<T, A> &, MakeHolder> {
+  using poly_type = xyz::polymorphic<T, A>;
+  template <class U> PyObject *operator()(U const &x) const {
+    if (x.valueless_after_move()) {
+      return detail::none();
+    }
+    return ::proxsuite::nlp::python::detail::make_polymorphic_reference_holder::
+        execute(const_cast<U &>(x));
+  }
+#ifndef BOOST_PYTHON_NO_PY_SIGNATURES
+  PyTypeObject const *get_pytype() {
+    return converter::registered_pytype<poly_type>::get_pytype();
+  }
+#endif
+};
+
+} // namespace python
+} // namespace boost
