@@ -2,7 +2,6 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/manifold-base.hpp"
 #include "proxsuite-nlp/function-base.hpp"
 
 namespace proxsuite {
@@ -20,7 +19,6 @@ public:
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
-  using Self = ConstraintSetBase<Scalar>;
 
   /// Do not use the vector-Hessian product in the Hessian
   /// for Gauss Newton.
@@ -66,7 +64,7 @@ public:
 
   /// @brief Update proximal parameter; this applies to when this class is a
   /// proximal operator that isn't a projection (e.g. \f$ \ell_1 \f$).
-  void setProxParameter(const Scalar mu) {
+  void setProxParameter(const Scalar mu) const {
     mu_ = mu;
     mu_inv_ = 1. / mu;
   };
@@ -110,8 +108,8 @@ public:
   Scalar mu_inv() const { return mu_inv_; }
 
 protected:
-  Scalar mu_ = 0.;
-  Scalar mu_inv_;
+  mutable Scalar mu_ = 0.;
+  mutable Scalar mu_inv_;
 };
 
 /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
