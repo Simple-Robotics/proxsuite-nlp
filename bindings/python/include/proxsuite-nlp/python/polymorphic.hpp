@@ -75,9 +75,10 @@ template <class Poly> void register_polymorphic_to_python() {
 namespace boost {
 namespace python {
 
-template <class T, class A, class MakeHolder>
-struct to_python_indirect<xyz::polymorphic<T, A> &, MakeHolder> {
-  using poly_type = xyz::polymorphic<T, A>;
+/// Use the same trick from <eigenpy/eigen-to-python.hpp> to specialize the
+/// template for both const and non-const
+template <class X, class MakeHolder> struct to_python_indirect_poly {
+  using poly_type = typename eigenpy::details::remove_cvref<X>::type;
   template <class U> PyObject *operator()(U const &x) const {
     if (x.valueless_after_move()) {
       return detail::none();
@@ -91,6 +92,14 @@ struct to_python_indirect<xyz::polymorphic<T, A> &, MakeHolder> {
   }
 #endif
 };
+
+template <class T, class A, class MakeHolder>
+struct to_python_indirect<xyz::polymorphic<T, A> &, MakeHolder>
+    : to_python_indirect_poly<xyz::polymorphic<T, A> &, MakeHolder> {};
+
+template <class T, class A, class MakeHolder>
+struct to_python_indirect<const xyz::polymorphic<T, A> &, MakeHolder>
+    : to_python_indirect_poly<const xyz::polymorphic<T, A> &, MakeHolder> {};
 
 } // namespace python
 } // namespace boost
