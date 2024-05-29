@@ -3,9 +3,11 @@
 #pragma once
 
 #include "proxsuite-nlp/function-base.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 namespace proxsuite {
 namespace nlp {
+using xyz::polymorphic;
 
 ///
 /// @brief   Base constraint set type.
@@ -123,7 +125,7 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   using ConstraintSet = ConstraintSetBase<Scalar>;
 
   shared_ptr<FunctionType> func_;
-  shared_ptr<ConstraintSet> set_;
+  polymorphic<ConstraintSet> set_;
 
   const FunctionType &func() const { return *func_; }
   int nr() const { return func_->nr(); }
@@ -135,11 +137,11 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   ConstraintObjectTpl &operator=(const ConstraintObjectTpl &) = default;
 
   ConstraintObjectTpl(shared_ptr<FunctionType> func,
-                      shared_ptr<ConstraintSet> set)
+                      const polymorphic<ConstraintSet> &set)
       : func_(func), set_(set) {}
 
   bool operator==(const ConstraintObjectTpl &other) const {
-    return (func_ == other.func_) && (set_ && other.set_);
+    return func_ == other.func_;
   }
 };
 
