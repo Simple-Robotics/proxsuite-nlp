@@ -1,7 +1,6 @@
 #pragma once
 
 #include "proxsuite-nlp/constraint-base.hpp"
-#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 namespace proxsuite {
 namespace nlp {

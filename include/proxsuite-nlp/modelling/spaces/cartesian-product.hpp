@@ -8,7 +8,6 @@
 namespace proxsuite {
 namespace nlp {
 namespace {
-using xyz::polymorphic;
 /// Typedef in anon namespace for use in rest of file.
 template <typename T>
 using PolymorphicManifold = polymorphic<ManifoldAbstractTpl<T>>;
