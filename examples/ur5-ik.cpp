@@ -20,6 +20,7 @@ PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 using namespace proxsuite::nlp;
 namespace pin = pinocchio;
 
+using PolyManifold = xyz::polymorphic<ManifoldAbstractTpl<Scalar>>;
 using Model = pin::ModelTpl<Scalar>;
 using Data = pin::DataTpl<Scalar>;
 using Space = MultibodyConfiguration<Scalar>;
@@ -39,20 +40,19 @@ struct FramePosition : C2FunctionTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   using Base = C2FunctionTpl<Scalar>;
 
-  shared_ptr<Space> space_;
+  Space space_;
   mutable Data data_;
   pin::FrameIndex fid_;
   Vector3s ref_;
   mutable Matrix6Xs fJf_;
 
-  FramePosition(const shared_ptr<Space> &space, pin::FrameIndex fid,
-                const Vector3s &ref)
-      : Base(*space, 3), space_(space), data_(space->getModel()), fid_(fid),
-        ref_(ref), fJf_(6, getModel().nv) {
+  FramePosition(Space space, pin::FrameIndex fid, const Vector3s &ref)
+      : Base(space, 3), space_(std::move(space)), data_(space.getModel()),
+        fid_(fid), ref_(ref), fJf_(6, getModel().nv) {
     fJf_.setZero();
   }
 
-  Model const &getModel() const { return space_->getModel(); }
+  Model const &getModel() const { return space_.getModel(); }
 
   VectorXs operator()(const ConstVectorRef &q) const override {
     pin::forwardKinematics(getModel(), data_, q);
@@ -72,7 +72,7 @@ int main() {
 
   const std::string ee_link_name = "tool0";
   Model model = loadModel();
-  auto space = std::make_shared<Space>(model);
+  Space space{model};
   pin::FrameIndex fid = model.getFrameId(ee_link_name);
 
   Vector3s ref(1.0, 0., 0.2);
@@ -90,7 +90,7 @@ int main() {
       allocate_shared_eigen_aligned<QuadraticResidualCostTpl<Scalar>>(fn, w1);
   auto cost2 = allocate_shared_eigen_aligned<QuadraticDistanceCostTpl<Scalar>>(
       space, q0, w2);
-  auto cost = std::make_shared<CostSumTpl<Scalar>>(space->nx(), space->ndx());
+  auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
   cost->addComponent(cost1);
   cost->addComponent(cost2);
 
@@ -98,10 +98,11 @@ int main() {
 
   constexpr bool has_joint_lims = true;
   if (has_joint_lims) {
-    auto box_cstr = std::make_shared<BoxConstraintTpl<Scalar>>(
-        model.lowerPositionLimit, model.upperPositionLimit);
+    BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
+                                      model.upperPositionLimit);
     ConstraintObjectTpl<Scalar> cstrobj(
-        std::make_shared<ManifoldDifferenceToPoint<Scalar>>(space, q0),
+        std::make_shared<ManifoldDifferenceToPoint<Scalar>>(PolyManifold{space},
+                                                            q0),
         box_cstr);
     problem.addConstraint(cstrobj);
   }

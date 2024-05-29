@@ -29,8 +29,7 @@ using SolverType = ProxNLPSolverTpl<double>;
 
 template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
-  auto space_ = std::make_shared<Manifold>(N);
-  const Manifold &space = *space_;
+  Manifold space{N};
   typename Manifold::PointType p1 = space.rand();
 
   Eigen::MatrixXd Qroot(N, N + 1);
@@ -48,14 +47,14 @@ template <int N, int M = 1> int submain() {
   auto res1 = std::make_shared<LinearFunctionTpl<double>>(A, b);
 
   auto cost = std::make_shared<QuadraticDistanceCostTpl<double>>(
-      space_, space.neutral(), Q_);
+      space, space.neutral(), Q_);
 
   std::vector<Problem::ConstraintObject> constraints;
   if (M > 0) {
-    constraints.emplace_back(res1, std::make_shared<EqualityType>());
+    constraints.emplace_back(res1, EqualityType{});
   }
 
-  Problem problem(space_, cost, constraints);
+  Problem problem(space, cost, constraints);
 
   SolverType solver(problem);
   solver.setPenalty(1e-4);
