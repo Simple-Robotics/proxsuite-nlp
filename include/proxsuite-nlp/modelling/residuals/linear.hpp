@@ -7,7 +7,6 @@
 
 namespace proxsuite {
 namespace nlp {
-using xyz::polymorphic;
 
 /**
  * @brief Linear residuals \f$r(x) = Ax + b\f$.

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <eigenpy/eigenpy.hpp>
-
 #include "proxsuite-nlp/context.hpp"
+#include <eigenpy/eigenpy.hpp>
 
 namespace proxsuite {
 namespace nlp {
