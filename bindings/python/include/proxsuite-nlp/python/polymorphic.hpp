@@ -10,9 +10,9 @@ template <class held_type> struct PolymorphicHolder;
 
 /// @brief Owning holder for the xyz::polymorphic<T, A> polymorphic value type.
 template <class _T, class _A>
-struct PolymorphicHolder<xyz::polymorphic<_T, _A>> : bp::instance_holder {
+struct PolymorphicHolder<polymorphic<_T, _A>> : bp::instance_holder {
   static_assert(std::is_polymorphic_v<_T>, "Held type should be polymorphic.");
-  using polymorphic_t = xyz::polymorphic<_T, _A>;
+  using polymorphic_t = polymorphic<_T, _A>;
   using value_type = _T;
   using allocator_type = _A;
 
@@ -23,8 +23,6 @@ struct PolymorphicHolder<xyz::polymorphic<_T, _A>> : bp::instance_holder {
 
 private:
   void *holds(bp::type_info dst_t, bool /*null_ptr_only*/) override {
-    fmt::println("PolymorphicHolder::holds()");
-    fmt::println("dst_t = {}", dst_t.name());
     if (dst_t == bp::type_id<polymorphic_t>()) {
       // return pointer to the held data
       return &this->m_p;
@@ -34,7 +32,6 @@ private:
       return p;
 
     bp::type_info src_t = bp::type_id<value_type>();
-    fmt::println("src_t = {}", src_t.name());
     return src_t == dst_t ? p : bp::objects::find_dynamic_type(p, src_t, dst_t);
   }
 
@@ -43,7 +40,7 @@ private:
 
 struct make_polymorphic_reference_holder {
   template <class T, class A>
-  static PyObject *execute(const xyz::polymorphic<T, A> &p) {
+  static PyObject *execute(const polymorphic<T, A> &p) {
     using pointer_holder = bp::objects::pointer_holder<T *, T>;
     T *q = const_cast<T *>(boost::get_pointer(p));
     return bp::objects::make_ptr_instance<T, pointer_holder>::execute(q);
@@ -55,7 +52,6 @@ struct make_polymorphic_reference_holder {
 /// @brief Expose a polymorphic value type, e.g. xyz::polymorphic<T, A>.
 template <class Poly> void register_polymorphic_to_python() {
   using value_type = typename Poly::value_type;
-  // bp::implicitly_convertible<value_type, Poly>();
   bp::objects::class_value_wrapper<
       Poly, bp::objects::make_ptr_instance<value_type,
                                            detail::PolymorphicHolder<Poly>>>();
