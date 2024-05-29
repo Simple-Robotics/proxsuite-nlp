@@ -16,7 +16,7 @@ using context::VectorXs;
 
 void exposeQuadraticCosts() {
   using FunctionPtr = shared_ptr<context::C2Function>;
-  using ManifoldPtr = shared_ptr<context::Manifold>;
+  using PolyManifold = polymorphic<context::Manifold>;
 
   using QuadraticResidualCost = QuadraticResidualCostTpl<Scalar>;
   bp::class_<QuadraticResidualCost, bp::bases<Cost>>(
@@ -43,11 +43,11 @@ void exposeQuadraticCosts() {
       "QuadraticDistanceCost",
       "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the "
       "manifold.",
-      bp::init<ManifoldPtr, const VectorXs &, const MatrixXs &>(
+      bp::init<PolyManifold, const VectorXs &, const MatrixXs &>(
           bp::args("self", "space", "target", "weights")))
-      .def(bp::init<ManifoldPtr, const VectorXs &>(
+      .def(bp::init<PolyManifold, const VectorXs &>(
           bp::args("self", "space", "target")))
-      .def(bp::init<ManifoldPtr>(
+      .def(bp::init<PolyManifold>(
           "Constructor which uses the neutral element of the space.",
           bp::args("self", "space")))
       .add_property("target", &QuadraticDistanceCost::getTarget,
