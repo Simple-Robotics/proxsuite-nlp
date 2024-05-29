@@ -83,7 +83,11 @@ void exposeCartesianProduct() {
            "component.")
       .def("merge_vector", &CartesianProduct::merge_vector, ("self"_a, "vs"),
            "Define a tangent vector on the manifold by merging vectors from "
-           "each component.");
+           "each component.")
+      .def(
+          "__mul__", +[](const CartesianProduct &a, const CartesianProduct &b) {
+            return a * b;
+          });
 }
 
 } // namespace python
