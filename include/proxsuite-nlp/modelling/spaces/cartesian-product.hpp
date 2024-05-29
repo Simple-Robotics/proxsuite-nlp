@@ -140,6 +140,14 @@ auto operator*(const PolymorphicManifold<T> &left,
   return right * left;
 }
 
+template <typename T>
+auto operator*(const CartesianProductTpl<T> &left,
+               const CartesianProductTpl<T> &right) {
+  CartesianProductTpl<T> out{left};
+  out.addComponent(right);
+  return out;
+}
+
 } // namespace nlp
 } // namespace proxsuite
 
