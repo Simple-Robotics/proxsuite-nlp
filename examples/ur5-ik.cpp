@@ -46,9 +46,9 @@ struct FramePosition : C2FunctionTpl<Scalar> {
   Vector3s ref_;
   mutable Matrix6Xs fJf_;
 
-  FramePosition(Space space, pin::FrameIndex fid, const Vector3s &ref)
-      : Base(space, 3), space_(std::move(space)), data_(space.getModel()),
-        fid_(fid), ref_(ref), fJf_(6, getModel().nv) {
+  FramePosition(const Space &space, pin::FrameIndex fid, const Vector3s &ref)
+      : Base(space, 3), space_(space), data_(space_.getModel()), fid_(fid),
+        ref_(ref), fJf_(6, getModel().nv) {
     fJf_.setZero();
   }
 
