@@ -23,7 +23,7 @@ public:
   using Workspace = WorkspaceTpl<Scalar>;
 
   /// The working manifold \f$M\f$.
-  shared_ptr<Manifold> manifold_;
+  polymorphic<Manifold> manifold_;
   /// The cost function.
   shared_ptr<CostType> cost_;
   /// The set of constraints.
@@ -32,10 +32,11 @@ public:
   const CostType &cost() const { return *cost_; }
   const Manifold &manifold() const { return *manifold_; }
 
-  ProblemTpl(shared_ptr<Manifold> manifold, shared_ptr<CostType> cost,
+  template <class U>
+  ProblemTpl(U &&manifold, shared_ptr<CostType> cost,
              const std::vector<ConstraintObject> &constraints = {})
-      : manifold_(manifold), cost_(cost), constraints_(constraints),
-        nc_total_(0) {
+      : manifold_(std::forward<U>(manifold)), cost_(cost),
+        constraints_(constraints), nc_total_(0) {
     reset_constraint_dim_vars();
   }
 
