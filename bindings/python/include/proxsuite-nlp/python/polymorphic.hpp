@@ -1,14 +1,6 @@
 #pragma once
-#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
-
-namespace boost {
-template <typename T> T *get_pointer(xyz::polymorphic<T> const &p) {
-  const T &r = *p;
-  return const_cast<T *>(&r);
-}
-} // namespace boost
-
 #include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 #include <eigenpy/utils/traits.hpp>
 
 namespace proxsuite::nlp {
@@ -37,7 +29,7 @@ private:
       // return pointer to the held data
       return &this->m_p;
     }
-    value_type *p = &(*this->m_p);
+    value_type *p = boost::get_pointer(m_p);
     if (dst_t == bp::type_id<value_type>())
       return p;
 
@@ -78,7 +70,7 @@ namespace python {
 /// Use the same trick from <eigenpy/eigen-to-python.hpp> to specialize the
 /// template for both const and non-const
 template <class X, class MakeHolder> struct to_python_indirect_poly {
-  using poly_type = typename eigenpy::details::remove_cvref<X>::type;
+  using poly_type = boost::remove_cv_ref_t<X>;
   template <class U> PyObject *operator()(U const &x) const {
     if (x.valueless_after_move()) {
       return detail::none();

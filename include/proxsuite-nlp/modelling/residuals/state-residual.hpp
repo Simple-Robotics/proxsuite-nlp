@@ -10,7 +10,6 @@
 
 namespace proxsuite {
 namespace nlp {
-using xyz::polymorphic;
 
 /**
  * Constraint function to be equal to a given element of a space.

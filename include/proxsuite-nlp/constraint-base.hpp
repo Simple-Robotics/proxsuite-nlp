@@ -7,7 +7,6 @@
 
 namespace proxsuite {
 namespace nlp {
-using xyz::polymorphic;
 
 ///
 /// @brief   Base constraint set type.

@@ -1,7 +1,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxsuite-nlp/python/polymorphic.hpp"
-
 #include "proxsuite-nlp/modelling/constraints.hpp"
+
+#include "proxsuite-nlp/python/polymorphic.hpp"
 
 #include <eigenpy/std-vector.hpp>
 
@@ -18,7 +18,6 @@ using eigenpy::StdVectorPythonVisitor;
 using L1Penalty = NonsmoothPenaltyL1Tpl<Scalar>;
 using ConstraintSetProduct = ConstraintSetProductTpl<Scalar>;
 using BoxConstraint = BoxConstraintTpl<Scalar>;
-using xyz::polymorphic;
 
 template <typename T>
 auto exposeSpecificConstraintSet(const char *name, const char *docstring) {
