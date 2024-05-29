@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/manifold-base.hpp"
@@ -16,7 +16,6 @@ public:
 
   /// Generic constraint type
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
-  using ConstraintPtr = shared_ptr<ConstraintObject>;
   /// Cost function type
   using CostType = CostFunctionBaseTpl<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
