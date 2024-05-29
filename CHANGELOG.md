@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* Add the `polymorphic_cxx14.hpp` header from [jbcoe/value_types](https://github.com/jbcoe/value_types/blob/main/polymorphic_cxx14.h), [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90)
+
+### Changed
+
+* Change from `shared_ptr<T>` to `polymorphic<T>` for manifolds and constraint sets
+* Remove use of `std::make_shared` for manifolds in examples [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90)
+* Changed ctor of `ProblemTpl` to template which takes the manifold
+
 ## [0.7.0] - 2024-05-14
 
 ### Changed
