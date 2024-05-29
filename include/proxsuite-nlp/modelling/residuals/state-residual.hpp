@@ -6,9 +6,11 @@
 
 #include "proxsuite-nlp/function-base.hpp"
 #include "proxsuite-nlp/manifold-base.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 namespace proxsuite {
 namespace nlp {
+using xyz::polymorphic;
 
 /**
  * Constraint function to be equal to a given element of a space.
@@ -27,9 +29,9 @@ public:
 
   /// Target point on the space.
   typename Manifold::PointType target_;
-  shared_ptr<Manifold> space_;
+  polymorphic<Manifold> space_;
 
-  ManifoldDifferenceToPoint(const shared_ptr<Manifold> &space,
+  ManifoldDifferenceToPoint(const polymorphic<Manifold> &space,
                             const ConstVectorRef &target)
       : Base(space->nx(), space->ndx(), space->ndx()), target_(target),
         space_(space) {

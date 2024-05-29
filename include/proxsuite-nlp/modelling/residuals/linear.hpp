@@ -3,9 +3,11 @@
 #include "proxsuite-nlp/function-base.hpp"
 #include "proxsuite-nlp/function-ops.hpp"
 #include "proxsuite-nlp/modelling/residuals/state-residual.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 namespace proxsuite {
 namespace nlp {
+using xyz::polymorphic;
 
 /**
  * @brief Linear residuals \f$r(x) = Ax + b\f$.
@@ -44,7 +46,7 @@ struct LinearFunctionDifferenceToPoint : ComposeFunctionTpl<_Scalar> {
 
   using Manifold = ManifoldAbstractTpl<Scalar>;
 
-  LinearFunctionDifferenceToPoint(const shared_ptr<Manifold> &space,
+  LinearFunctionDifferenceToPoint(const polymorphic<Manifold> &space,
                                   const ConstVectorRef &target,
                                   const ConstMatrixRef &A,
                                   const ConstVectorRef &b)

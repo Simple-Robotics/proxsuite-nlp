@@ -18,31 +18,31 @@ template <typename _Scalar>
 struct QuadraticDistanceCostTpl : QuadraticResidualCostTpl<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
-  using FunctionType = ManifoldDifferenceToPoint<Scalar>;
+  using StateResidual = ManifoldDifferenceToPoint<Scalar>;
   using Manifold = ManifoldAbstractTpl<Scalar>;
   using Base = QuadraticResidualCostTpl<Scalar>;
   using Base::residual_;
   using Base::weights_;
 
-  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space,
+  QuadraticDistanceCostTpl(const polymorphic<Manifold> &space,
                            const ConstVectorRef &target,
                            const ConstMatrixRef &weights)
-      : Base(std::make_shared<FunctionType>(space, target), weights) {}
+      : Base(std::make_shared<StateResidual>(space, target), weights) {}
 
-  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space,
+  QuadraticDistanceCostTpl(const polymorphic<Manifold> &space,
                            const ConstVectorRef &target)
       : QuadraticDistanceCostTpl(
             space, target, MatrixXs::Identity(space->ndx(), space->ndx())) {}
 
-  QuadraticDistanceCostTpl(const shared_ptr<Manifold> &space)
+  QuadraticDistanceCostTpl(const polymorphic<Manifold> &space)
       : QuadraticDistanceCostTpl(space, space->neutral()) {}
 
   ConstVectorRef getTarget() const {
-    return std::static_pointer_cast<FunctionType>(residual_)->target_;
+    return static_cast<StateResidual *>(residual_.get())->target_;
   }
 
   void updateTarget(const ConstVectorRef &x) {
-    std::static_pointer_cast<FunctionType>(residual_)->target_ = x;
+    static_cast<StateResidual *>(residual_.get())->target_ = x;
   }
 };
 
