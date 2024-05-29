@@ -109,7 +109,8 @@ private:
 };
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
-extern template struct ConstraintSetProductTpl<context::Scalar>;
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    ConstraintSetProductTpl<context::Scalar>;
 #endif
 
 } // namespace nlp

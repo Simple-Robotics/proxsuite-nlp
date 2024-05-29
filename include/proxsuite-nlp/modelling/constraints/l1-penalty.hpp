@@ -1,4 +1,4 @@
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/constraint-base.hpp"
@@ -45,6 +45,11 @@ struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
     out = z.array().abs() <= mu_;
   }
 };
+
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    NonsmoothPenaltyL1Tpl<context::Scalar>;
+#endif
 
 } // namespace nlp
 } // namespace proxsuite

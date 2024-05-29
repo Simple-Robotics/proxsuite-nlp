@@ -1,5 +1,4 @@
-/* Copyright (C) 2022 LAAS-CNRS, INRIA
- */
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 #include "proxsuite-nlp/modelling/residuals/linear.hpp"
 #include "proxsuite-nlp/modelling/constraints/equality-constraint.hpp"
