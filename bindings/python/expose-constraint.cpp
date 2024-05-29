@@ -1,5 +1,5 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
-#include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/polymorphic.hpp"
 
 #include "proxsuite-nlp/modelling/constraints.hpp"
 
@@ -18,16 +18,17 @@ using eigenpy::StdVectorPythonVisitor;
 using L1Penalty = NonsmoothPenaltyL1Tpl<Scalar>;
 using ConstraintSetProduct = ConstraintSetProductTpl<Scalar>;
 using BoxConstraint = BoxConstraintTpl<Scalar>;
+using xyz::polymorphic;
 
 template <typename T>
 auto exposeSpecificConstraintSet(const char *name, const char *docstring) {
-  return bp::class_<T, bp::bases<context::ConstraintSet>>(name, docstring,
-                                                          bp::no_init);
+  bp::implicitly_convertible<T, polymorphic<ConstraintSet>>();
+  return bp::class_<T, bp::bases<ConstraintSet>>(name, docstring, bp::no_init);
 }
 
-template <typename T>
+template <typename ConstraintType>
 context::Constraint make_constraint(const shared_ptr<context::C2Function> &f) {
-  return context::Constraint(f, std::make_shared<T>());
+  return context::Constraint(f, ConstraintType{});
 }
 
 static void exposeConstraintTypes();
@@ -35,15 +36,14 @@ static void exposeConstraintTypes();
 /// @todo Expose properly using pure_virtual, to allow overriding from Python
 void exposeConstraints() {
 
-  bp::register_ptr_to_python<shared_ptr<ConstraintSet>>();
+  register_polymorphic_to_python<polymorphic<ConstraintSet>>();
   bp::class_<ConstraintSet, boost::noncopyable>(
       "ConstraintSetBase",
       "Base class for constraint sets or nonsmooth penalties.", bp::no_init)
-      .def("evaluate", &ConstraintSet::evaluate, bp::args("self", "z"),
+      .def("evaluate", &ConstraintSet::evaluate, ("self"_a, "z"),
            "Evaluate the constraint indicator function or nonsmooth penalty "
            "on the projection/prox map of :math:`z`.")
-      .def("projection", &ConstraintSet::projection,
-           bp::args("self", "z", "zout"))
+      .def("projection", &ConstraintSet::projection, ("self"_a, "z", "zout"))
       .def(
           "projection",
           +[](const ConstraintSet &c, const ConstVectorRef &z) {
@@ -51,9 +51,9 @@ void exposeConstraints() {
             c.projection(z, zout);
             return zout;
           },
-          bp::args("self", "z"))
+          ("self"_a, "z"))
       .def("normalConeProjection", &ConstraintSet::normalConeProjection,
-           bp::args("self", "z", "zout"))
+           ("self"_a, "z", "zout"))
       .def(
           "normalConeProjection",
           +[](const ConstraintSet &c, const ConstVectorRef &z) {
@@ -61,27 +61,27 @@ void exposeConstraints() {
             c.normalConeProjection(z, zout);
             return zout;
           },
-          bp::args("self", "z"))
+          ("self"_a, "z"))
       .def("applyProjectionJacobian", &ConstraintSet::applyProjectionJacobian,
-           bp::args("self", "z", "Jout"), "Apply the projection Jacobian.")
+           ("self"_a, "z", "Jout"), "Apply the projection Jacobian.")
       .def("applyNormalProjectionJacobian",
            &ConstraintSet::applyNormalConeProjectionJacobian,
-           bp::args("self", "z", "Jout"),
+           ("self"_a, "z", "Jout"),
            "Apply the normal cone projection Jacobian.")
       .def("computeActiveSet", &ConstraintSet::computeActiveSet,
-           bp::args("self", "z", "out"))
+           ("self"_a, "z", "out"))
       .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
-           bp::args("self", "zin", "zproj"),
+           ("self"_a, "zin", "zproj"),
            "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
       .def("setProxParameter", &ConstraintSet::setProxParameter,
-           bp::args("self", "mu"), "Set proximal parameter.")
+           ("self"_a, "mu"), "Set proximal parameter.")
       .add_property("mu", &ConstraintSet::mu, "Current proximal parameter.")
       .def(bp::self == bp::self);
 
   bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",
-      bp::init<shared_ptr<C2Function>, shared_ptr<ConstraintSet>>(
-          bp::args("self", "func", "set")))
+      bp::init<shared_ptr<C2Function>, const polymorphic<ConstraintSet> &>(
+          ("self"_a, "func", "constraint_set")))
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
       .def_readonly("func", &Constraint::func_, "Underlying function.")
       .def_readonly("set", &Constraint::set_, "Constraint set.");
@@ -125,7 +125,7 @@ static void exposeConstraintTypes() {
 
   exposeSpecificConstraintSet<ConstraintSetProduct>(
       "ConstraintSetProduct", "Cartesian product of constraint sets.")
-      .def(bp::init<std::vector<xyz::polymorphic<ConstraintSet>>,
+      .def(bp::init<std::vector<polymorphic<ConstraintSet>>,
                     std::vector<Eigen::Index>>(
           ("self"_a, "components", "blockSizes")))
       .add_property("components",
