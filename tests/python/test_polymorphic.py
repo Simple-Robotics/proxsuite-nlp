@@ -7,6 +7,7 @@ from polymorphic_test import (
     poly_use_base,
     create_vec_poly,
     poly_passthrough,
+    get_const_y_poly_ref,
 )
 
 assert isinstance(getY(), Y)
@@ -39,3 +40,8 @@ print(py)
 pz = poly_passthrough(z)
 assert isinstance(pz, Z)
 print(pz)
+
+print("Get static Y:")
+ry_static = get_const_y_poly_ref()
+print(ry_static)
+assert isinstance(ry_static, Y)

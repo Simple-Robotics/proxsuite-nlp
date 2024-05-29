@@ -38,6 +38,10 @@ PolyX getZ() { return PolyX(Z()); }
 
 PolyX poly_passthrough(const PolyX &x) { return x; }
 
+static PolyX static_x = PolyX{Y()};
+
+const PolyX &get_const_y_poly_ref() { return static_x; }
+
 BOOST_PYTHON_MODULE(polymorphic_test) {
   register_polymorphic_to_python<PolyX>();
 
@@ -55,6 +59,8 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::def("getZ", &getZ);
   bp::def("create_vec_poly", &create_vec_poly);
   bp::def("poly_passthrough", &poly_passthrough, "x"_a);
+  bp::def("get_const_y_poly_ref", &get_const_y_poly_ref,
+          bp::return_value_policy<bp::reference_existing_object>());
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
