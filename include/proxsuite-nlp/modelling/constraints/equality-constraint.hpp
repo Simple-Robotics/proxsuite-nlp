@@ -1,3 +1,5 @@
+/// @file
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/constraint-base.hpp"
@@ -51,6 +53,11 @@ public:
 template <typename Scalar>
 using EqualityConstraint PROXSUITE_NLP_DEPRECATED_MESSAGE(
     "Use EqualityConstraintTpl<T> instead") = EqualityConstraintTpl<Scalar>;
+
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    EqualityConstraintTpl<context::Scalar>;
+#endif
 
 } // namespace nlp
 } // namespace proxsuite

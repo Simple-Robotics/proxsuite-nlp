@@ -1,4 +1,4 @@
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/constraint-base.hpp"
@@ -41,6 +41,11 @@ struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
 template <typename Scalar>
 using NegativeOrthant PROXSUITE_NLP_DEPRECATED_MESSAGE(
     "Use NegativeOrthantTpl<T> instead") = NegativeOrthantTpl<Scalar>;
+
+#ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
+extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    NegativeOrthantTpl<context::Scalar>;
+#endif
 
 } // namespace nlp
 } // namespace proxsuite
