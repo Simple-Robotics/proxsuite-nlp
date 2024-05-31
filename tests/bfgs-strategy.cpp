@@ -7,8 +7,8 @@ using namespace proxsuite::nlp;
 
 BOOST_AUTO_TEST_CASE(test_inverse_hessian_update) {
   const long nx = 4;
-  using BfgsStrategy_t = BfgsStrategy<Scalar>; // default to InverseHessian
-  BfgsStrategy_t bfgs(nx);
+  using BFGSStrategy_t = BFGSStrategy<Scalar>; // default to InverseHessian
+  BFGSStrategy_t bfgs(nx);
   VectorXs x0 = VectorXs::Random(nx);
   VectorXs g0 = VectorXs::Random(nx);
   bfgs.init(x0, g0);
@@ -41,8 +41,8 @@ BOOST_AUTO_TEST_CASE(test_inverse_hessian_update) {
 
 BOOST_AUTO_TEST_CASE(test_hessian_update) {
   const long nx = 4;
-  using BfgsStrategy_t = BfgsStrategy<Scalar, BfgsType::Hessian>;
-  BfgsStrategy_t bfgs(nx);
+  using BFGSStrategy_t = BFGSStrategy<Scalar, BFGSType::Hessian>;
+  BFGSStrategy_t bfgs(nx);
   VectorXs x0 = VectorXs::Random(nx);
   VectorXs g0 = VectorXs::Random(nx);
   bfgs.init(x0, g0);
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(test_hessian_update) {
 
 BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
   const long nx = 4;
-  using BfgsStrategy_t = BfgsStrategy<double, BfgsType::InverseHessian>;
-  BfgsStrategy_t bfgs(nx);
+  using BFGSStrategy_t = BFGSStrategy<double, BFGSType::InverseHessian>;
+  BFGSStrategy_t bfgs(nx);
 
   // random quadratic function with positive definite Hessian
   Eigen::MatrixXd H = Eigen::MatrixXd::Random(nx, nx);
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
 
 BOOST_AUTO_TEST_CASE(test_bfgs_hessian) {
   const long nx = 4;
-  using BfgsStrategy_t = BfgsStrategy<double, BfgsType::Hessian>;
-  BfgsStrategy_t bfgs(nx);
+  using BFGSStrategy_t = BFGSStrategy<double, BFGSType::Hessian>;
+  BFGSStrategy_t bfgs(nx);
 
   // random quadratic function with positive definite Hessian
   Eigen::MatrixXd H = Eigen::MatrixXd::Random(nx, nx);
