@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2024 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2024 INRIA
 #pragma once
 
 #include "proxsuite-nlp/fwd.hpp"
@@ -7,17 +7,17 @@
 namespace proxsuite {
 namespace nlp {
 
-enum BfgsType { Hessian, InverseHessian };
+enum BFGSType { Hessian, InverseHessian };
 
 // forward declaration
 template <typename Scalar, BfgsType BFGS_TYPE> struct BfgsUpdateImpl;
 
 template <typename Scalar, BfgsType BFGS_TYPE = BfgsType::InverseHessian>
-class BfgsStrategy {
+class BFGSStrategy {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
 public:
-  BfgsStrategy(const int num_vars)
+  explicit BfgsStrategy(const int num_vars)
       : M(Eigen::MatrixXd::Identity(num_vars, num_vars)), is_init(false),
         is_psd(true), x_prev(VectorXs::Zero(num_vars)),
         g_prev(VectorXs::Zero(num_vars)), s(VectorXs::Zero(num_vars)),
@@ -45,7 +45,7 @@ public:
     PROXSUITE_NLP_NOMALLOC_BEGIN;
     s = x - x_prev;
     y = g - g_prev;
-    Scalar sy = s.dot(y);
+    const Scalar sy = s.dot(y);
 
     if (sy > 0) {
       BfgsUpdateImpl<Scalar, BFGS_TYPE>::update(*this, s, y);
