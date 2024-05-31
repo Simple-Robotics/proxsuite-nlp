@@ -51,25 +51,14 @@ public:
   void Jintegrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                        MatrixRef Jout, int arg) const;
 
-  virtual void JintegrateTransport(const ConstVectorRef &x,
-                                   const ConstVectorRef &v, MatrixRef Jout,
-                                   int arg) const {
-    const int nv_ = base_.ndx();
-    base_.JintegrateTransport(getBasePoint(x), getBaseTangent(v),
-                              Jout.topRows(nv_), arg);
-  }
+  void JintegrateTransport(const ConstVectorRef &x, const ConstVectorRef &v,
+                           MatrixRef Jout, int arg) const;
 
   void Jdifference_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
                         MatrixRef Jout, int arg) const;
 
-  virtual void interpolate_impl(const ConstVectorRef &x0,
-                                const ConstVectorRef &x1, const Scalar &u,
-                                VectorRef out) const {
-    base_.interpolate(getBasePoint(x0), getBasePoint(x1), u,
-                      getBasePointWrite(out));
-    out.tail(base_.ndx()) =
-        (Scalar(1.) - u) * getBaseTangent(x0) + u * getBaseTangent(x1);
-  }
+  void interpolate_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
+                        const Scalar &u, VectorRef out) const;
 
   /// Get base point of an element of the tangent bundle.
   /// This map is exactly the natural projection.

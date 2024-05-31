@@ -1,6 +1,5 @@
 #pragma once
 
-#include "proxsuite-nlp/config.hpp"
 #include "proxsuite-nlp/context.hpp"
 #include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 

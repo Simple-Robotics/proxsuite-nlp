@@ -85,9 +85,8 @@ public:
     }
   }
 
-  virtual void interpolate_impl(const ConstVectorRef &x0,
-                                const ConstVectorRef &x1, const Scalar &u,
-                                VectorRef out) const {
+  void interpolate_impl(const ConstVectorRef &x0, const ConstVectorRef &x1,
+                        const Scalar &u, VectorRef out) const {
     pinocchio::interpolate(model_, x0, x1, u, out);
   }
 
@@ -122,5 +121,5 @@ struct MultibodyPhaseSpace
 } // namespace proxsuite
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
-#include "./multibody.txx"
+#include "proxsuite-nlp/modelling/spaces/multibody.txx"
 #endif
