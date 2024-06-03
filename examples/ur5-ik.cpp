@@ -11,6 +11,7 @@
 #include <proxsuite-nlp/cost-sum.hpp>
 #include <proxsuite-nlp/prox-solver.hpp>
 #include <proxsuite-nlp/modelling/constraints.hpp>
+#include <proxsuite-nlp/fmt-hessian-approx.hpp>
 
 #include <boost/filesystem/path.hpp>
 
@@ -70,55 +71,64 @@ struct FramePosition : C2FunctionTpl<Scalar> {
 
 int main() {
 
-  const std::string ee_link_name = "tool0";
-  Model model = loadModel();
-  Space space{model};
-  pin::FrameIndex fid = model.getFrameId(ee_link_name);
+  // solve with different hessian approximations
+  std::vector<HessianApprox> hess_approximations = {
+      HessianApprox::EXACT, HessianApprox::GAUSS_NEWTON, HessianApprox::BFGS,
+      HessianApprox::IDENTITY};
 
-  Vector3s ref(1.0, 0., 0.2);
-  auto fn = std::make_shared<FramePosition>(space, fid, ref);
+  for (auto hess_approx : hess_approximations) {
+    fmt::print("Solving with hessian approximation: {}\n", hess_approx);
+    const std::string ee_link_name = "tool0";
+    Model model = loadModel();
+    Space space{model};
+    pin::FrameIndex fid = model.getFrameId(ee_link_name);
 
-  auto q0 = pin::neutral(model);
-  MatrixXs w1(3, 3);
-  w1.setIdentity();
-  w1 *= 4.0;
-  MatrixXs w2(model.nv, model.nv);
-  w2.setIdentity();
-  w2 *= 1e-2;
+    Vector3s ref(1.0, 0., 0.2);
+    auto fn = std::make_shared<FramePosition>(space, fid, ref);
 
-  auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
-  auto cost2 =
-      std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
-  auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
-  cost->addComponent(cost1);
-  cost->addComponent(cost2);
+    auto q0 = pin::neutral(model);
+    MatrixXs w1(3, 3);
+    w1.setIdentity();
+    w1 *= 4.0;
+    MatrixXs w2(model.nv, model.nv);
+    w2.setIdentity();
+    w2 *= 1e-2;
 
-  Problem problem(space, cost);
+    auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
+    auto cost2 =
+        std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
+    auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
+    cost->addComponent(cost1);
+    cost->addComponent(cost2);
 
-  constexpr bool has_joint_lims = true;
-  if (has_joint_lims) {
-    BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
-                                      model.upperPositionLimit);
-    ConstraintObjectTpl<Scalar> cstrobj(
-        std::make_shared<ManifoldDifferenceToPoint<Scalar>>(PolyManifold{space},
-                                                            q0),
-        box_cstr);
-    problem.addConstraint(cstrobj);
+    Problem problem(space, cost);
+
+    constexpr bool has_joint_lims = true;
+    if (has_joint_lims) {
+      BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
+                                        model.upperPositionLimit);
+      ConstraintObjectTpl<Scalar> cstrobj(
+          std::make_shared<ManifoldDifferenceToPoint<Scalar>>(PolyManifold{space},
+                                                              q0),
+          box_cstr);
+      problem.addConstraint(cstrobj);
+    }
+    
+    ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
+                                    proxsuite::nlp::QUIET);
+    solver.hess_approx = hess_approx;
+    solver.max_iters = 500;
+    solver.setup();
+    solver.solve(q0);
+
+    ResultsTpl<Scalar> const &results = *solver.results_;
+    WorkspaceTpl<Scalar> const &ws = *solver.workspace_;
+    std::cout << results << std::endl;
+
+    fmt::print("Optimal cost: {}\n", ws.objective_value);
+    fmt::print("Optimal cost grad: {}\n", ws.objective_gradient.transpose());
+    auto opt_frame_pos = (*fn)(results.x_opt);
+    fmt::print("Optimal frame pos: {}\n\n", opt_frame_pos.transpose());
   }
-
-  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
-                                  proxsuite::nlp::VERBOSE);
-  solver.setup();
-  solver.solve(q0);
-
-  ResultsTpl<Scalar> const &results = *solver.results_;
-  WorkspaceTpl<Scalar> const &ws = *solver.workspace_;
-  std::cout << results << std::endl;
-
-  fmt::print("Optimal cost: {}\n", ws.objective_value);
-  fmt::print("Optimal cost grad: {}\n", ws.objective_gradient.transpose());
-  auto opt_frame_pos = (*fn)(results.x_opt);
-  fmt::print("Optimal frame pos: {}\n", opt_frame_pos.transpose());
-
   return 0;
 }

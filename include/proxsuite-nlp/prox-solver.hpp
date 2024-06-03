@@ -10,6 +10,7 @@
 #include "proxsuite-nlp/helpers-base.hpp"
 #include "proxsuite-nlp/logger.hpp"
 #include "proxsuite-nlp/bcl-params.hpp"
+#include "proxsuite-nlp/bfgs-strategy.hpp"
 
 #include <boost/mpl/bool.hpp>
 
@@ -27,6 +28,10 @@ enum class HessianApprox {
   EXACT,
   /// Gauss-Newton (or rather SCQP) approximation
   GAUSS_NEWTON,
+  /// BFGS approximation
+  BFGS,
+  /// Identity
+  IDENTITY
 };
 
 enum InertiaFlag { INERTIA_OK = 0, INERTIA_BAD = 1, INERTIA_HAS_ZEROS = 2 };
@@ -48,6 +53,7 @@ public:
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
   using ConstraintSet = ConstraintSetTpl<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
+  using BFGS = BFGSStrategy<Scalar, BFGSType::Hessian>;
 
 protected:
   /// General nonlinear program to solve.
@@ -66,6 +72,8 @@ public:
   /// Linesearch strategy.
   LinesearchStrategy ls_strat = LinesearchStrategy::ARMIJO;
   MultiplierUpdateMode mul_update_mode = MultiplierUpdateMode::NEWTON;
+
+  unique_ptr<BFGS> bfgs_strategy_;
 
   /// linear algebra opts
   std::size_t max_refinement_steps_ = 5;
@@ -138,6 +146,16 @@ public:
   void setup() {
     workspace_ = std::make_unique<Workspace>(*problem_, ldlt_choice_);
     results_ = std::make_unique<Results>(*problem_);
+
+    if (hess_approx == HessianApprox::BFGS) {
+      // TODO: work on implementation of BFGS on manifolds
+      if (problem_->ndx() == problem_->nx()) {
+        bfgs_strategy_ = std::make_unique<BFGS>(problem_->ndx());
+      } else {
+        throw std::runtime_error(
+            "BFGS for hessian approximation currently only works for Euclidean manifolds.");
+      }
+    }
   }
 
   /**
