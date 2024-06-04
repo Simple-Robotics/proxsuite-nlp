@@ -25,7 +25,9 @@ if(NOT pytest_FOUND)
   message(FATAL_ERROR "Python pytest package missing. You can install it with: pip install pytest")
 endif()
 
-set(PYTHON_TESTS test_1d_funs.py test_costs.py test_functions.py test_manifolds.py test_print.py)
+set(PYTHON_TESTS test_1d_funs.py test_costs.py test_functions.py test_manifolds.py
+                 test_polymorphic.py test_print.py
+)
 
 message(STATUS "Python tests: ${PYTHON_TESTS}")
 

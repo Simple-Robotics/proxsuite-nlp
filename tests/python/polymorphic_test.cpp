@@ -17,9 +17,18 @@ struct Y : X {
   std::string name() const override { return "Y"; }
 };
 
-struct W final : Y {
-  W() : Y() {}
-  std::string name() const override { return "W (Y)"; }
+struct Z final : Y {
+  Z() : Y() {}
+  std::string name() const override { return "Z (Y)"; }
+};
+
+struct PyX final : X, bp::wrapper<X> {
+  std::string name() const override {
+    if (bp::override f = get_override("name")) {
+      return f();
+    }
+    return X::name();
+  }
 };
 
 using PolyX = xyz::polymorphic<X>;
@@ -32,23 +41,30 @@ struct poly_use_base {
   PolyX x;
 };
 
+struct X_wrap_store {
+  X_wrap_store(const PyX &x) : x(x) {}
+  PyX x;
+};
+
 struct poly_store {
   poly_store(const PolyX &x) : x(x) {}
   PolyX x;
 };
 
-VecPolyX create_vec_poly() { return {Y(), Y(), W()}; }
+VecPolyX create_vec_poly() { return {Y(), Y(), Z()}; }
 
 PolyX getY() { return PolyX(Y()); }
-PolyX getW() { return PolyX(W()); }
+PolyX getZ() { return PolyX(Z()); }
 
 PolyX poly_passthrough(const PolyX &x) { return x; }
 
+void call_method(const PolyX &x) {
+  std::cout << "  - call_method: PolyX::name(): " << x->name() << std::endl;
+}
+
 static PolyX static_x = PolyX{Y()};
 
-const PolyX &get_const_y_poly_ref() { return static_x; }
-
-const PolyX &set_return(PolyX x) {
+const PolyX &set_return(const PolyX &x) {
   static_x = x;
   return static_x;
 }
@@ -60,25 +76,26 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::class_<X, boost::noncopyable>("X", bp::init<>()).def("name", &X::name);
   bp::class_<Y, bp::bases<X>>("Y", bp::init<>());
 
-  bp::class_<W, bp::bases<Y>>("W", bp::init<>());
+  bp::class_<Z, bp::bases<Y>>("Z", bp::init<>());
 
   eigenpy::StdVectorPythonVisitor<VecPolyX>::expose(
       "VecPolyX",
       eigenpy::details::overload_base_get_item_for_std_vector<VecPolyX>());
 
   bp::def("getY", &getY);
-  bp::def("getW", &getW);
+  bp::def("getZ", &getZ);
   bp::def("create_vec_poly", &create_vec_poly);
   bp::def("poly_passthrough", &poly_passthrough, "x"_a);
   bp::def("call_method", &call_method, bp::args("x"));
-  bp::def("get_const_y_poly_ref", &get_const_y_poly_ref,
-          bp::return_value_policy<bp::reference_existing_object>());
   bp::def("set_return", &set_return,
           bp::return_value_policy<bp::reference_existing_object>());
 
+  bp::class_<X_wrap_store>("X_wrap_store", bp::init<const PyX &>("x"_a))
+      .def_readwrite("x", &X_wrap_store::x);
+
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
-      .def(bp::init<const W &>(bp::args("self", "t")))
+      .def(bp::init<const Z &>(bp::args("self", "t")))
       .add_property("x", bp::make_getter(&poly_use_base::x,
                                          bp::return_internal_reference<>()));
 
