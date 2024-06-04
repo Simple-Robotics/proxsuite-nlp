@@ -3,37 +3,17 @@
 #include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 #include <eigenpy/utils/traits.hpp>
 
+// Required class template specialization for
+// boost::python::register_ptr_to_python<> to work.
+namespace boost::python {
+template <class T, class A> struct pointee<xyz::polymorphic<T, A>> {
+  typedef T type;
+};
+} // namespace boost::python
+
 namespace proxsuite::nlp {
 namespace python {
 namespace detail {
-template <class held_type> struct PolymorphicHolder;
-
-/// @brief Owning holder for the xyz::polymorphic<T, A> polymorphic value type.
-template <class _T, class _A>
-struct PolymorphicHolder<polymorphic<_T, _A>> : bp::instance_holder {
-  static_assert(std::is_polymorphic_v<_T>, "Held type should be polymorphic.");
-  using polymorphic_t = polymorphic<_T, _A>;
-  using value_type = _T;
-  using allocator_type = _A;
-
-  template <typename U> PolymorphicHolder(U &&u) : m_p(std::forward<U>(u)) {}
-
-private:
-  void *holds(bp::type_info dst_t, bool /*null_ptr_only*/) override {
-    if (dst_t == bp::type_id<polymorphic_t>()) {
-      // return pointer to the held data
-      return &this->m_p;
-    }
-    value_type *p = boost::get_pointer(m_p);
-    if (dst_t == bp::type_id<value_type>())
-      return p;
-
-    bp::type_info src_t = bp::type_id<value_type>();
-    return src_t == dst_t ? p : bp::objects::find_dynamic_type(p, src_t, dst_t);
-  }
-
-  polymorphic_t m_p;
-};
 
 struct make_polymorphic_reference_holder {
   template <class T, class A>
