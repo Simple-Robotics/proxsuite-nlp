@@ -16,10 +16,7 @@ struct PolymorphicHolder<polymorphic<_T, _A>> : bp::instance_holder {
   using value_type = _T;
   using allocator_type = _A;
 
-  PolymorphicHolder(polymorphic_t obj) : m_p(std::move(obj)) {}
-
-  template <typename U>
-  PolymorphicHolder(PyObject *, U u) : m_p(std::move(u)) {}
+  template <typename U> PolymorphicHolder(U &&u) : m_p(std::forward<U>(u)) {}
 
 private:
   void *holds(bp::type_info dst_t, bool /*null_ptr_only*/) override {
