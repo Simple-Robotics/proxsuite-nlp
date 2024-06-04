@@ -32,8 +32,7 @@ void exposeCartesianProduct() {
       std::vector<VectorRef> (CartesianProduct::*)(VectorRef) const;
 
   bp::implicitly_convertible<CartesianProduct, PolymorphicManifold>();
-  bp::class_<CartesianProduct, bp::bases<Manifold>,
-             shared_ptr<CartesianProduct>>(
+  bp::class_<CartesianProduct, bp::bases<Manifold>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
       bp::no_init)
       .def(bp::init<>("self"_a))
