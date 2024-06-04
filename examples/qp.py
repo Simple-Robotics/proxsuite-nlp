@@ -68,8 +68,8 @@ x_init = np.random.randn(nx) * 10
 lams0 = [np.random.randn(resdl.nr)]
 solver.setup()
 solver.solve(x_init, lams0)
-results = solver.getResults()
-workspace = solver.getWorkspace()
+results = solver.results
+workspace = solver.workspace
 
 solver.clear_callbacks()
 
