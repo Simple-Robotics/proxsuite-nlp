@@ -47,7 +47,9 @@ struct X_wrap_store {
 };
 
 struct poly_store {
-  poly_store(const PolyX &x) : x(x) {}
+  poly_store(const PolyX &x) : x(x) {
+    std::cout << "Called poly_store ctor: name is " << x->name() << std::endl;
+  }
   PolyX x;
 };
 
@@ -59,7 +61,11 @@ PolyX getZ() { return PolyX(Z()); }
 PolyX poly_passthrough(const PolyX &x) { return x; }
 
 void call_method(const PolyX &x) {
-  std::cout << "  - call_method: PolyX::name(): " << x->name() << std::endl;
+  fmt::println("  - {:s} PolyX::name(): {:s}", __FUNCTION__, x->name());
+  auto t = dynamic_cast<const bp::wrapper<X> *>(&(*x));
+  if (t) {
+    fmt::println("  - {:s} got a bp::wrapper<X>", __FUNCTION__);
+  }
 }
 
 static PolyX static_x = PolyX{Y()};
@@ -73,10 +79,15 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   register_polymorphic_to_python<PolyX>();
   register_polymorphic_to_python<PolyY>();
 
-  bp::class_<X, boost::noncopyable>("X", bp::init<>()).def("name", &X::name);
-  bp::class_<Y, bp::bases<X>>("Y", bp::init<>());
+  bp::class_<PyX, boost::noncopyable>("X", bp::init<>())
+      .def("name", &X::name)
+      .def(PolymorphicVisitor<PolyX>());
+  bp::class_<Y, bp::bases<X>>("Y", bp::init<>())
+      .def(PolymorphicVisitor<PolyX>());
 
-  bp::class_<Z, bp::bases<Y>>("Z", bp::init<>());
+  bp::class_<Z, bp::bases<Y>>("Z", bp::init<>())
+      .def(PolymorphicVisitor<PolyX>())
+      .def(PolymorphicVisitor<PolyY>());
 
   eigenpy::StdVectorPythonVisitor<VecPolyX>::expose(
       "VecPolyX",
@@ -96,10 +107,9 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
       .def(bp::init<const Z &>(bp::args("self", "t")))
-      .add_property("x", bp::make_getter(&poly_use_base::x,
-                                         bp::return_internal_reference<>()));
+      .def(bp::init<const PyX &>(bp::args("self", "t")))
+      .def_readonly("x", &poly_use_base::x);
 
   bp::class_<poly_store>("poly_store", bp::init<const PolyX &>(("self"_a, "x")))
-      .add_property("x", bp::make_getter(&poly_store::x,
-                                         bp::return_internal_reference<>()));
+      .def_readonly("x", &poly_store::x);
 }
