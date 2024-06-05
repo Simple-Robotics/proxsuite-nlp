@@ -27,12 +27,35 @@ struct make_polymorphic_reference_holder {
 } // namespace detail
 
 /// @brief Expose a polymorphic value type, e.g. xyz::polymorphic<T, A>.
-template <class Poly> void register_polymorphic_to_python() {
-  using value_type = typename Poly::value_type;
+/// @details Just an alias for bp::register_ptr_to_python<>().
+template <class Poly> inline void register_polymorphic_to_python() {
+  using X = typename bp::pointee<Poly>::type;
   bp::objects::class_value_wrapper<
-      Poly, bp::objects::make_ptr_instance<value_type,
-                                           detail::PolymorphicHolder<Poly>>>();
+      Poly, bp::objects::make_ptr_instance<
+                X, bp::objects::pointer_holder<Poly, X>>>();
 }
+
+/// Does the same thing as boost::python::implicitly_convertible<>(),
+/// except the conversion is placed at the top of the conversion chain.
+/// This ensures that Boost.Python attempts to convert to Poly BEFORE
+/// any parent class!
+template <class Poly>
+struct PolymorphicVisitor : bp::def_visitor<PolymorphicVisitor<Poly>> {
+
+  template <class PyClass> void visit(PyClass &) const {
+    using T = typename PyClass::wrapped_type;
+    using meta = typename PyClass::metadata;
+    using held = typename meta::held_type;
+    typedef bp::converter::implicit<held, Poly> functions;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-abstract-non-virtual-dtor"
+    bp::converter::registry::insert(
+        &functions::convertible, &functions::construct, bp::type_id<Poly>(),
+        &bp::converter::expected_from_python_type_direct<T>::get_pytype);
+  }
+#pragma GCC diagnostic pop
+};
 
 } // namespace python
 } // namespace proxsuite::nlp
