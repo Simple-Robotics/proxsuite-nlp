@@ -1,6 +1,7 @@
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 #include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/polymorphic.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -31,7 +32,6 @@ void exposeCartesianProduct() {
   using MutSplitSig =
       std::vector<VectorRef> (CartesianProduct::*)(VectorRef) const;
 
-  bp::implicitly_convertible<CartesianProduct, PolymorphicManifold>();
   bp::class_<CartesianProduct, bp::bases<Manifold>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
       bp::no_init)
@@ -84,9 +84,9 @@ void exposeCartesianProduct() {
            "Define a tangent vector on the manifold by merging vectors from "
            "each component.")
       .def(
-          "__mul__", +[](const CartesianProduct &a, const CartesianProduct &b) {
-            return a * b;
-          });
+          "__mul__", +[](const CartesianProduct &a,
+                         const CartesianProduct &b) { return a * b; })
+      .def(PolymorphicVisitor<PolymorphicManifold>());
 }
 
 } // namespace python

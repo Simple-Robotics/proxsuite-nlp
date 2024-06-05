@@ -53,12 +53,17 @@ template <class Poly> inline void register_polymorphic_to_python() {
                 X, bp::objects::pointer_holder<Poly, X>>>();
 }
 
+template <class Poly> struct PolymorphicVisitor;
+
 /// Does the same thing as boost::python::implicitly_convertible<>(),
 /// except the conversion is placed at the top of the conversion chain.
 /// This ensures that Boost.Python attempts to convert to Poly BEFORE
 /// any parent class!
-template <class Poly>
-struct PolymorphicVisitor : bp::def_visitor<PolymorphicVisitor<Poly>> {
+template <class Base, class A>
+struct PolymorphicVisitor<xyz::polymorphic<Base, A>>
+    : bp::def_visitor<PolymorphicVisitor<xyz::polymorphic<Base, A>>> {
+  using Poly = xyz::polymorphic<Base, A>;
+  static_assert(std::is_polymorphic_v<Base>, "Type should be polymorphic!");
 
   template <class PyClass> void visit(PyClass &) const {
     using T = typename PyClass::wrapped_type;
