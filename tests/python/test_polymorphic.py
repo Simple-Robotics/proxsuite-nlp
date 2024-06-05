@@ -49,8 +49,9 @@ def test_poly_base():
     assert isinstance(b.x, Z)
 
     b = poly_use_base(d)
-    print(b.x, b.x.name())
-    assert isinstance(b.x, DerX)
+    x = b.x
+    print(x, x.name())
+    assert isinstance(x, DerX)
 
 
 def test_poly_store():
