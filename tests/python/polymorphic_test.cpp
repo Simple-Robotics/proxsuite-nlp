@@ -31,6 +31,16 @@ struct PyX final : X, bp::wrapper<X> {
   }
 };
 
+struct PyY final : Y, bp::wrapper<Y> {
+  std::string name() const override {
+    if (bp::override f = get_override("name")) {
+      return f();
+    }
+    return default_name();
+  }
+  std::string default_name() const { return Y::name(); }
+};
+
 using PolyX = xyz::polymorphic<X>;
 using PolyY = xyz::polymorphic<Y>;
 using VecPolyX = std::vector<PolyX>;
@@ -82,7 +92,8 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
   bp::class_<PyX, boost::noncopyable>("X", bp::init<>())
       .def("name", &X::name)
       .def(PolymorphicVisitor<PolyX>());
-  bp::class_<Y, bp::bases<X>>("Y", bp::init<>())
+  bp::class_<PyY, bp::bases<X>, boost::noncopyable>("Y", bp::init<>())
+      .def("name", &Y::name, &PyY::default_name)
       .def(PolymorphicVisitor<PolyX>());
 
   bp::class_<Z, bp::bases<Y>>("Z", bp::init<>())
