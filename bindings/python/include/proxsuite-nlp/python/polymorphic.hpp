@@ -18,8 +18,26 @@ namespace detail {
 struct make_polymorphic_reference_holder {
   template <class T, class A>
   static PyObject *execute(const polymorphic<T, A> &p) {
-    using pointer_holder = bp::objects::pointer_holder<T *, T>;
+    if (p.valueless_after_move())
+      return bp::detail::none();
     T *q = const_cast<T *>(boost::get_pointer(p));
+    assert(q);
+    // C++17 for the win
+    if constexpr (std::is_polymorphic_v<T>) {
+      // Detect if the polymorphic<T> object contains a
+      // boost::python::wrapper<T> callback class. If so, extract the owning
+      // PyObject* and return it.
+      if (bp::detail::wrapper_base *t =
+              dynamic_cast<bp::detail::wrapper_base *>(q)) {
+        // The following call extracts the underlying PyObject.
+        // see <boost/python/to_python_indirect.hpp>, execute() overload
+        PyObject *o = bp::detail::wrapper_base_::get_owner(*t);
+        assert(o);
+        if (o)
+          return bp::incref(o);
+      }
+    }
+    using pointer_holder = bp::objects::pointer_holder<T *, T>;
     return bp::objects::make_ptr_instance<T, pointer_holder>::execute(q);
   }
 };
@@ -68,9 +86,6 @@ namespace python {
 template <class X, class MakeHolder> struct to_python_indirect_poly {
   using poly_type = boost::remove_cv_ref_t<X>;
   template <class U> PyObject *operator()(U const &x) const {
-    if (x.valueless_after_move()) {
-      return detail::none();
-    }
     return ::proxsuite::nlp::python::detail::make_polymorphic_reference_holder::
         execute(const_cast<U &>(x));
   }
