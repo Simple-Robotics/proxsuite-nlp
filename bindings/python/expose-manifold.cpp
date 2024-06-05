@@ -112,13 +112,13 @@ template <typename M>
 bp::class_<TangentBundleTpl<M>, bp::bases<Manifold>>
 exposeTangentBundle(const char *name, const char *docstring) {
   using OutType = TangentBundleTpl<M>;
-  bp::implicitly_convertible<OutType, PolyManifold>();
   return bp::class_<OutType, bp::bases<Manifold>>(
              name, docstring, bp::init<M>(("self"_a, "base")))
       .add_property("base",
                     bp::make_function(&OutType::getBaseSpace,
                                       bp::return_internal_reference<>()),
-                    "Get the base space.");
+                    "Get the base space.")
+      .def(PolymorphicVisitor<PolyManifold>());
 }
 
 /// Expose the tangent bundle with an additional constructor.
@@ -136,8 +136,8 @@ void exposeCartesianProduct();
 template <typename LieGroup>
 void exposeLieGroup(const char *name, const char *docstring) {
   bp::class_<PinocchioLieGroup<LieGroup>, bp::bases<Manifold>>(
-      name, docstring, bp::init<>("self"_a));
-  bp::implicitly_convertible<PinocchioLieGroup<LieGroup>, PolyManifold>();
+      name, docstring, bp::init<>("self"_a))
+      .def(PolymorphicVisitor<PolyManifold>());
 }
 
 void exposePinocchioSpaces() {
@@ -151,9 +151,8 @@ void exposePinocchioSpaces() {
   bp::class_<PinocchioLieGroup<DynSizeEuclideanSpace>, bp::bases<Manifold>>(
       "EuclideanSpace", "Pinocchio's n-dimensional Euclidean vector space.",
       bp::no_init)
-      .def(bp::init<int>(("self"_a, "dim")));
-  bp::implicitly_convertible<PinocchioLieGroup<DynSizeEuclideanSpace>,
-                             PolyManifold>();
+      .def(bp::init<int>(("self"_a, "dim")))
+      .def(PolymorphicVisitor<PolyManifold>());
 
   exposeLieGroup<VectorSpaceOperationTpl<1, Scalar>>(
       "R", "One-dimensional Euclidean space AKA real number line.");
@@ -191,17 +190,16 @@ void exposePinocchioSpaces() {
   /* Groups associated w/ Pinocchio models */
   using Multibody = MultibodyConfiguration<Scalar>;
   using Model = ModelTpl<Scalar>;
-  bp::implicitly_convertible<Multibody, PolyManifold>();
   bp::class_<Multibody, bp::bases<Manifold>>(
       "MultibodyConfiguration", "Configuration group of a multibody",
       bp::init<const Model &>(bp::args("self", "model")))
       .add_property("model",
                     bp::make_function(&Multibody::getModel,
                                       bp::return_internal_reference<>()),
-                    "Return the Pinocchio model instance.");
+                    "Return the Pinocchio model instance.")
+      .def(PolymorphicVisitor<PolyManifold>());
 
   using MultiPhase = MultibodyPhaseSpace<Scalar>;
-  bp::implicitly_convertible<MultiPhase, PolyManifold>();
   bp::class_<MultiPhase, bp::bases<Manifold>>(
       "MultibodyPhaseSpace",
       "Tangent space of the multibody configuration group.",
@@ -214,7 +212,8 @@ void exposePinocchioSpaces() {
                                 +[](const MultiPhase &m) -> const Multibody & {
                                   return m.getBaseSpace();
                                 },
-                                bp::return_internal_reference<>()));
+                                bp::return_internal_reference<>()))
+      .def(PolymorphicVisitor<PolyManifold>());
 }
 #endif
 
@@ -225,8 +224,8 @@ void exposeManifolds() {
   /* Basic vector space */
   bp::class_<VectorSpaceTpl<Scalar>, bp::bases<Manifold>>(
       "VectorSpace", "Basic Euclidean vector space.", bp::no_init)
-      .def(bp::init<const int>(("self"_a, "dim")));
-  bp::implicitly_convertible<VectorSpaceTpl<Scalar>, PolyManifold>();
+      .def(bp::init<const int>(("self"_a, "dim")))
+      .def(PolymorphicVisitor<PolyManifold>());
 
   exposeCartesianProduct();
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO

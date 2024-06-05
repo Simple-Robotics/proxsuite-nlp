@@ -21,8 +21,8 @@ using BoxConstraint = BoxConstraintTpl<Scalar>;
 
 template <typename T>
 auto exposeSpecificConstraintSet(const char *name, const char *docstring) {
-  bp::implicitly_convertible<T, polymorphic<ConstraintSet>>();
-  return bp::class_<T, bp::bases<ConstraintSet>>(name, docstring, bp::no_init);
+  return bp::class_<T, bp::bases<ConstraintSet>>(name, docstring, bp::no_init)
+      .def(PolymorphicVisitor<polymorphic<ConstraintSet>>());
 }
 
 template <typename ConstraintType>
