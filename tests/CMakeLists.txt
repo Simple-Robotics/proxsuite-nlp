@@ -35,25 +35,7 @@ endif(NOT eigenrand_POPULATED)
 
 # Add benchmark dependency
 if(BUILD_BENCHMARK)
-  FetchContent_Declare(
-    benchmark
-    GIT_REPOSITORY https://github.com/google/benchmark.git
-    GIT_TAG v1.8.3
-    GIT_PROGRESS TRUE
-  )
-  FetchContent_GetProperties(benchmark)
-  if(NOT benchmark_POPULATED)
-    set(BENCHMARK_ENABLE_WERROR
-        OFF
-        CACHE INTERNAL "Disable -Werror flag in benchmark"
-    )
-    set(BENCHMARK_ENABLE_TESTING
-        OFF
-        CACHE INTERNAL "Disable testing of the benchmark library"
-    )
-    FetchContent_Populate(benchmark)
-    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR} EXCLUDE_FROM_ALL)
-  endif()
+  find_package(benchmark REQUIRED)
 endif()
 
 # create an object library just for cnpy
