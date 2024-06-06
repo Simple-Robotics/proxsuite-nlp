@@ -20,6 +20,12 @@ struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
+  NegativeOrthantTpl() = default;
+  NegativeOrthantTpl(const NegativeOrthantTpl &) = default;
+  NegativeOrthantTpl &operator=(const NegativeOrthantTpl &) = default;
+  NegativeOrthantTpl(NegativeOrthantTpl &&) = default;
+  NegativeOrthantTpl &operator=(NegativeOrthantTpl &&) = default;
+
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
