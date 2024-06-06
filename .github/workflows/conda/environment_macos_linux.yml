@@ -10,6 +10,7 @@ dependencies:
   - ccache
   - eigenpy>=3.4.0
   - pinocchio
+  - benchmark
   - eigen
   - fmt
   - example-robot-data
