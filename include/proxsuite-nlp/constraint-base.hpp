@@ -21,6 +21,8 @@ public:
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
 
+  ConstraintSetBase() = default;
+
   /// Do not use the vector-Hessian product in the Hessian
   /// for Gauss Newton.
   virtual bool disableGaussNewton() const { return true; }
