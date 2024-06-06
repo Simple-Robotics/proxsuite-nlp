@@ -47,6 +47,11 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
     }
   }
 
+  ConstraintSetProductTpl(const ConstraintSetProductTpl &) = default;
+  ConstraintSetProductTpl &operator=(const ConstraintSetProductTpl &) = default;
+  ConstraintSetProductTpl(ConstraintSetProductTpl &&) = default;
+  ConstraintSetProductTpl &operator=(ConstraintSetProductTpl &&) = default;
+
   Scalar evaluate(const ConstVectorRef &zproj) const override {
     Scalar res = 0.;
     for (std::size_t i = 0; i < m_components.size(); i++) {
