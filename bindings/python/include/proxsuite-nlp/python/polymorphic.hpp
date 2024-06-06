@@ -88,8 +88,8 @@ namespace python {
 
 /// Use the same trick from <eigenpy/eigen-to-python.hpp> to specialize the
 /// template for both const and non-const
-template <class X, class MakeHolder> struct to_python_indirect_poly {
-  using poly_type = boost::remove_cv_ref_t<X>;
+template <class poly_ref, class MakeHolder> struct to_python_indirect_poly {
+  using poly_type = boost::remove_cv_ref_t<poly_ref>;
   template <class U> PyObject *operator()(U const &x) const {
     return ::proxsuite::nlp::python::detail::make_polymorphic_reference_holder::
         execute(const_cast<U &>(x));
