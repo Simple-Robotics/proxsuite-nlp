@@ -19,6 +19,12 @@ struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
+  NonsmoothPenaltyL1Tpl() = default;
+  NonsmoothPenaltyL1Tpl(const NonsmoothPenaltyL1Tpl &) = default;
+  NonsmoothPenaltyL1Tpl &operator=(const NonsmoothPenaltyL1Tpl &) = default;
+  NonsmoothPenaltyL1Tpl(NonsmoothPenaltyL1Tpl &&) = default;
+  NonsmoothPenaltyL1Tpl &operator=(NonsmoothPenaltyL1Tpl &&) = default;
+
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
   using Base::mu_;
