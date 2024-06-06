@@ -19,6 +19,11 @@ class DerX(X):
         return "My name is DerX and I'm from Python!"
 
 
+class DerY(Y):
+    def name(self):
+        return "DerivedY"
+
+
 assert isinstance(getY(), Y)
 assert isinstance(getZ(), Z)
 assert issubclass(Y, X)
@@ -33,6 +38,9 @@ call_method(z)
 d = DerX()
 print(d)
 call_method(d)
+e = DerY()
+print(e)
+call_method(e)
 
 dstore = X_wrap_store(d)
 print("dstore.x:", dstore.x)
@@ -41,33 +49,47 @@ print("dstore.x:", dstore.x)
 def test_poly_base():
     print("=== test_poly_base ===")
     b = poly_use_base(y)
-    print(b.x)
-    assert isinstance(b.x, Y)
+    x = b.x
+    print(x)
+    assert isinstance(x, Y)
 
     b = poly_use_base(z)
-    print(b.x)
-    assert isinstance(b.x, Z)
+    x = b.x
+    print(x)
+    assert isinstance(x, Z)
 
     b = poly_use_base(d)
     x = b.x
     print(x, x.name())
     assert isinstance(x, DerX)
 
+    b = poly_use_base(e)
+    x = b.x
+    print(x, x.name())
+    assert isinstance(x, DerY)
+
 
 def test_poly_store():
     print("=== test_poly_store ===")
     b = poly_store(y)
-    print(b.x)
-    assert isinstance(b.x, X)
-    assert isinstance(b.x, Y)
+    x = b.x
+    print(x)
+    assert isinstance(x, X)
+    assert isinstance(x, Y)
 
     print("poly_store(z)")
     b = poly_store(z)
-    print(b.x)
-    assert isinstance(b.x, Z)
+    x = b.x
+    print(x)
+    assert isinstance(x, Z)
 
     b = poly_store(d)
-    print(b.x, b.x.name())
+    x = b.x
+    print(x, x.name())
+
+    b = poly_store(e)
+    x = b.x
+    print(x, x.name())
 
 
 test_poly_base()
@@ -91,6 +113,10 @@ assert isinstance(pz, Y)
 
 pd = poly_passthrough(d)
 print("d", pd)
+assert isinstance(pd, DerX)
+
+pe = poly_passthrough(e)
+assert isinstance(pe, DerY)
 
 print("Set static and return:")
 r_stat = set_return(z)
