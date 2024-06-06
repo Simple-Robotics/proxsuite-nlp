@@ -14,7 +14,7 @@ protected:
 
 struct Y : X {
   Y() : X() {}
-  std::string name() const override { return "Y"; }
+  virtual std::string name() const override { return "Y"; }
 };
 
 struct Z final : Y {
@@ -31,6 +31,7 @@ struct PyX final : X, bp::wrapper<X> {
   }
 };
 
+/// A callback class (extensible from Python) for the virtual
 struct PyY final : Y, bp::wrapper<Y> {
   std::string name() const override {
     if (bp::override f = get_override("name")) {
@@ -58,7 +59,7 @@ struct X_wrap_store {
 
 struct poly_store {
   poly_store(const PolyX &x) : x(x) {
-    std::cout << "Called poly_store ctor: name is " << x->name() << std::endl;
+    fmt::println("Called poly_store ctor: name is {:s}", x->name());
   }
   PolyX x;
 };
@@ -72,9 +73,13 @@ PolyX poly_passthrough(const PolyX &x) { return x; }
 
 void call_method(const PolyX &x) {
   fmt::println("  - {:s} PolyX::name(): {:s}", __FUNCTION__, x->name());
-  auto t = dynamic_cast<const bp::wrapper<X> *>(&(*x));
+  const bp::detail::wrapper_base *t =
+      dynamic_cast<const bp::detail::wrapper_base *>(&(*x));
   if (t) {
-    fmt::println("  - {:s} got a bp::wrapper<X>", __FUNCTION__);
+    PyObject *o = bp::detail::wrapper_base_::get_owner(*t);
+    PyTypeObject *type = o->ob_type;
+    fmt::println("  - {:s} got a bp::wrapper<>, Python type {:s}", __FUNCTION__,
+                 type->tp_name);
   }
 }
 
@@ -94,7 +99,8 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
       .def(PolymorphicVisitor<PolyX>());
   bp::class_<PyY, bp::bases<X>, boost::noncopyable>("Y", bp::init<>())
       .def("name", &Y::name, &PyY::default_name)
-      .def(PolymorphicVisitor<PolyX>());
+      .def(PolymorphicVisitor<PolyX>())
+      .def(PolymorphicVisitor<PolyY>());
 
   bp::class_<Z, bp::bases<Y>>("Z", bp::init<>())
       .def(PolymorphicVisitor<PolyX>())
@@ -119,6 +125,7 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
       .def(bp::init<const Y &>(bp::args("self", "t")))
       .def(bp::init<const Z &>(bp::args("self", "t")))
       .def(bp::init<const PyX &>(bp::args("self", "t")))
+      .def(bp::init<const PyY &>(bp::args("self", "t")))
       .def_readonly("x", &poly_use_base::x);
 
   bp::class_<poly_store>("poly_store", bp::init<const PolyX &>(("self"_a, "x")))
