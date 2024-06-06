@@ -41,6 +41,10 @@ public:
   }
 
   CartesianProductTpl() = default;
+  CartesianProductTpl(const CartesianProductTpl &) = default;
+  CartesianProductTpl &operator=(const CartesianProductTpl &) = default;
+  CartesianProductTpl(CartesianProductTpl &&) = default;
+  CartesianProductTpl &operator=(CartesianProductTpl &&) = default;
 
   CartesianProductTpl(const std::vector<polymorphic<Base>> &components)
       : m_components(components) {}
