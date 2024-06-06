@@ -10,12 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Add the `polymorphic_cxx14.hpp` header from [jbcoe/value_types](https://github.com/jbcoe/value_types/blob/main/polymorphic_cxx14.h), [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90)
+* **Python:** add conversions (for values, versions) for the `polymorphic<T,A>` types in new `<proxsuite-nlp/python/polymorphic.hpp>` header
+* **Python:** add `PolymorphicVisitor` visitor and `register_polymorphic_to_python<T>()` template function to register conversions from/to the `polymorphic<T, A>` type
 
 ### Changed
 
 * Change from `shared_ptr<T>` to `polymorphic<T>` for manifolds and constraint sets
-* Remove use of `std::make_shared` for manifolds in examples [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90)
-* Changed ctor of `ProblemTpl` to template which takes the manifold
+* Remove use of `std::make_shared` for manifolds in examples [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90), instead plass pain types
+* `ConstraintObjectTpl` now holds the constraint set through a `polymorphic<ConstraintSet>`
+* Changed ctors of `ProblemTpl` and `CostAbstractTpl` to template which takes the concrete manifold type
+* **Python:** pull all wrapper classes (inheriting from `bp::wrapper<U>`) out of the `aligator::python::internal` namespace
+* **Python:** fix abstract classes exposed as subclasses of `bp::wrapper<U>` not registering their owning `PyObject*` properly
 
 ## [0.7.0] - 2024-05-14
 
