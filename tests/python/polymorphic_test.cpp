@@ -64,7 +64,15 @@ struct poly_store {
   PolyX x;
 };
 
-VecPolyX create_vec_poly() { return {Y(), Y(), Z()}; }
+struct vec_store {
+  void add(const PolyX &x) { values.emplace_back(x); }
+  const auto &get() const { return values; }
+
+  auto get_copy() const { return values; }
+
+private:
+  VecPolyX values;
+};
 
 PolyX getY() { return PolyX(Y()); }
 PolyX getZ() { return PolyX(Z()); }
@@ -112,7 +120,6 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
 
   bp::def("getY", &getY);
   bp::def("getZ", &getZ);
-  bp::def("create_vec_poly", &create_vec_poly);
   bp::def("poly_passthrough", &poly_passthrough, "x"_a);
   bp::def("call_method", &call_method, bp::args("x"));
   bp::def("set_return", &set_return,
@@ -130,4 +137,10 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
 
   bp::class_<poly_store>("poly_store", bp::init<const PolyX &>(("self"_a, "x")))
       .def_readonly("x", &poly_store::x);
+
+  bp::class_<vec_store>("vec_store", bp::init<>())
+      .def("add", &vec_store::add, ("self"_a, "x"))
+      .def("get", &vec_store::get, ("self"_a),
+           bp::return_internal_reference<>())
+      .def("get_copy", &vec_store::get_copy, ("self"_a));
 }
