@@ -91,7 +91,7 @@ void exposeManifoldBase() {
             m.Jdifference(x0, x1, Jout, arg);
             return Jout;
           },
-          ("self"_a, "x", "v", "arg"),
+          ("self"_a, "x0", "x1", "arg"),
           "Compute and return the Jacobian of the log.")
       .def("tangent_space", &Manifold::tangentSpace, bp::args("self"),
            "Returns an object representing the tangent space to this manifold.")
