@@ -7,10 +7,10 @@ from polymorphic_test import (
     X_wrap_store,
     poly_use_base,
     poly_store,
-    create_vec_poly,
     set_return,
     poly_passthrough,
     call_method,
+    vec_store,
 )
 
 
@@ -20,6 +20,9 @@ class DerX(X):
 
 
 class DerY(Y):
+    def __init__(self):
+        super().__init__()
+
     def name(self):
         return "DerivedY"
 
@@ -95,12 +98,6 @@ def test_poly_store():
 test_poly_base()
 test_poly_store()
 
-print("Create vector<PolyX>")
-vec = create_vec_poly()
-assert len(vec) == 3
-print(vec[0])
-print(vec.tolist())
-
 print("passthrough:")
 py = poly_passthrough(y)
 assert isinstance(py, Y)
@@ -110,6 +107,14 @@ pz = poly_passthrough(z)
 print("z", pz)
 assert isinstance(pz, Z)
 assert isinstance(pz, Y)
+
+print("=== vec_store ===")
+vs = vec_store()
+vs.add(z)
+vs.add(d)
+vs.add(e)
+print(vs.get().tolist())
+assert len(vs.get()) == 3
 
 # poly_passthrough() returns a copy, and the to-value converter for Poly does not test for bp::wrapper objects
 # pd = poly_passthrough(d)
