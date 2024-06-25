@@ -1,6 +1,7 @@
 #pragma once
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
+#include "proxsuite-nlp/macros.hpp"
 #include <eigenpy/utils/traits.hpp>
 
 // Required class template specialization for
@@ -41,12 +42,12 @@ struct PolymorphicVisitor<xyz::polymorphic<Base, A>>
     using held = typename meta::held_type;
     typedef bp::converter::implicit<held, Poly> functions;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdelete-non-abstract-non-virtual-dtor"
+    PROXSUITE_NLP_COMPILER_DIAGNOSTIC_PUSH
+    PROXSUITE_NLP_COMPILER_DIAGNOSTIC_IGNORED_DELETE_NON_ABSTRACT_NON_VIRTUAL_DTOR
     bp::converter::registry::insert(
         &functions::convertible, &functions::construct, bp::type_id<Poly>(),
         &bp::converter::expected_from_python_type_direct<T>::get_pytype);
-#pragma GCC diagnostic pop
+    PROXSUITE_NLP_COMPILER_DIAGNOSTIC_POP
   }
 };
 
