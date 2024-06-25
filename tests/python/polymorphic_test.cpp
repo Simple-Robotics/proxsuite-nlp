@@ -129,17 +129,24 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
       .def_readwrite("x", &X_wrap_store::x);
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
-      .def(bp::init<const Y &>(bp::args("self", "t")))
-      .def(bp::init<const Z &>(bp::args("self", "t")))
-      .def(bp::init<const PyX &>(bp::args("self", "t")))
-      .def(bp::init<const PyY &>(bp::args("self", "t")))
+      .def(bp::init<const Y &>(
+          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<const Z &>(
+          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<const PyX &>(
+          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<const PyY &>(
+          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
       .def_readonly("x", &poly_use_base::x);
 
-  bp::class_<poly_store>("poly_store", bp::init<const PolyX &>(("self"_a, "x")))
+  bp::class_<poly_store>(
+      "poly_store", bp::init<const PolyX &>(
+                        ("self"_a, "x"))[bp::with_custodian_and_ward<1, 2>()])
       .def_readonly("x", &poly_store::x);
 
   bp::class_<vec_store>("vec_store", bp::init<>())
-      .def("add", &vec_store::add, ("self"_a, "x"))
+      .def("add", &vec_store::add, ("self"_a, "x"),
+           bp::with_custodian_and_ward<1, 2>())
       .def("get", &vec_store::get, ("self"_a),
            bp::return_internal_reference<>())
       .def("get_copy", &vec_store::get_copy, ("self"_a));
