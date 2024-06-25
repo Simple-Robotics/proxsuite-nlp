@@ -50,31 +50,46 @@ print("dstore.x:", dstore.x)
 
 
 def test_poly_base():
+    y = Y()
+    z = Z()
+    d = DerX()
+    e = DerY()
+
     print("=== test_poly_base ===")
     b = poly_use_base(y)
+    del y
     x = b.x
     print(x)
     assert isinstance(x, Y)
 
     b = poly_use_base(z)
+    del z
     x = b.x
     print(x)
     assert isinstance(x, Z)
 
     b = poly_use_base(d)
+    del d
     x = b.x
     print(x, x.name())
     assert isinstance(x, DerX)
 
     b = poly_use_base(e)
+    del e
     x = b.x
     print(x, x.name())
     assert isinstance(x, DerY)
 
 
 def test_poly_store():
+    y = Y()
+    z = Z()
+    d = DerX()
+    e = DerY()
+
     print("=== test_poly_store ===")
     b = poly_store(y)
+    del y
     x = b.x
     print(x)
     assert isinstance(x, X)
@@ -82,15 +97,18 @@ def test_poly_store():
 
     print("poly_store(z)")
     b = poly_store(z)
+    del z
     x = b.x
     print(x)
     assert isinstance(x, Z)
 
     b = poly_store(d)
+    del d
     x = b.x
     print(x, x.name())
 
     b = poly_store(e)
+    del e
     x = b.x
     print(x, x.name())
 
