@@ -4,7 +4,12 @@
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
+#include <pinocchio/config.hpp>
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+#include <pinocchio/multibody/sample-models.hpp>
+#else
 #include <pinocchio/parsers/sample-models.hpp>
+#endif // PINOCCHIO_VERSION_AT_LEAST
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 #endif
