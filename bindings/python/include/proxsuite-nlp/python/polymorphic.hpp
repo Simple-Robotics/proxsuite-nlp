@@ -51,6 +51,74 @@ struct PolymorphicVisitor<xyz::polymorphic<Base, A>>
   }
 };
 
+/// Like boost::python::with_custodian_and_ward but the ward must be a list
+/// and with_custodian_and_ward memory management will be applied on each
+/// element of contained in the ward.
+template <std::size_t custodian, std::size_t ward,
+          class BasePolicy_ = bp::default_call_policies>
+struct with_custodian_and_ward_list_content : BasePolicy_ {
+  BOOST_STATIC_ASSERT(custodian != ward);
+  BOOST_STATIC_ASSERT(custodian > 0);
+  BOOST_STATIC_ASSERT(ward > 0);
+
+  template <class ArgumentPackage>
+  static bool precall(ArgumentPackage const &args_) {
+    unsigned arity_ = bp::detail::arity(args_);
+    if (custodian > arity_ || ward > arity_) {
+      PyErr_SetString(
+          PyExc_IndexError,
+          "with_custodian_and_ward_list_content: argument index out of range");
+      return false;
+    }
+
+    PyObject *patient = bp::detail::get_prev<ward>::execute(args_);
+    PyObject *nurse = bp::detail::get_prev<custodian>::execute(args_);
+
+    // Check if patient is a list
+    if (!PyList_Check(patient)) {
+      PyErr_SetString(
+          PyExc_TypeError,
+          "with_custodian_and_ward_list_content: ward must be a list");
+      return false;
+    }
+
+    // Retrieve the underlying list.
+    // TODO I'm not sure the bp::handle is mandatory here.
+    // I don't think we will call Python interpreter some how and
+    // delete the patient reference (See
+    // https://docs.python.org/3/extending/extending.html#thin-ice).
+    bp::object patient_obj(bp::handle<>(bp::borrowed(patient)));
+    bp::list patient_list(patient_obj);
+
+    // Add life_support for each element of the patient_list
+    bp::ssize_t list_size = bp::len(patient_list);
+    std::vector<PyObject *> life_support_list;
+    life_support_list.reserve(list_size);
+    for (bp::ssize_t k = 0; k < list_size; ++k) {
+      auto l = patient_list[k];
+      PyObject *life_support = bp::objects::make_nurse_and_patient(
+          nurse, bp::object(patient_list[k]).ptr());
+      if (life_support == 0) {
+        for (PyObject *ls : life_support_list) {
+          Py_DECREF(ls);
+        }
+        return false;
+      }
+      life_support_list.push_back(life_support);
+    }
+
+    bool result = BasePolicy_::precall(args_);
+
+    if (!result) {
+      for (PyObject *ls : life_support_list) {
+        Py_DECREF(ls);
+      }
+    }
+
+    return result;
+  }
+};
+
 } // namespace python
 } // namespace proxsuite::nlp
 
