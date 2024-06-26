@@ -128,7 +128,7 @@ static void exposeConstraintTypes() {
       .def(bp::init<std::vector<polymorphic<ConstraintSet>>,
                     std::vector<Eigen::Index>>(
           ("self"_a, "components",
-           "blockSizes"))[bp::with_custodian_and_ward<1, 2>()])
+           "blockSizes"))[with_custodian_and_ward_list_content<1, 2>()])
       .add_property("components",
                     bp::make_function(&ConstraintSetProduct::components,
                                       bp::return_internal_reference<>()))
