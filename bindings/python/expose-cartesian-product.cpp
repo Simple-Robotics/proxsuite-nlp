@@ -37,7 +37,7 @@ void exposeCartesianProduct() {
       bp::no_init)
       .def(bp::init<>("self"_a))
       .def(bp::init<const std::vector<PolymorphicManifold> &>(
-          ("self"_a, "spaces"))[bp::with_custodian_and_ward<1, 2>()])
+          ("self"_a, "spaces"))[with_custodian_and_ward_list_content<1, 2>()])
       .def(bp::init<PolymorphicManifold, PolymorphicManifold>(
           ("self"_a, "left", "right"))[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3>>()])
