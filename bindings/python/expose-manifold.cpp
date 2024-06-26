@@ -10,6 +10,10 @@
 #include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 #include "proxsuite-nlp/modelling/spaces/tangent-bundle.hpp"
 
+#include <eigenpy/std-vector.hpp>
+
+#include <vector>
+
 namespace proxsuite {
 namespace nlp {
 namespace python {
@@ -105,6 +109,11 @@ void exposeManifoldBase() {
           "__rmul__", +[](const PolyManifold &a, const CartesianProduct &b) {
             return a * b;
           });
+
+  eigenpy::StdVectorPythonVisitor<std::vector<PolyManifold>>::expose(
+      "StdVec_Manifold",
+      eigenpy::details::overload_base_get_item_for_std_vector<
+          std::vector<PolyManifold>>());
 }
 
 /// Expose the tangent bundle of a manifold type @p M.

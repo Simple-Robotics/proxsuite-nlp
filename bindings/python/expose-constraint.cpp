@@ -5,6 +5,8 @@
 
 #include <eigenpy/std-vector.hpp>
 
+#include <vector>
+
 namespace proxsuite {
 namespace nlp {
 namespace python {
@@ -136,6 +138,11 @@ static void exposeConstraintTypes() {
                     bp::make_function(&ConstraintSetProduct::blockSizes,
                                       bp::return_internal_reference<>()),
                     "Dimensions of each component of the cartesian product.");
+
+  StdVectorPythonVisitor<std::vector<polymorphic<ConstraintSet>>>::expose(
+      "StdVec_ConstraintObject",
+      eigenpy::details::overload_base_get_item_for_std_vector<
+          std::vector<polymorphic<ConstraintSet>>>());
 }
 
 } // namespace python
