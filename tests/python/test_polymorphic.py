@@ -126,9 +126,9 @@ def test_vec_store():
     vs_list = vs.get().tolist()
     print(vs_list)
     assert len(vs.get()) == 3
-    assert (isinstance(vs_list[0], Z))
-    assert (isinstance(vs_list[1], DerX))
-    assert (isinstance(vs_list[2], DerY))
+    assert isinstance(vs_list[0], Z)
+    assert isinstance(vs_list[1], DerX)
+    assert isinstance(vs_list[2], DerY)
 
 
 test_poly_base()
