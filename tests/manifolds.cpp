@@ -4,7 +4,12 @@
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
+#include <pinocchio/config.hpp>
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+#include <pinocchio/multibody/sample-models.hpp>
+#else
 #include <pinocchio/parsers/sample-models.hpp>
+#endif // PINOCCHIO_VERSION_AT_LEAST
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 #endif
@@ -18,13 +23,15 @@ BOOST_AUTO_TEST_SUITE(manifold)
 
 using namespace proxsuite::nlp;
 using Manifold = ManifoldAbstractTpl<double>;
+using VectorSpace = VectorSpaceTpl<double>;
 
 BOOST_AUTO_TEST_CASE(test_vectorspace) {
   constexpr int N1 = 3;
-  VectorSpaceTpl<double, N1> space1;
+  VectorSpace vs1 = VectorSpace(N1);
+  polymorphic<Manifold> space1(vs1);
 
-  auto x0 = space1.neutral();
-  auto x1 = space1.rand();
+  auto x0 = space1->neutral();
+  auto x1 = space1->rand();
 
   BOOST_CHECK_EQUAL(N1, x0.size());
   BOOST_CHECK_EQUAL(N1, x1.size());
@@ -33,9 +40,10 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
 
   constexpr int N2 = 35;
 
-  VectorSpaceTpl<double> space2(N2);
-  x0 = space2.neutral();
-  x1 = space2.rand();
+  VectorSpace vs2 = VectorSpace(N2);
+  polymorphic<Manifold> space2(vs2);
+  x0 = space2->neutral();
+  x1 = space2->rand();
 
   BOOST_CHECK(x0.isApprox(Eigen::VectorXd::Zero(35)));
 
@@ -46,13 +54,11 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
   x0 = prod1.rand();
 
   // test copy constructor
-  VectorSpaceTpl<double, N1> space1_copy(space1);
-  VectorSpaceTpl<double> space2_copy(space2);
-  shared_ptr<Manifold> space2_ptr =
-      std::make_shared<VectorSpaceTpl<double>>(space2);
+  polymorphic<Manifold> space1_copy(space1);
+  polymorphic<Manifold> space2_copy(space2);
 
-  auto prod2 = space2_ptr * space2_ptr;
-  x1 = prod2->rand();
+  auto prod2 = space2_copy * space2_copy;
+  x1 = prod2.rand();
 }
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO

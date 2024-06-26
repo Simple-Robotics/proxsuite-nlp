@@ -20,6 +20,10 @@ template <typename Scalar> struct BoxConstraintTpl : ConstraintSetBase<Scalar> {
 
   BoxConstraintTpl(const ConstVectorRef lower, const ConstVectorRef upper)
       : Base(), lower_limit(lower), upper_limit(upper) {}
+  BoxConstraintTpl(const BoxConstraintTpl &) = default;
+  BoxConstraintTpl &operator=(const BoxConstraintTpl &) = default;
+  BoxConstraintTpl(BoxConstraintTpl &&) = default;
+  BoxConstraintTpl &operator=(BoxConstraintTpl &&) = default;
 
   decltype(auto) projection_impl(const ConstVectorRef &z) const {
     return z.cwiseMin(upper_limit).cwiseMax(lower_limit);

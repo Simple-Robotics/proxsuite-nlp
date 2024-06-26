@@ -25,6 +25,8 @@ requirements:
     - cmake
     - clang  # [win]
     - ninja
+    - libgomp       # [linux]
+    - llvm-openmp   # [osx]
   host:
     - eigen
     - eigenpy

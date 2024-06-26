@@ -1,6 +1,7 @@
 #pragma once
 
-#include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
+#include "proxsuite-nlp/manifold-base.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 #include <type_traits>
 
@@ -8,7 +9,8 @@ namespace proxsuite {
 namespace nlp {
 namespace {
 /// Typedef in anon namespace for use in rest of file.
-template <typename T> using ManifoldPtr = shared_ptr<ManifoldAbstractTpl<T>>;
+template <typename T>
+using PolymorphicManifold = polymorphic<ManifoldAbstractTpl<T>>;
 } // namespace
 
 /** @brief    The cartesian product of two or more manifolds.
@@ -21,49 +23,46 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
   PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
 private:
-  std::vector<shared_ptr<Base>> components;
+  std::vector<polymorphic<Base>> m_components;
 
 public:
-  const Base &getComponent(std::size_t i) const { return *components[i]; }
+  const Base &getComponent(std::size_t i) const { return *m_components[i]; }
 
-  inline std::size_t numComponents() const { return components.size(); }
+  inline std::size_t numComponents() const { return m_components.size(); }
 
-  inline void addComponent(const shared_ptr<Base> &c) {
-    components.push_back(c);
+  template <class Concrete> inline void addComponent(const Concrete &c) {
+    m_components.emplace_back(c);
   }
 
-  inline void addComponent(const shared_ptr<CartesianProductTpl> &other) {
-    for (const auto &c : other->components) {
+  inline void addComponent(const CartesianProductTpl &other) {
+    for (const auto &c : other.m_components) {
       this->addComponent(c);
     }
   }
 
-  CartesianProductTpl() {}
+  CartesianProductTpl() = default;
+  CartesianProductTpl(const CartesianProductTpl &) = default;
+  CartesianProductTpl &operator=(const CartesianProductTpl &) = default;
+  CartesianProductTpl(CartesianProductTpl &&) = default;
+  CartesianProductTpl &operator=(CartesianProductTpl &&) = default;
 
-  CartesianProductTpl(const std::vector<shared_ptr<Base>> &components)
-      : components(components) {}
+  CartesianProductTpl(const std::vector<polymorphic<Base>> &components)
+      : m_components(components) {}
 
-  CartesianProductTpl(const std::initializer_list<shared_ptr<Base>> &components)
-      : components(components) {}
+  CartesianProductTpl(
+      const std::initializer_list<polymorphic<Base>> &components)
+      : m_components(components) {}
 
-  CartesianProductTpl(const shared_ptr<Base> &left,
-                      const shared_ptr<Base> &right) {
+  CartesianProductTpl(const polymorphic<Base> &left,
+                      const polymorphic<Base> &right) {
     addComponent(left);
     addComponent(right);
-  }
-
-  template <typename U, typename V>
-  CartesianProductTpl(const U &left, const V &right) {
-    static_assert(!(std::is_pointer<U>::value || std::is_pointer<V>::value),
-                  "Ctor operators on non-pointer types.");
-    addComponent(std::make_shared<U>(left));
-    addComponent(std::make_shared<V>(right));
   }
 
   inline int nx() const {
     int r = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      r += components[i]->nx();
+      r += m_components[i]->nx();
     }
     return r;
   }
@@ -71,7 +70,7 @@ public:
   inline int ndx() const {
     int r = 0;
     for (std::size_t i = 0; i < numComponents(); i++) {
-      r += components[i]->ndx();
+      r += m_components[i]->ndx();
     }
     return r;
   }
@@ -125,39 +124,31 @@ public:
 };
 
 template <typename T>
-auto operator*(const ManifoldPtr<T> &left, const ManifoldPtr<T> &right) {
-  return std::make_shared<CartesianProductTpl<T>>(left, right);
+auto operator*(const PolymorphicManifold<T> &left,
+               const PolymorphicManifold<T> &right) {
+  return CartesianProductTpl<T>(left, right);
 }
 
 template <typename T>
-auto operator*(const shared_ptr<CartesianProductTpl<T>> &left,
-               const ManifoldPtr<T> &right) {
-  auto out = std::make_shared<CartesianProductTpl<T>>(*left);
-  out->addComponent(right);
-  return out;
-}
-
-template <typename T>
-auto operator*(const ManifoldPtr<T> &left,
-               const shared_ptr<CartesianProductTpl<T>> &right) {
-  auto out = std::make_shared<CartesianProductTpl<T>>();
-  out->addComponent(left);
-  out->addComponent(right);
-  return out;
-}
-
-template <typename T>
-CartesianProductTpl<T> operator*(const CartesianProductTpl<T> &left,
-                                 const ManifoldPtr<T> &right) {
+auto operator*(const CartesianProductTpl<T> &left,
+               const PolymorphicManifold<T> &right) {
   CartesianProductTpl<T> out(left);
   out.addComponent(right);
   return out;
 }
 
 template <typename T>
-CartesianProductTpl<T> operator*(const ManifoldPtr<T> &left,
-                                 const CartesianProductTpl<T> &right) {
+auto operator*(const PolymorphicManifold<T> &left,
+               const CartesianProductTpl<T> &right) {
   return right * left;
+}
+
+template <typename T>
+auto operator*(const CartesianProductTpl<T> &left,
+               const CartesianProductTpl<T> &right) {
+  CartesianProductTpl<T> out{left};
+  out.addComponent(right);
+  return out;
 }
 
 } // namespace nlp

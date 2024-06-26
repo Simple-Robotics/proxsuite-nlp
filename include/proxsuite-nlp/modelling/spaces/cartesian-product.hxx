@@ -10,8 +10,8 @@ auto CartesianProductTpl<Scalar>::neutral() const -> PointType {
   PointType out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->nx();
-    out.segment(c, n) = components[i]->neutral();
+    const long n = m_components[i]->nx();
+    out.segment(c, n) = m_components[i]->neutral();
     c += n;
   }
   return out;
@@ -22,8 +22,8 @@ auto CartesianProductTpl<Scalar>::rand() const -> PointType {
   PointType out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->nx();
-    out.segment(c, n) = components[i]->rand();
+    const long n = m_components[i]->nx();
+    out.segment(c, n) = m_components[i]->rand();
     c += n;
   }
   return out;
@@ -34,7 +34,7 @@ bool CartesianProductTpl<Scalar>::isNormalized(const ConstVectorRef &x) const {
   bool res = true;
   auto xs = this->split(x);
   for (std::size_t i = 0; i < numComponents(); i++) {
-    res |= components[i]->isNormalized(xs[i]);
+    res |= m_components[i]->isNormalized(xs[i]);
   }
   return res;
 }
@@ -46,7 +46,7 @@ std::vector<U> CartesianProductTpl<Scalar>::split_impl(VectorType &x) const {
   std::vector<U> out;
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->nx();
+    const long n = m_components[i]->nx();
     out.push_back(x.segment(c, n));
     c += n;
   }
@@ -61,7 +61,7 @@ CartesianProductTpl<Scalar>::split_vector_impl(VectorType &v) const {
   std::vector<U> out;
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->ndx();
+    const long n = m_components[i]->ndx();
     out.push_back(v.segment(c, n));
     c += n;
   }
@@ -74,7 +74,7 @@ auto CartesianProductTpl<Scalar>::merge(const std::vector<VectorXs> &xs) const
   PointType out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->nx();
+    const long n = m_components[i]->nx();
     out.segment(c, n) = xs[i];
     c += n;
   }
@@ -87,7 +87,7 @@ auto CartesianProductTpl<Scalar>::merge_vector(
   TangentVectorType out(this->ndx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long n = components[i]->ndx();
+    const long n = m_components[i]->ndx();
     out.segment(c, n) = vs[i];
     c += n;
   }
@@ -163,11 +163,11 @@ void CartesianProductTpl<Scalar>::JintegrateTransport(const ConstVectorRef &x,
                                                       int arg) const {
   Eigen::Index cq = 0, cv = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long nq = components[i]->nx();
+    const long nq = m_components[i]->nx();
     auto sx = x.segment(cq, nq);
     cq += nq;
 
-    const long nv = components[i]->ndx();
+    const long nv = m_components[i]->ndx();
     auto sv = v.segment(cv, nv);
     auto sJout = Jout.middleRows(cv, nv);
     cv += nv;
@@ -185,12 +185,12 @@ void CartesianProductTpl<Scalar>::Jdifference_impl(const ConstVectorRef &x0,
   Jout.setZero();
   Eigen::Index cq = 0, cv = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
-    const long nq = components[i]->nx();
+    const long nq = m_components[i]->nx();
     auto sx0 = x0.segment(cq, nq);
     auto sx1 = x1.segment(cq, nq);
     cq += nq;
 
-    const long nv = components[i]->ndx();
+    const long nv = m_components[i]->ndx();
     auto sJout = Jout.block(cv, cv, nv, nv);
     cv += nv;
 

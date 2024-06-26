@@ -71,7 +71,7 @@ jobs:
       shell: bash -el {0}
       run: |
         conda build -c conda-forge \
-          --error-overlinking \
+          --no-error-overlinking \
           --py ${{ matrix.python-version }} \
           --numpy ${{ matrix.numpy-version }} \
           packaging/conda/proxsuite-nlp-release

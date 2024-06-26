@@ -43,10 +43,10 @@ BOOST_AUTO_TEST_SUITE(cost)
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 
 BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
-  auto space = std::make_shared<SE2>();
-  auto x0 = space->neutral();
-  auto x1 = space->rand();
-  auto x2 = space->rand();
+  SE2 space;
+  auto x0 = space.neutral();
+  auto x1 = space.rand();
+  auto x2 = space.rand();
 
   CostPtr cost1 = std::make_shared<QuadraticDistanceCostTpl<double>>(space, x0);
   CostPtr cost2 = std::make_shared<QuadraticDistanceCostTpl<double>>(space, x1);
@@ -70,7 +70,6 @@ BOOST_AUTO_TEST_CASE(test_cost_sum, *utf::tolerance(1e-10)) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cast_cost) {
-  auto space = std::make_shared<SE2>();
   auto fun = std::make_shared<CustomC2Func>();
   CostPtr cost = downcast_function_to_cost<Scalar>(fun);
 

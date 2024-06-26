@@ -25,6 +25,10 @@ public:
   PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   MultibodyConfiguration(const ModelType &model) : model_(model) {};
+  MultibodyConfiguration(const MultibodyConfiguration &) = default;
+  MultibodyConfiguration &operator=(const MultibodyConfiguration &) = default;
+  MultibodyConfiguration(MultibodyConfiguration &&) = default;
+  MultibodyConfiguration &operator=(MultibodyConfiguration &&) = default;
 
   const ModelType &getModel() const { return model_; }
 
@@ -115,6 +119,10 @@ struct MultibodyPhaseSpace
 
   MultibodyPhaseSpace(const ModelType &model)
       : TangentBundleTpl<ConfigSpace>(ConfigSpace(model)) {}
+  MultibodyPhaseSpace(const MultibodyPhaseSpace &) = default;
+  MultibodyPhaseSpace &operator=(const MultibodyPhaseSpace &) = default;
+  MultibodyPhaseSpace(MultibodyPhaseSpace &&) = default;
+  MultibodyPhaseSpace &operator=(MultibodyPhaseSpace &&) = default;
 };
 
 } // namespace nlp

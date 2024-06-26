@@ -20,6 +20,12 @@ public:
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
+  EqualityConstraintTpl() = default;
+  EqualityConstraintTpl(const EqualityConstraintTpl &) = default;
+  EqualityConstraintTpl &operator=(const EqualityConstraintTpl &) = default;
+  EqualityConstraintTpl(EqualityConstraintTpl &&) = default;
+  EqualityConstraintTpl &operator=(EqualityConstraintTpl &&) = default;
+
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
