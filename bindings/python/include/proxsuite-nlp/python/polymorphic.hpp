@@ -165,7 +165,9 @@ private:
     if (PyObject *o = detail::wrapper_base_::owner(p)) {
       // to_python_indirect call incref on o, but this create a memory leak
       // when used with bp::return_internal_reference.
-      return o;
+      // TODO Without incref, if we call multiple time return_internal_reference
+      // on the same member, this create an undefined behavior
+      return incref(o);
     }
     return MakeHolder::execute(p);
   }
