@@ -37,9 +37,10 @@ void exposeCartesianProduct() {
       bp::no_init)
       .def(bp::init<>("self"_a))
       .def(bp::init<const std::vector<PolymorphicManifold> &>(
-          ("self"_a, "spaces")))
+          ("self"_a, "spaces"))[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<PolymorphicManifold, PolymorphicManifold>(
-          ("self"_a, "left", "right")))
+          ("self"_a, "left", "right"))[bp::with_custodian_and_ward<
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .def(
           "getComponent",
           +[](CartesianProduct const &m, std::size_t i) -> const Manifold & {
@@ -52,7 +53,8 @@ void exposeCartesianProduct() {
           bp::return_internal_reference<>(), ("self"_a, "i"),
           "Get the i-th component of the Cartesian product.")
       .def("addComponent", &CartesianProduct::addComponent<PolymorphicManifold>,
-           ("self"_a, "c"), "Add a component to the Cartesian product.")
+           ("self"_a, "c"), bp::with_custodian_and_ward<1, 2>(),
+           "Add a component to the Cartesian product.")
       .add_property("num_components", &CartesianProduct::numComponents,
                     "Get the number of components in the Cartesian product.")
       .def(
