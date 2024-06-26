@@ -113,8 +113,27 @@ def test_poly_store():
     print(x, x.name())
 
 
+def test_vec_store():
+    z = Z()
+    d = DerX()
+    e = DerY()
+    print("=== vec_store ===")
+    vs = vec_store([z, d])
+    vs.add(e)
+    del z
+    del d
+    del e
+    vs_list = vs.get().tolist()
+    print(vs_list)
+    assert len(vs.get()) == 3
+    assert (isinstance(vs_list[0], Z))
+    assert (isinstance(vs_list[1], DerX))
+    assert (isinstance(vs_list[2], DerY))
+
+
 test_poly_base()
 test_poly_store()
+test_vec_store()
 
 print("passthrough:")
 py = poly_passthrough(y)
@@ -126,13 +145,6 @@ print("z", pz)
 assert isinstance(pz, Z)
 assert isinstance(pz, Y)
 
-print("=== vec_store ===")
-vs = vec_store()
-vs.add(z)
-vs.add(d)
-vs.add(e)
-print(vs.get().tolist())
-assert len(vs.get()) == 3
 
 # poly_passthrough() returns a copy, and the to-value converter for Poly does not test for bp::wrapper objects
 # pd = poly_passthrough(d)

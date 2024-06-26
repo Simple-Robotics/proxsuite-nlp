@@ -65,6 +65,8 @@ struct poly_store {
 };
 
 struct vec_store {
+  vec_store() = default;
+  vec_store(const std::vector<PolyX> &x) : values(x) {}
   void add(const PolyX &x) { values.emplace_back(x); }
   const auto &get() const { return values; }
 
@@ -145,6 +147,8 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
       .def_readonly("x", &poly_store::x);
 
   bp::class_<vec_store>("vec_store", bp::init<>())
+      .def(bp::init<const std::vector<PolyX> &>(bp::args(
+          "self", "vec"))[with_custodian_and_ward_list_content<1, 2>()])
       .def("add", &vec_store::add, ("self"_a, "x"),
            bp::with_custodian_and_ward<1, 2>())
       .def("get", &vec_store::get, ("self"_a),
