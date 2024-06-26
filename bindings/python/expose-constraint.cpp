@@ -80,7 +80,8 @@ void exposeConstraints() {
   bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",
       bp::init<shared_ptr<C2Function>, const polymorphic<ConstraintSet> &>(
-          ("self"_a, "func", "constraint_set")))
+          ("self"_a, "func",
+           "constraint_set"))[bp::with_custodian_and_ward<1, 3>()])
       .add_property("nr", &Constraint::nr, "Constraint dimension.")
       .def_readonly("func", &Constraint::func_, "Underlying function.")
       .def_readonly("set", &Constraint::set_, "Constraint set.");
@@ -126,7 +127,8 @@ static void exposeConstraintTypes() {
       "ConstraintSetProduct", "Cartesian product of constraint sets.")
       .def(bp::init<std::vector<polymorphic<ConstraintSet>>,
                     std::vector<Eigen::Index>>(
-          ("self"_a, "components", "blockSizes")))
+          ("self"_a, "components",
+           "blockSizes"))[bp::with_custodian_and_ward<1, 2>()])
       .add_property("components",
                     bp::make_function(&ConstraintSetProduct::components,
                                       bp::return_internal_reference<>()))
