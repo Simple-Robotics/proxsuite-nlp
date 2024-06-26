@@ -39,7 +39,6 @@ def test_cartesian_product():
     print(prod_from_vec.getComponent(0), prod_from_vec.getComponent(1))
     assert prod_from_vec.num_components == 2
 
-
     x0 = prod.neutral()
     x1 = prod.rand()
     assert x0.size == prod.nx
