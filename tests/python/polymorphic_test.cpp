@@ -22,7 +22,7 @@ struct Z final : Y {
   std::string name() const override { return "Z (Y)"; }
 };
 
-struct PyX final : X, bp::wrapper<X> {
+struct PyX final : X, PolymorphicWrapper<PyX, X> {
   std::string name() const override {
     if (bp::override f = get_override("name")) {
       return f();
@@ -32,7 +32,7 @@ struct PyX final : X, bp::wrapper<X> {
 };
 
 /// A callback class (extensible from Python) for the virtual
-struct PyY final : Y, bp::wrapper<Y> {
+struct PyY final : Y, PolymorphicWrapper<PyY, Y> {
   std::string name() const override {
     if (bp::override f = get_override("name")) {
       return f();
@@ -41,6 +41,17 @@ struct PyY final : Y, bp::wrapper<Y> {
   }
   std::string default_name() const { return Y::name(); }
 };
+
+namespace boost::python::objects {
+
+template <> struct value_holder<PyX> : OwningNonOwningHolder<PyX> {
+  using OwningNonOwningHolder::OwningNonOwningHolder;
+};
+template <> struct value_holder<PyY> : OwningNonOwningHolder<PyY> {
+  using OwningNonOwningHolder::OwningNonOwningHolder;
+};
+
+} // namespace boost::python::objects
 
 using PolyX = xyz::polymorphic<X>;
 using PolyY = xyz::polymorphic<Y>;
@@ -131,26 +142,18 @@ BOOST_PYTHON_MODULE(polymorphic_test) {
       .def_readwrite("x", &X_wrap_store::x);
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
-      .def(bp::init<const Y &>(
-          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<const Z &>(
-          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<const PyX &>(
-          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<const PyY &>(
-          bp::args("self", "t"))[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<const Y &>(bp::args("self", "t")))
+      .def(bp::init<const Z &>(bp::args("self", "t")))
+      .def(bp::init<const PyX &>(bp::args("self", "t")))
+      .def(bp::init<const PyY &>(bp::args("self", "t")))
       .def_readonly("x", &poly_use_base::x);
 
-  bp::class_<poly_store>(
-      "poly_store", bp::init<const PolyX &>(
-                        ("self"_a, "x"))[bp::with_custodian_and_ward<1, 2>()])
+  bp::class_<poly_store>("poly_store", bp::init<const PolyX &>(("self"_a, "x")))
       .def_readonly("x", &poly_store::x);
 
   bp::class_<vec_store>("vec_store", bp::init<>())
-      .def(bp::init<const std::vector<PolyX> &>(bp::args(
-          "self", "vec"))[with_custodian_and_ward_list_content<1, 2>()])
-      .def("add", &vec_store::add, ("self"_a, "x"),
-           bp::with_custodian_and_ward<1, 2>())
+      .def(bp::init<const std::vector<PolyX> &>(bp::args("self", "vec")))
+      .def("add", &vec_store::add, ("self"_a, "x"))
       .def("get", &vec_store::get, ("self"_a),
            bp::return_internal_reference<>())
       .def("get_copy", &vec_store::get_copy, ("self"_a));
