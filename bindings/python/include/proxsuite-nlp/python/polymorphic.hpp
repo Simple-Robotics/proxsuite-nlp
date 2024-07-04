@@ -5,6 +5,8 @@
 
 #include <eigenpy/utils/traits.hpp>
 
+#include <boost/core/demangle.hpp>
+
 #include <variant>
 
 // Required class template specialization for
@@ -220,7 +222,14 @@ private:
       bp::objects::instance<> *inst =
           ((bp::objects::instance<> *)copied_owner_ptr);
       OwningNonOwningHolder<PyBase> *value_holder =
-          (OwningNonOwningHolder<PyBase> *)inst->objects;
+          dynamic_cast<OwningNonOwningHolder<PyBase> *>(inst->objects);
+      if (!value_holder) {
+        std::ostringstream error_msg;
+        error_msg << "OwningNonOwningHolder should be setup for "
+                  << boost::core::demangle(typeid(PyBase).name()) << " type"
+                  << std::endl;
+        throw std::logic_error(error_msg.str());
+      }
       value_holder->m_held = static_cast<PyBase *>(this);
 
       bp::detail::initialize_wrapper(copied_owner_ptr, this);
