@@ -118,7 +118,8 @@ private:
 public:
   template <typename... Args>
   OwningNonOwningHolder(PyObject *self, Args... args)
-      : m_held(std::forward<Args>(args)...) {
+      : m_held(Value(boost::python::objects::do_unforward(
+            std::forward<Args>(args), 0)...)) {
     boost::python::detail::initialize_wrapper(self, get_ptr());
   }
 
