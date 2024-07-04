@@ -44,13 +44,12 @@ void exposeQuadraticCosts() {
       "Quadratic distance cost `(1/2)r.T * Q * r + b.T * r + c` on the "
       "manifold.",
       bp::init<PolyManifold, const VectorXs &, const MatrixXs &>(
-          bp::args("self", "space", "target",
-                   "weights"))[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<PolyManifold, const VectorXs &>(bp::args(
-          "self", "space", "target"))[bp::with_custodian_and_ward<1, 2>()])
+          bp::args("self", "space", "target", "weights")))
+      .def(bp::init<PolyManifold, const VectorXs &>(
+          bp::args("self", "space", "target")))
       .def(bp::init<PolyManifold>(
           "Constructor which uses the neutral element of the space.",
-          bp::args("self", "space"))[bp::with_custodian_and_ward<1, 2>()])
+          bp::args("self", "space")))
       .add_property("target", &QuadraticDistanceCost::getTarget,
                     &QuadraticDistanceCost::updateTarget);
 }
