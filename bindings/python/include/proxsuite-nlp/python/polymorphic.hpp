@@ -33,6 +33,41 @@ template <class Poly> struct PolymorphicVisitor;
 /// except the conversion is placed at the top of the conversion chain.
 /// This ensures that Boost.Python attempts to convert to Poly BEFORE
 /// any parent class!
+///
+/// Example:
+///
+///   struct X {
+///     virtual ~X() = default;
+///     virtual std::string name() const { return "X"; }
+///   };
+///   struct PyX final : X, proxsuite::nlp::python::PolymorphicWrapper<PyX, X> {
+///     std::string name() const override {
+///       if (boost::python::override f = get_override("name")) {
+///         return f();
+///       }
+///       return X::name();
+///     }
+///   };
+///   using PolyX = xyz::polymorphic<X>;
+///
+///   namespace boost::python::objects {
+///
+///   template <>
+///   struct value_holder<PyX> :
+///   proxsuite::nlp::python::OwningNonOwningHolder<PyX>
+///   {
+///     using OwningNonOwningHolder::OwningNonOwningHolder;
+///   };
+///
+///   } // namespace boost::python::objects
+///
+///   BOOST_PYTHON_MODULE(module_name) {
+///     boost::python::class_<PyX, boost::noncopyable>("X",
+///     boost::python::init<>())
+///         .def("name", &X::name)
+///         .def(proxsuite::nlp::python::PolymorphicVisitor<PolyX>());
+///   }
+
 template <class Base, class A>
 struct PolymorphicVisitor<xyz::polymorphic<Base, A>>
     : bp::def_visitor<PolymorphicVisitor<xyz::polymorphic<Base, A>>> {
