@@ -144,9 +144,10 @@ void exposeCartesianProduct();
 /// and no-arg default constructor.
 template <typename LieGroup>
 void exposeLieGroup(const char *name, const char *docstring) {
-  bp::class_<PinocchioLieGroup<LieGroup>, bp::bases<Manifold>>(
-      name, docstring, bp::init<>("self"_a))
-      .def(PolymorphicVisitor<PolyManifold>());
+  bp::class_<PinocchioLieGroup<LieGroup>, bp::bases<Manifold>> cl(
+      name, docstring, bp::init<>("self"_a));
+  cl.def(PolymorphicVisitor<PolyManifold>());
+  cl.enable_pickling_(true);
 }
 
 void exposePinocchioSpaces() {
