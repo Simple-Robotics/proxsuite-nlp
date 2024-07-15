@@ -39,20 +39,21 @@ if(BUILD_BENCHMARK)
 endif()
 
 # create an object library just for cnpy
-add_library(cnpy STATIC cnpy.cpp)
-target_link_libraries(cnpy PUBLIC Eigen3::Eigen)
-target_include_directories(cnpy PUBLIC $<INSTALL_INTERFACE:./>)
-set_target_properties(cnpy PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp)
-set_standard_output_directory(cnpy)
+set(CNPY_LIB ${PROJECT_NAME}-cnpy)
+add_library(${CNPY_LIB} STATIC cnpy.cpp)
+target_link_libraries(${CNPY_LIB} PUBLIC Eigen3::Eigen)
+target_include_directories(${CNPY_LIB} PUBLIC $<INSTALL_INTERFACE:./>)
+set_target_properties(${CNPY_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp)
+set_standard_output_directory(${CNPY_LIB})
 
 install(
-  TARGETS cnpy
+  TARGETS ${CNPY_LIB}
   EXPORT ${TARGETS_EXPORT_NAME}
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
   PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}/tests
 )
 
-set(TEST_UTIL_LIB ${PROJECT_NAME}_test_util)
+set(TEST_UTIL_LIB ${PROJECT_NAME}-test_util)
 add_library(${TEST_UTIL_LIB} STATIC util.cpp)
 target_link_libraries(${TEST_UTIL_LIB} PUBLIC ${PROJECT_NAME})
 target_link_libraries(${TEST_UTIL_LIB} PUBLIC EigenRand::EigenRand)
@@ -69,7 +70,7 @@ endmacro()
 function(get_cpp_test_name name dir out_var)
   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "test-cpp" prefix ${dir})
   set(${out_var}
-      "${prefix}-${name}"
+      "${PROJECT_NAME}-${prefix}-${name}"
       PARENT_SCOPE
   )
 endfunction()
@@ -94,7 +95,7 @@ function(add_proxsuite_nlp_test name)
 
   target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
   target_link_libraries(${test_name} PRIVATE Boost::unit_test_framework)
-  target_link_libraries(${test_name} PRIVATE cnpy)
+  target_link_libraries(${test_name} PRIVATE ${CNPY_LIB})
   target_link_libraries(${test_name} PRIVATE ${TEST_UTIL_LIB})
 endfunction()
 

@@ -12,6 +12,7 @@ set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
 set(PROJECT_CUSTOM_HEADER_DIR "proxsuite-nlp")
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES True)
+set(PROJECT_AUTO_RUN_FINALIZE FALSE)
 
 set(CXX_DISABLE_WERROR True)
 
@@ -21,11 +22,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PROJECT_USE_CMAKE_EXPORT True)
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
-
-set(DOXYGEN_USE_MATHJAX YES)
-set(DOXYGEN_USE_TEMPLATE_CSS YES)
-set(DOXYGEN_HTML_HEADER "${CMAKE_SOURCE_DIR}/doc/header.html")
-set(DOXYGEN_HTML_STYLESHEET "")
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -59,6 +55,11 @@ else()
   endif()
 endif()
 
+set(DOXYGEN_USE_MATHJAX YES)
+set(DOXYGEN_USE_TEMPLATE_CSS YES)
+set(DOXYGEN_HTML_HEADER "${PROJECT_SOURCE_DIR}/doc/header.html")
+set(DOXYGEN_HTML_STYLESHEET "")
+
 include(${JRL_CMAKE_MODULES}/base.cmake)
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
@@ -67,6 +68,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/boost.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ide.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/apple.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/python.cmake)
 include(CMakeDependentOption)
 
 apply_default_apple_configuration()
@@ -145,6 +147,7 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
+  findpython()
   add_project_dependency(eigenpy 3.4.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.4.0")
 
   execute_process(
@@ -235,6 +238,7 @@ function(create_library)
 
   add_library(${PROJECT_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
   add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
+  add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
   set_standard_output_directory(${PROJECT_NAME})
   set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
   target_compile_definitions(
@@ -256,7 +260,11 @@ function(create_library)
   if(BUILD_WITH_PROXSUITE_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
   endif(BUILD_WITH_PROXSUITE_SUPPORT)
-  target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
+  target_include_directories(
+    ${PROJECT_NAME}
+    PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  )
 
   set(MSVC_CMD_OPTIONS /bigobj)
   target_compile_options(${PROJECT_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:${MSVC_CMD_OPTIONS}>)
@@ -327,3 +335,5 @@ pkg_config_append_cflags("${CFLAGS_DEPENDENCIES}")
 
 # Install catkin package.xml
 install(FILES package.xml DESTINATION share/${PROJECT_NAME})
+
+setup_project_finalize()

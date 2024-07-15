@@ -6,7 +6,7 @@ set(EXAMPLES_HEADER "example-base.hpp")
 
 function(add_proxsuite_nlp_example exfile)
   get_filename_component(example_name ${exfile} NAME_WE)
-  set(example_name "example-${example_name}")
+  set(example_name "${PROJECT_NAME}-example-${example_name}")
   get_filename_component(exfile ${exfile} NAME)
   message(STATUS "Adding executable ${example_name} (file ${exfile})")
 
@@ -24,8 +24,10 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   find_package(example-robot-data REQUIRED)
   add_proxsuite_nlp_example(so2.cpp)
   add_proxsuite_nlp_example(ur5-ik.cpp)
-  target_link_libraries(example-ur5-ik PUBLIC example-robot-data::example-robot-data)
-endif(BUILD_WITH_PINOCCHIO_SUPPORT)
+  target_link_libraries(
+    ${PROJECT_NAME}-example-ur5-ik PUBLIC example-robot-data::example-robot-data
+  )
+endif()
 
 # Python examples
 if(BUILD_PYTHON_INTERFACE)
@@ -40,4 +42,4 @@ if(BUILD_PYTHON_INTERFACE)
     )
   endforeach()
 
-endif(BUILD_PYTHON_INTERFACE)
+endif()
