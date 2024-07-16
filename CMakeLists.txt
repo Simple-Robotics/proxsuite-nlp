@@ -252,14 +252,14 @@ function(create_library)
 
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio)
-  endif(BUILD_WITH_PINOCCHIO_SUPPORT)
+  endif()
 
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
   if(BUILD_WITH_PROXSUITE_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
-  endif(BUILD_WITH_PROXSUITE_SUPPORT)
+  endif()
   target_include_directories(
     ${PROJECT_NAME}
     PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>

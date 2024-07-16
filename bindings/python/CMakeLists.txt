@@ -6,8 +6,8 @@
 set(PYLIB_NAME "pyproxsuite_nlp")
 set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/proxsuite_nlp)
 
-include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
+include(${JRL_CMAKE_MODULES}/python-helpers.cmake)
+include(${JRL_CMAKE_MODULES}/stubs.cmake)
 
 # identify bindings C++ source files
 file(GLOB_RECURSE PY_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)

@@ -21,7 +21,7 @@ endfunction()
 add_proxsuite_nlp_example(circle.cpp)
 add_proxsuite_nlp_example(equality-qp.cpp)
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
-  find_package(example-robot-data REQUIRED)
+  add_project_private_dependency(example-robot-data REQUIRED)
   add_proxsuite_nlp_example(so2.cpp)
   add_proxsuite_nlp_example(ur5-ik.cpp)
   target_link_libraries(
