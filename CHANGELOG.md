@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Solver: store problem instance as a raw pointer, change solver ctor ([#79](https://github.com/Simple-Robotics/proxsuite-nlp/pull/79))
+* Allow to build with fmt 11 ([#97](https://github.com/Simple-Robotics/proxsuite-nlp/pull/97))
 
 ## [0.6.1] - 2024-05-13
 
