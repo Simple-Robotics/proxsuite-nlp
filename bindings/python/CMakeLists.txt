@@ -18,6 +18,7 @@ add_header_group(PY_HEADERS)
 function(MAKE_BINDINGS)
   add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
   add_library(proxsuite::nlp::python ALIAS ${PYLIB_NAME})
+  add_library(${PYLIB_NAME}::${PYLIB_NAME} ALIAS ${PYLIB_NAME})
 
   set_target_properties(
     ${PYLIB_NAME}

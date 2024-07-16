@@ -262,8 +262,8 @@ function(create_library)
   endif()
   target_include_directories(
     ${PROJECT_NAME}
-    PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
 
   set(MSVC_CMD_OPTIONS /bigobj)
