@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `BfgsStrategy` to estimate (inverse) Hessians by @fabinsch
+
 ## [0.7.0] - 2024-05-14
 
 ### Changed
