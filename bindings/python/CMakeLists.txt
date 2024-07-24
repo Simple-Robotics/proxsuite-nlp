@@ -6,8 +6,8 @@
 set(PYLIB_NAME "pyproxsuite_nlp")
 set(${PYLIB_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/proxsuite_nlp)
 
-include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/stubs.cmake)
+include(${JRL_CMAKE_MODULES}/python-helpers.cmake)
+include(${JRL_CMAKE_MODULES}/stubs.cmake)
 
 # identify bindings C++ source files
 file(GLOB_RECURSE PY_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -18,6 +18,7 @@ add_header_group(PY_HEADERS)
 function(MAKE_BINDINGS)
   add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
   add_library(proxsuite::nlp::python ALIAS ${PYLIB_NAME})
+  add_library(${PROJECT_NAME}::${PYLIB_NAME} ALIAS ${PYLIB_NAME})
 
   set_target_properties(
     ${PYLIB_NAME}
