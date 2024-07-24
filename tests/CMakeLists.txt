@@ -16,22 +16,15 @@ FetchContent_Declare(
   GIT_PROGRESS TRUE
   EXCLUDE_FROM_ALL SYSTEM
 )
-FetchContent_GetProperties(eigenrand)
-if(NOT eigenrand_POPULATED)
-  set(EIGENRAND_BUILD_TEST
-      OFF
-      CACHE INTERNAL "Enable EigenRand test"
-  )
-  set(EIGENRAND_BUILD_BENCHMARK
-      OFF
-      CACHE INTERNAL "Enable EigenRand benchmark"
-  )
-  FetchContent_Populate(eigenrand)
-  add_library(EigenRand::EigenRand IMPORTED INTERFACE)
-  set_target_properties(
-    EigenRand::EigenRand PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${eigenrand_SOURCE_DIR}
-  )
-endif(NOT eigenrand_POPULATED)
+set(EIGENRAND_BUILD_TEST
+    OFF
+    CACHE INTERNAL "Enable EigenRand test"
+)
+set(EIGENRAND_BUILD_BENCHMARK
+    OFF
+    CACHE INTERNAL "Enable EigenRand benchmark"
+)
+FetchContent_MakeAvailable(eigenrand)
 
 # Add benchmark dependency
 if(BUILD_BENCHMARK)

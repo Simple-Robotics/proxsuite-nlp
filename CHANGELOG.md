@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add compatibility with jrl-cmakemodules workspace ([#99](https://github.com/Simple-Robotics/proxsuite-nlp/pull/99))
 
+### Fixed
+- Remove CMake CMP0167 and CMP0169 warnings ([#100](https://github.com/Simple-Robotics/proxsuite-nlp/pull/100))
+
 ## [0.7.0] - 2024-05-14
 
 ### Changed
