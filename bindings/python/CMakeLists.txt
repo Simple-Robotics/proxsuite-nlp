@@ -16,18 +16,11 @@ file(GLOB_RECURSE PY_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 add_header_group(PY_HEADERS)
 
 function(MAKE_BINDINGS)
-  add_library(${PYLIB_NAME} SHARED ${PY_SOURCES} ${PY_HEADERS})
+  python3_add_library(${PYLIB_NAME} MODULE WITH_SOABI ${PY_SOURCES} ${PY_HEADERS})
   add_library(proxsuite::nlp::python ALIAS ${PYLIB_NAME})
   add_library(${PROJECT_NAME}::${PYLIB_NAME} ALIAS ${PYLIB_NAME})
 
-  set_target_properties(
-    ${PYLIB_NAME}
-    PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
-               RUNTIME_OUTPUT_DIRECTORY "proxsuite_nlp"
-               PREFIX ""
-               SUFFIX ${PYTHON_EXT_SUFFIX}
-               VERSION ${PROJECT_VERSION}
-  )
+  set_target_properties(${PYLIB_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp")
   if(UNIX)
     get_relative_rpath(${${PYLIB_NAME}_INSTALL_DIR} PYLIB_INSTALL_RPATH)
     set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}")
