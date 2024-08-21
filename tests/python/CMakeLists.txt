@@ -44,9 +44,9 @@ include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
 
 function(add_test_lib filename)
   get_filename_component(name ${filename} NAME_WE)
-  add_library(${name} SHARED ${filename})
-  target_link_libraries(${name} PRIVATE pyproxsuite_nlp)
-  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX ${PYTHON_EXT_SUFFIX})
+  python3_add_library(${name} MODULE WITH_SOABI ${filename})
+  target_link_libraries(${name} PRIVATE ${PROJECT_NAME} eigenpy::eigenpy)
+  target_include_directories(${name} PRIVATE ../../bindings/python/include)
 endfunction()
 
 add_test_lib(polymorphic_test.cpp)
