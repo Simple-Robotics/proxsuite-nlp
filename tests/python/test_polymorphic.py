@@ -1,4 +1,4 @@
-from polymorphic_test import (
+from test_polymorphic_ext import (
     X,
     Y,
     Z,

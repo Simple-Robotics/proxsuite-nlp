@@ -111,7 +111,7 @@ const PolyX &set_return(const PolyX &x) {
   return static_x;
 }
 
-BOOST_PYTHON_MODULE(polymorphic_test) {
+BOOST_PYTHON_MODULE(MODULE_NAME) {
   register_polymorphic_to_python<PolyX>();
   register_polymorphic_to_python<PolyY>();
 
