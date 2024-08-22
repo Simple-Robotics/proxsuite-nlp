@@ -42,11 +42,11 @@ endforeach()
 
 include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
 
-function(add_test_lib filename)
-  get_filename_component(name ${filename} NAME_WE)
+function(add_test_lib filename name)
   python3_add_library(${name} MODULE WITH_SOABI ${filename})
   target_link_libraries(${name} PRIVATE ${PROJECT_NAME} eigenpy::eigenpy)
   target_include_directories(${name} PRIVATE ../../bindings/python/include)
+  target_compile_definitions(${name} PRIVATE MODULE_NAME=${name})
 endfunction()
 
-add_test_lib(polymorphic_test.cpp)
+add_test_lib(polymorphic_test.cpp test_polymorphic_ext)
