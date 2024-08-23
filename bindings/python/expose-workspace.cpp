@@ -1,5 +1,4 @@
 #include "proxsuite-nlp/python/fwd.hpp"
-#include "proxsuite-nlp/python/policies.hpp"
 
 #include "proxsuite-nlp/workspace.hpp"
 
@@ -17,10 +16,14 @@ void exposeWorkspace() {
                     "KKT system right-hand side buffer.")
       .def_readonly("kkt_err", &Workspace::kkt_err, "KKT system error.")
       .def_readonly("pd_step", &Workspace::pd_step, "The primal-dual step.")
-      .add_property("prim_step", bp::make_getter(&Workspace::prim_step,
-                                                 policies::return_by_value))
-      .add_property("dual_step", bp::make_getter(&Workspace::dual_step,
-                                                 policies::return_by_value))
+      .add_property(
+          "prim_step",
+          bp::make_getter(&Workspace::prim_step,
+                          bp::return_value_policy<bp::return_by_value>()))
+      .add_property(
+          "dual_step",
+          bp::make_getter(&Workspace::dual_step,
+                          bp::return_value_policy<bp::return_by_value>()))
       .def_readonly("objective_value", &Workspace::objective_value)
       .def_readonly("objective_gradient", &Workspace::objective_gradient)
       .def_readonly("objective_hessian", &Workspace::objective_hessian)
