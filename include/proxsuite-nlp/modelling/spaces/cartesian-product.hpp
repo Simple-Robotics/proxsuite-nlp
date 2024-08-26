@@ -49,8 +49,7 @@ public:
   CartesianProductTpl(const std::vector<polymorphic<Base>> &components)
       : m_components(components) {}
 
-  CartesianProductTpl(
-      const std::initializer_list<polymorphic<Base>> &components)
+  CartesianProductTpl(std::initializer_list<polymorphic<Base>> components)
       : m_components(components) {}
 
   CartesianProductTpl(const polymorphic<Base> &left,
