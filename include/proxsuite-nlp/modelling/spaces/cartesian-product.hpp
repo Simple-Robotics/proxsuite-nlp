@@ -7,11 +7,6 @@
 
 namespace proxsuite {
 namespace nlp {
-namespace {
-/// Typedef in anon namespace for use in rest of file.
-template <typename T>
-using PolymorphicManifold = polymorphic<ManifoldAbstractTpl<T>>;
-} // namespace
 
 /** @brief    The cartesian product of two or more manifolds.
  */
@@ -31,6 +26,11 @@ public:
   inline std::size_t numComponents() const { return m_components.size(); }
 
   template <class Concrete> inline void addComponent(const Concrete &c) {
+    static_assert(
+        std::is_base_of_v<Base, Concrete> ||
+            std::is_same_v<Concrete, polymorphic<Base>>,
+        "Input type should either be derived from ManifoldAbstractTpl or be "
+        "polymorphic<ManifoldAbstractTpl>.");
     m_components.emplace_back(c);
   }
 
@@ -123,21 +123,21 @@ public:
 };
 
 template <typename T>
-auto operator*(const PolymorphicManifold<T> &left,
-               const PolymorphicManifold<T> &right) {
+auto operator*(const polymorphic<ManifoldAbstractTpl<T>> &left,
+               const polymorphic<ManifoldAbstractTpl<T>> &right) {
   return CartesianProductTpl<T>(left, right);
 }
 
 template <typename T>
 auto operator*(const CartesianProductTpl<T> &left,
-               const PolymorphicManifold<T> &right) {
+               const polymorphic<ManifoldAbstractTpl<T>> &right) {
   CartesianProductTpl<T> out(left);
   out.addComponent(right);
   return out;
 }
 
 template <typename T>
-auto operator*(const PolymorphicManifold<T> &left,
+auto operator*(const polymorphic<ManifoldAbstractTpl<T>> &left,
                const CartesianProductTpl<T> &right) {
   return right * left;
 }
