@@ -27,10 +27,12 @@ class DerY(Y):
         return "DerivedY"
 
 
-assert isinstance(getY(), Y)
-assert isinstance(getZ(), Z)
-assert issubclass(Y, X)
-assert issubclass(Z, Y)
+def test_subclasses():
+    assert isinstance(getY(), Y)
+    assert isinstance(getZ(), Z)
+    assert issubclass(Y, X)
+    assert issubclass(Z, Y)
+
 
 y = Y()
 print(y)
@@ -38,14 +40,14 @@ call_method(y)
 z = Z()
 print(z)
 call_method(z)
-d = DerX()
-print(d)
-call_method(d)
-e = DerY()
-print(e)
-call_method(e)
+dx = DerX()
+print(dx)
+call_method(dx)
+dy = DerY()
+print(dy)
+call_method(dy)
 
-dstore = X_wrap_store(d)
+dstore = X_wrap_store(dx)
 print("dstore.x:", dstore.x)
 
 
@@ -131,6 +133,7 @@ def test_vec_store():
     assert isinstance(vs_list[2], DerY)
 
 
+test_subclasses()
 test_poly_base()
 test_poly_store()
 test_vec_store()
@@ -147,16 +150,16 @@ assert isinstance(pz, Y)
 
 
 # poly_passthrough() returns a copy, and the to-value converter for Poly does not test for bp::wrapper objects
-# pd = poly_passthrough(d)
-# print("d", pd)
-# assert isinstance(pd, DerX)
-# pe = poly_passthrough(e)
-# assert isinstance(pe, DerY)
+pd = poly_passthrough(dx)
+print("d", pd)
+assert isinstance(pd, DerX)
+pe = poly_passthrough(dy)
+assert isinstance(pe, DerY)
 
 print("Set static and return:")
 r_stat = set_return(z)
 print("r_stat (Z):", r_stat)
 assert isinstance(r_stat, Z)
-r_stat = set_return(d)
+r_stat = set_return(dx)
 print(r_stat, r_stat.name())
 assert isinstance(r_stat, DerX)
