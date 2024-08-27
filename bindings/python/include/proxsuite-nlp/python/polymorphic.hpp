@@ -203,7 +203,7 @@ private:
       // bp::object decrements the refcount at destruction
       // so by calling it with borrowed we incref owner_ptr to avoid destroying
       // it.
-      bp::object owner{bp::handle<>(boost::python::borrowed(owner_ptr))};
+      bp::object owner{bp::handle<>(bp::borrowed(owner_ptr))};
 
       // Deepcopy is safer to copy derived class values but don't copy C++ class
       // content.
