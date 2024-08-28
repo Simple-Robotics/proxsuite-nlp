@@ -3,7 +3,7 @@
 #pragma once
 
 #include <stdexcept>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #define PROXSUITE_NLP_RUNTIME_ERROR(msg)                                       \
   throw ::proxsuite::nlp::RuntimeError(                                        \

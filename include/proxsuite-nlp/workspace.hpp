@@ -5,6 +5,8 @@
 #include "proxsuite-nlp/problem-base.hpp"
 #include "proxsuite-nlp/ldlt-allocator.hpp"
 
+#include <fmt/ostream.h>
+
 namespace proxsuite {
 namespace nlp {
 

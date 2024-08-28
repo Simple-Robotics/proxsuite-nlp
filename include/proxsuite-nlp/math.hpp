@@ -101,5 +101,3 @@ template <typename T> T sign(const T &x) {
 } // namespace math
 } // namespace nlp
 } // namespace proxsuite
-
-#include "proxsuite-nlp/fmt-eigen.hpp"

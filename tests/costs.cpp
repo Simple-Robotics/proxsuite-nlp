@@ -1,8 +1,7 @@
 #include "proxsuite-nlp/modelling/costs/squared-distance.hpp"
 #include "proxsuite-nlp/cost-sum.hpp"
 
-#include <fmt/core.h>
-#include <fmt/ostream.h>
+#include "proxsuite-nlp/fmt-eigen.hpp"
 
 #include <boost/test/unit_test.hpp>
 

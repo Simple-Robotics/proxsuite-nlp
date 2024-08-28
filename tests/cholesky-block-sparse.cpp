@@ -11,7 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "proxsuite-nlp/math.hpp"
-#include <fmt/ranges.h>
+#include "proxsuite-nlp/fmt-eigen.hpp"
 
 BOOST_AUTO_TEST_SUITE(cholesky_sparse)
 

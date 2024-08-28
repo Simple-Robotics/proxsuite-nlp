@@ -1,8 +1,9 @@
 /// @file
-/// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/problem-base.hpp"
+#include "proxsuite-nlp/fmt-eigen.hpp"
 
 namespace proxsuite {
 namespace nlp {
