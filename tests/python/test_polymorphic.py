@@ -4,7 +4,6 @@ from test_polymorphic_ext import (
     Z,
     getY,
     getZ,
-    X_wrap_store,
     poly_use_base,
     poly_store,
     set_return,
@@ -15,8 +14,12 @@ from test_polymorphic_ext import (
 
 
 class DerX(X):
+    def __init__(self, msg: str):
+        super().__init__()
+        self.msg = msg
+
     def name(self):
-        return "My name is DerX and I'm from Python!"
+        return "My name is DerX and I'm from Python! Msg {:s}".format(self.msg)
 
 
 class DerY(Y):
@@ -24,7 +27,7 @@ class DerY(Y):
         super().__init__()
 
     def name(self):
-        return "DerivedY"
+        return "My name is DerY, derived in Python from Y!"
 
 
 def test_subclasses():
@@ -34,30 +37,33 @@ def test_subclasses():
     assert issubclass(Z, Y)
 
 
-y = Y()
-print(y)
-call_method(y)
-z = Z()
-print(z)
-call_method(z)
-dx = DerX()
-print(dx)
-call_method(dx)
-dy = DerY()
-print(dy)
-call_method(dy)
+print("======================================")
+print("=========== START TESTING ============")
+print("======================================")
 
-dstore = X_wrap_store(dx)
-print("dstore.x:", dstore.x)
+x = X()
+call_method(x)
+
+y = Y()
+call_method(y)
+
+z = Z()
+call_method(z)
+
+dx = DerX("prout")
+call_method(dx)
+
+dy = DerY()
+call_method(dy)
 
 
 def test_poly_base():
     y = Y()
     z = Z()
-    d = DerX()
+    dx = DerX("ha")
     e = DerY()
 
-    print("=== test_poly_base ===")
+    print("\n===== test_poly_base =====")
     b = poly_use_base(y)
     del y
     x = b.x
@@ -70,8 +76,8 @@ def test_poly_base():
     print(x)
     assert isinstance(x, Z)
 
-    b = poly_use_base(d)
-    del d
+    b = poly_use_base(dx)
+    del dx
     x = b.x
     print(x, x.name())
     assert isinstance(x, DerX)
@@ -86,10 +92,10 @@ def test_poly_base():
 def test_poly_store():
     y = Y()
     z = Z()
-    d = DerX()
-    e = DerY()
+    d = DerX("hoo")
+    dy = DerY()
 
-    print("=== test_poly_store ===")
+    print("\n===== test_poly_store =====")
     b = poly_store(y)
     del y
     x = b.x
@@ -105,21 +111,25 @@ def test_poly_store():
     assert isinstance(x, Z)
 
     b = poly_store(d)
+    x.msg = "holla"
+    assert d.msg == "hoo"
     del d
     x = b.x
     print(x, x.name())
+    assert isinstance(x, DerX)
 
-    b = poly_store(e)
-    del e
+    b = poly_store(dy)
+    del dy
     x = b.x
     print(x, x.name())
+    assert isinstance(x, DerY)
 
 
 def test_vec_store():
     z = Z()
-    d = DerX()
+    d = DerX("heehee")
     e = DerY()
-    print("=== vec_store ===")
+    print("\n===== test_vec_store =====")
     vs = vec_store([z, d])
     vs.add(e)
     del z
@@ -138,7 +148,6 @@ test_poly_base()
 test_poly_store()
 test_vec_store()
 
-print("passthrough:")
 py = poly_passthrough(y)
 assert isinstance(py, Y)
 print("y", py)
@@ -151,9 +160,10 @@ assert isinstance(pz, Y)
 
 # poly_passthrough() returns a copy, and the to-value converter for Poly does not test for bp::wrapper objects
 pd = poly_passthrough(dx)
-print("d", pd)
+print("> pass return dx:", pd)
 assert isinstance(pd, DerX)
 pe = poly_passthrough(dy)
+print("> pass return dy:", pe)
 assert isinstance(pe, DerY)
 
 print("Set static and return:")
