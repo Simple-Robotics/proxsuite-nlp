@@ -14,8 +14,7 @@ void exposeProblem() {
   bp::class_<Problem>("Problem", "Problem definition class.", bp::no_init)
       .def(bp::init<const polymorphic<Manifold> &, shared_ptr<context::Cost>,
                     const std::vector<Constraint> &>(
-          ("self"_a, "space", "cost",
-           "constraints"_a = bp::list()))[bp::with_custodian_and_ward<1, 2>()])
+          ("self"_a, "space", "cost", "constraints"_a = bp::list())))
       .def_readwrite("cost", &Problem::cost_, "The cost function instance.")
       .def_readwrite("manifold", &Problem::manifold_, "Problem manifold.")
       .add_property("num_constraint_blocks", &Problem::getNumConstraints,

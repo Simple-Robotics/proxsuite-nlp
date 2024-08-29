@@ -1,5 +1,4 @@
 #include "proxsuite-nlp/python/fwd.hpp"
-#include "proxsuite-nlp/python/policies.hpp"
 
 #include "proxsuite-nlp/ldlt-allocator.hpp"
 
@@ -29,13 +28,13 @@ struct LDLTVisitor : bp::def_visitor<LDLTVisitor<LDLTtype>> {
   }
 
   template <typename... Args> void visit(bp::class_<Args...> &cl) const {
-    cl.def("compute", compute_proxy, policies::return_internal_reference,
+    cl.def("compute", compute_proxy, bp::return_internal_reference<>(),
            ("self"_a, "mat"))
         .def("solveInPlace", solveInPlace_proxy, ("self"_a, "rhsAndX"))
         .def("solve", solve<Eigen::Ref<const VectorXs>>, ("self"_a, "rhs"))
         .def("solve", solve<Eigen::Ref<const MatrixXs>>, ("self"_a, "rhs"))
-        .def("matrixLDLT", &LDLTtype::matrixLDLT, policies::return_by_value,
-             "self"_a,
+        .def("matrixLDLT", &LDLTtype::matrixLDLT,
+             bp::return_value_policy<bp::return_by_value>(), "self"_a,
              "Get the current value of the decomposition matrix. This makes a "
              "copy.");
   }
