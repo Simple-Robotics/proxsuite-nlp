@@ -116,13 +116,9 @@ BOOST_PYTHON_MODULE(MODULE_NAME) {
 
   bp::class_<PyX, boost::noncopyable>("X", bp::init<>())
       .def("name", &X::name, &PyX::default_name)
-      .def("__copy__", &generic__copy__<X>)
-      .def("__deepcopy__", &generic__deepcopy__<X>)
       .def(PolymorphicVisitor<PolyX>());
   bp::class_<PyY, bp::bases<X>, boost::noncopyable>("Y", bp::init<>())
       .def("name", &Y::name, &PyY::default_name)
-      .def("__copy__", &generic__copy__<Y>)
-      .def("__deepcopy__", &generic__deepcopy__<Y>)
       .def(PolymorphicVisitor<PolyX>())
       .def(PolymorphicVisitor<PolyY>());
 
