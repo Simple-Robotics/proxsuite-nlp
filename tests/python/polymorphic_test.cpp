@@ -5,7 +5,7 @@ using namespace proxsuite::nlp::python;
 
 struct X {
   ~X() = default;
-  virtual std::string name() const { return "X"; }
+  virtual std::string name() const { return "I am X base"; }
   X() = default;
 
 protected:
@@ -14,12 +14,12 @@ protected:
 
 struct Y : X {
   Y() : X() {}
-  virtual std::string name() const override { return "Y"; }
+  virtual std::string name() const override { return "I am Y, son of X"; }
 };
 
 struct Z final : Y {
   Z() : Y() {}
-  std::string name() const override { return "Z (Y)"; }
+  std::string name() const override { return "I am Z, son of Y"; }
 };
 
 struct PyX final : X, PolymorphicWrapper<PyX, X> {
@@ -27,8 +27,9 @@ struct PyX final : X, PolymorphicWrapper<PyX, X> {
     if (bp::override f = get_override("name")) {
       return f();
     }
-    return X::name();
+    return default_name();
   }
+  std::string default_name() const { return X::name(); }
 };
 
 /// A callback class (extensible from Python) for the virtual
@@ -63,11 +64,6 @@ struct poly_use_base {
   PolyX x;
 };
 
-struct X_wrap_store {
-  X_wrap_store(const PyX &x) : x(x) {}
-  PyX x;
-};
-
 struct poly_store {
   poly_store(const PolyX &x) : x(x) {
     fmt::println("Called poly_store ctor: name is {:s}", x->name());
@@ -90,18 +86,21 @@ private:
 PolyX getY() { return PolyX(Y()); }
 PolyX getZ() { return PolyX(Z()); }
 
-PolyX poly_passthrough(const PolyX &x) { return x; }
+PolyX poly_passthrough(const PolyX &x) {
+  fmt::println("passthrough: got message {}", x->name());
+  return x;
+}
 
 void call_method(const PolyX &x) {
-  fmt::println("  - {:s} PolyX::name(): {:s}", __FUNCTION__, x->name());
+  fmt::print("[{:s}] PolyX::name(): {:s}", __FUNCTION__, x->name());
   const bp::detail::wrapper_base *t =
       dynamic_cast<const bp::detail::wrapper_base *>(&(*x));
   if (t) {
     PyObject *o = bp::detail::wrapper_base_::get_owner(*t);
     PyTypeObject *type = o->ob_type;
-    fmt::println("  - {:s} got a bp::wrapper<>, Python type {:s}", __FUNCTION__,
-                 type->tp_name);
+    fmt::print(" | got bp::wrapper, Python type {:s}", type->tp_name);
   }
+  fmt::println("");
 }
 
 static PolyX static_x = PolyX{Y()};
@@ -116,10 +115,14 @@ BOOST_PYTHON_MODULE(MODULE_NAME) {
   register_polymorphic_to_python<PolyY>();
 
   bp::class_<PyX, boost::noncopyable>("X", bp::init<>())
-      .def("name", &X::name)
+      .def("name", &X::name, &PyX::default_name)
+      .def("__copy__", &generic__copy__<X>)
+      .def("__deepcopy__", &generic__deepcopy__<X>)
       .def(PolymorphicVisitor<PolyX>());
   bp::class_<PyY, bp::bases<X>, boost::noncopyable>("Y", bp::init<>())
       .def("name", &Y::name, &PyY::default_name)
+      .def("__copy__", &generic__copy__<Y>)
+      .def("__deepcopy__", &generic__deepcopy__<Y>)
       .def(PolymorphicVisitor<PolyX>())
       .def(PolymorphicVisitor<PolyY>());
 
@@ -137,9 +140,6 @@ BOOST_PYTHON_MODULE(MODULE_NAME) {
   bp::def("call_method", &call_method, bp::args("x"));
   bp::def("set_return", &set_return,
           bp::return_value_policy<bp::reference_existing_object>());
-
-  bp::class_<X_wrap_store>("X_wrap_store", bp::init<const PyX &>("x"_a))
-      .def_readwrite("x", &X_wrap_store::x);
 
   bp::class_<poly_use_base>("poly_use_base", bp::no_init)
       .def(bp::init<const Y &>(bp::args("self", "t")))
