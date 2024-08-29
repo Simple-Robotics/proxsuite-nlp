@@ -18,6 +18,9 @@ class DerX(X):
         super().__init__()
         self.msg = msg
 
+    def __getinitargs__(self):
+        return (self.msg,)
+
     def name(self):
         return "My name is DerX and I'm from Python! Msg {:s}".format(self.msg)
 
