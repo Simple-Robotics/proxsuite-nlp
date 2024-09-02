@@ -23,13 +23,17 @@ public:
   using Scalar = typename LieGroup::Scalar;
   enum { Options = LieGroup::Options };
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
+  static_assert(std::is_base_of_v<pin::LieGroupBase<LieGroup>, LieGroup>,
+                "LieGroup template argument should be a subclass of "
+                "pinocchio::LieGroupBase.");
 
   LieGroup lg_;
   PinocchioLieGroup() {}
   PinocchioLieGroup(const LieGroup &lg) : lg_(lg) {}
+  PinocchioLieGroup(LieGroup &&lg) : lg_(std::move(lg)) {}
 
-  template <typename... Args> PinocchioLieGroup(Args... args) : lg_(args...) {}
+  template <typename... Args>
+  PinocchioLieGroup(Args &&...args) : lg_(std::forward<Args>(args)...) {}
 
   inline int nx() const { return lg_.nq(); }
   inline int ndx() const { return lg_.nv(); }
