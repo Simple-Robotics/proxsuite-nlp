@@ -20,16 +20,16 @@ int main() {
   constexpr int dim = 2;
   Manifold space{dim};
   const int nx = space.nx();
-  Manifold::PointType p0(nx); // target
+  Manifold::VectorXs p0(nx); // target
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
-  Manifold::PointType p1(nx);
+  Manifold::VectorXs p1(nx);
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
   const int ndx = space.ndx();
-  Manifold::TangentVectorType d(ndx);
+  Manifold::VectorXs d(ndx);
   space.difference(p0, p1, d);
   d.setZero();
   Manifold::MatrixXs J0(ndx, ndx), J1(ndx, ndx);

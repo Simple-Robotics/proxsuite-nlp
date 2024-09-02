@@ -6,8 +6,8 @@ namespace proxsuite {
 namespace nlp {
 
 template <typename Scalar>
-auto CartesianProductTpl<Scalar>::neutral() const -> PointType {
-  PointType out(this->nx());
+auto CartesianProductTpl<Scalar>::neutral() const -> VectorXs {
+  VectorXs out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
     const long n = m_components[i]->nx();
@@ -18,8 +18,8 @@ auto CartesianProductTpl<Scalar>::neutral() const -> PointType {
 }
 
 template <typename Scalar>
-auto CartesianProductTpl<Scalar>::rand() const -> PointType {
-  PointType out(this->nx());
+auto CartesianProductTpl<Scalar>::rand() const -> VectorXs {
+  VectorXs out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
     const long n = m_components[i]->nx();
@@ -70,8 +70,8 @@ CartesianProductTpl<Scalar>::split_vector_impl(VectorType &v) const {
 
 template <typename Scalar>
 auto CartesianProductTpl<Scalar>::merge(const std::vector<VectorXs> &xs) const
-    -> PointType {
-  PointType out(this->nx());
+    -> VectorXs {
+  VectorXs out(this->nx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
     const long n = m_components[i]->nx();
@@ -83,8 +83,8 @@ auto CartesianProductTpl<Scalar>::merge(const std::vector<VectorXs> &xs) const
 
 template <typename Scalar>
 auto CartesianProductTpl<Scalar>::merge_vector(
-    const std::vector<VectorXs> &vs) const -> TangentVectorType {
-  TangentVectorType out(this->ndx());
+    const std::vector<VectorXs> &vs) const -> VectorXs {
+  VectorXs out(this->ndx());
   Eigen::Index c = 0;
   for (std::size_t i = 0; i < numComponents(); i++) {
     const long n = m_components[i]->ndx();

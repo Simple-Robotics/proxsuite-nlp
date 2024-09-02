@@ -1,3 +1,5 @@
+/// @file
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/manifold-base.hpp"
@@ -10,10 +12,8 @@ namespace nlp {
 
 namespace pin = pinocchio;
 
-/** @brief  Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
- *
- *
- */
+/// @brief  Wrap a Pinocchio Lie group into a ManifoldAbstractTpl object.
+///
 template <typename _LieGroup>
 struct PinocchioLieGroup
     : public ManifoldAbstractTpl<typename _LieGroup::Scalar,
@@ -21,8 +21,9 @@ struct PinocchioLieGroup
 public:
   using LieGroup = _LieGroup;
   using Scalar = typename LieGroup::Scalar;
-  enum { Options = LieGroup::Options };
+  static constexpr int Options = LieGroup::Options;
   using Base = ManifoldAbstractTpl<Scalar, Options>;
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   static_assert(std::is_base_of_v<pin::LieGroupBase<LieGroup>, LieGroup>,
                 "LieGroup template argument should be a subclass of "
                 "pinocchio::LieGroupBase.");
@@ -31,9 +32,13 @@ public:
   PinocchioLieGroup() {}
   PinocchioLieGroup(const LieGroup &lg) : lg_(lg) {}
   PinocchioLieGroup(LieGroup &&lg) : lg_(std::move(lg)) {}
+  PinocchioLieGroup(const PinocchioLieGroup &lg) = default;
+  PinocchioLieGroup(PinocchioLieGroup &&lg) = default;
 
   template <typename... Args>
   PinocchioLieGroup(Args &&...args) : lg_(std::forward<Args>(args)...) {}
+
+  operator LieGroup() { return lg_; }
 
   inline int nx() const { return lg_.nq(); }
   inline int ndx() const { return lg_.nv(); }
@@ -85,9 +90,9 @@ public:
     lg_.interpolate(x0, x1, u, out);
   }
 
-  PointType neutral() const { return lg_.neutral(); }
+  VectorXs neutral() const { return lg_.neutral(); }
 
-  PointType rand() const { return lg_.random(); }
+  VectorXs rand() const { return lg_.random(); }
   bool isNormalized(const ConstVectorRef &x) const {
     if (x.size() < nx())
       return false;

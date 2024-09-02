@@ -13,7 +13,7 @@ struct VectorSpaceTpl : public ManifoldAbstractTpl<_Scalar, _Options> {
   using Scalar = _Scalar;
   enum { Dim = _Dim, Options = _Options };
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   int dim_;
 

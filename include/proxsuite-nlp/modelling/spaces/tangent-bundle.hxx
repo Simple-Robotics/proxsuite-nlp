@@ -5,22 +5,17 @@
 namespace proxsuite {
 namespace nlp {
 
-template <class Base>
-typename TangentBundleTpl<Base>::PointType
-TangentBundleTpl<Base>::neutral() const {
-  PointType out(nx());
+template <class Base> auto TangentBundleTpl<Base>::neutral() const -> VectorXs {
+  VectorXs out(nx());
   out.setZero();
   out.head(base_.nx()) = base_.neutral();
   return out;
 }
 
-template <class Base>
-typename TangentBundleTpl<Base>::PointType
-TangentBundleTpl<Base>::rand() const {
-  PointType out(nx());
+template <class Base> auto TangentBundleTpl<Base>::rand() const -> VectorXs {
+  VectorXs out(nx());
   out.head(base_.nx()) = base_.rand();
-  using BTanVec_t = typename Base::TangentVectorType;
-  out.tail(base_.ndx()) = BTanVec_t::Random(base_.ndx());
+  out.tail(base_.ndx()) = VectorXs::Random(base_.ndx());
   return out;
 }
 

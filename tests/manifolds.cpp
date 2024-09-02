@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent) {
   const int ndx = tspace.ndx();
   BOOST_CHECK_EQUAL(ndx, 2);
   BOOST_TEST_MESSAGE(" testing diff");
-  TSO2::TangentVectorType dx0(ndx);
+  TSO2::VectorXs dx0(ndx);
   dx0.setZero();
   tspace.difference(x0, x1, dx0);
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent) {
 
   // INTEGRATION OP
   BOOST_TEST_MESSAGE("Testing integration");
-  TSO2::PointType x1_new(tspace.nx());
+  TSO2::VectorXs x1_new(tspace.nx());
   tspace.integrate(x0, dx0, x1_new);
   BOOST_CHECK(x1_new.isApprox(x1));
 
@@ -143,19 +143,18 @@ BOOST_AUTO_TEST_CASE(test_pinmodel) {
   pinocchio::buildModels::humanoidRandom(model, true);
 
   using Man = MultibodyConfiguration<double>;
-  using Point_t = Man::PointType;
   Man space(model);
 
-  Point_t x0 = pinocchio::neutral(model);
-  Point_t d(model.nv);
+  Man::VectorXs x0 = pinocchio::neutral(model);
+  Man::VectorXs d(model.nv);
   d.setRandom();
 
-  Point_t xout(model.nq);
+  Man::VectorXs xout(model.nq);
   space.integrate(x0, d, xout);
   auto xout2 = pinocchio::integrate(model, x0, d);
   BOOST_CHECK(xout.isApprox(xout2));
 
-  Point_t x1;
+  Man::VectorXs x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
   space.difference(x0, x0, d);

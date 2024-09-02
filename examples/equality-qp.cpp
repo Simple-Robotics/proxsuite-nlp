@@ -30,7 +30,7 @@ using SolverType = ProxNLPSolverTpl<double>;
 template <int N, int M = 1> int submain() {
   using Manifold = VectorSpaceTpl<double>;
   Manifold space{N};
-  typename Manifold::PointType p1 = space.rand();
+  typename Manifold::VectorXs p1 = space.rand();
 
   Eigen::MatrixXd Qroot(N, N + 1);
   Qroot.setRandom();

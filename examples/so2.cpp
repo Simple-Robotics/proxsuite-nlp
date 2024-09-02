@@ -16,9 +16,9 @@ using Problem = ProblemTpl<double>;
 
 int main() {
   Manifold space;
-  Manifold::PointType p0 = space.rand(); // target
-  Manifold::PointType p1 = space.rand();
-  Manifold::PointType neut = space.neutral();
+  Manifold::VectorXs p0 = space.rand(); // target
+  Manifold::VectorXs p1 = space.rand();
+  Manifold::VectorXs neut = space.neutral();
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 

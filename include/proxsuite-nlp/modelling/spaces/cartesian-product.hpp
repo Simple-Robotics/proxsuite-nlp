@@ -15,7 +15,7 @@ struct CartesianProductTpl : ManifoldAbstractTpl<_Scalar> {
   using Scalar = _Scalar;
 
   using Base = ManifoldAbstractTpl<Scalar>;
-  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
 private:
   std::vector<polymorphic<Base>> m_components;
@@ -74,8 +74,8 @@ public:
     return r;
   }
 
-  PointType neutral() const;
-  PointType rand() const;
+  VectorXs neutral() const;
+  VectorXs rand() const;
   bool isNormalized(const ConstVectorRef &x) const;
 
 private:
@@ -102,9 +102,9 @@ public:
     return split_vector_impl<const ConstVectorRef>(v);
   }
 
-  PointType merge(const std::vector<VectorXs> &xs) const;
+  VectorXs merge(const std::vector<VectorXs> &xs) const;
 
-  TangentVectorType merge_vector(const std::vector<VectorXs> &vs) const;
+  VectorXs merge_vector(const std::vector<VectorXs> &vs) const;
 
   void integrate_impl(const ConstVectorRef &x, const ConstVectorRef &v,
                       VectorRef out) const;

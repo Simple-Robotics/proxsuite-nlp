@@ -27,7 +27,7 @@ public:
   using Manifold = ManifoldAbstractTpl<Scalar>;
 
   /// Target point on the space.
-  typename Manifold::PointType target_;
+  VectorXs target_;
   polymorphic<Manifold> space_;
 
   ManifoldDifferenceToPoint(const polymorphic<Manifold> &space,
