@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Python:** pull all wrapper classes (inheriting from `bp::wrapper<U>`) out of the `aligator::python::internal` namespace
 * **Python:** fix abstract classes exposed as subclasses of `bp::wrapper<U>` not registering their owning `PyObject*` properly
 
+### Removed
+
+* Removed function template `allocate_shared_eigen_aligned` since we now use C++17 and Eigen::aligned_allocator is no longer needed.
+
 ## [0.7.0] - 2024-05-14
 
 ### Changed
