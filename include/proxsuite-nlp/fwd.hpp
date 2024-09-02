@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 /// @brief     Forward declarations and configuration macros.
 #pragma once
 
@@ -60,12 +60,6 @@ namespace proxsuite {
 namespace nlp {
 
 using xyz::polymorphic;
-
-template <typename T, typename... Args>
-auto allocate_shared_eigen_aligned(Args &&...args) {
-  return std::allocate_shared<T>(Eigen::aligned_allocator<T>(),
-                                 std::forward<Args>(args)...);
-}
 
 // fwd BCLParams
 template <typename Scalar> struct BCLParamsTpl;

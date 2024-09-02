@@ -76,7 +76,7 @@ int main() {
   pin::FrameIndex fid = model.getFrameId(ee_link_name);
 
   Vector3s ref(1.0, 0., 0.2);
-  auto fn = allocate_shared_eigen_aligned<FramePosition>(space, fid, ref);
+  auto fn = std::make_shared<FramePosition>(space, fid, ref);
 
   auto q0 = pin::neutral(model);
   MatrixXs w1(3, 3);
@@ -86,10 +86,9 @@ int main() {
   w2.setIdentity();
   w2 *= 1e-2;
 
-  auto cost1 =
-      allocate_shared_eigen_aligned<QuadraticResidualCostTpl<Scalar>>(fn, w1);
-  auto cost2 = allocate_shared_eigen_aligned<QuadraticDistanceCostTpl<Scalar>>(
-      space, q0, w2);
+  auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
+  auto cost2 =
+      std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
   auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
   cost->addComponent(cost1);
   cost->addComponent(cost2);

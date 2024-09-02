@@ -1,3 +1,5 @@
+/// @file
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
 #include "proxsuite-nlp/cost-function.hpp"
@@ -53,9 +55,8 @@ public:
   QuadraticResidualCostTpl(const ConstMatrixRef &weights,
                            const ConstVectorRef &slope, const Scalar constant,
                            ResidualArgs &...args)
-      : QuadraticResidualCostTpl(
-            allocate_shared_eigen_aligned<Underlying>(args...), weights, slope,
-            constant) {}
+      : QuadraticResidualCostTpl(std::make_shared<Underlying>(args...), weights,
+                                 slope, constant) {}
 
   Scalar call(const ConstVectorRef &x) const;
 
