@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Allow use of installed jrl-cmakemodules & eigenrand ([#106](https://github.com/Simple-Robotics/proxsuite-nlp/pull/106))
+
 ## [0.7.1] - 2024-09-04
 
 ### Added

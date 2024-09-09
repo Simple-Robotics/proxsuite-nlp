@@ -4,27 +4,36 @@
 
 add_project_dependency(Boost COMPONENTS unit_test_framework REQUIRED)
 
-# Fetch private dependencies
-include(FetchContent)
+find_path(
+  EigenRand_INCLUDE_DIR
+  NAMES EigenRand
+  PATHS ${EigenRand_PREFIX}
+  PATH_SUFFIXES include/EigenRand
+)
 
-# Add eigenrand dependency
-# TODO use main bab2min/EigenRand when PR is merged
-FetchContent_Declare(
-  eigenrand
-  GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
-  GIT_TAG 23d287e
-  GIT_PROGRESS TRUE
-  EXCLUDE_FROM_ALL SYSTEM
-)
-set(EIGENRAND_BUILD_TEST
-    OFF
-    CACHE INTERNAL "Enable EigenRand test"
-)
-set(EIGENRAND_BUILD_BENCHMARK
-    OFF
-    CACHE INTERNAL "Enable EigenRand benchmark"
-)
-FetchContent_MakeAvailable(eigenrand)
+if(NOT EigenRand_INCLUDE_DIR)
+  # Fetch private dependencies
+  include(FetchContent)
+
+  # Add eigenrand dependency
+  # TODO use main bab2min/EigenRand when PR is merged
+  FetchContent_Declare(
+    eigenrand
+    GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
+    GIT_TAG 23d287e
+    GIT_PROGRESS TRUE
+    EXCLUDE_FROM_ALL SYSTEM
+  )
+  set(EIGENRAND_BUILD_TEST
+      OFF
+      CACHE INTERNAL "Enable EigenRand test"
+  )
+  set(EIGENRAND_BUILD_BENCHMARK
+      OFF
+      CACHE INTERNAL "Enable EigenRand benchmark"
+  )
+  FetchContent_MakeAvailable(eigenrand)
+endif()
 
 # Add benchmark dependency
 if(BUILD_BENCHMARK)
@@ -49,7 +58,15 @@ install(
 set(TEST_UTIL_LIB ${PROJECT_NAME}-test_util)
 add_library(${TEST_UTIL_LIB} STATIC util.cpp)
 target_link_libraries(${TEST_UTIL_LIB} PUBLIC ${PROJECT_NAME})
-target_link_libraries(${TEST_UTIL_LIB} PUBLIC EigenRand::EigenRand)
+modernize_target_link_libraries(
+  ${TEST_UTIL_LIB}
+  SCOPE
+  PUBLIC
+  TARGETS
+  EigenRand::EigenRand
+  INCLUDE_DIRS
+  ${EigenRand_INCLUDE_DIR}
+)
 set_target_properties(${TEST_UTIL_LIB} PROPERTIES LINKER_LANGUAGE CXX)
 
 macro(ADD_TEST_CFLAGS test_name flag)
