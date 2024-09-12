@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add the `polymorphic_cxx14.hpp` header from [jbcoe/value_types](https://github.com/jbcoe/value_types/blob/main/polymorphic_cxx14.h), [#90](https://github.com/Simple-Robotics/proxsuite-nlp/pull/90)
 * **Python:** add conversions (for values, versions) for the `polymorphic<T,A>` types in new `<proxsuite-nlp/python/polymorphic.hpp>` header
 * **Python:** add `PolymorphicVisitor` visitor and `register_polymorphic_to_python<T>()` template function to register conversions from/to the `polymorphic<T, A>` type
+* Allow use of installed jrl-cmakemodules & eigenrand ([#106](https://github.com/Simple-Robotics/proxsuite-nlp/pull/106))
+
+## [0.7.1] - 2024-09-04
+
+### Added
+* Add compatibility with jrl-cmakemodules workspace ([#99](https://github.com/Simple-Robotics/proxsuite-nlp/pull/99))
 
 ### Fixed
 
@@ -34,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Solver: store problem instance as a raw pointer, change solver ctor ([#79](https://github.com/Simple-Robotics/proxsuite-nlp/pull/79))
 * Allow to build with fmt 11 ([#97](https://github.com/Simple-Robotics/proxsuite-nlp/pull/97))
 
 ## [0.6.1] - 2024-05-13
@@ -42,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Changes to includes and tests for linesearch methods ([#81](https://github.com/Simple-Robotics/proxsuite-nlp/pull/81))
+* Solver: store problem instance as a raw pointer, change solver ctor ([#79](https://github.com/Simple-Robotics/proxsuite-nlp/pull/79))
 
 ## [0.6.0] - 2024-05-02
 
@@ -113,7 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * This is the first release of `proxsuite-nlp`. This library is a joint effort between LAAS-CNRS and INRIA, and will be maintained and expanded in the future. Please provide constructive feedback and contribute!
 
-[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Simple-Robotics/proxsuite-nlp/compare/v0.5.0...v0.6.0
