@@ -38,7 +38,7 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
   using Base = ConstraintSetBase<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
-  ConstraintSetProductTpl(const std::vector<Base *> components,
+  ConstraintSetProductTpl(const std::vector<xyz::polymorphic<Base>> components,
                           const std::vector<Eigen::Index> &blockSizes)
       : m_components(components), m_blockSizes(blockSizes) {
     if (components.size() != blockSizes.size()) {
@@ -46,6 +46,11 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
                                   "block sizes should be the same.");
     }
   }
+
+  ConstraintSetProductTpl(const ConstraintSetProductTpl &) = default;
+  ConstraintSetProductTpl &operator=(const ConstraintSetProductTpl &) = default;
+  ConstraintSetProductTpl(ConstraintSetProductTpl &&) = default;
+  ConstraintSetProductTpl &operator=(ConstraintSetProductTpl &&) = default;
 
   Scalar evaluate(const ConstVectorRef &zproj) const override {
     Scalar res = 0.;
@@ -100,11 +105,13 @@ struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
     }
   }
 
-  const std::vector<Base *> &components() const { return m_components; }
+  const std::vector<xyz::polymorphic<Base>> &components() const {
+    return m_components;
+  }
   const std::vector<Eigen::Index> &blockSizes() const { return m_blockSizes; }
 
 private:
-  std::vector<Base *> m_components;
+  std::vector<xyz::polymorphic<Base>> m_components;
   std::vector<Eigen::Index> m_blockSizes;
 };
 

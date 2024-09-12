@@ -4,7 +4,12 @@
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
+#include <pinocchio/config.hpp>
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+#include <pinocchio/multibody/sample-models.hpp>
+#else
 #include <pinocchio/parsers/sample-models.hpp>
+#endif // PINOCCHIO_VERSION_AT_LEAST
 #include "proxsuite-nlp/modelling/spaces/pinocchio-groups.hpp"
 #include "proxsuite-nlp/modelling/spaces/multibody.hpp"
 #endif
@@ -17,13 +22,15 @@ BOOST_AUTO_TEST_SUITE(manifold)
 
 using namespace proxsuite::nlp;
 using Manifold = ManifoldAbstractTpl<double>;
+using VectorSpace = VectorSpaceTpl<double>;
 
 BOOST_AUTO_TEST_CASE(test_vectorspace) {
   constexpr int N1 = 3;
-  VectorSpaceTpl<double, N1> space1;
+  VectorSpace vs1 = VectorSpace(N1);
+  polymorphic<Manifold> space1(vs1);
 
-  auto x0 = space1.neutral();
-  auto x1 = space1.rand();
+  auto x0 = space1->neutral();
+  auto x1 = space1->rand();
 
   BOOST_CHECK_EQUAL(N1, x0.size());
   BOOST_CHECK_EQUAL(N1, x1.size());
@@ -32,9 +39,10 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
 
   constexpr int N2 = 35;
 
-  VectorSpaceTpl<double> space2(N2);
-  x0 = space2.neutral();
-  x1 = space2.rand();
+  VectorSpace vs2 = VectorSpace(N2);
+  polymorphic<Manifold> space2(vs2);
+  x0 = space2->neutral();
+  x1 = space2->rand();
 
   BOOST_CHECK(x0.isApprox(Eigen::VectorXd::Zero(35)));
 
@@ -45,13 +53,11 @@ BOOST_AUTO_TEST_CASE(test_vectorspace) {
   x0 = prod1.rand();
 
   // test copy constructor
-  VectorSpaceTpl<double, N1> space1_copy(space1);
-  VectorSpaceTpl<double> space2_copy(space2);
-  shared_ptr<Manifold> space2_ptr =
-      std::make_shared<VectorSpaceTpl<double>>(space2);
+  polymorphic<Manifold> space1_copy(space1);
+  polymorphic<Manifold> space2_copy(space2);
 
-  auto prod2 = space2_ptr * space2_ptr;
-  x1 = prod2->rand();
+  auto prod2 = space2_copy * space2_copy;
+  x1 = prod2.rand();
 }
 
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
@@ -96,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent) {
   const int ndx = tspace.ndx();
   BOOST_CHECK_EQUAL(ndx, 2);
   BOOST_TEST_MESSAGE(" testing diff");
-  TSO2::TangentVectorType dx0(ndx);
+  TSO2::VectorXs dx0(ndx);
   dx0.setZero();
   tspace.difference(x0, x1, dx0);
 
@@ -118,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_so2_tangent) {
 
   // INTEGRATION OP
   BOOST_TEST_MESSAGE("Testing integration");
-  TSO2::PointType x1_new(tspace.nx());
+  TSO2::VectorXs x1_new(tspace.nx());
   tspace.integrate(x0, dx0, x1_new);
   BOOST_CHECK(x1_new.isApprox(x1));
 
@@ -137,19 +143,18 @@ BOOST_AUTO_TEST_CASE(test_pinmodel) {
   pinocchio::buildModels::humanoidRandom(model, true);
 
   using Man = MultibodyConfiguration<double>;
-  using Point_t = Man::PointType;
   Man space(model);
 
-  Point_t x0 = pinocchio::neutral(model);
-  Point_t d(model.nv);
+  Man::VectorXs x0 = pinocchio::neutral(model);
+  Man::VectorXs d(model.nv);
   d.setRandom();
 
-  Point_t xout(model.nq);
+  Man::VectorXs xout(model.nq);
   space.integrate(x0, d, xout);
   auto xout2 = pinocchio::integrate(model, x0, d);
   BOOST_CHECK(xout.isApprox(xout2));
 
-  Point_t x1;
+  Man::VectorXs x1;
   d.setZero();
   x1 = pinocchio::randomConfiguration(model);
   space.difference(x0, x0, d);

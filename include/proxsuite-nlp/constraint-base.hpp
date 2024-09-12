@@ -2,8 +2,8 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/manifold-base.hpp"
 #include "proxsuite-nlp/function-base.hpp"
+#include "proxsuite-nlp/third-party/polymorphic_cxx14.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -20,7 +20,8 @@ public:
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using ActiveType = Eigen::Matrix<bool, Eigen::Dynamic, 1>;
-  using Self = ConstraintSetBase<Scalar>;
+
+  ConstraintSetBase() = default;
 
   /// Do not use the vector-Hessian product in the Hessian
   /// for Gauss Newton.
@@ -66,7 +67,7 @@ public:
 
   /// @brief Update proximal parameter; this applies to when this class is a
   /// proximal operator that isn't a projection (e.g. \f$ \ell_1 \f$).
-  void setProxParameter(const Scalar mu) {
+  void setProxParameter(const Scalar mu) const {
     mu_ = mu;
     mu_inv_ = 1. / mu;
   };
@@ -110,8 +111,8 @@ public:
   Scalar mu_inv() const { return mu_inv_; }
 
 protected:
-  Scalar mu_ = 0.;
-  Scalar mu_inv_;
+  mutable Scalar mu_ = 0.;
+  mutable Scalar mu_inv_;
 };
 
 /** @brief    Packs a ConstraintSetBase and C2FunctionTpl together.
@@ -125,7 +126,7 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   using ConstraintSet = ConstraintSetBase<Scalar>;
 
   shared_ptr<FunctionType> func_;
-  shared_ptr<ConstraintSet> set_;
+  polymorphic<ConstraintSet> set_;
 
   const FunctionType &func() const { return *func_; }
   int nr() const { return func_->nr(); }
@@ -137,11 +138,11 @@ template <typename _Scalar> struct ConstraintObjectTpl {
   ConstraintObjectTpl &operator=(const ConstraintObjectTpl &) = default;
 
   ConstraintObjectTpl(shared_ptr<FunctionType> func,
-                      shared_ptr<ConstraintSet> set)
+                      const polymorphic<ConstraintSet> &set)
       : func_(func), set_(set) {}
 
   bool operator==(const ConstraintObjectTpl &other) const {
-    return (func_ == other.func_) && (set_ && other.set_);
+    return func_ == other.func_;
   }
 };
 

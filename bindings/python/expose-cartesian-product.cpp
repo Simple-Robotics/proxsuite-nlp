@@ -1,6 +1,7 @@
 #include "proxsuite-nlp/modelling/spaces/cartesian-product.hpp"
 
 #include "proxsuite-nlp/python/fwd.hpp"
+#include "proxsuite-nlp/python/polymorphic.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -8,7 +9,7 @@ namespace python {
 
 using context::Manifold;
 using context::Scalar;
-using ManifoldPtr = shared_ptr<Manifold>;
+using PolymorphicManifold = polymorphic<Manifold>;
 using context::ConstVectorRef;
 using context::VectorRef;
 using context::VectorXs;
@@ -31,12 +32,14 @@ void exposeCartesianProduct() {
   using MutSplitSig =
       std::vector<VectorRef> (CartesianProduct::*)(VectorRef) const;
 
-  bp::class_<CartesianProduct, bp::bases<Manifold>,
-             shared_ptr<CartesianProduct>>(
+  bp::class_<CartesianProduct, bp::bases<Manifold>>(
       "CartesianProduct", "Cartesian product of two or more manifolds.",
-      bp::init<const std::vector<ManifoldPtr> &>(bp::args("self", "spaces")))
-      .def(
-          bp::init<ManifoldPtr, ManifoldPtr>(bp::args("self", "left", "right")))
+      bp::no_init)
+      .def(bp::init<>("self"_a))
+      .def(bp::init<const std::vector<PolymorphicManifold> &>(
+          ("self"_a, "spaces")))
+      .def(bp::init<PolymorphicManifold, PolymorphicManifold>(
+          ("self"_a, "left", "right")))
       .def(
           "getComponent",
           +[](CartesianProduct const &m, std::size_t i) -> const Manifold & {
@@ -46,18 +49,10 @@ void exposeCartesianProduct() {
             }
             return m.getComponent(i);
           },
-          bp::return_internal_reference<>(), bp::args("self", "i"),
+          bp::return_internal_reference<>(), ("self"_a, "i"),
           "Get the i-th component of the Cartesian product.")
-      .def(
-          "addComponent",
-          +[](CartesianProduct &m, ManifoldPtr const &p) { m.addComponent(p); },
-          bp::args("self", "c"), "Add a component to the Cartesian product.")
-      .def(
-          "addComponent",
-          +[](CartesianProduct &m, shared_ptr<CartesianProduct> const &p) {
-            m.addComponent(p);
-          },
-          bp::args("self", "c"), "Add a component to the Cartesian product.")
+      .def("addComponent", &CartesianProduct::addComponent<PolymorphicManifold>,
+           ("self"_a, "c"), "Add a component to the Cartesian product.")
       .add_property("num_components", &CartesianProduct::numComponents,
                     "Get the number of components in the Cartesian product.")
       .def(
@@ -65,9 +60,9 @@ void exposeCartesianProduct() {
           +[](CartesianProduct const &m, const ConstVectorRef &x) {
             return copy_vec_constref(m.split(x));
           },
-          bp::args("self", "x"), split_doc.c_str())
+          ("self"_a, "x"), split_doc.c_str())
       .def<MutSplitSig>(
-          "split", &CartesianProduct::split, bp::args("self", "x"),
+          "split", &CartesianProduct::split, ("self"_a, "x"),
           (split_doc +
            " This returns a list of mutable references to each component.")
               .c_str())
@@ -76,23 +71,22 @@ void exposeCartesianProduct() {
           +[](CartesianProduct const &m, const ConstVectorRef &x) {
             return copy_vec_constref(m.split_vector(x));
           },
-          bp::args("self", "v"), split_vec_doc.c_str())
+          ("self"_a, "v"), split_vec_doc.c_str())
       .def<MutSplitSig>(
-          "split_vector", &CartesianProduct::split_vector,
-          bp::args("self", "v"),
+          "split_vector", &CartesianProduct::split_vector, ("self"_a, "v"),
           (split_vec_doc +
            " This returns a list of mutable references to each component.")
               .c_str())
-      .def("merge", &CartesianProduct::merge, bp::args("self", "xs"),
+      .def("merge", &CartesianProduct::merge, ("self"_a, "xs"),
            "Define a point on the manifold by merging points from each "
            "component.")
-      .def("merge_vector", &CartesianProduct::merge_vector,
-           bp::args("self", "vs"),
+      .def("merge_vector", &CartesianProduct::merge_vector, ("self"_a, "vs"),
            "Define a tangent vector on the manifold by merging vectors from "
            "each component.")
       .def(
-          "__mul__", +[](const shared_ptr<CartesianProduct> &a,
-                         const ManifoldPtr &b) { return a * b; });
+          "__mul__", +[](const CartesianProduct &a,
+                         const CartesianProduct &b) { return a * b; })
+      .def(PolymorphicVisitor<PolymorphicManifold>());
 }
 
 } // namespace python

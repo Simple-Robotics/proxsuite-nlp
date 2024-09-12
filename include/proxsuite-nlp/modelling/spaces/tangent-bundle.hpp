@@ -16,9 +16,8 @@ protected:
 public:
   using Self = TangentBundleTpl<Base>;
   using Scalar = typename Base::Scalar;
-  enum { Options = Base::Options };
-
-  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
+  static constexpr int Options = Base::Options;
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
   /// Constructor using base space instance.
   TangentBundleTpl(Base base) : base_(base) {};
@@ -31,8 +30,8 @@ public:
   inline int nx() const { return base_.nx() + base_.ndx(); }
   inline int ndx() const { return 2 * base_.ndx(); }
 
-  PointType neutral() const;
-  PointType rand() const;
+  VectorXs neutral() const;
+  VectorXs rand() const;
   bool isNormalized(const ConstVectorRef &x) const {
     auto p = getBasePoint(x);
     return base_.isNormalized(p);

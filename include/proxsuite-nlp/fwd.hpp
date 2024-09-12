@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2022-2023 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 /// @brief     Forward declarations and configuration macros.
 #pragma once
 
@@ -39,14 +39,27 @@ using std::unique_ptr;
 #include "proxsuite-nlp/deprecated.hpp"
 #include "proxsuite-nlp/warning.hpp"
 
+namespace xyz {
+// fwd-decl for boost override later
+template <class T, class A> class polymorphic;
+} // namespace xyz
+
+/// The following overload for get_pointer is defined here, to avoid conflicts
+/// with other Boost libraries using get_pointer() without seeing this overload
+/// if included later.
+
+namespace boost {
+template <typename T, typename A>
+inline T *get_pointer(::xyz::polymorphic<T, A> const &x) {
+  const T *r = x.operator->();
+  return const_cast<T *>(r);
+}
+} // namespace boost
+
 namespace proxsuite {
 namespace nlp {
 
-template <typename T, typename... Args>
-auto allocate_shared_eigen_aligned(Args &&...args) {
-  return std::allocate_shared<T>(Eigen::aligned_allocator<T>(),
-                                 std::forward<Args>(args)...);
-}
+using xyz::polymorphic;
 
 // fwd BCLParams
 template <typename Scalar> struct BCLParamsTpl;

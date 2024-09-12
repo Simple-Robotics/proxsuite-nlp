@@ -3,8 +3,6 @@
 /// @brief  Base structs for linesearch algorithms.
 #pragma once
 
-#include "proxsuite-nlp/fwd.hpp"
-
 #include <fmt/format.h>
 #include <ostream>
 

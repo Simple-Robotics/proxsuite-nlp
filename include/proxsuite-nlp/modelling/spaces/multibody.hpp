@@ -18,18 +18,22 @@ template <typename _Scalar, int _Options = 0>
 struct MultibodyConfiguration : public ManifoldAbstractTpl<_Scalar, _Options> {
 public:
   using Scalar = _Scalar;
-  enum { Options = _Options };
+  static constexpr int Options = _Options;
+  PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
   using Self = MultibodyConfiguration<Scalar, Options>;
   using ModelType = pinocchio::ModelTpl<Scalar, Options>;
   using Base = ManifoldAbstractTpl<Scalar, Options>;
-  PROXSUITE_NLP_DEFINE_MANIFOLD_TYPES(Base)
 
   MultibodyConfiguration(const ModelType &model) : model_(model) {};
+  MultibodyConfiguration(const MultibodyConfiguration &) = default;
+  MultibodyConfiguration &operator=(const MultibodyConfiguration &) = default;
+  MultibodyConfiguration(MultibodyConfiguration &&) = default;
+  MultibodyConfiguration &operator=(MultibodyConfiguration &&) = default;
 
   const ModelType &getModel() const { return model_; }
 
-  PointType neutral() const { return pinocchio::neutral(model_); }
-  PointType rand() const { return pinocchio::randomConfiguration(model_); }
+  VectorXs neutral() const { return pinocchio::neutral(model_); }
+  VectorXs rand() const { return pinocchio::randomConfiguration(model_); }
   bool isNormalized(const ConstVectorRef &x) const {
     return pinocchio::isNormalized(model_, x);
   }
@@ -115,6 +119,10 @@ struct MultibodyPhaseSpace
 
   MultibodyPhaseSpace(const ModelType &model)
       : TangentBundleTpl<ConfigSpace>(ConfigSpace(model)) {}
+  MultibodyPhaseSpace(const MultibodyPhaseSpace &) = default;
+  MultibodyPhaseSpace &operator=(const MultibodyPhaseSpace &) = default;
+  MultibodyPhaseSpace(MultibodyPhaseSpace &&) = default;
+  MultibodyPhaseSpace &operator=(MultibodyPhaseSpace &&) = default;
 };
 
 } // namespace nlp

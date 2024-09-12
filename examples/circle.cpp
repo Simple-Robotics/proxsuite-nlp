@@ -18,19 +18,18 @@ using Problem = ProblemTpl<double>;
 
 int main() {
   constexpr int dim = 2;
-  auto space_ = std::make_shared<Manifold>(dim);
-  const Manifold &space = *space_;
+  Manifold space{dim};
   const int nx = space.nx();
-  Manifold::PointType p0(nx); // target
+  Manifold::VectorXs p0(nx); // target
   p0 << -.4, .7;
   fmt::print("  |p0| = {}", p0.norm());
-  Manifold::PointType p1(nx);
+  Manifold::VectorXs p1(nx);
   p1 << 1., 0.5;
   fmt::print("{} << p0\n", p0);
   fmt::print("{} << p1\n", p1);
 
   const int ndx = space.ndx();
-  Manifold::TangentVectorType d(ndx);
+  Manifold::VectorXs d(ndx);
   space.difference(p0, p1, d);
   d.setZero();
   Manifold::MatrixXs J0(ndx, ndx), J1(ndx, ndx);
@@ -46,14 +45,14 @@ int main() {
   weights.setIdentity();
 
   auto cost_fun =
-      std::make_shared<QuadraticDistanceCostTpl<double>>(space_, p0, weights);
+      std::make_shared<QuadraticDistanceCostTpl<double>>(space, p0, weights);
   const auto &cf = *cost_fun;
   fmt::print("cost: {}\n", cf.call(p1));
   fmt::print("grad: {}\n", cf.computeGradient(p1));
   fmt::print("hess: {}\n", cf.computeHessian(p1));
 
   using DistResType = ManifoldDifferenceToPoint<double>;
-  auto resptr = std::make_shared<DistResType>(space_, space.neutral());
+  auto resptr = std::make_shared<DistResType>(space, space.neutral());
   const auto &residual = *resptr;
   fmt::print("residual val @ p0: {}\n", residual(p0).transpose());
   fmt::print("residual val @ p1: {}\n", residual(p1).transpose());
@@ -70,11 +69,11 @@ int main() {
   auto residualCirclePtr = std::make_shared<QuadraticResidualCostTpl<double>>(
       resptr, w2, -radius_sq);
 
-  using Ineq_t = NegativeOrthantTpl<double>;
-  using CstrType = Problem::ConstraintObject;
-  CstrType cstr1(residualCirclePtr, std::make_shared<Ineq_t>());
+  using Inequality = NegativeOrthantTpl<double>;
+  using CstrType = ConstraintObjectTpl<double>;
+  CstrType cstr1(residualCirclePtr, Inequality{});
   std::vector<CstrType> cstrs{cstr1};
-  Problem prob(space_, cost_fun, cstrs);
+  Problem prob(space, cost_fun, cstrs);
 
   /// Test out merit functions
 

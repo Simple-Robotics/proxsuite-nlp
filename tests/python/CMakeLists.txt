@@ -25,7 +25,9 @@ if(NOT pytest_FOUND)
   message(FATAL_ERROR "Python pytest package missing. You can install it with: pip install pytest")
 endif()
 
-set(PYTHON_TESTS test_1d_funs.py test_costs.py test_functions.py test_manifolds.py test_print.py)
+set(PYTHON_TESTS test_1d_funs.py test_costs.py test_functions.py test_manifolds.py
+                 test_polymorphic.py test_print.py
+)
 
 message(STATUS "Python tests: ${PYTHON_TESTS}")
 
@@ -37,3 +39,14 @@ foreach(pyfile ${PYTHON_TESTS})
   # specifically for some tests
   add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "bindings/python")
 endforeach()
+
+include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
+
+function(add_test_lib filename name)
+  python3_add_library(${name} MODULE WITH_SOABI ${filename})
+  target_link_libraries(${name} PRIVATE ${PROJECT_NAME} eigenpy::eigenpy)
+  target_include_directories(${name} PRIVATE ../../bindings/python/include)
+  target_compile_definitions(${name} PRIVATE MODULE_NAME=${name})
+endfunction()
+
+add_test_lib(polymorphic_test.cpp test_polymorphic_ext)

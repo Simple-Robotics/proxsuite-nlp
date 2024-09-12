@@ -1,6 +1,6 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/problem-base.hpp"
-#include "proxsuite-nlp/modelling/constraints.hpp"
+#include "proxsuite-nlp/constraint-base.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -12,10 +12,9 @@ void exposeProblem() {
   using context::Problem;
 
   bp::class_<Problem>("Problem", "Problem definition class.", bp::no_init)
-      .def(bp::init<shared_ptr<Manifold>, shared_ptr<context::Cost>,
+      .def(bp::init<const polymorphic<Manifold> &, shared_ptr<context::Cost>,
                     const std::vector<Constraint> &>(
-          (bp::arg("self"), bp::arg("space"), bp::arg("cost"),
-           bp::arg("constraints") = bp::list())))
+          ("self"_a, "space", "cost", "constraints"_a = bp::list())))
       .def_readwrite("cost", &Problem::cost_, "The cost function instance.")
       .def_readwrite("manifold", &Problem::manifold_, "Problem manifold.")
       .add_property("num_constraint_blocks", &Problem::getNumConstraints,
@@ -25,7 +24,7 @@ void exposeProblem() {
       .add_property("nx", &Problem::nx, "Get the problem tangent space dim.")
       .add_property("ndx", &Problem::ndx, "Get the problem tangent space dim.")
       .def("add_constraint", &Problem::addConstraint<const Constraint &>,
-           bp::args("self", "cstr"), "Add a constraint to the problem.");
+           ("self"_a, "cstr"), "Add a constraint to the problem.");
 }
 
 } // namespace python
