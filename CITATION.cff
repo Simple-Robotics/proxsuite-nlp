@@ -21,6 +21,6 @@ authors:
     email: nmansard@laas.fr
     affiliation: LAAS-CNRS
     orcid: 'https://orcid.org/0000-0002-8090-0601'
-version: 0.7.1
-date-released: "2024-09-04"
+version: 0.8.0
+date-released: "2024-09-16"
 license: BSD-2-Clause
