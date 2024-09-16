@@ -156,7 +156,7 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
   findpython()
-  add_project_dependency(eigenpy 3.4.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.4.0")
+  add_project_dependency(eigenpy 3.8.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.8.0")
 
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
@@ -168,7 +168,7 @@ endif(BUILD_PYTHON_INTERFACE)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
-  add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.9.1")
+  add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 3.0.0")
   add_compile_definitions(PROXSUITE_NLP_WITH_PINOCCHIO)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_WITH_PINOCCHIO")
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* Ask for Pinocchio 3.0.0 (which exists, not 2.9.1)
+
+### Changed
+
+* Increase minimum version of eigenpy to 3.8.0
+
 ## [0.8.0] - 2024-09-16
 
 ### Added
