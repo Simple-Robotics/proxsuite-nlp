@@ -40,7 +40,7 @@ foreach(pyfile ${PYTHON_TESTS})
   add_python_unit_test(${test_name} "tests/python/${pyfile}" "tests/python" "bindings/python")
 endforeach()
 
-include(${PROJECT_SOURCE_DIR}/cmake/python-helpers.cmake)
+include(${JRL_CMAKE_MODULES}/python-helpers.cmake)
 
 function(add_test_lib filename name)
   python3_add_library(${name} MODULE WITH_SOABI ${filename})
