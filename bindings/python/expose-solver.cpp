@@ -15,7 +15,7 @@ void exposeSolver() {
   using context::ConstVectorRef;
   using context::Problem;
   using context::VectorRef;
-  using eigenpy::deprecation_warning_policy;
+  using eigenpy::deprecated_member;
   using eigenpy::DeprecationType;
   using eigenpy::ReturnInternalStdUniquePtr;
 
@@ -120,13 +120,13 @@ void exposeSolver() {
       .def("setup", &ProxNLPSolver::setup, ("self"_a),
            "Initialize the solver workspace and results.")
       .def("getResults", &ProxNLPSolver::getResults, ("self"_a),
-           deprecation_warning_policy<DeprecationType::DEPRECATION,
-                                      bp::return_internal_reference<>>(
+           deprecated_member<DeprecationType::DEPRECATION,
+                             bp::return_internal_reference<>>(
                "This getter has been deprecated."),
            "Get a reference to the results object.")
       .def("getWorkspace", &ProxNLPSolver::getWorkspace, ("self"_a),
-           deprecation_warning_policy<DeprecationType::DEPRECATION,
-                                      bp::return_internal_reference<>>(
+           deprecated_member<DeprecationType::DEPRECATION,
+                             bp::return_internal_reference<>>(
                "This getter has been deprecated."),
            "Get a reference to the workspace object.")
       .add_property("workspace", bp::make_getter(&ProxNLPSolver::workspace_,

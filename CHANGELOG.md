@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Increase minimum version of eigenpy to 3.8.0
+* [python] Header `proxsuite-nlp/python/deprecation-policy.hpp` is now deprecated and simply using-declares the templates from eigenpy's corresponding header (introduced in [3.6.0](https://github.com/stack-of-tasks/eigenpy/releases/tag/v3.6.0))
 
 ## [0.8.0] - 2024-09-16
 
