@@ -20,6 +20,9 @@ on:
       - 'CITATION.cff'
       - 'CITATIONS.bib'
       - 'CHANGELOG.md'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
