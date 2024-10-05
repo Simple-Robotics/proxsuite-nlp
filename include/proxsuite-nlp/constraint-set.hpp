@@ -153,11 +153,6 @@ extern template struct PROXSUITE_NLP_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     ConstraintObjectTpl<context::Scalar>;
 #endif
 
-template <typename Scalar>
-using ConstraintSetBase PROXSUITE_NLP_DEPRECATED_MESSAGE(
-    "This template class has been renamed to ConstraintSetTpl.") =
-    ConstraintSetTpl<Scalar>;
-
 } // namespace nlp
 } // namespace proxsuite
 

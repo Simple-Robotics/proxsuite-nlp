@@ -103,6 +103,11 @@ template <typename Base> struct TangentBundleTpl;
 // fwd ConstraintSetTpl
 template <typename Scalar> struct ConstraintSetTpl;
 
+template <typename Scalar>
+using ConstraintSetBase PROXSUITE_NLP_DEPRECATED_MESSAGE(
+    "This template class has been renamed to ConstraintSetTpl.") =
+    ConstraintSetTpl<Scalar>;
+
 // fwd ConstraintObject
 template <typename Scalar> struct ConstraintObjectTpl;
 
