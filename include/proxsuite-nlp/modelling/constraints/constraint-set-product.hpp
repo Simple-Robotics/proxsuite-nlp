@@ -1,6 +1,6 @@
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -33,9 +33,9 @@ auto blockVectorGetRow(const Eigen::MatrixBase<Derived> &matrix,
 /// convenient.
 /// @warning This struct contains a non-owning vector of its component sets.
 template <typename Scalar>
-struct ConstraintSetProductTpl : ConstraintSetBase<Scalar> {
+struct ConstraintSetProductTpl : ConstraintSetTpl<Scalar> {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
-  using Base = ConstraintSetBase<Scalar>;
+  using Base = ConstraintSetTpl<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
   ConstraintSetProductTpl(const std::vector<xyz::polymorphic<Base>> components,

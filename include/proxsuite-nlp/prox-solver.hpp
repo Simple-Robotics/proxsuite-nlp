@@ -46,7 +46,7 @@ public:
   using Manifold = ManifoldAbstractTpl<Scalar>;
   using LinesearchOptions = typename Linesearch<Scalar>::Options;
   using CallbackPtr = shared_ptr<helpers::base_callback<Scalar>>;
-  using ConstraintSet = ConstraintSetBase<Scalar>;
+  using ConstraintSet = ConstraintSetTpl<Scalar>;
   using ConstraintObject = ConstraintObjectTpl<Scalar>;
 
 protected:

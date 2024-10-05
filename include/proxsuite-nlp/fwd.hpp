@@ -100,8 +100,8 @@ template <typename Scalar> struct CartesianProductTpl;
 
 template <typename Base> struct TangentBundleTpl;
 
-// fwd ConstraintSetBase
-template <typename Scalar> struct ConstraintSetBase;
+// fwd ConstraintSetTpl
+template <typename Scalar> struct ConstraintSetTpl;
 
 // fwd ConstraintObject
 template <typename Scalar> struct ConstraintObjectTpl;

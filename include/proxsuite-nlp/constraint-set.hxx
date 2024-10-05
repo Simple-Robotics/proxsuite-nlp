@@ -2,14 +2,14 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
 
 template <typename Scalar>
-void ConstraintSetBase<Scalar>::applyProjectionJacobian(const ConstVectorRef &z,
-                                                        MatrixRef Jout) const {
+void ConstraintSetTpl<Scalar>::applyProjectionJacobian(const ConstVectorRef &z,
+                                                       MatrixRef Jout) const {
   const int nr = (int)z.size();
   assert(nr == Jout.rows());
   ActiveType active_set(nr);
@@ -23,7 +23,7 @@ void ConstraintSetBase<Scalar>::applyProjectionJacobian(const ConstVectorRef &z,
 }
 
 template <typename Scalar>
-void ConstraintSetBase<Scalar>::applyNormalConeProjectionJacobian(
+void ConstraintSetTpl<Scalar>::applyNormalConeProjectionJacobian(
     const ConstVectorRef &z, MatrixRef Jout) const {
   const int nr = (int)z.size();
   assert(nr == Jout.rows());

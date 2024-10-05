@@ -1,4 +1,4 @@
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 #include "proxsuite-nlp/modelling/constraints.hpp"
 #include "proxsuite-nlp/modelling/spaces/vector-space.hpp"
 
