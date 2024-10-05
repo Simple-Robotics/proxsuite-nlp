@@ -1,3 +1,5 @@
+/// @file
+/// @copyright Copyright (C) 2024 LAAS-CNRS, INRIA
 #include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite::nlp {
