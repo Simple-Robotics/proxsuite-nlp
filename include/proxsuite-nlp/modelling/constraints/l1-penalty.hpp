@@ -1,7 +1,7 @@
 /// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -15,7 +15,7 @@ namespace nlp {
  *          and an appropriate generalized Jacobian.
  */
 template <typename _Scalar>
-struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
+struct NonsmoothPenaltyL1Tpl : ConstraintSetTpl<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
@@ -25,7 +25,7 @@ struct NonsmoothPenaltyL1Tpl : ConstraintSetBase<_Scalar> {
   NonsmoothPenaltyL1Tpl(NonsmoothPenaltyL1Tpl &&) = default;
   NonsmoothPenaltyL1Tpl &operator=(NonsmoothPenaltyL1Tpl &&) = default;
 
-  using Base = ConstraintSetBase<Scalar>;
+  using Base = ConstraintSetTpl<Scalar>;
   using ActiveType = typename Base::ActiveType;
   using Base::mu_;
 

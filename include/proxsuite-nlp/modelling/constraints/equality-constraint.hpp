@@ -2,7 +2,7 @@
 /// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -15,7 +15,7 @@ namespace nlp {
  * function.
  */
 template <typename _Scalar>
-struct EqualityConstraintTpl : ConstraintSetBase<_Scalar> {
+struct EqualityConstraintTpl : ConstraintSetTpl<_Scalar> {
 public:
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
@@ -26,7 +26,7 @@ public:
   EqualityConstraintTpl(EqualityConstraintTpl &&) = default;
   EqualityConstraintTpl &operator=(EqualityConstraintTpl &&) = default;
 
-  using Base = ConstraintSetBase<Scalar>;
+  using Base = ConstraintSetTpl<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
   bool disableGaussNewton() const { return true; }

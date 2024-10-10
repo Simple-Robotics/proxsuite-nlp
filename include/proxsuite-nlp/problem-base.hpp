@@ -4,7 +4,7 @@
 
 #include "proxsuite-nlp/manifold-base.hpp"
 #include "proxsuite-nlp/cost-function.hpp"
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {

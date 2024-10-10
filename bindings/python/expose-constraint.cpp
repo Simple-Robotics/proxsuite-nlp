@@ -38,46 +38,52 @@ static void exposeConstraintTypes();
 void exposeConstraints() {
 
   register_polymorphic_to_python<polymorphic<ConstraintSet>>();
-  bp::class_<ConstraintSet, boost::noncopyable>(
-      "ConstraintSetBase",
-      "Base class for constraint sets or nonsmooth penalties.", bp::no_init)
-      .def("evaluate", &ConstraintSet::evaluate, ("self"_a, "z"),
-           "Evaluate the constraint indicator function or nonsmooth penalty "
-           "on the projection/prox map of :math:`z`.")
-      .def("projection", &ConstraintSet::projection, ("self"_a, "z", "zout"))
-      .def(
-          "projection",
-          +[](const ConstraintSet &c, const ConstVectorRef &z) {
-            context::VectorXs zout(z.size());
-            c.projection(z, zout);
-            return zout;
-          },
-          ("self"_a, "z"))
-      .def("normalConeProjection", &ConstraintSet::normalConeProjection,
-           ("self"_a, "z", "zout"))
-      .def(
-          "normalConeProjection",
-          +[](const ConstraintSet &c, const ConstVectorRef &z) {
-            context::VectorXs zout(z.size());
-            c.normalConeProjection(z, zout);
-            return zout;
-          },
-          ("self"_a, "z"))
-      .def("applyProjectionJacobian", &ConstraintSet::applyProjectionJacobian,
-           ("self"_a, "z", "Jout"), "Apply the projection Jacobian.")
-      .def("applyNormalProjectionJacobian",
-           &ConstraintSet::applyNormalConeProjectionJacobian,
-           ("self"_a, "z", "Jout"),
-           "Apply the normal cone projection Jacobian.")
-      .def("computeActiveSet", &ConstraintSet::computeActiveSet,
-           ("self"_a, "z", "out"))
-      .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
-           ("self"_a, "zin", "zproj"),
-           "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
-      .def("setProxParameter", &ConstraintSet::setProxParameter,
-           ("self"_a, "mu"), "Set proximal parameter.")
-      .add_property("mu", &ConstraintSet::mu, "Current proximal parameter.")
-      .def(bp::self == bp::self);
+  auto cls =
+      bp::class_<ConstraintSet, boost::noncopyable>(
+          "ConstraintSet",
+          "Base class for constraint sets or nonsmooth penalties.", bp::no_init)
+          .def(
+              "evaluate", &ConstraintSet::evaluate, ("self"_a, "z"),
+              "Evaluate the constraint indicator function or nonsmooth penalty "
+              "on the projection/prox map of :math:`z`.")
+          .def("projection", &ConstraintSet::projection,
+               ("self"_a, "z", "zout"))
+          .def(
+              "projection",
+              +[](const ConstraintSet &c, const ConstVectorRef &z) {
+                context::VectorXs zout(z.size());
+                c.projection(z, zout);
+                return zout;
+              },
+              ("self"_a, "z"))
+          .def("normalConeProjection", &ConstraintSet::normalConeProjection,
+               ("self"_a, "z", "zout"))
+          .def(
+              "normalConeProjection",
+              +[](const ConstraintSet &c, const ConstVectorRef &z) {
+                context::VectorXs zout(z.size());
+                c.normalConeProjection(z, zout);
+                return zout;
+              },
+              ("self"_a, "z"))
+          .def("applyProjectionJacobian",
+               &ConstraintSet::applyProjectionJacobian, ("self"_a, "z", "Jout"),
+               "Apply the projection Jacobian.")
+          .def("applyNormalProjectionJacobian",
+               &ConstraintSet::applyNormalConeProjectionJacobian,
+               ("self"_a, "z", "Jout"),
+               "Apply the normal cone projection Jacobian.")
+          .def("computeActiveSet", &ConstraintSet::computeActiveSet,
+               ("self"_a, "z", "out"))
+          .def("evaluateMoreauEnvelope", &ConstraintSet::evaluateMoreauEnvelope,
+               ("self"_a, "zin", "zproj"),
+               "Evaluate the Moreau envelope with parameter :math:`\\mu`.")
+          .def("setProxParameter", &ConstraintSet::setProxParameter,
+               ("self"_a, "mu"), "Set proximal parameter.")
+          .add_property("mu", &ConstraintSet::mu, "Current proximal parameter.")
+          .def(bp::self == bp::self);
+  bp::scope current_scope;
+  current_scope.attr("ConstraintBase") = cls;
 
   bp::class_<Constraint>(
       "ConstraintObject", "Packs a constraint set together with a function.",

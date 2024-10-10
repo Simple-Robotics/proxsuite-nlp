@@ -1,6 +1,6 @@
 #include "proxsuite-nlp/python/fwd.hpp"
 #include "proxsuite-nlp/problem-base.hpp"
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {

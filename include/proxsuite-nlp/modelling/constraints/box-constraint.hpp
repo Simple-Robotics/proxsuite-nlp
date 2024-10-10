@@ -1,7 +1,7 @@
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -10,9 +10,9 @@ namespace nlp {
  * @brief   Box constraint set \f$z \in [z_\min, z_\max]\f$.
  *
  */
-template <typename Scalar> struct BoxConstraintTpl : ConstraintSetBase<Scalar> {
+template <typename Scalar> struct BoxConstraintTpl : ConstraintSetTpl<Scalar> {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
-  using Base = ConstraintSetBase<Scalar>;
+  using Base = ConstraintSetTpl<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
   VectorXs lower_limit;

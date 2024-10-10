@@ -1,7 +1,7 @@
 /// @copyright Copyright (C) 2022-2024 LAAS-CNRS, INRIA
 #pragma once
 
-#include "proxsuite-nlp/constraint-base.hpp"
+#include "proxsuite-nlp/constraint-set.hpp"
 
 namespace proxsuite {
 namespace nlp {
@@ -16,7 +16,7 @@ namespace nlp {
  * where \f$h : \mathcal{X} \to \RR^p\f$ is a given residual.
  */
 template <typename _Scalar>
-struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
+struct NegativeOrthantTpl : ConstraintSetTpl<_Scalar> {
   using Scalar = _Scalar;
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
@@ -26,7 +26,7 @@ struct NegativeOrthantTpl : ConstraintSetBase<_Scalar> {
   NegativeOrthantTpl(NegativeOrthantTpl &&) = default;
   NegativeOrthantTpl &operator=(NegativeOrthantTpl &&) = default;
 
-  using Base = ConstraintSetBase<Scalar>;
+  using Base = ConstraintSetTpl<Scalar>;
   using ActiveType = typename Base::ActiveType;
 
   void projection(const ConstVectorRef &z, VectorRef zout) const {
