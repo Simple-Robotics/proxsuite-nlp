@@ -25,21 +25,21 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   add_proxsuite_nlp_example(so2.cpp)
   add_proxsuite_nlp_example(ur5-ik.cpp)
   target_link_libraries(
-    ${PROJECT_NAME}-example-ur5-ik PUBLIC example-robot-data::example-robot-data
+    ${PROJECT_NAME}-example-ur5-ik
+    PUBLIC example-robot-data::example-robot-data
   )
 endif()
 
 # Python examples
 if(BUILD_PYTHON_INTERFACE)
-
   file(GLOB_RECURSE EXAMPLES_PY ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
 
   foreach(pyfile ${EXAMPLES_PY})
     get_filename_component(pyfile_name ${pyfile} NAME)
     execute_process(
-      COMMAND ${CMAKE_COMMAND} -E create_symlink ${pyfile}
-              ${CMAKE_CURRENT_BINARY_DIR}/${pyfile_name}
+      COMMAND
+        ${CMAKE_COMMAND} -E create_symlink ${pyfile}
+        ${CMAKE_CURRENT_BINARY_DIR}/${pyfile_name}
     )
   endforeach()
-
 endif()

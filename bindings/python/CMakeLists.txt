@@ -16,25 +16,40 @@ file(GLOB_RECURSE PY_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 add_header_group(PY_HEADERS)
 
 function(MAKE_BINDINGS)
-  python3_add_library(${PYLIB_NAME} MODULE WITH_SOABI ${PY_SOURCES} ${PY_HEADERS})
+  python3_add_library(
+    ${PYLIB_NAME}
+    MODULE
+    WITH_SOABI
+    ${PY_SOURCES}
+    ${PY_HEADERS}
+  )
   add_library(proxsuite::nlp::python ALIAS ${PYLIB_NAME})
   add_library(${PROJECT_NAME}::${PYLIB_NAME} ALIAS ${PYLIB_NAME})
 
-  set_target_properties(${PYLIB_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp")
+  set_target_properties(
+    ${PYLIB_NAME}
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY "proxsuite_nlp"
+  )
   if(UNIX)
     get_relative_rpath(${${PYLIB_NAME}_INSTALL_DIR} PYLIB_INSTALL_RPATH)
-    set_target_properties(${PYLIB_NAME} PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}")
+    set_target_properties(
+      ${PYLIB_NAME}
+      PROPERTIES INSTALL_RPATH "${PYLIB_INSTALL_RPATH}"
+    )
   endif()
 
   set(GCC_CMD_OPTIONS -Wno-conversion -Wno-comment)
   set(GCC_CMD_ID AppleClang,Clang,GNU)
   target_compile_options(
-    ${PYLIB_NAME} PRIVATE $<$<CXX_COMPILER_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>
+    ${PYLIB_NAME}
+    PRIVATE $<$<CXX_COMPILER_ID:${GCC_CMD_ID}>:${GCC_CMD_OPTIONS}>
   )
   target_compile_definitions(${PYLIB_NAME} PRIVATE MODULE_NAME=${PYLIB_NAME})
   target_include_directories(
-    ${PYLIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
-                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+    ${PYLIB_NAME}
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+      $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   )
 
   # link solver, eigenpy, Boost.Python
@@ -42,7 +57,8 @@ function(MAKE_BINDINGS)
   install(
     TARGETS ${PYLIB_NAME}
     EXPORT ${TARGETS_EXPORT_NAME}
-    DESTINATION ${${PYLIB_NAME}_INSTALL_DIR}
+    DESTINATION
+    ${${PYLIB_NAME}_INSTALL_DIR}
   )
 endfunction()
 
@@ -56,7 +72,13 @@ install(
 )
 
 # COPY PYTHON FILES INTO OUTPUT FOLDER
-set(${PYLIB_NAME}_PYFILES __init__.py casadi_utils.py utils.py windows_dll_manager.py)
+set(
+  ${PYLIB_NAME}_PYFILES
+  __init__.py
+  casadi_utils.py
+  utils.py
+  windows_dll_manager.py
+)
 
 foreach(pyfile ${${PYLIB_NAME}_PYFILES})
   python_install_on_site(proxsuite_nlp ${pyfile})

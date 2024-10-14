@@ -22,16 +22,11 @@ if(NOT EigenRand_INCLUDE_DIR)
     GIT_REPOSITORY https://github.com/ManifoldFR/EigenRand.git
     GIT_TAG 23d287e
     GIT_PROGRESS TRUE
-    EXCLUDE_FROM_ALL SYSTEM
+    EXCLUDE_FROM_ALL
+    SYSTEM
   )
-  set(EIGENRAND_BUILD_TEST
-      OFF
-      CACHE INTERNAL "Enable EigenRand test"
-  )
-  set(EIGENRAND_BUILD_BENCHMARK
-      OFF
-      CACHE INTERNAL "Enable EigenRand benchmark"
-  )
+  set(EIGENRAND_BUILD_TEST OFF CACHE INTERNAL "Enable EigenRand test")
+  set(EIGENRAND_BUILD_BENCHMARK OFF CACHE INTERNAL "Enable EigenRand benchmark")
   FetchContent_MakeAvailable(eigenrand)
 endif()
 
@@ -45,7 +40,10 @@ set(CNPY_LIB ${PROJECT_NAME}-cnpy)
 add_library(${CNPY_LIB} STATIC cnpy.cpp)
 target_link_libraries(${CNPY_LIB} PUBLIC Eigen3::Eigen)
 target_include_directories(${CNPY_LIB} PUBLIC $<INSTALL_INTERFACE:./>)
-set_target_properties(${CNPY_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp)
+set_target_properties(
+  ${CNPY_LIB}
+  PROPERTIES POSITION_INDEPENDENT_CODE ON PUBLIC_HEADER cnpy.hpp
+)
 set_standard_output_directory(${CNPY_LIB})
 
 install(
@@ -79,10 +77,7 @@ endmacro()
 
 function(get_cpp_test_name name dir out_var)
   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "test-cpp" prefix ${dir})
-  set(${out_var}
-      "${PROJECT_NAME}-${prefix}-${name}"
-      PARENT_SCOPE
-  )
+  set(${out_var} "${PROJECT_NAME}-${prefix}-${name}" PARENT_SCOPE)
 endfunction()
 
 function(add_proxsuite_nlp_test name)
@@ -111,10 +106,7 @@ endfunction()
 
 function(get_cpp_bench_name name dir out_var)
   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "bench-cpp" prefix ${dir})
-  set(${out_var}
-      "${prefix}-${name}"
-      PARENT_SCOPE
-  )
+  set(${out_var} "${prefix}-${name}" PARENT_SCOPE)
 endfunction()
 
 function(add_proxsuite_nlp_bench name)
@@ -143,8 +135,9 @@ endif(WIN32)
 function(symlink_data_file filename)
   # filename should be relative
   execute_process(
-    COMMAND ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-            ${CMAKE_CURRENT_BINARY_DIR}/${filename}
+    COMMAND
+      ${CMAKE_COMMAND} -E ${LINK} ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+      ${CMAKE_CURRENT_BINARY_DIR}/${filename}
   )
 endfunction()
 

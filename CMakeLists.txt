@@ -5,8 +5,9 @@
 cmake_minimum_required(VERSION 3.12)
 
 set(PROJECT_NAME proxsuite-nlp)
-set(PROJECT_DESCRIPTION
-    "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds."
+set(
+  PROJECT_DESCRIPTION
+  "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds."
 )
 set(PROJECT_URL "https://github.com/Simple-Robotics/proxsuite-nlp")
 set(PROJECT_CUSTOM_HEADER_EXTENSION "hpp")
@@ -42,16 +43,17 @@ else()
   elseif(${CMAKE_VERSION} VERSION_LESS "3.14.0")
     message(
       FATAL_ERROR
-        "\nCan't find jrl-cmakemodules. Please either:\n"
-        "  - use git submodule: 'git submodule update --init'\n"
-        "  - or install https://github.com/jrl-umi3218/jrl-cmakemodules\n"
-        "  - or upgrade your CMake version to >= 3.14 to allow automatic fetching\n"
+      "\nCan't find jrl-cmakemodules. Please either:\n"
+      "  - use git submodule: 'git submodule update --init'\n"
+      "  - or install https://github.com/jrl-umi3218/jrl-cmakemodules\n"
+      "  - or upgrade your CMake version to >= 3.14 to allow automatic fetching\n"
     )
   else()
     message(STATUS "JRL cmakemodules not found. Let's fetch it.")
     include(FetchContent)
     FetchContent_Declare(
-      "jrl-cmakemodules" GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git"
+      "jrl-cmakemodules"
+      GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git"
     )
     FetchContent_MakeAvailable("jrl-cmakemodules")
     FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
@@ -83,33 +85,54 @@ apply_default_apple_configuration()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE
-      Release
-      CACHE STRING "Choose the type of build." FORCE
-  )
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
   # Set the possible values of build type for cmake-gui
   set_property(
-    CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+    CACHE CMAKE_BUILD_TYPE
+    PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
   )
 endif()
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_PYTHON_INTERFACE "Build the Python bindings" ON)
-option(BUILD_WITH_VERSION_SUFFIX "Build libraries with version appended to suffix" OFF)
-option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
+option(
+  BUILD_WITH_VERSION_SUFFIX
+  "Build libraries with version appended to suffix"
+  OFF
+)
+option(
+  ENABLE_TEMPLATE_INSTANTIATION
+  "Template instantiation of the main library"
+  ON
+)
 option(BUILD_EXAMPLES "Build the examples" ON)
 option(BUILD_BENCHMARK "Build the benchmarks" OFF)
 
 # --- OPTIONAL DEPENDENCIES -------------------------
-option(BUILD_WITH_PINOCCHIO_SUPPORT "Build the library with support for Pinocchio" ON)
-option(BUILD_WITH_PROXSUITE_SUPPORT "Build the library with ProxSuite's LDLT decomposition" OFF)
+option(
+  BUILD_WITH_PINOCCHIO_SUPPORT
+  "Build the library with support for Pinocchio"
+  ON
+)
+option(
+  BUILD_WITH_PROXSUITE_SUPPORT
+  "Build the library with ProxSuite's LDLT decomposition"
+  OFF
+)
 cmake_dependent_option(
-  GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF
-  BUILD_PYTHON_INTERFACE OFF
+  GENERATE_PYTHON_STUBS
+  "Generate the Python stubs associated to the Python library"
+  OFF
+  BUILD_PYTHON_INTERFACE
+  OFF
 )
 
 option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
-option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
+option(
+  CHECK_RUNTIME_MALLOC
+  "Check if some memory allocations are performed at runtime"
+  OFF
+)
 
 # Variable containing all the cflags definition relative to optional dependencies
 # and options
@@ -128,7 +151,11 @@ endif(CHECK_RUNTIME_MALLOC)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
   add_compile_definitions(PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION)
-  list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION")
+  list(
+    APPEND
+    CFLAGS_DEPENDENCIES
+    "-DPROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION"
+  )
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 macro(TAG_LIBRARY_VERSION target)
@@ -159,9 +186,12 @@ if(BUILD_PYTHON_INTERFACE)
   add_project_dependency(eigenpy 3.8.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.8.0")
 
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import platform; print(platform.python_implementation())"
+    COMMAND
+      ${PYTHON_EXECUTABLE} -c
+      "import platform; print(platform.python_implementation())"
     OUTPUT_VARIABLE _python_implementation_value
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
   )
   message(STATUS "Python compiler: ${_python_implementation_value}")
 endif(BUILD_PYTHON_INTERFACE)
@@ -180,63 +210,69 @@ file(GLOB_RECURSE LIB_HEADERS ${LIB_HEADER_DIR}/*.hpp ${LIB_HEADER_DIR}/*.hxx)
 set(LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/block-kind.cpp)
 
 if(ENABLE_TEMPLATE_INSTANTIATION)
-
-  set(LIB_TEMPLATE_SOURCES
-      ${PROJECT_SOURCE_DIR}/src/block-ldlt.cpp
-      ${PROJECT_SOURCE_DIR}/src/constraints.cpp
-      ${PROJECT_SOURCE_DIR}/src/constraint-set.cpp
-      ${PROJECT_SOURCE_DIR}/src/constraint-set-product.cpp
-      ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
-      ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
-      ${PROJECT_SOURCE_DIR}/src/function-base.cpp
-      ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
-      ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
-      ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
-      ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
-      ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
-      ${PROJECT_SOURCE_DIR}/src/linesearch-base.cpp
-      ${PROJECT_SOURCE_DIR}/src/linesearch-armijo.cpp
-      ${PROJECT_SOURCE_DIR}/src/results.cpp
-      ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
-      ${PROJECT_SOURCE_DIR}/src/workspace.cpp
-      ${PROJECT_SOURCE_DIR}/src/pdal.cpp
+  set(
+    LIB_TEMPLATE_SOURCES
+    ${PROJECT_SOURCE_DIR}/src/block-ldlt.cpp
+    ${PROJECT_SOURCE_DIR}/src/constraints.cpp
+    ${PROJECT_SOURCE_DIR}/src/constraint-set.cpp
+    ${PROJECT_SOURCE_DIR}/src/constraint-set-product.cpp
+    ${PROJECT_SOURCE_DIR}/src/manifold-base.cpp
+    ${PROJECT_SOURCE_DIR}/src/cartesian-product.cpp
+    ${PROJECT_SOURCE_DIR}/src/function-base.cpp
+    ${PROJECT_SOURCE_DIR}/src/squared-distance.cpp
+    ${PROJECT_SOURCE_DIR}/src/quadratic-residual.cpp
+    ${PROJECT_SOURCE_DIR}/src/cost-function.cpp
+    ${PROJECT_SOURCE_DIR}/src/cost-sum.cpp
+    ${PROJECT_SOURCE_DIR}/src/prox-solver.cpp
+    ${PROJECT_SOURCE_DIR}/src/linesearch-base.cpp
+    ${PROJECT_SOURCE_DIR}/src/linesearch-armijo.cpp
+    ${PROJECT_SOURCE_DIR}/src/results.cpp
+    ${PROJECT_SOURCE_DIR}/src/problem-base.cpp
+    ${PROJECT_SOURCE_DIR}/src/workspace.cpp
+    ${PROJECT_SOURCE_DIR}/src/pdal.cpp
   )
-  set(LIB_TEMPLATE_DECLARATIONS
-      ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
-      ${LIB_HEADER_DIR}/manifold-base.txx
-      ${LIB_HEADER_DIR}/function-base.txx
-      ${LIB_HEADER_DIR}/cost-function.txx
-      ${LIB_HEADER_DIR}/cost-sum.txx
-      ${LIB_HEADER_DIR}/prox-solver.txx
-      ${LIB_HEADER_DIR}/results.txx
-      ${LIB_HEADER_DIR}/problem-base.txx
-      ${LIB_HEADER_DIR}/workspace.txx
-      ${LIB_HEADER_DIR}/pdal.txx
-      ${LIB_HEADER_DIR}/linesearch.txx
-      ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
-      ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
-      ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx
+  set(
+    LIB_TEMPLATE_DECLARATIONS
+    ${LIB_HEADER_DIR}/linalg/block-ldlt.txx
+    ${LIB_HEADER_DIR}/manifold-base.txx
+    ${LIB_HEADER_DIR}/function-base.txx
+    ${LIB_HEADER_DIR}/cost-function.txx
+    ${LIB_HEADER_DIR}/cost-sum.txx
+    ${LIB_HEADER_DIR}/prox-solver.txx
+    ${LIB_HEADER_DIR}/results.txx
+    ${LIB_HEADER_DIR}/problem-base.txx
+    ${LIB_HEADER_DIR}/workspace.txx
+    ${LIB_HEADER_DIR}/pdal.txx
+    ${LIB_HEADER_DIR}/linesearch.txx
+    ${LIB_HEADER_DIR}/modelling/costs/squared-distance.txx
+    ${LIB_HEADER_DIR}/modelling/costs/quadratic-residual.txx
+    ${LIB_HEADER_DIR}/modelling/spaces/cartesian-product.txx
   )
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
-    list(APPEND LIB_TEMPLATE_SOURCES ${PROJECT_SOURCE_DIR}/src/multibody/rigid-transform-point.cpp
-         ${PROJECT_SOURCE_DIR}/src/multibody/spaces.cpp
+    list(
+      APPEND
+      LIB_TEMPLATE_SOURCES
+      ${PROJECT_SOURCE_DIR}/src/multibody/rigid-transform-point.cpp
+      ${PROJECT_SOURCE_DIR}/src/multibody/spaces.cpp
     )
-    list(APPEND LIB_TEMPLATE_DECLARATIONS
-         ${LIB_HEADER_DIR}/modelling/residuals/rigid-transform-point.txx
-         ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx
+    list(
+      APPEND
+      LIB_TEMPLATE_DECLARATIONS
+      ${LIB_HEADER_DIR}/modelling/residuals/rigid-transform-point.txx
+      ${LIB_HEADER_DIR}/modelling/spaces/multibody.txx
     )
   endif(BUILD_WITH_PINOCCHIO_SUPPORT)
   list(APPEND LIB_HEADERS ${LIB_TEMPLATE_DECLARATIONS})
   list(APPEND LIB_SOURCES ${LIB_TEMPLATE_SOURCES})
-
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 function(set_standard_output_directory target)
   set_target_properties(
     ${target}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin
-               LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
-               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+    PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin
+      LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+      ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
   )
 endfunction()
 
@@ -248,12 +284,19 @@ function(create_library)
   add_library(proxsuite::nlp ALIAS ${PROJECT_NAME})
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
   set_standard_output_directory(${PROJECT_NAME})
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN")
+  set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES LINKER_LANGUAGE CXX INSTALL_RPATH "\$ORIGIN"
+  )
   target_compile_definitions(
-    ${PROJECT_NAME} PUBLIC ${CURRENT_COMPILE_DEFINITIONS} $<$<PLATFORM_ID:Windows>:NOMINMAX>
+    ${PROJECT_NAME}
+    PUBLIC ${CURRENT_COMPILE_DEFINITIONS} $<$<PLATFORM_ID:Windows>:NOMINMAX>
   )
 
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX VERSION ${PROJECT_VERSION})
+  set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES LINKER_LANGUAGE CXX VERSION ${PROJECT_VERSION}
+  )
   if(BUILD_LIBRARY_WITH_VERSION_SUFFIX)
     tag_library_version(${PROJECT_NAME})
   endif()
@@ -266,19 +309,33 @@ function(create_library)
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
   target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)
   if(BUILD_WITH_PROXSUITE_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} PUBLIC proxsuite::proxsuite-vectorized)
+    target_link_libraries(
+      ${PROJECT_NAME}
+      PUBLIC proxsuite::proxsuite-vectorized
+    )
   endif()
   target_include_directories(
     ${PROJECT_NAME}
-    PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    PUBLIC
+      $<INSTALL_INTERFACE:include>
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
 
   set(MSVC_CMD_OPTIONS /bigobj)
-  target_compile_options(${PROJECT_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:${MSVC_CMD_OPTIONS}>)
+  target_compile_options(
+    ${PROJECT_NAME}
+    PUBLIC $<$<CXX_COMPILER_ID:MSVC>:${MSVC_CMD_OPTIONS}>
+  )
 
   foreach(headerFile ${LIB_HEADERS})
-    string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/" "" headerFileRelative ${headerFile})
+    string(
+      REGEX REPLACE
+      "${PROJECT_SOURCE_DIR}/"
+      ""
+      headerFileRelative
+      ${headerFile}
+    )
     get_filename_component(headerPath ${headerFileRelative} PATH)
     install(
       FILES ${headerFileRelative}
@@ -286,7 +343,6 @@ function(create_library)
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
   endforeach(headerFile ${LIB_HEADERS})
-
 endfunction()
 
 create_library()
@@ -297,8 +353,7 @@ add_source_group(LIB_SOURCES)
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${TARGETS_EXPORT_NAME}
-  INCLUDES
-  DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
@@ -317,10 +372,7 @@ endif()
 macro(EXPORT_VARIABLE var_name var_value)
   get_directory_property(has_parent PARENT_DIRECTORY)
   if(has_parent)
-    set(${var_name}
-        ${var_value}
-        PARENT_SCOPE
-    )
+    set(${var_name} ${var_value} PARENT_SCOPE)
   else()
     set(${var_name} ${var_value})
   endif()
