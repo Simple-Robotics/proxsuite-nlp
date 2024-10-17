@@ -5,7 +5,6 @@
 #include <Eigen/Core>
 #include <limits>
 #include <vector>
-#include <cassert>
 
 namespace proxsuite {
 namespace nlp {

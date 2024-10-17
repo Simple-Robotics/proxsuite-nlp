@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `fmt` formatter for `Eigen::WithFormat<T>` types
+
+### Changed
+
+- Remove redundant `#include <cassert>` in `math.hpp`
+
 ## [0.9.0] - 2024-10-14
 
 ### Fixed

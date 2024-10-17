@@ -2,6 +2,7 @@
 /// @copyright Copyright (C) 2023 LAAS-CNRS, INRIA
 #pragma once
 
+#include "proxsuite-nlp/math.hpp"
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
@@ -16,3 +17,7 @@ template <typename MatrixType>
 struct fmt::is_range<MatrixType,
                      proxsuite::nlp::enable_if_eigen_dense<MatrixType, char>>
     : std::false_type {};
+
+template <typename MatrixType>
+struct fmt::formatter<Eigen::WithFormat<MatrixType>>
+    : public fmt::ostream_formatter {};
