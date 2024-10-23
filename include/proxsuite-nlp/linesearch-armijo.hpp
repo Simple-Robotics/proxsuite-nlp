@@ -53,8 +53,10 @@ public:
 
   ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
 
-  template <typename Fn>
-  Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0, Scalar &alpha_try) {
+  using fun_t = std::function<Scalar(Scalar)>;
+
+  Scalar run(fun_t phi, const Scalar phi0, const Scalar dphi0,
+             Scalar &alpha_try) {
     const FunctionSample lower_bound(0., phi0, dphi0);
 
     alpha_try = 1.;
@@ -176,15 +178,18 @@ public:
       const FunctionSample &cand1 = samples[2];
       const Scalar &a0 = cand0.alpha;
       const Scalar &a1 = cand1.alpha;
+      Matrix2s alph_mat;
+      Vector2s coeffs_cubic_interpolant;
+      /// Solver for the 2x2 linear system
       alph_mat(0, 0) = a0 * a0 * a0;
       alph_mat(0, 1) = a0 * a0;
       alph_mat(1, 0) = a1 * a1 * a1;
       alph_mat(1, 1) = a1 * a1;
 
-      alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
-      alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
+      Vector2s alph_rhs{cand1.phi - phi0 - dphi0 * a1,
+                        cand0.phi - phi0 - dphi0 * a0};
 
-      decomp.compute(alph_mat);
+      Eigen::HouseholderQR<Matrix2s> decomp(alph_mat);
       coeffs_cubic_interpolant = decomp.solve(alph_rhs);
 
       const Scalar c3 = coeffs_cubic_interpolant(0);
@@ -219,12 +224,6 @@ protected:
   using Base::options;
   Polynomial interpolant;
   std::vector<FunctionSample> samples; // interpolation samples
-
-  Matrix2s alph_mat;
-  Vector2s alph_rhs;
-  Vector2s coeffs_cubic_interpolant;
-  /// Solver for the 2x2 linear system
-  Eigen::HouseholderQR<Matrix2s> decomp;
 };
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION
