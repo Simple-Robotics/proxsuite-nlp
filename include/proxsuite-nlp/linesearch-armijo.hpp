@@ -45,6 +45,7 @@ template <typename Scalar>
 class ArmijoLinesearch final : public Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
+  using Base::options_;
   using FunctionSample = typename Base::FunctionSample;
   using Polynomial = PolynomialTpl<Scalar>;
   using VectorXs = typename math_types<Scalar>::VectorXs;
@@ -71,26 +72,26 @@ public:
         break;
       } catch (const std::runtime_error &e) {
         alpha_try *= 0.5;
-        if (alpha_try <= options().alpha_min) {
-          alpha_try = options().alpha_min;
+        if (alpha_try <= options_.alpha_min) {
+          alpha_try = options_.alpha_min;
           break;
         }
       }
     }
 
-    if (std::abs(dphi0) < options().dphi_thresh) {
+    if (std::abs(dphi0) < options_.dphi_thresh) {
       return latest.phi;
     }
 
-    for (std::size_t i = 0; i < options().max_num_steps; i++) {
+    for (std::size_t i = 0; i < options_.max_num_steps; i++) {
 
       const Scalar dM = latest.phi - phi0;
-      if (dM <= options().armijo_c1 * alpha_try * dphi0) {
+      if (dM <= options_.armijo_c1 * alpha_try * dphi0) {
         break;
       }
 
       // compute next alpha try
-      LSInterpolation strat = options().interp_type;
+      LSInterpolation strat = options_.interp_type;
       if (strat == LSInterpolation::BISECTION) {
         alpha_try *= 0.5;
       } else {
@@ -119,15 +120,15 @@ public:
         }
 
         alpha_try = this->minimize_interpolant(
-            strat, options().contraction_min * alpha_try,
-            options().contraction_max * alpha_try);
+            strat, options_.contraction_min * alpha_try,
+            options_.contraction_max * alpha_try);
       }
 
       if (std::isnan(alpha_try)) {
         // handle NaN case
-        alpha_try = options().contraction_min * previous.alpha;
+        alpha_try = options_.contraction_min * previous.alpha;
       } else {
-        alpha_try = std::max(alpha_try, options().alpha_min);
+        alpha_try = std::max(alpha_try, options_.alpha_min);
       }
 
       try {
@@ -137,11 +138,11 @@ public:
         continue;
       }
 
-      if (alpha_try <= options().alpha_min) {
+      if (alpha_try <= options_.alpha_min) {
         break;
       }
     }
-    alpha_try = std::max(alpha_try, options().alpha_min);
+    alpha_try = std::max(alpha_try, options_.alpha_min);
     return latest.phi;
   }
 
@@ -221,7 +222,6 @@ public:
   }
 
 protected:
-  using Base::options;
   Polynomial interpolant;
   std::vector<FunctionSample> samples; // interpolation samples
 };

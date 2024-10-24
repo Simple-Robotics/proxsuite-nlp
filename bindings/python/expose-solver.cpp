@@ -57,7 +57,14 @@ void exposeSolver() {
       .value("LDLT_PROXSUITE", LDLTChoice::PROXSUITE)
       .export_values();
 
-  using LinesearchOptions = Linesearch<Scalar>::Options;
+  using Linesearch = Linesearch<Scalar>;
+  using LinesearchOptions = Linesearch::Options;
+  bp::class_<Linesearch>("Linesearch", bp::no_init)
+      .def(bp::init<const LinesearchOptions &>(("self"_a, "options")))
+      .def_readwrite("options", &Linesearch::options_);
+  bp::class_<ArmijoLinesearch<Scalar>, bp::bases<Linesearch>>(
+      "ArmijoLinesearch", bp::no_init)
+      .def(bp::init<const LinesearchOptions &>(("self"_a, "options")));
   bp::class_<LinesearchOptions>("LinesearchOptions", "Linesearch options.",
                                 bp::init<>(("self"_a), "Default constructor."))
       .def_readwrite("armijo_c1", &LinesearchOptions::armijo_c1)
