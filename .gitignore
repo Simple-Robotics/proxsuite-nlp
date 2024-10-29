@@ -1,4 +1,9 @@
 **/__pycache__/
 build*/
+!build_scripts/
 .vscode/
 .cache/
+
+# pixi environments
+.pixi
+*.egg-info

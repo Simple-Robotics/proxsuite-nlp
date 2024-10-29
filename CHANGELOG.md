@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `fmt` formatter for `Eigen::WithFormat<T>` types
+- Add Pixi support ([#113](https://github.com/Simple-Robotics/proxsuite-nlp/pull/113))
 
 ### Changed
 

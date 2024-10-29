@@ -21,6 +21,7 @@ using CostBase = CostFunctionBaseTpl<Scalar>;
 using CostPtr = shared_ptr<CostBase>;
 using C2Function = C2FunctionTpl<Scalar>;
 
+#ifdef PROXSUITE_NLP_WITH_PINOCCHIO
 struct CustomC2Func : C2FunctionTpl<Scalar> {
 
   CustomC2Func() : C2FunctionTpl<Scalar>(SE2(), 1) {}
@@ -32,6 +33,7 @@ struct CustomC2Func : C2FunctionTpl<Scalar> {
     Jout.setZero();
   }
 };
+#endif
 
 auto function_that_takes_a_cost(const CostPtr &) {
   // does nothing

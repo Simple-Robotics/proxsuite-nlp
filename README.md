@@ -16,6 +16,23 @@ From [our channel](https://anaconda.org/simple-robotics/proxsuite-nlp)
 conda install -c simple-robotics proxsuite-nlp
 ```
 
+### From source with Pixi
+
+To build **proxsuite-nlp** from source the easiest way is to use [Pixi](https://pixi.sh/latest/#installation).
+
+[Pixi](https://pixi.sh/latest/) is a cross-platform package management tool for developers that
+will install all required dependencies in `.pixi` directory.
+It's used by our CI agent so you have the guarantee to get the right dependencies.
+
+Run the following command to install dependencies, configure, build and test the project:
+
+```bash
+pixi run test
+```
+
+The project will be built in the `build` directory.
+You can run `pixi shell` and build the project with `cmake` and `ninja` manually.
+
 ### From source
 
 Clone this repo using
@@ -47,7 +64,6 @@ cmake --build build/ --config Release --target install
 * numpy
 * matplotlib
 * typed-argument-parser
-* tqdm
 * meshcat-python
 
 ### Notes
