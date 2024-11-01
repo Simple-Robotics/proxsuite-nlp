@@ -45,6 +45,7 @@ template <typename Scalar>
 class ArmijoLinesearch final : public Linesearch<Scalar> {
 public:
   using Base = Linesearch<Scalar>;
+  using Base::options_;
   using FunctionSample = typename Base::FunctionSample;
   using Polynomial = PolynomialTpl<Scalar>;
   using VectorXs = typename math_types<Scalar>::VectorXs;
@@ -53,8 +54,10 @@ public:
 
   ArmijoLinesearch(const typename Base::Options &options) : Base(options) {}
 
-  template <typename Fn>
-  Scalar run(Fn phi, const Scalar phi0, const Scalar dphi0, Scalar &alpha_try) {
+  using fun_t = std::function<Scalar(Scalar)>;
+
+  Scalar run(fun_t phi, const Scalar phi0, const Scalar dphi0,
+             Scalar &alpha_try) {
     const FunctionSample lower_bound(0., phi0, dphi0);
 
     alpha_try = 1.;
@@ -69,26 +72,26 @@ public:
         break;
       } catch (const std::runtime_error &e) {
         alpha_try *= 0.5;
-        if (alpha_try <= options().alpha_min) {
-          alpha_try = options().alpha_min;
+        if (alpha_try <= options_.alpha_min) {
+          alpha_try = options_.alpha_min;
           break;
         }
       }
     }
 
-    if (std::abs(dphi0) < options().dphi_thresh) {
+    if (std::abs(dphi0) < options_.dphi_thresh) {
       return latest.phi;
     }
 
-    for (std::size_t i = 0; i < options().max_num_steps; i++) {
+    for (std::size_t i = 0; i < options_.max_num_steps; i++) {
 
       const Scalar dM = latest.phi - phi0;
-      if (dM <= options().armijo_c1 * alpha_try * dphi0) {
+      if (dM <= options_.armijo_c1 * alpha_try * dphi0) {
         break;
       }
 
       // compute next alpha try
-      LSInterpolation strat = options().interp_type;
+      LSInterpolation strat = options_.interp_type;
       if (strat == LSInterpolation::BISECTION) {
         alpha_try *= 0.5;
       } else {
@@ -117,15 +120,15 @@ public:
         }
 
         alpha_try = this->minimize_interpolant(
-            strat, options().contraction_min * alpha_try,
-            options().contraction_max * alpha_try);
+            strat, options_.contraction_min * alpha_try,
+            options_.contraction_max * alpha_try);
       }
 
       if (std::isnan(alpha_try)) {
         // handle NaN case
-        alpha_try = options().contraction_min * previous.alpha;
+        alpha_try = options_.contraction_min * previous.alpha;
       } else {
-        alpha_try = std::max(alpha_try, options().alpha_min);
+        alpha_try = std::max(alpha_try, options_.alpha_min);
       }
 
       try {
@@ -135,11 +138,11 @@ public:
         continue;
       }
 
-      if (alpha_try <= options().alpha_min) {
+      if (alpha_try <= options_.alpha_min) {
         break;
       }
     }
-    alpha_try = std::max(alpha_try, options().alpha_min);
+    alpha_try = std::max(alpha_try, options_.alpha_min);
     return latest.phi;
   }
 
@@ -176,15 +179,18 @@ public:
       const FunctionSample &cand1 = samples[2];
       const Scalar &a0 = cand0.alpha;
       const Scalar &a1 = cand1.alpha;
+      Matrix2s alph_mat;
+      Vector2s coeffs_cubic_interpolant;
+      /// Solver for the 2x2 linear system
       alph_mat(0, 0) = a0 * a0 * a0;
       alph_mat(0, 1) = a0 * a0;
       alph_mat(1, 0) = a1 * a1 * a1;
       alph_mat(1, 1) = a1 * a1;
 
-      alph_rhs(0) = cand1.phi - phi0 - dphi0 * a1;
-      alph_rhs(1) = cand0.phi - phi0 - dphi0 * a0;
+      Vector2s alph_rhs{cand1.phi - phi0 - dphi0 * a1,
+                        cand0.phi - phi0 - dphi0 * a0};
 
-      decomp.compute(alph_mat);
+      Eigen::HouseholderQR<Matrix2s> decomp(alph_mat);
       coeffs_cubic_interpolant = decomp.solve(alph_rhs);
 
       const Scalar c3 = coeffs_cubic_interpolant(0);
@@ -216,15 +222,8 @@ public:
   }
 
 protected:
-  using Base::options;
   Polynomial interpolant;
   std::vector<FunctionSample> samples; // interpolation samples
-
-  Matrix2s alph_mat;
-  Vector2s alph_rhs;
-  Vector2s coeffs_cubic_interpolant;
-  /// Solver for the 2x2 linear system
-  Eigen::HouseholderQR<Matrix2s> decomp;
 };
 
 #ifdef PROXSUITE_NLP_ENABLE_TEMPLATE_INSTANTIATION

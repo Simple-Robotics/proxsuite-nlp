@@ -52,10 +52,10 @@ public:
     FunctionSample(T a, T v, T g) : alpha(a), phi(v), dphi(g), valid(true) {}
   };
 
-  const Linesearch::Options &options() const { return options_; }
   void setOptions(const Linesearch::Options &options) { options_ = options; }
 
-private:
+  void reset() {}
+
   Linesearch::Options options_;
 };
 

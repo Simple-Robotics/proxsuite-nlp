@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Remove redundant `#include <cassert>` in `math.hpp`
+- linesearch-armijo.hpp : some changes
+- linesearch-base.hpp : add reset()
+- linesearch : remove getter and setter for options, make struct public
+- python : linesearch : expose linesearch classes to Python
 
 ## [0.9.0] - 2024-10-14
 
