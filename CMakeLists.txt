@@ -65,11 +65,29 @@ set(DOXYGEN_USE_TEMPLATE_CSS YES)
 set(DOXYGEN_HTML_HEADER "${PROJECT_SOURCE_DIR}/doc/header.html")
 set(DOXYGEN_HTML_STYLESHEET "")
 
-# Use BoostConfig module distributed by boost library instead of using FindBoost module distributed
-# by CMake
+# ----------------------------------------------------
+# --- Policy -----------------------------------------
+# CMake Policy setup
+# ----------------------------------------------------
+# Policy can be removed when cmake_minimum_required is updated.
+
+# We also set CMAKE_POLICY_DEFAULT_CMPXXXX because CMake modules can reset
+# policy and redefine some macros like `find_dependency` that will not use our
+# policy.
+
+# Use BoostConfig module distributed by boost library instead of using FindBoost
+# module distributed by CMake (to remove in 3.30). This policy is not working
+# when using clang-cl.
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
+  set(CMAKE_POLICY_DEFAULT_CMP0167 NEW)
 endif()
+# install() DESTINATION paths are normalized (to remove in 3.31).
+if(POLICY CMP0177)
+  cmake_policy(SET CMP0177 NEW)
+  set(CMAKE_POLICY_DEFAULT_CMP0177 NEW)
+endif()
+
 include(${JRL_CMAKE_MODULES}/base.cmake)
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
@@ -134,8 +152,8 @@ option(
   OFF
 )
 
-# Variable containing all the cflags definition relative to optional dependencies
-# and options
+# Variable containing all the cflags definition relative to optional
+# dependencies and options
 set(CFLAGS_DEPENDENCIES)
 
 if(INITIALIZE_WITH_NAN)
@@ -165,8 +183,12 @@ endmacro(TAG_LIBRARY_VERSION)
 # ----------------------------------------------------
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
-add_project_dependency(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.3.7")
-add_project_dependency(fmt "9.1.0...<12" REQUIRED PKG_CONFIG_REQUIRES "fmt >= 9.1.0")
+add_project_dependency(Eigen3 3.3.7 REQUIRED PKG_CONFIG_REQUIRES
+                       "eigen3 >= 3.3.7"
+)
+add_project_dependency(fmt "9.1.0...<12" REQUIRED PKG_CONFIG_REQUIRES
+                       "fmt >= 9.1.0"
+)
 
 if(BUILD_WITH_PROXSUITE_SUPPORT)
   add_project_dependency(proxsuite REQUIRED)
@@ -183,7 +205,9 @@ add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development.Module NumPy Development)
   findpython()
-  add_project_dependency(eigenpy 3.8.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 3.8.0")
+  add_project_dependency(eigenpy 3.8.0 REQUIRED PKG_CONFIG_REQUIRES
+                         "eigenpy >= 3.8.0"
+  )
 
   execute_process(
     COMMAND
@@ -198,7 +222,9 @@ endif(BUILD_PYTHON_INTERFACE)
 
 if(BUILD_WITH_PINOCCHIO_SUPPORT)
   message(STATUS "Building with Pinocchio support.")
-  add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 3.0.0")
+  add_project_dependency(pinocchio REQUIRED PKG_CONFIG_REQUIRES
+                         "pinocchio >= 3.0.0"
+  )
   add_compile_definitions(PROXSUITE_NLP_WITH_PINOCCHIO)
   list(APPEND CFLAGS_DEPENDENCIES "-DPROXSUITE_NLP_WITH_PINOCCHIO")
 endif(BUILD_WITH_PINOCCHIO_SUPPORT)
