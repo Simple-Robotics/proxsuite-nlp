@@ -661,3 +661,7 @@ BunchKaufman<MatrixType_, UpLo_>::compute(const EigenBase<InputType> &a) {
   return *this;
 }
 } // namespace Eigen
+
+namespace proxsuite::nlp {
+using Eigen::BunchKaufman;
+}

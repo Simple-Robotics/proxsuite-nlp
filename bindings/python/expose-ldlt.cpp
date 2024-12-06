@@ -47,7 +47,7 @@ void exposeLdltRoutines() {
   using DenseLDLT = linalg::DenseLDLT<Scalar>;
   bp::class_<DenseLDLT>("DenseLDLT", bp::no_init).def(LDLTVisitor<DenseLDLT>());
 
-  using BunchKaufman_t = Eigen::BunchKaufman<context::MatrixXs, Eigen::Lower>;
+  using BunchKaufman_t = BunchKaufman<context::MatrixXs, Eigen::Lower>;
   bp::class_<BunchKaufman_t>("BunchKaufman", bp::no_init)
       .def(bp::init<>("self"_a))
       .def(LDLTVisitor<BunchKaufman_t>())

@@ -36,7 +36,7 @@ template <typename Scalar,
           class MatrixType = typename math_types<Scalar>::MatrixXs>
 using LDLTVariant =
     boost::variant<linalg::DenseLDLT<Scalar>, linalg::BlockLDLT<Scalar>,
-                   Eigen::LDLT<MatrixType>, Eigen::BunchKaufman<MatrixType>
+                   Eigen::LDLT<MatrixType>, BunchKaufman<MatrixType>
 #ifdef PROXSUITE_NLP_USE_PROXSUITE_LDLT
                    ,
                    linalg::ProxSuiteLDLTWrapper<Scalar>
@@ -109,7 +109,7 @@ LDLTVariant<Scalar> allocate_ldlt_from_sizes(const std::vector<isize> &nprims,
   case LDLTChoice::DENSE:
     return linalg::DenseLDLT<Scalar>(size);
   case LDLTChoice::BUNCHKAUFMAN:
-    return Eigen::BunchKaufman<MatrixXs>(size);
+    return BunchKaufman<MatrixXs>(size);
   case LDLTChoice::BLOCKSPARSE: {
     auto structure = create_default_block_structure(nprims, nduals);
 
@@ -136,7 +136,7 @@ namespace internal {
 /// Compute signature of matrix from Bunch-Kaufman factorization.
 template <typename MatrixType, typename Signature, int UpLo>
 void bunch_kaufman_compute_signature(
-    Eigen::BunchKaufman<MatrixType, UpLo> const &factor, Signature &signature) {
+    BunchKaufman<MatrixType, UpLo> const &factor, Signature &signature) {
   using Eigen::Index;
   using Scalar = typename MatrixType::Scalar;
   using Real = typename Eigen::NumTraits<Scalar>::Real;
@@ -187,7 +187,7 @@ struct ComputeSignatureVisitor {
   }
 
   template <typename MatType>
-  void operator()(const Eigen::BunchKaufman<MatType> &facto) const {
+  void operator()(const BunchKaufman<MatType> &facto) const {
     internal::bunch_kaufman_compute_signature(facto, signature);
   }
   Eigen::VectorXi &signature;
