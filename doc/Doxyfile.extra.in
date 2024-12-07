@@ -5,7 +5,7 @@ INPUT                   = @PROJECT_SOURCE_DIR@/doc \
 
 RECURSIVE               = YES
 
-FILE_PATTERNS           = *.cc *.cpp *.h *.hpp *.dox *.md *.py
+FILE_PATTERNS           = *.cpp *.hxx *.h *.hpp *.dox *.md
 
 # Document members in declaration order
 SORT_MEMBER_DOCS        = NO
@@ -13,9 +13,9 @@ SORT_BRIEF_DOCS         = NO
 SORT_MEMBERS_CTORS_1ST  = YES
 
 GENERATE_TESTLIST       = YES
-EXTRACT_STATIC          = YES
+EXTRACT_ALL             = NO
+EXTRACT_ANON_NSPACES    = NO
 
-EXTRACT_PRIV_VIRTUAL    = YES
 ENABLE_PREPROCESSING    = YES
 MACRO_EXPANSION         = YES
 EXPAND_ONLY_PREDEF      = YES
@@ -23,9 +23,7 @@ PREDEFINED              += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
                            PROXSUITE_NLP_DYNAMIC_TYPEDEFS
 
 FULL_PATH_NAMES         = YES
-EXCLUDE_SYMBOLS         = *::internal, internal::*, *::internal::*
-# Do not show source files
-EXCLUDE_PATTERNS        = *.hxx
+EXCLUDE_SYMBOLS         = std, xyz, *::internal, internal::*, *::internal::*
 
 INCLUDE_PATH            = @PROJECT_SOURCE_DIR@/include
 
