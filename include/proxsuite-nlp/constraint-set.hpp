@@ -77,7 +77,7 @@ public:
   virtual void computeActiveSet(const ConstVectorRef &z,
                                 Eigen::Ref<ActiveType> out) const = 0;
 
-  virtual ~ConstraintSetTpl<Scalar>() = default;
+  virtual ~ConstraintSetTpl() = default;
 
   bool operator==(const ConstraintSetTpl<Scalar> &rhs) { return this == &rhs; }
 
