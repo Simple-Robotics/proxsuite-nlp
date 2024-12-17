@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- constraint-set.hpp : remove template-id for destructor
+
 ## [0.10.0] - 2024-10-14
 
 ### Added
