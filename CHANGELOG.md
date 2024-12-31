@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - constraint-set.hpp : remove template-id for destructor
+- Only link against needed pinocchio libraries ([#118](https://github.com/Simple-Robotics/proxsuite-nlp/pull/118))
 
 ## [0.10.0] - 2024-10-14
 
