@@ -26,7 +26,7 @@ if(BUILD_WITH_PINOCCHIO_SUPPORT)
   add_proxsuite_nlp_example(ur5-ik.cpp)
   target_link_libraries(
     ${PROJECT_NAME}-example-ur5-ik
-    PUBLIC example-robot-data::example-robot-data
+    PUBLIC example-robot-data::example-robot-data pinocchio::pinocchio_parsers
   )
 endif()
 

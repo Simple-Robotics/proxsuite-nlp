@@ -328,7 +328,7 @@ function(create_library)
   endif()
 
   if(BUILD_WITH_PINOCCHIO_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio)
+    target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio_default)
   endif()
 
   target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
