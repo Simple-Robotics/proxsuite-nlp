@@ -4,14 +4,14 @@ ci:
   autoupdate_schedule: quarterly
 repos:
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v18.1.8
+    rev: v19.1.6
     hooks:
     - id: clang-format
       types_or: []
       types: [text]
       files: '\.(cpp|cxx|c|h|hpp|hxx|txx)$'
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -28,14 +28,14 @@ repos:
             )$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: 'v0.6.3'
+    rev: 'v0.8.6'
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/BlankSpruce/gersemi
-    rev: 0.15.1
+    rev: 0.17.1
     hooks:
       - id: gersemi
   - repo: https://github.com/Lucas-C/pre-commit-hooks
