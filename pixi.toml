@@ -1,6 +1,6 @@
 [project]
 name = "proxsuite-nlp"
-version = "0.10.0"
+version = "0.10.1"
 description = "A primal-dual augmented Lagrangian-type solver for nonlinear programming on manifolds"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
