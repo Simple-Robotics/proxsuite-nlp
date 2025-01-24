@@ -43,7 +43,7 @@ HTML_EXTRA_STYLESHEET   = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome.css
 HTML_EXTRA_FILES        = @PROJECT_SOURCE_DIR@/doc/doxygen-awesome-darkmode-toggle.js
 HTML_COLORSTYLE         = LIGHT
 
-TAGFILES                =
+MATHJAX_VERSION         = MathJax_3
 
 SHOW_FILES              = YES
 SHOW_NAMESPACES         = YES
