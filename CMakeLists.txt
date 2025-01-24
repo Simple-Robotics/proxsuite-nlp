@@ -61,9 +61,7 @@ else()
 endif()
 
 set(DOXYGEN_USE_MATHJAX YES)
-set(DOXYGEN_USE_TEMPLATE_CSS YES)
 set(DOXYGEN_HTML_HEADER "${PROJECT_SOURCE_DIR}/doc/header.html")
-set(DOXYGEN_HTML_STYLESHEET "")
 
 # ----------------------------------------------------
 # --- Policy -----------------------------------------

@@ -48,8 +48,6 @@ TAGFILES                =
 SHOW_FILES              = YES
 SHOW_NAMESPACES         = YES
 
-MATHJAX_FORMAT          = SVG
-
 SOURCE_BROWSER          = YES
 
 ALPHABETICAL_INDEX      = YES
