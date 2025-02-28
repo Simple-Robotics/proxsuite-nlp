@@ -11,6 +11,7 @@
 #include <proxsuite-nlp/cost-sum.hpp>
 #include <proxsuite-nlp/prox-solver.hpp>
 #include <proxsuite-nlp/modelling/constraints.hpp>
+#include <proxsuite-nlp/fmt-hessian-approx.hpp>
 
 #include <boost/filesystem/path.hpp>
 
@@ -70,6 +71,11 @@ struct FramePosition : C2FunctionTpl<Scalar> {
 
 int main() {
 
+  // solve with different hessian approximations
+  std::vector<HessianApprox> hess_approximations = {
+      HessianApprox::EXACT, HessianApprox::GAUSS_NEWTON, HessianApprox::BFGS,
+      HessianApprox::IDENTITY};
+
   const std::string ee_link_name = "tool0";
   Model model = loadModel();
   Space space{model};
@@ -106,19 +112,23 @@ int main() {
     problem.addConstraint(cstrobj);
   }
 
-  ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
-                                  proxsuite::nlp::VERBOSE);
-  solver.setup();
-  solver.solve(q0);
+  for (auto hess_approx : hess_approximations) {
+    fmt::print("Solving with hessian approximation: {}\n", hess_approx);
+    ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
+                                    proxsuite::nlp::QUIET);
+    solver.hess_approx = hess_approx;
+    solver.max_iters = 500;
+    solver.setup();
+    solver.solve(q0);
 
-  ResultsTpl<Scalar> const &results = *solver.results_;
-  WorkspaceTpl<Scalar> const &ws = *solver.workspace_;
-  std::cout << results << std::endl;
+    ResultsTpl<Scalar> const &results = *solver.results_;
+    WorkspaceTpl<Scalar> const &ws = *solver.workspace_;
+    std::cout << results << std::endl;
 
-  fmt::print("Optimal cost: {}\n", ws.objective_value);
-  fmt::print("Optimal cost grad: {}\n", ws.objective_gradient.transpose());
-  auto opt_frame_pos = (*fn)(results.x_opt);
-  fmt::print("Optimal frame pos: {}\n", opt_frame_pos.transpose());
-
+    fmt::print("Optimal cost: {}\n", ws.objective_value);
+    fmt::print("Optimal cost grad: {}\n", ws.objective_gradient.transpose());
+    auto opt_frame_pos = (*fn)(results.x_opt);
+    fmt::print("Optimal frame pos: {}\n\n", opt_frame_pos.transpose());
+  }
   return 0;
 }
