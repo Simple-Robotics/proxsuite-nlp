@@ -5,6 +5,8 @@
 
 using namespace proxsuite::nlp;
 
+// Tests the BFGS inverse Hessian update by verifying it follows the standard
+// formula.
 BOOST_AUTO_TEST_CASE(test_inverse_hessian_update) {
   const long nx = 4;
   using BFGSStrategy_t = BFGSStrategy<Scalar>; // default to InverseHessian
@@ -39,6 +41,8 @@ BOOST_AUTO_TEST_CASE(test_inverse_hessian_update) {
   BOOST_TEST_CHECK(H.isApprox(H_inv_expected, 1e-6));
 }
 
+// Tests the BFGS Hessian update by verifying it follows the standard DFP
+// formula.
 BOOST_AUTO_TEST_CASE(test_hessian_update) {
   const long nx = 4;
   using BFGSStrategy_t = BFGSStrategy<Scalar, BFGSType::Hessian>;
@@ -74,6 +78,8 @@ BOOST_AUTO_TEST_CASE(test_hessian_update) {
   BOOST_TEST_CHECK(H.isApprox(H_expected, 1e-6));
 }
 
+// Tests whether the BFGS inverse Hessian approximation converges to the true
+// inverse Hessian.
 BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
   const long nx = 4;
   using BFGSStrategy_t = BFGSStrategy<double, BFGSType::InverseHessian>;
@@ -105,6 +111,7 @@ BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
   BOOST_TEST_CHECK(bfgs.M.isApprox(H_inv, 1e-5));
 }
 
+// Tests whether the BFGS Hessian approximation converges to the true Hessian
 BOOST_AUTO_TEST_CASE(test_bfgs_hessian) {
   const long nx = 4;
   using BFGSStrategy_t = BFGSStrategy<double, BFGSType::Hessian>;
