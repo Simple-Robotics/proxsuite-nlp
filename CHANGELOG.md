@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `BfgsStrategy` to estimate (inverse) Hessian and use in Euclidian example ([#92](https://github.com/Simple-Robotics/proxsuite-nlp/pull/92))
+- Add `BfgsStrategy` to estimate (inverse) Hessian and use it in Euclidian example ([#92](https://github.com/Simple-Robotics/proxsuite-nlp/pull/92))
 
 ## [0.10.1] - 2025-01-24
 

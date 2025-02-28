@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2024 INRIA
+/// @copyright Copyright (C) 2024-2025 INRIA
 #pragma once
 
 #include <fmt/ostream.h>
