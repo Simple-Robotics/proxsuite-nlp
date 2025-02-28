@@ -69,7 +69,7 @@ public:
       V.noalias() = MatrixXs::Identity(s.size(), s.size()) - xy_transpose / sy;
       VMinv.noalias() = V * hessian;
       VMinvVt.noalias() = VMinv * V.transpose();
-      hessian = VMinvVt + xx_transpose / sy;
+      hessian.noalias() = VMinvVt + xx_transpose / sy;
       is_psd = true;
     } else {
       is_psd = false;
