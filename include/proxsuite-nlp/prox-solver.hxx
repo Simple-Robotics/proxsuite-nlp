@@ -228,14 +228,21 @@ template <typename Scalar>
 void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
     const ConstVectorRef &x, Workspace &workspace, boost::mpl::true_) const {
   this->computeProblemDerivatives(x, workspace, boost::mpl::false_());
-  if (hess_approx == HessianApprox::BFGS) {
+
+  switch (hess_approx) {
+  case HessianApprox::BFGS:
     bfgs_strategy_.update(x, workspace.objective_gradient);
     workspace.objective_hessian = bfgs_strategy_.M;
-  } else if (hess_approx == HessianApprox::IDENTITY) {
+    break;
+
+  case HessianApprox::IDENTITY:
     workspace.objective_hessian.setIdentity();
-  } else {
+    break;
+
+  default: // handle both EXACT and GAUSS_NEWTON
     problem_->computeHessians(x, workspace,
                               hess_approx == HessianApprox::EXACT);
+    break;
   }
 }
 
