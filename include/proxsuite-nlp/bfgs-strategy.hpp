@@ -1,5 +1,5 @@
 /// @file
-/// @copyright Copyright (C) 2024 INRIA
+/// @copyright Copyright (C) 2024-2025 INRIA
 #pragma once
 
 #include "proxsuite-nlp/fwd.hpp"
@@ -17,6 +17,11 @@ class BFGSStrategy {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
 
 public:
+  BFGSStrategy()
+      : M(), is_init(false), is_psd(false), x_prev(), g_prev(), s(), y(),
+        xx_transpose(), xy_transpose(), V(), VMinv(), VMinvVt(),
+        is_valid(false) {}
+
   explicit BFGSStrategy(const int num_vars)
       : M(MatrixXs::Identity(num_vars, num_vars)), is_init(false), is_psd(true),
         x_prev(VectorXs::Zero(num_vars)), g_prev(VectorXs::Zero(num_vars)),
@@ -25,12 +30,17 @@ public:
         xy_transpose(MatrixXs::Zero(num_vars, num_vars)),
         V(MatrixXs::Zero(num_vars, num_vars)),
         VMinv(MatrixXs::Zero(num_vars, num_vars)),
-        VMinvVt(MatrixXs::Zero(num_vars, num_vars)) {
+        VMinvVt(MatrixXs::Zero(num_vars, num_vars)), is_valid(true) {
     x_prev = VectorXs::Zero(num_vars);
     g_prev = VectorXs::Zero(num_vars);
   }
 
   void init(const ConstVectorRef &x0, const ConstVectorRef &g0) {
+    if (!is_valid) {
+      throw std::runtime_error("Cannot initialize an invalid BFGSStrategy. Use "
+                               "the constructor with num_vars first.");
+    }
+
     x_prev = x0;
     g_prev = g0;
     is_init = true;
@@ -62,6 +72,8 @@ public:
     PROXSUITE_NLP_NOMALLOC_END;
   }
 
+  bool isValid() const { return is_valid; }
+
 public:
   MatrixXs M; // (inverse of the) Hessian approximation
   bool is_init;
@@ -79,6 +91,7 @@ private:
   MatrixXs V;
   MatrixXs VMinv;
   MatrixXs VMinvVt;
+  bool is_valid;
 };
 
 // Specialization of update_impl method for BFGSType::InverseHessian

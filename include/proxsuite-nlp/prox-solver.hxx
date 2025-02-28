@@ -229,8 +229,8 @@ void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
     const ConstVectorRef &x, Workspace &workspace, boost::mpl::true_) const {
   this->computeProblemDerivatives(x, workspace, boost::mpl::false_());
   if (hess_approx == HessianApprox::BFGS) {
-    bfgs_strategy_->update(x, workspace.objective_gradient);
-    workspace.objective_hessian = bfgs_strategy_->M;
+    bfgs_strategy_.update(x, workspace.objective_gradient);
+    workspace.objective_hessian = bfgs_strategy_.M;
   } else if (hess_approx == HessianApprox::IDENTITY) {
     workspace.objective_hessian.setIdentity();
   } else {

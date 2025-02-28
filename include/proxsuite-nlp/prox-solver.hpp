@@ -73,7 +73,7 @@ public:
   LinesearchStrategy ls_strat = LinesearchStrategy::ARMIJO;
   MultiplierUpdateMode mul_update_mode = MultiplierUpdateMode::NEWTON;
 
-  unique_ptr<BFGS> bfgs_strategy_;
+  mutable BFGS bfgs_strategy_;
 
   /// linear algebra opts
   std::size_t max_refinement_steps_ = 5;
@@ -150,7 +150,8 @@ public:
     if (hess_approx == HessianApprox::BFGS) {
       // TODO: work on implementation of BFGS on manifolds
       if (problem_->ndx() == problem_->nx()) {
-        bfgs_strategy_ = std::make_unique<BFGS>(problem_->ndx());
+        BFGS valid_bfgs_strategy_ = BFGS(problem_->ndx());
+        bfgs_strategy_ = std::move(valid_bfgs_strategy_);
       } else {
         throw std::runtime_error("BFGS for hessian approximation currently "
                                  "only works for Euclidean manifolds.");
