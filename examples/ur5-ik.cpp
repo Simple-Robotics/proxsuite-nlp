@@ -76,44 +76,44 @@ int main() {
       HessianApprox::EXACT, HessianApprox::GAUSS_NEWTON, HessianApprox::BFGS,
       HessianApprox::IDENTITY};
 
+  const std::string ee_link_name = "tool0";
+  Model model = loadModel();
+  Space space{model};
+  pin::FrameIndex fid = model.getFrameId(ee_link_name);
+
+  Vector3s ref(1.0, 0., 0.2);
+  auto fn = std::make_shared<FramePosition>(space, fid, ref);
+
+  auto q0 = pin::neutral(model);
+  MatrixXs w1(3, 3);
+  w1.setIdentity();
+  w1 *= 4.0;
+  MatrixXs w2(model.nv, model.nv);
+  w2.setIdentity();
+  w2 *= 1e-2;
+
+  auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
+  auto cost2 =
+      std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
+  auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
+  cost->addComponent(cost1);
+  cost->addComponent(cost2);
+
+  Problem problem(space, cost);
+
+  constexpr bool has_joint_lims = true;
+  if (has_joint_lims) {
+    BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
+                                      model.upperPositionLimit);
+    ConstraintObjectTpl<Scalar> cstrobj(
+        std::make_shared<ManifoldDifferenceToPoint<Scalar>>(PolyManifold{space},
+                                                            q0),
+        box_cstr);
+    problem.addConstraint(cstrobj);
+  }
+
   for (auto hess_approx : hess_approximations) {
     fmt::print("Solving with hessian approximation: {}\n", hess_approx);
-    const std::string ee_link_name = "tool0";
-    Model model = loadModel();
-    Space space{model};
-    pin::FrameIndex fid = model.getFrameId(ee_link_name);
-
-    Vector3s ref(1.0, 0., 0.2);
-    auto fn = std::make_shared<FramePosition>(space, fid, ref);
-
-    auto q0 = pin::neutral(model);
-    MatrixXs w1(3, 3);
-    w1.setIdentity();
-    w1 *= 4.0;
-    MatrixXs w2(model.nv, model.nv);
-    w2.setIdentity();
-    w2 *= 1e-2;
-
-    auto cost1 = std::make_shared<QuadraticResidualCostTpl<Scalar>>(fn, w1);
-    auto cost2 =
-        std::make_shared<QuadraticDistanceCostTpl<Scalar>>(space, q0, w2);
-    auto cost = std::make_shared<CostSumTpl<Scalar>>(space.nx(), space.ndx());
-    cost->addComponent(cost1);
-    cost->addComponent(cost2);
-
-    Problem problem(space, cost);
-
-    constexpr bool has_joint_lims = true;
-    if (has_joint_lims) {
-      BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
-                                        model.upperPositionLimit);
-      ConstraintObjectTpl<Scalar> cstrobj(
-          std::make_shared<ManifoldDifferenceToPoint<Scalar>>(
-              PolyManifold{space}, q0),
-          box_cstr);
-      problem.addConstraint(cstrobj);
-    }
-
     ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
                                     proxsuite::nlp::QUIET);
     solver.hess_approx = hess_approx;
