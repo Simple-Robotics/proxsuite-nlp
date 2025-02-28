@@ -8,9 +8,6 @@ namespace nlp {
 
 enum BFGSType { Hessian, InverseHessian };
 
-// forward declaration
-template <typename Scalar, BFGSType BFGS_TYPE> struct BFGSUpdateImpl;
-
 template <typename Scalar, BFGSType BFGS_TYPE = BFGSType::InverseHessian>
 class BFGSStrategy {
   PROXSUITE_NLP_DYNAMIC_TYPEDEFS(Scalar);
@@ -57,7 +54,18 @@ public:
     const Scalar sy = s.dot(y);
 
     if (sy > 0) {
-      BFGSUpdateImpl<Scalar, BFGS_TYPE>::update(*this, s, y);
+      if constexpr (BFGS_TYPE == BFGSType::InverseHessian) {
+        // Nocedal and Wright, Numerical Optimization, 2nd ed., p. 140, eqn 6.17
+        // (BFGS update)
+        xx_transpose.noalias() = s * s.transpose();
+        xy_transpose.noalias() = s * y.transpose();
+      } else if constexpr (BFGS_TYPE == BFGSType::Hessian) {
+        // Nocedal and Wright, Numerical Optimization, 2nd ed., p. 139, eqn 6.13
+        // (DFP update)
+        xx_transpose.noalias() = y * y.transpose();
+        xy_transpose.noalias() = y * s.transpose();
+      }
+
       V.noalias() = MatrixXs::Identity(s.size(), s.size()) - xy_transpose / sy;
       VMinv.noalias() = V * hessian;
       VMinvVt.noalias() = VMinv * V.transpose();
@@ -78,7 +86,6 @@ public:
   bool is_psd;
 
 private:
-  friend struct BFGSUpdateImpl<Scalar, BFGS_TYPE>;
   VectorXs x_prev; // previous iterate
   VectorXs g_prev; // previous gradient
   VectorXs s;      // delta iterate
@@ -90,35 +97,6 @@ private:
   MatrixXs VMinv;
   MatrixXs VMinvVt;
   bool is_valid;
-};
-
-// Specialization of update_impl method for BFGSType::InverseHessian
-// see Nocedal and Wright, Numerical Optimization, 2nd ed., p. 140, eqn 6.17
-// (BFGS update)
-template <typename Scalar>
-struct BFGSUpdateImpl<Scalar, BFGSType::InverseHessian> {
-  static void update(BFGSStrategy<Scalar, BFGSType::InverseHessian> &strategy,
-                     const typename BFGSStrategy<
-                         Scalar, BFGSType::InverseHessian>::ConstVectorRef &s,
-                     const typename BFGSStrategy<
-                         Scalar, BFGSType::InverseHessian>::ConstVectorRef &y) {
-    strategy.xx_transpose.noalias() = s * s.transpose();
-    strategy.xy_transpose.noalias() = s * y.transpose();
-  }
-};
-
-// Specialization of update_impl method for BFGSType::Hessian
-// see Nocedal and Wright, Numerical Optimization, 2nd ed., p. 139, eqn 6.13
-// (DFP update)
-template <typename Scalar> struct BFGSUpdateImpl<Scalar, BFGSType::Hessian> {
-  static void update(
-      BFGSStrategy<Scalar, BFGSType::Hessian> &strategy,
-      const typename BFGSStrategy<Scalar, BFGSType::Hessian>::ConstVectorRef &s,
-      const typename BFGSStrategy<Scalar, BFGSType::Hessian>::ConstVectorRef
-          &y) {
-    strategy.xx_transpose.noalias() = y * y.transpose();
-    strategy.xy_transpose.noalias() = y * s.transpose();
-  }
 };
 
 } // namespace nlp
