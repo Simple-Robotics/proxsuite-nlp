@@ -108,12 +108,12 @@ int main() {
       BoxConstraintTpl<Scalar> box_cstr(model.lowerPositionLimit,
                                         model.upperPositionLimit);
       ConstraintObjectTpl<Scalar> cstrobj(
-          std::make_shared<ManifoldDifferenceToPoint<Scalar>>(PolyManifold{space},
-                                                              q0),
+          std::make_shared<ManifoldDifferenceToPoint<Scalar>>(
+              PolyManifold{space}, q0),
           box_cstr);
       problem.addConstraint(cstrobj);
     }
-    
+
     ProxNLPSolverTpl<Scalar> solver(problem, 1e-4, 0.01, 0.0,
                                     proxsuite::nlp::QUIET);
     solver.hess_approx = hess_approx;

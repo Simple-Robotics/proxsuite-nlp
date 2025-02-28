@@ -152,8 +152,8 @@ public:
       if (problem_->ndx() == problem_->nx()) {
         bfgs_strategy_ = std::make_unique<BFGS>(problem_->ndx());
       } else {
-        throw std::runtime_error(
-            "BFGS for hessian approximation currently only works for Euclidean manifolds.");
+        throw std::runtime_error("BFGS for hessian approximation currently "
+                                 "only works for Euclidean manifolds.");
       }
     }
   }
