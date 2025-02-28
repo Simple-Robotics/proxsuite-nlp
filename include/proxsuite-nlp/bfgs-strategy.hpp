@@ -1,7 +1,6 @@
 /// @file
 /// @copyright Copyright (C) 2024-2025 INRIA
 #pragma once
-
 #include "proxsuite-nlp/fwd.hpp"
 
 namespace proxsuite {
@@ -18,14 +17,14 @@ class BFGSStrategy {
 
 public:
   BFGSStrategy()
-      : M(), is_init(false), is_psd(false), x_prev(), g_prev(), s(), y(),
+      : is_init(false), is_psd(false), x_prev(), g_prev(), s(), y(),
         xx_transpose(), xy_transpose(), V(), VMinv(), VMinvVt(),
         is_valid(false) {}
 
   explicit BFGSStrategy(const int num_vars)
-      : M(MatrixXs::Identity(num_vars, num_vars)), is_init(false), is_psd(true),
-        x_prev(VectorXs::Zero(num_vars)), g_prev(VectorXs::Zero(num_vars)),
-        s(VectorXs::Zero(num_vars)), y(VectorXs::Zero(num_vars)),
+      : is_init(false), is_psd(true), x_prev(VectorXs::Zero(num_vars)),
+        g_prev(VectorXs::Zero(num_vars)), s(VectorXs::Zero(num_vars)),
+        y(VectorXs::Zero(num_vars)),
         xx_transpose(MatrixXs::Zero(num_vars, num_vars)),
         xy_transpose(MatrixXs::Zero(num_vars, num_vars)),
         V(MatrixXs::Zero(num_vars, num_vars)),
@@ -60,10 +59,9 @@ public:
     if (sy > 0) {
       BFGSUpdateImpl<Scalar, BFGS_TYPE>::update(*this, s, y);
       V.noalias() = MatrixXs::Identity(s.size(), s.size()) - xy_transpose / sy;
-      VMinv.noalias() = V * M;
+      VMinv.noalias() = V * hessian;
       VMinvVt.noalias() = VMinv * V.transpose();
-      M = VMinvVt + xx_transpose / sy;
-      hessian = M;
+      hessian = VMinvVt + xx_transpose / sy;
       is_psd = true;
     } else {
       is_psd = false;
@@ -76,7 +74,6 @@ public:
   bool isValid() const { return is_valid; }
 
 public:
-  MatrixXs M; // (inverse of the) Hessian approximation
   bool is_init;
   bool is_psd;
 

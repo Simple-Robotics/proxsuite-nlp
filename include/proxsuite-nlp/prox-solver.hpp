@@ -153,6 +153,8 @@ public:
       if (problem_->ndx() == problem_->nx()) {
         BFGS valid_bfgs_strategy_ = BFGS(problem_->ndx());
         bfgs_strategy_ = std::move(valid_bfgs_strategy_);
+        //  set workspace hessian to identity matrix (init to zero in workspace)
+        workspace_->objective_hessian.setIdentity();
       } else {
         throw std::runtime_error("BFGS for hessian approximation currently "
                                  "only works for Euclidean manifolds.");

@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(test_inverse_hessian_update) {
   VectorXs y;
 
   bool is_psd = false;
-  MatrixXs H;
+  MatrixXs H = MatrixXs::Identity(nx, nx);
   while (!is_psd) {
     x = VectorXs::Random(nx);
     g = VectorXs::Random(nx);
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_hessian_update) {
   VectorXs y;
 
   bool is_psd = false;
-  MatrixXs H;
+  MatrixXs H = MatrixXs::Identity(nx, nx);
   while (!is_psd) {
     x = VectorXs::Random(nx);
     g = VectorXs::Random(nx);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
   Eigen::VectorXd g0 = H * x0 - b;
   bfgs.init(x0, g0);
 
-  MatrixXs H_inv_approx;
+  MatrixXs H_inv_approx = MatrixXs::Identity(nx, nx);
   for (int i = 0; i < 1000; ++i) {
     Eigen::VectorXd x = Eigen::VectorXd::Random(nx);
     Eigen::VectorXd g = H * x - b; // gradient
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_bfgs_inverse_hessian) {
     }
   }
 
-  BOOST_TEST_CHECK(bfgs.M.isApprox(H_inv, 1e-5));
+  BOOST_TEST_CHECK(H_inv_approx.isApprox(H_inv, 1e-5));
 }
 
 // Tests whether the BFGS Hessian approximation converges to the true Hessian
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_bfgs_hessian) {
   Eigen::VectorXd g0 = H * x0 - b;
   bfgs.init(x0, g0);
 
-  MatrixXs H_approx;
+  MatrixXs H_approx = MatrixXs::Identity(nx, nx);
   for (int i = 0; i < 1000; ++i) {
     Eigen::VectorXd x = Eigen::VectorXd::Random(nx);
     Eigen::VectorXd g = H * x - b; // gradient
@@ -139,5 +139,5 @@ BOOST_AUTO_TEST_CASE(test_bfgs_hessian) {
     }
   }
 
-  BOOST_TEST_CHECK(bfgs.M.isApprox(H, 1e-5));
+  BOOST_TEST_CHECK(H_approx.isApprox(H, 1e-5));
 }

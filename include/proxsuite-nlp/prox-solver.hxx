@@ -234,7 +234,6 @@ void ProxNLPSolverTpl<Scalar>::computeProblemDerivatives(
   case HessianApprox::BFGS:
     bfgs_strategy_.update(x, workspace.objective_gradient,
                           workspace.objective_hessian);
-    // workspace.objective_hessian = bfgs_strategy_.M;
     break;
 
   case HessianApprox::IDENTITY:
