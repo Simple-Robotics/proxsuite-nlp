@@ -1,5 +1,6 @@
 /// @file
 /// @copyright Copyright (C) 2022 LAAS-CNRS, INRIA
+/// @copyright Copyright (C) 2024-2025 INRIA
 /// @brief     Implementations for the prox solver.
 #pragma once
 
