@@ -46,7 +46,8 @@ public:
     is_init = true;
   }
 
-  void update(const ConstVectorRef &x, const ConstVectorRef &g) {
+  void update(const ConstVectorRef &x, const ConstVectorRef &g,
+              MatrixXs &hessian) {
     if (!is_init) {
       init(x, g);
       return;
@@ -62,6 +63,7 @@ public:
       VMinv.noalias() = V * M;
       VMinvVt.noalias() = VMinv * V.transpose();
       M = VMinvVt + xx_transpose / sy;
+      hessian = M;
       is_psd = true;
     } else {
       is_psd = false;
@@ -71,7 +73,6 @@ public:
     g_prev = g;
     PROXSUITE_NLP_NOMALLOC_END;
   }
-
   bool isValid() const { return is_valid; }
 
 public:
