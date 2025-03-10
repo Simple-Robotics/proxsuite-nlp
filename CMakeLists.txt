@@ -414,7 +414,9 @@ if(BUILD_WITH_PROXSUITE_SUPPORT)
 endif()
 
 pkg_config_append_libs(${PROJECT_NAME})
-pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
+foreach(boostlib ${BOOST_REQUIRED_COMPONENTS})
+  pkg_config_append_libs("boost_${boostlib}")
+endforeach()
 pkg_config_append_cflags("${CFLAGS_DEPENDENCIES}")
 
 # Install catkin package.xml

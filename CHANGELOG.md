@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove absolute path for boost library ([#125](https://github.com/Simple-Robotics/proxsuite-nlp/pull/125))
+
 ### Added
 
 - `prox-solver.hpp`: Add more alternatives to the `HessianApprox` enum  ([#92](https://github.com/Simple-Robotics/proxsuite-nlp/pull/92))
