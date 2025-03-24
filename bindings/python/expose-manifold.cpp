@@ -207,7 +207,8 @@ void exposePinocchioSpaces() {
                     bp::make_function(&Multibody::getModel,
                                       bp::return_internal_reference<>()),
                     "Return the Pinocchio model instance.")
-      .def(PolymorphicVisitor<PolyManifold>());
+      .def(PolymorphicVisitor<PolyManifold>())
+      .enable_pickling_(true);
 
   using MultiPhase = MultibodyPhaseSpace<Scalar>;
   bp::class_<MultiPhase, bp::bases<Manifold>>(
@@ -223,7 +224,8 @@ void exposePinocchioSpaces() {
                                   return m.getBaseSpace();
                                 },
                                 bp::return_internal_reference<>()))
-      .def(PolymorphicVisitor<PolyManifold>());
+      .def(PolymorphicVisitor<PolyManifold>())
+      .enable_pickling_(true);
 }
 #endif
 
@@ -235,7 +237,8 @@ void exposeManifolds() {
   bp::class_<VectorSpaceTpl<Scalar>, bp::bases<Manifold>>(
       "VectorSpace", "Basic Euclidean vector space.", bp::no_init)
       .def(bp::init<const int>(("self"_a, "dim")))
-      .def(PolymorphicVisitor<PolyManifold>());
+      .def(PolymorphicVisitor<PolyManifold>())
+      .enable_pickling_(true);
 
   exposeCartesianProduct();
 #ifdef PROXSUITE_NLP_WITH_PINOCCHIO
