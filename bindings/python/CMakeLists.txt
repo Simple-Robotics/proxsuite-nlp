@@ -57,8 +57,7 @@ function(MAKE_BINDINGS)
   install(
     TARGETS ${PYLIB_NAME}
     EXPORT ${TARGETS_EXPORT_NAME}
-    DESTINATION
-    ${${PYLIB_NAME}_INSTALL_DIR}
+    DESTINATION ${${PYLIB_NAME}_INSTALL_DIR}
   )
 endfunction()
 
