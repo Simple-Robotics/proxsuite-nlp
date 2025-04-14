@@ -57,16 +57,16 @@ void exposeManifoldBase() {
       .def<BinaryFunTypeRet>("difference", &Manifold::difference,
                              ("self"_a, "x0", "x1"))
       .def("interpolate",
-           (void(Manifold::*)(const ConstVectorRef &, const ConstVectorRef &,
-                              const Scalar &, VectorRef)
+           (void (Manifold::*)(const ConstVectorRef &, const ConstVectorRef &,
+                               const Scalar &, VectorRef)
                 const)(&Manifold::interpolate),
            ("self"_a, "x0", "x1", "u", "out"))
-      .def(
-          "interpolate",
-          (VectorXs(Manifold::*)(const ConstVectorRef &, const ConstVectorRef &,
-                                 const Scalar &) const)(&Manifold::interpolate),
-          ("self"_a, "x0", "x1", "u"),
-          "Interpolate between two points on the manifold. Allocated version.")
+      .def("interpolate",
+           (VectorXs (Manifold::*)(const ConstVectorRef &,
+                                   const ConstVectorRef &, const Scalar &)
+                const)(&Manifold::interpolate),
+           ("self"_a, "x0", "x1", "u"),
+           "Interpolate between two points on the manifold. Allocated version.")
       .def<JacobianFunType>("Jintegrate", &Manifold::Jintegrate,
                             ("self"_a, "x", "v", "Jout", "arg"),
                             "Compute the Jacobian of the exp operator.")
