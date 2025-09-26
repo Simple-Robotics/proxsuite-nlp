@@ -1,8 +1,10 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Simple-Robotics/proxsuite-nlp/main/doc/images/proxsuite-logo.png" width="700" alt="Proxsuite Logo" align="center"/>
-</p>
+> [!IMPORTANT]  
+> This repository is archived. Development on nonlinear solvers for control (on Lie groups for robotics) continues on the [aligator](https://github.com/Simple-Robotics/aligator) repository.
+>
+> At time of archiving, the dense nonlinear solver in this repository is not ported over to aligator. This might change in the future if there is demand for it (and especially for a sparse Lie group NLP solver).
 
-# proxsuite-nlp: a package for nonlinear optimization on manifolds
+
+# proxsuite-nlp: a package for nonlinear optimization on manifolds [ARCHIVED]
 
 **proxsuite-nlp** is a C++ library, implementing a primal-dual augmented Lagrangian-type algorithm for nonlinear optimization on manifolds, as well as some modelling tools.
 
